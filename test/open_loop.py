@@ -8,17 +8,15 @@ import os
 import naga as ch
 import shesha as ao
 import time
-import matplotlib.pyplot as plt
 import hdf5_utils as h5u
 import numpy as np
-plt.ion()
 
-print "TEST SHESHA\n closed loop: call loop(int niter)"
+print("TEST SHESHA\n closed loop: call loop(int niter)")
 
 
 if(len(sys.argv) != 2):
     error = 'command line should be:"python -i test.py parameters_filename"\n with "parameters_filename" the path to the parameters file'
-    raise StandardError(error)
+    raise Exception(error)
 
 # get parameters from file
 param_file = sys.argv[1]
@@ -36,7 +34,7 @@ elif(param_file.split('.')[-1] == "h5"):
 else:
     raise ValueError("Parameter file extension must be .py or .h5")
 
-print "param_file is", param_file
+print("param_file is", param_file)
 
 
 if(hasattr(config, "simul_name")):
@@ -44,7 +42,7 @@ if(hasattr(config, "simul_name")):
         simul_name = ""
     else:
         simul_name = config.simul_name
-        print "simul name is", simul_name
+        print("simul name is", simul_name)
 else:
     simul_name = ""
 
@@ -62,52 +60,52 @@ config.p_geom.set_pupdiam(500)
 c = ch.naga_context(devices=config.p_loop.devices)
 
 #    wfs
-print "->wfs"
+print("->wfs")
 wfs, tel = ao.wfs_init(config.p_wfss, config.p_atmos, config.p_tel,
                        config.p_geom, None, config.p_loop, config.p_dms)
 
 #   atmos
-print "->atmos"
+print("->atmos")
 atm = ao.atmos_init(c, config.p_atmos, config.p_tel, config.p_geom,
                     config.p_loop, config.p_wfss, wfs, None,
                     clean=clean, load=matricesToLoad)
 
 #   dm
-print "->dm"
+print("->dm")
 dms = ao.dm_init(config.p_dms, config.p_wfss, wfs, config.p_geom, config.p_tel)
 ao.correct_dm(config.p_dms, dms, config.p_controller0, config.p_geom,
               np.ones((config.p_wfs0._nvalid, config.p_dm0._ntotact), dtype = np.float32),
-              '', {}, 1)
+              b'', {}, 1)
 
 
 if not clean:
     h5u.validDataBase(os.environ["SHESHA_ROOT"] + "/data/", matricesToLoad)
 
-print "===================="
-print "init done"
-print "===================="
-print "objects initialzed on GPU:"
-print "--------------------------------------------------------"
-print atm
-print wfs
-print dms
+print("====================")
+print("init done")
+print("====================")
+print("objects initialzed on GPU:")
+print("--------------------------------------------------------")
+print(atm)
+print(wfs)
+print(dms)
 
 mimg = 0.  # initializing average image
 
 
 def loop(n):
-    print "----------------------------------------------------"
-    print "iter# | S.E. SR | L.E. SR | Est. Rem. | framerate"
-    print "----------------------------------------------------"
+    print("----------------------------------------------------")
+    print("iter# | S.E. SR | L.E. SR | Est. Rem. | framerate")
+    print("----------------------------------------------------")
     t0 = time.time()
     for i in range(n):
         atm.move_atmos()
 
         for w in range(len(config.p_wfss)):
-            wfs.sensors_trace(w, "all", tel, atm, dms)
+            wfs.sensors_trace(w, b"all", tel, atm, dms)
 
     t1 = time.time()
-    print " loop execution time:", t1 - t0, "  (", n, "iterations), ", (t1 - t0) / n, "(mean)  ", n / (t1 - t0), "Hz"
+    print(" loop execution time:", t1 - t0, "  (", n, "iterations), ", (t1 - t0) / n, "(mean)  ", n / (t1 - t0), "Hz")
 
 
 # loop(config.p_loop.niter)

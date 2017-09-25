@@ -57,10 +57,10 @@ def system(cmd, output=False):
         out = out.split('\n')[:-1]
 
     for i in range(len(out)):
-        print out[i]
+        print((out[i]))
 
     if(output):
-        # print "here"
+        # print("here")
         return out, exitcode, err
 
 
@@ -79,7 +79,7 @@ def pli(data, color='gist_earth', cmin=9998, cmax=9998, win=1, origin=None, aspe
     if(cmax != 9998):
         exec('options += ",vmax=cmax"')
 
-    if(color == 'yorick'):
+    if(color == b'yorick'):
         color = 'gist_earth'
     if(origin is None):
         origin = ""
@@ -97,9 +97,9 @@ def binning(w, footprint):
     # the averaging block
     # prelocate memory
     binned = np.zeros(w.shape[0] * w.shape[1]).reshape(w.shape[0], w.shape[1])
-    # print w
-    for i in xrange(w.shape[0]):
-        for j in xrange(w.shape[1]):
+    # print(w)
+    for i in range(w.shape[0]):
+        for j in range(w.shape[1]):
             binned[i, j] = w[i, j].sum() / (footprint * footprint + 0.0)
 
     return binned
@@ -127,10 +127,10 @@ def plg(data, x="", win=1, xlog=0, ylog=0, color="black", ):
     try:
         data.ndim
         if(data.ndim > 1):
-            print "Warning %dD dimensions. Cannot plot data. Use pli instead. " % data.ndim
+            print(("Warning %dD dimensions. Cannot plot data. Use pli instead. " % data.ndim))
     except:
         return
-    if(x == ""):
+    if(x == b""):
         ax.plot(data, color=color)
     else:
         ax.plot(x, data, color=color)
@@ -151,7 +151,7 @@ def plg(data, x="", win=1, xlog=0, ylog=0, color="black", ):
 def zcen(data):
     data = np.array(data)
     if(len(data.shape) > 1):
-        print "oups zcen with dims > 1 not coded yet..."
+        print("oups zcen with dims > 1 not coded yet...")
         return 0
     tmp = tmp2 = []
     for i in range(len(data) - 1):
@@ -168,7 +168,7 @@ def getValidSubapArray(nssp, rext, rint, return2d=False):
     # obs=0.286
     if((nssp == 7) and (rint > 0.285 and rint < 0.29)):
         rint = 0.285
-        print "cas particulier"
+        print("cas particulier")
     x = zcen(np.linspace(-1, 1, num=nssp + 1))
     xx = []
     for i in range(nssp):
@@ -238,7 +238,7 @@ def plsh(slopesvector, nssp, validint, sparta=False, invertxy=False, returnquive
     known, that’s why <validint> has to be passed in the argument list.
 
     """
-    nsub = slopesvector.shape[0] / 2
+    nsub = slopesvector.shape[0] // 2
     x = np.linspace(-1, 1, nssp)
     x, y = np.meshgrid(x, x)
     r = np.sqrt(x * x + y * y)
@@ -248,7 +248,7 @@ def plsh(slopesvector, nssp, validint, sparta=False, invertxy=False, returnquive
     # subapertures in slopesvector
     rorder = np.sort(r.reshape(nssp * nssp))
     # number of subapertures not valid due to central obscuration
-    ncentral = nssp * nssp - np.sum(r >= validint)
+    ncentral = nssp * nssp - np.sum(r >= validint, dtype=np.int32)
     # determine value of external radius so that the test (validint < r < validext)
     # leads to the correct number of subapertures
     validext = rorder[ncentral + nsub]

@@ -36,12 +36,12 @@ class MatplotlibWidget(QtGui.QWidget):
 #!/usr/bin/python
 import sys
 import platform
-from PyQt4 import QtCore, QtGui
-from PyQt4.QtCore import *
-from PyQt4.QtGui import *
+from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtCore import *
+from PyQt5.QtGui import *
 
-from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
-from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT as Navigationtoolbar
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as Navigationtoolbar
 from matplotlib.figure import Figure
 import matplotlib.gridspec as gridspec
 import matplotlib
@@ -57,14 +57,14 @@ class MplCanvas(FigureCanvas):
         self.axes = self.fig.add_subplot(self.gs1[0], aspect="auto")
 
         FigureCanvas.__init__(self, self.fig)
-        FigureCanvas.setSizePolicy(self, QtGui.QSizePolicy.Expanding,QtGui.QSizePolicy.Expanding)
+        FigureCanvas.setSizePolicy(self, QtWidgets.QSizePolicy.Expanding,QtWidgets.QSizePolicy.Expanding)
         FigureCanvas.updateGeometry(self)
 
 #creates embeddable matplotlib figure/canvas with toolbar
-class MatplotlibWidget(QtGui.QWidget):
+class MatplotlibWidget(QtWidgets.QWidget):
 
     def __init__(self, parent = None):
-        QtGui.QWidget.__init__(self, parent)
+        QtWidgets.QWidget.__init__(self, parent)
         self.create_framentoolbar()
 
     def create_framentoolbar(self):
@@ -72,7 +72,7 @@ class MatplotlibWidget(QtGui.QWidget):
         self.canvas = MplCanvas()
         self.canvas.setParent(self.frame)
         self.mpltoolbar = Navigationtoolbar(self.canvas, self.frame)
-        self.vbl = QtGui.QVBoxLayout()
+        self.vbl = QtWidgets.QVBoxLayout()
         self.vbl.addWidget(self.canvas)
         self.vbl.addWidget(self.mpltoolbar)
         self.setLayout(self.vbl)
