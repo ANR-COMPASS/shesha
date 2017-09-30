@@ -8,15 +8,22 @@ from Sensors import Sensors
 
 def openLoopSlp(tel: Telescope, atmos: Atmos, wfs: Sensors, rtc: Rtc, nrec: int,
                 ncontrol: int, p_wfss: list):
-    """Return a set of recorded open-loop slopes, usefull for initialize modal control optimization
+    """ Return a set of recorded open-loop slopes, usefull for initialize modal control optimization
 
     :parameters:
+
         tel: (Telescope) : Telescope object
+
         atmos: (Atmos) : Atmos object
+
         wfs: (Sensors) : Sensors object
+
         rtc: (Rtc) : Rtc object
+
         nrec: (int) : number of samples to record
+
         ncontrol: (int) : controller's index
+
         p_wfss: (list of Param_wfs) : wfs settings
     """
     # TEST IT

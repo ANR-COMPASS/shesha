@@ -45,8 +45,7 @@ class Param_centroider:
                                                  3: sinus local)"""
 
     def set_nwfs(self, n):
-        """
-            Set the index of the WFS handled by the centroider
+        """ Set the index of the WFS handled by the centroider
 
         :param n: (long) : WFS index
         """
@@ -55,8 +54,7 @@ class Param_centroider:
     nwfs = property(lambda x: x.__nwfs, set_nwfs)
 
     def set_type(self, t):
-        """
-            Set the centroider type
+        """ Set the centroider type
 
         :param t: (string) : type
         """
@@ -65,8 +63,7 @@ class Param_centroider:
     type_centro = property(lambda x: x.__type_centro, set_type)
 
     def set_type_fct(self, t):
-        """
-            TODO: docstring
+        """ TODO: docstring
 
         :param t: (string) : type
         """
@@ -75,8 +72,7 @@ class Param_centroider:
     type_fct = property(lambda x: x.__type_fct, set_type_fct)
 
     def set_weights(self, w):
-        """
-            Set the weights used by a wcog cetroider
+        """ Set the weights used by a wcog cetroider
 
         :param w: (np.ndarray[ndim=1, dtype=np.float32]) : weights
         """
@@ -85,8 +81,7 @@ class Param_centroider:
     weights = property(lambda x: x.__weights, set_weights)
 
     def set_nmax(self, n):
-        """
-            Set the nmax pixels used by a bpcog centroider
+        """ Set the nmax pixels used by a bpcog centroider
 
         :param n: (int) : nmax
         """
@@ -95,8 +90,7 @@ class Param_centroider:
     nmax = property(lambda x: x.__nmax, set_nmax)
 
     def set_thresh(self, t):
-        """
-            Set the threshold used by a tcog centroider
+        """ Set the threshold used by a tcog centroider
 
         :param t: (float) : thresh
         """
@@ -105,8 +99,7 @@ class Param_centroider:
     thresh = property(lambda x: x.__thresh, set_thresh)
 
     def set_width(self, t):
-        """
-            Set the width of the gaussian used by a corr centroider
+        """ Set the width of the gaussian used by a corr centroider
 
         :param t: (float) : width
         """
@@ -115,8 +108,7 @@ class Param_centroider:
     width = property(lambda x: x.__width, set_width)
 
     def set_sizex(self, n):
-        """
-            Set the x size of inter mat for corr centroider
+        """ Set the x size of inter mat for corr centroider
 
         :param n: (int) : sizex
         """
@@ -125,8 +117,7 @@ class Param_centroider:
     sizex = property(lambda x: x.__sizex, set_sizex)
 
     def set_sizey(self, n):
-        """
-            Set the y size of interp mat for corr centroider
+        """ Set the y size of interp mat for corr centroider
 
         :param n: (int) : sizey
         """
@@ -135,8 +126,7 @@ class Param_centroider:
     sizey = property(lambda x: x.__sizey, set_sizey)
 
     def set_interpmat(self, imap):
-        """
-            Set the interp mat for corr centroider
+        """ Set the interp mat for corr centroider
 
         :param imap: (np.ndarray[ndim=2, dtype=np.float32]) : sizey
         """
@@ -145,8 +135,7 @@ class Param_centroider:
     interpmat = property(lambda x: x.__interpmat, set_interpmat)
 
     def set_method(self, n):
-        """
-            Set the method used by a pyr centroider:
+        """ Set the method used by a pyr centroider:
                     0: nosinus global
                     1: sinus global
                     2: nosinus local

@@ -14,13 +14,21 @@ def make_pupil(dim, pupd, tel, xc=-1, yc=-1, real=0):
     """Initialize the system pupil
 
     :parameters:
+
         dim: (long) : linear size of ???
+
         pupd: (long) : linear size of total pupil
+
         tel: (Param_tel) : Telescope structure
+
         xc: (int)
+
         yc: (int)
+
         real: (int)
+
         cobs: (float) : central obstruction ratio.
+
     TODO: complete
     """
 
@@ -62,14 +70,23 @@ def make_pupil_generic(dim, pupd, t_spiders=0.01, spiders_type=SpiderType.SIX, x
         Initialize the system pupil
 
     :parameters:
+
         dim: (long) : linear size of ???
+
         pupd: (long) : linear size of total pupil
+
         t_spiders: (float) : secondary supports ratio.
+
         spiders_type: (str) :  secondary supports type: "four" or "six".
+
         xc: (int)
+
         yc: (int)
+
         real: (int)
+
         cobs: (float) : central obstruction ratio.
+
     TODO: complete
     """
 
@@ -135,8 +152,11 @@ def make_VLT(dim, pupd, tel):
         Initialize the VLT pupil
 
     :parameters:
+
         dim: (long) : linear size of ???
+
         pupd: (long) : linear size of total pupil
+
         tel: (Param_tel) : Telescope structure
     """
 
@@ -174,10 +194,15 @@ def make_EELT(dim, pupd, tel, N_seg=-1):
         Initialize the EELT pupil
 
     :parameters:
+
         dim: (long) : linear size of ???
+
         pupd: (long) : linear size of total pupil
+
         tel: (Param_tel) : Telescope structure
+
         N_seg: (int)
+
     TODO: complete
     TODO : add force rescal pup elt
     """
@@ -287,9 +312,13 @@ def make_phase_ab(dim, pupd, tel, pup):
     """Compute the EELT M1 phase aberration
 
     :parameters:
+
         dim: (long) : linear size of ???
+
         pupd: (long) : linear size of total pupil
+
         tel: (Param_tel) : Telescope structure
+
         pup: (?)
 
     TODO: complete

@@ -13,10 +13,12 @@ from typing import Tuple
 
 
 def make_radii(cobs: float, nr: int) -> float:
-    """
-        TODO: docstring
+    """ TODO: docstring
+
         :parameters:
+
             cobs: (float) : central obstruction
+
             nr : (int) :
     """
     d = (1. - cobs * cobs) / nr
@@ -35,14 +37,21 @@ def make_kernels(cobs: float, nr: int, radp: np.ndarray, kl_type: bytes,
     should be in units of the diameter of the telescope.
 
     TODO:
+
     :parameters:
+
         cobs : (float): central obstruction
+
         nr : (int) :
+
         radp : (float) :
+
         kl_type : (bytes) : "kolmo" or "karman"
+
         outscl : (float) : outter scale for Von Karman spectrum
 
     :return:
+
         kers :
     """
     nth = 5 * nr
@@ -78,13 +87,14 @@ def make_kernels(cobs: float, nr: int, radp: np.ndarray, kl_type: bytes,
 
 
 def piston_orth(nr: int) -> np.ndarray:
-    """
-        TODO: docstring
+    """ TODO: docstring
 
         :parameters:
+
             nr:
 
         :return:
+
             s:
     """
     s = np.zeros((nr, nr), dtype=np.float32)  # type: np.ndarray[np.float32]
@@ -99,14 +109,16 @@ def piston_orth(nr: int) -> np.ndarray:
 
 
 def make_azimuth(nord: int, npp: int) -> np.ndarray:
-    """
-        TODO: docstring
+    """ TODO: docstring
 
         :parameters:
+
             nord:
+
             npp:
 
         :return:
+
             azbas:
     """
 
@@ -132,12 +144,17 @@ def radii(nr: int, npp: int, cobs: float) -> np.ndarray:
     are no points on the border.
 
     TODO:
+
         :parameters:
+
             nr:
+
             npp:
+
             cobs: (float) : central obstruction
 
         :return:
+
             r
     """
 
@@ -158,10 +175,13 @@ def polang(r: np.ndarray) -> np.ndarray:
     but containing the azimuthal values for a polar coordinate system.
 
     TODO:
+
         :parameters:
+
             r:
 
         :return:
+
             p:
     """
     s = r.shape
@@ -187,16 +207,25 @@ def setpincs(ax: np.ndarray, ay: np.ndarray, px: np.ndarray, py: np.ndarray,
     SEE ALSO : pcgeom
 
     TODO:
+
         :parameters:
+
             ax:
+
             ay:
+
             px:
+
             py:
+
             cobs: (float) : central obstruction
 
         :return:
+
             pincx:
+
             pincy:
+
             pincw
     """
 
@@ -254,23 +283,39 @@ def pcgeom(nr, npp, cobs, ncp, ncmar):
     in the cartesian arrays outside the region of interest
 
     TODO:
+
         :parameters:
+
             nr:
+
             npp:
+
             cobs: (float) : central obstruction
+
             ncp:
+
             ncmar:
 
         :returns:
+
             ncp:
+
             ncmar:
+
             px:
+
             py:
+
             cr:
+
             cp:
+
             pincx:
+
             pincy:
+
             pincw:
+
             ap:
     """
     nused = ncp - 2 * ncmar
@@ -315,25 +360,45 @@ def set_pctr(dim: int, nr, npp, nkl: int, cobs: float, nord, ncmar=None, ncp=Non
     right initializations. bas is a gkl_basis_struct built with
     the gkl_bas routine.
     TODO:
+
     :parameters:
+
         dim:
+
         nr:
+
         npp:
+
         nkl:
+
         cobs:
+
         nord:
+
         ncmar: (optional)
+
         ncp: (optional)
+
     :returns:
+
         ncp
+
         ncmar
+
         px
+
         py
+
         cr
+
         cp
+
         pincx
+
         pincy
+
         pincw
+
         ap
     """
     ncp = dim
@@ -356,8 +421,11 @@ def gkl_fcom(kers: np.ndarray, cobs: float, nf: int):
     coordinates (nord, npo and ordd).
 
     :parameters:
+
         kerns : (np.ndarray[ndim= ,dtype=np.float32]) :
+
         cobs : (float) : central obstruction
+
         nf : (int) :
     """
     nkl = nf

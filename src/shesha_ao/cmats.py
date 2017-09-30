@@ -20,16 +20,24 @@ def cmat_init(ncontrol: int, rtc: Rtc, p_controller: conf.Param_controller,
     """ Compute the command matrix on the GPU
 
     :parameters:
-        ncontrol: (int) :
-        rtc: (Rtc) :
-        p_controller: (Param_controller) : controller settings
-        p_wfss: (list of Param_wfs) : wfs settings
-        p_atmos: (Param_atmos) : atmos settings
-        p_tel : (Param_tel) : telescope settings
-        p_dms: (list of Param_dm) : dms settings
-        KL2V : (np.ndarray[ndim=2, dtype=np.float32]): (optional) KL to volts matrix (for KL cmat)
-        nmodes: (int) : (optional) number of kl modes
 
+        ncontrol: (int) :
+
+        rtc: (Rtc) :
+
+        p_controller: (Param_controller) : controller settings
+
+        p_wfss: (list of Param_wfs) : wfs settings
+
+        p_atmos: (Param_atmos) : atmos settings
+
+        p_tel : (Param_tel) : telescope settings
+
+        p_dms: (list of Param_dm) : dms settings
+
+        KL2V : (np.ndarray[ndim=2, dtype=np.float32]): (optional) KL to volts matrix (for KL cmat)
+
+        nmodes: (int) : (optional) number of kl modes
     """
     if (p_controller.type_control == scons.ControllerType.LS):
         print("Doing imat svd...")

@@ -70,8 +70,7 @@ class Param_controller:
     kl_imat = property(lambda x: x.__kl_imat, set_kl_imat)
 
     def set_type(self, t):
-        """
-            Set the controller type
+        """ Set the controller type
 
         :param t: (string) : type
         """
@@ -80,8 +79,7 @@ class Param_controller:
     type_control = property(lambda x: x.__type_control, set_type)
 
     def set_klgain(self, g):
-        """
-            Set klgain for imatkl size = number of kl mode
+        """ Set klgain for imatkl size = number of kl mode
 
         :param g: (np.ndarray[ndim=1, dtype=np.float32]) : g
         """
@@ -90,7 +88,7 @@ class Param_controller:
     klgain = property(lambda x: x.__klgain, set_klgain)
 
     def set_nkl(self, n):
-        """Set the number of KL modes used in imat_kl and used for computation of covmat in case of minimum variance controller
+        """ Set the number of KL modes used in imat_kl and used for computation of covmat in case of minimum variance controller
 
         :param n: (long) : number of KL modes
         """
@@ -99,7 +97,7 @@ class Param_controller:
     nkl = property(lambda x: x.__nkl, set_nkl)
 
     def set_nwfs(self, l):
-        """Set the indices of wfs
+        """ Set the indices of wfs
 
         :param l: (np.ndarray[ndim=1, dtype=np.int32]) : indices of wfs
         """
@@ -108,7 +106,7 @@ class Param_controller:
     nwfs = property(lambda x: x.__nwfs, set_nwfs)
 
     def set_ndm(self, l):
-        """Set the indices of dms
+        """ Set the indices of dms
 
         :param l: (np.ndarray[ndim=1, dtype=np.int32]) : indices of dms
         """
@@ -117,7 +115,7 @@ class Param_controller:
     ndm = property(lambda x: x.__ndm, set_ndm)
 
     def set_nactu(self, l):
-        """Set the indices of dms
+        """ Set the indices of dms
 
         :param l: (np.ndarray[ndim=1, dtype=np.int32]) : indices of dms
         """
@@ -126,7 +124,7 @@ class Param_controller:
     nactu = property(lambda x: x.__nactu, set_nactu)
 
     def set_nvalid(self, l):
-        """Set the number of valid subaps
+        """ Set the number of valid subaps
 
         :param l: (list of int) : number of valid subaps
         """
@@ -135,7 +133,7 @@ class Param_controller:
     nvalid = property(lambda x: x.__nvalid, set_nvalid)
 
     def set_maxcond(self, m):
-        """Set the max condition number
+        """ Set the max condition number
 
         :param m: (float) : max condition number
         """
@@ -144,7 +142,7 @@ class Param_controller:
     maxcond = property(lambda x: x.__maxcond, set_maxcond)
 
     def set_TTcond(self, m):
-        """Set the tiptilt condition number for cmat filtering with mv controller
+        """ Set the tiptilt condition number for cmat filtering with mv controller
 
         :param m: (float) : tiptilt condition number
         """
@@ -153,27 +151,25 @@ class Param_controller:
     TTcond = property(lambda x: x.__TTcond, set_TTcond)
 
     def set_delay(self, d):
-        """Set the loop delay expressed in frames
+        """ Set the loop delay expressed in frames
 
-        :parameters:
-            d: (float) :delay [frames]
+        :param d: (float) :delay [frames]
         """
         self.__delay = csu.enforce_float(d)
 
     delay = property(lambda x: x.__delay, set_delay)
 
     def set_gain(self, g):
-        """Set the loop gain
+        """ Set the loop gain
 
-        :parameters:
-            g: (float) : loop gain
+        :param g: (float) : loop gain
         """
         self.__gain = csu.enforce_float(g)
 
     gain = property(lambda x: x.__gain, set_gain)
 
     def set_cured_ndivs(self, n):
-        """Set the subdivision levels in cured
+        """ Set the subdivision levels in cured
 
         :param c: (long) : subdivision levels in cured
         """
@@ -182,7 +178,7 @@ class Param_controller:
     cured_ndivs = property(lambda x: x.__cured_ndivs, set_cured_ndivs)
 
     def set_modopti(self, n):
-        """Set the flag for modal optimization
+        """ Set the flag for modal optimization
 
         :param n: (int) : flag for modal optimization
         """
@@ -191,7 +187,7 @@ class Param_controller:
     modopti = property(lambda x: x.__modopti, set_modopti)
 
     def set_nrec(self, n):
-        """Set the number of sample of open loop slopes for modal optimization computation
+        """ Set the number of sample of open loop slopes for modal optimization computation
 
         :param n: (int) : number of sample
         """
@@ -200,7 +196,7 @@ class Param_controller:
     nrec = property(lambda x: x.__nrec, set_nrec)
 
     def set_nmodes(self, n):
-        """Set the number of modes for M2V matrix (modal optimization)
+        """ Set the number of modes for M2V matrix (modal optimization)
 
         :param n: (int) : number of modes
         """
@@ -209,7 +205,7 @@ class Param_controller:
     nmodes = property(lambda x: x.__nmodes, set_nmodes)
 
     def set_gmin(self, g):
-        """Set the minimum gain for modal optimization
+        """ Set the minimum gain for modal optimization
 
         :param g: (float) : minimum gain for modal optimization
         """
@@ -218,7 +214,7 @@ class Param_controller:
     gmin = property(lambda x: x.__gmin, set_gmin)
 
     def set_gmax(self, g):
-        """Set the maximum gain for modal optimization
+        """ Set the maximum gain for modal optimization
 
         :param g: (float) : maximum gain for modal optimization
         """
@@ -227,7 +223,7 @@ class Param_controller:
     gmax = property(lambda x: x.__gmax, set_gmax)
 
     def set_ngain(self, n):
-        """Set the number of tested gains
+        """ Set the number of tested gains
 
         :param n: (int) : number of tested gains
         """
@@ -236,7 +232,7 @@ class Param_controller:
     ngain = property(lambda x: x.__ngain, set_ngain)
 
     def set_imat(self, imat):
-        """Set the full interaction matrix
+        """ Set the full interaction matrix
 
         :param imat: (np.ndarray[ndim=2,dtype=np.float32_t]) : full interaction matrix
         """
@@ -247,7 +243,7 @@ class Param_controller:
     _imat = property(lambda x: x.__imat, set_imat)
 
     def set_cmat(self, cmat):
-        """Set the full control matrix
+        """ Set the full control matrix
 
         :param cmat: (np.ndarray[ndim=2,dtype=np.float32_t]) : full control matrix
         """

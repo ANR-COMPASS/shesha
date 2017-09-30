@@ -12,16 +12,20 @@ from shesha_constants import DmType, PatternType
 
 
 def besel_orth(m, n, phi, r):
-    """
-        TODO: docstring
+    """ TODO: docstring
 
         :parameters:
+
             m:
+
             n:
+
             phi:
+
             r:
 
         :return:
+
             B:
     """
     # fonction de bessel fourier orthogonale (BFOFS)
@@ -36,15 +40,18 @@ def besel_orth(m, n, phi, r):
 
 
 def bessel_influence(xx, yy, type_i=PatternType.SQUARE):
-    """
-        TODO: docstring
+    """ TODO: docstring
 
         :parameters:
+
             xx:
+
             yy:
+
             type_i: (optional)
 
         :return:
+
             influ
     """
 
@@ -103,17 +110,21 @@ def bessel_influence(xx, yy, type_i=PatternType.SQUARE):
 
 
 def makeRigaut(pitch: float, coupling: float, x=None, y=None):
-    """Compute 'Rigaut-like' influence function
+    """ Compute 'Rigaut-like' influence function
 
     :parameters:
+
         pitch: (float) : pitch of the DM expressed in pixels
+
         coupling: (float) : coupling of the actuators
+
         x: indices of influence function  in relative position x local coordinates (float). 0 = top of the influence function
+
         y: indices of influence function  in relative position y local coordinates (float). 0 = top of the influence function
 
     :return:
-        influ: (np.ndarray(dims=3,dtype=np.float64)) : cube of the IF for each actuator
 
+        influ: (np.ndarray(dims=3,dtype=np.float64)) : cube of the IF for each actuator
     """
     irc = 1.16136 + 2.97422 * coupling + \
         (-13.2381) * coupling**2 + 20.4395 * coupling**3
@@ -146,17 +157,21 @@ def makeRigaut(pitch: float, coupling: float, x=None, y=None):
 
 
 def makeRadialSchwartz(pitch: float, coupling: float, x=None, y=None):
-    """Compute radial Schwartz influence function
+    """ Compute radial Schwartz influence function
 
     :parameters:
+
         pitch: (float) : pitch of the DM expressed in pixels
+
         coupling: (float) : coupling of the actuators
+
         x: indices of influence function  in relative position x local coordinates (float). 0 = top of the influence function
+
         y: indices of influence function  in relative position y local coordinates (float). 0 = top of the influence function
 
     :return:
-        influ: (np.ndarray(dims=3,dtype=np.float64)) : cube of the IF for each actuator
 
+        influ: (np.ndarray(dims=3,dtype=np.float64)) : cube of the IF for each actuator
     """
     k = 6  # order of the Schwartz function
     #
@@ -174,17 +189,21 @@ def makeRadialSchwartz(pitch: float, coupling: float, x=None, y=None):
 
 
 def makeSquareSchwartz(pitch: float, coupling: float, x=None, y=None):
-    """Compute Square Schwartz influence function
+    """ Compute Square Schwartz influence function
 
     :parameters:
+
         pitch: (float) : pitch of the DM expressed in pixels
+
         coupling: (float) : coupling of the actuators
+
         x: indices of influence function  in relative position x local coordinates (float). 0 = top of the influence function
+
         y: indices of influence function  in relative position y local coordinates (float). 0 = top of the influence function
 
     :return:
-        influ: (np.ndarray(dims=3,dtype=np.float64)) : cube of the IF for each actuator
 
+        influ: (np.ndarray(dims=3,dtype=np.float64)) : cube of the IF for each actuator
     """
     k = 6  # order of the Schwartz function
     #
@@ -204,20 +223,24 @@ def makeSquareSchwartz(pitch: float, coupling: float, x=None, y=None):
 
 
 def makeBlacknutt(pitch: float, coupling: float, x=None, y=None):
-    """Compute Blacknutt influence function
+    """ Compute Blacknutt influence function
     Attention, ici on ne peut pas choisir la valeur de coupling.
     La variable a ete laissee dans le code juste pour compatibilité avec les
     autres fonctions, mais elle n'est pas utilisee.
 
     :parameters:
+
         pitch: (float): pitch of the DM expressed in pixels
+
         coupling: (float) : coupling of the actuators
+
         x: indices of influence function  in relative position x local coordinates (float). 0 = top of the influence function
+
         y: indices of influence function  in relative position y local coordinates (float). 0 = top of the influence function
 
     :return:
-        influ: (np.ndarray(dims=3,dtype=np.float64)) : cube of the IF for each actuator
 
+        influ: (np.ndarray(dims=3,dtype=np.float64)) : cube of the IF for each actuator
     """
     smallsize = int(np.ceil(4 * pitch + 1))
     if (x is None or y is None):
@@ -238,17 +261,21 @@ def makeBlacknutt(pitch: float, coupling: float, x=None, y=None):
 
 
 def makeGaussian(pitch: float, coupling: float, x=None, y=None):
-    """Compute Gaussian influence function. Coupling parameter is not taken into account
+    """ Compute Gaussian influence function. Coupling parameter is not taken into account
 
     :parameters:
+
         pitch: (float) : pitch of the DM expressed in pixels
+
         coupling: (float) : coupling of the actuators
+
         x: indices of influence function  in relative position x local coordinates (float). 0 = top of the influence function
+
         y: indices of influence function  in relative position y local coordinates (float). 0 = top of the influence function
 
     :return:
-        influ: (np.ndarray(dims=3,dtype=np.float64)) : cube of the IF for each actuator
 
+        influ: (np.ndarray(dims=3,dtype=np.float64)) : cube of the IF for each actuator
     """
     irc = 1.16136 + 2.97422 * coupling + \
         (-13.2381) * coupling**2 + 20.4395 * coupling**3
@@ -275,17 +302,21 @@ def makeGaussian(pitch: float, coupling: float, x=None, y=None):
 
 def makeBessel(pitch: float, coupling: float, x: np.ndarray=None, y: np.ndarray=None,
                patternType: bytes=PatternType.SQUARE):
-    """Compute Bessel influence function
+    """ Compute Bessel influence function
 
     :parameters:
+
         pitch: (float) : pitch of the DM expressed in pixels
+
         coupling: (float) : coupling of the actuators
+
         x: indices of influence function  in relative position x local coordinates (float). 0 = top of the influence function
+
         y: indices of influence function  in relative position y local coordinates (float). 0 = top of the influence function
 
     :return:
-        influ: (np.ndarray(dims=3,dtype=np.float64)) : cube of the IF for each actuator
 
+        influ: (np.ndarray(dims=3,dtype=np.float64)) : cube of the IF for each actuator
     """
     smallsize = int(np.ceil(pitch * 3.2))
 

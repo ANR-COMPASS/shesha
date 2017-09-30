@@ -16,9 +16,13 @@ def make_apodizer(dim, pupd, filename, angle):
     """TODO doc
 
     :parameters:
+
         (int) : im:
+
         (int) : pupd:
+
         (str) : filename:
+
         (float) : angle:
     """
 

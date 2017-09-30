@@ -22,6 +22,20 @@ class BenchBrama(SimulatorBrama):
 
         if self.rtc is not None:
             self.rtc.publish()
-        if self.tar is not None:
-            self.tar.publish()
 
+    def loop(self, monitoring_freq=100, **kwargs):
+        """
+        TODO: docstring
+        """
+        print("----------------------")
+        print("iter# | Framerate (Hz)")
+        print("----------------------")
+        t0 = time.time()
+        i=0
+        while True:
+            self.next(**kwargs)
+            if ((i + 1) % monitoring_freq == 0):
+                framerate = (monitoring_freq) / (time.time() - t0)
+                print("%d \t %.1f" %(i + 1, framerate))
+                t0 = time.time()
+            i+=1

@@ -16,12 +16,14 @@ from typing import List, Union
 
 
 def dim_dm_support(cent: float, extent: int, ssize: int):
-    """
-    Compute the DM support dimensions
+    """ Compute the DM support dimensions
 
     :parameters:
+
         cent : (float): center of the pupil
+
         extent: (float): size of the DM support
+
         ssize: (int): size of ipupil support
     """
     n1 = np.floor(cent - extent / 2)
@@ -39,6 +41,7 @@ def dim_dm_patch(pupdiam: int, diam: float, type_dm: bytes, alt: float,
     """ compute patchDiam for DM
 
     :parameters:
+
         pupdiam: (int) : pupil diameter
 
         diam: (float) : telescope diameter
@@ -75,9 +78,13 @@ def createSquarePattern(pitch: float, nxact: int):
     Coordinates are centred around (0,0).
 
     :parameters:
+
         pitch: (float) : distance in pixels between 2 adjacent actus
+
         nxact: (int) : number of actu across the pupil diameter
+
     :return:
+
         xy: (np.ndarray(dims=2,dtype=np.float32)) : xy[M,2] list of coodinates
     """
 
@@ -96,10 +103,14 @@ def createHexaPattern(pitch: float, supportSize: int):
     The support that limits the grid is a square [-n/2,n/2].
 
     :parameters:
+
         pitch: (float) : distance in pixels between 2 adjacent actus
+
         n: (float) : size in pixels of the support over which the coordinate list
              should be returned.
+
     :return:
+
         xy: (np.ndarray(dims=2,dtype=np.float32)) : xy[M,2] list of coodinates
     """
     V3 = np.sqrt(3)
@@ -126,10 +137,14 @@ def createDoubleHexaPattern(pitch: float, supportSize: int):
     The support that limits the grid is a square [-n/2,n/2].
 
     :parameters:
+
         pitch: (float) : distance in pixels between 2 adjacent actus
+
         n: (float) : size in pixels of the support over which the coordinate list
              should be returned.
+
     :return:
+
         xy: (np.ndarray(dims=2,dtype=np.float32)) : xy[M,2] list of coodinates
     """
     V3 = np.sqrt(3)
@@ -164,17 +179,27 @@ def select_actuators(xc: np.ndarray, yc: np.ndarray, nxact: int, pitch: int, cob
                      margin_in: float, margin_out: float, N=None):
     """
     Select the "valid" actuators according to the system geometry
+
     :parameters:
+
         xc: actuators x positions (origine in center of mirror)
+
         yc: actuators y positions (origine in center of mirror)
+
         nxact:
+
         pitch:
+
         cobs:
+
         margin_in:
+
         margin_out:
+
         N:
 
     :return:
+
         liste_fin: actuator indice selection for xpos/ypos
 
 
@@ -209,6 +234,7 @@ def make_zernike(nzer: int, size: int, diameter: int, xc=-1., yc=-1., ext=0):
     """Compute the zernike modes
 
     :parameters:
+
         nzer: (int) : number of modes
 
         size: (int) : size of the screen
@@ -217,11 +243,12 @@ def make_zernike(nzer: int, size: int, diameter: int, xc=-1., yc=-1., ext=0):
 
         xc: (float) : (optional) x-position of the center
 
-
         yc: (float) : (optional) y-position of the center
 
         ext: (int) : (optional) extension
+
     :return:
+
         z : (np.ndarray(ndims=3,dtype=np.float64)) : zernikes modes
     """
     m = 0
@@ -292,9 +319,11 @@ def zernumero(zn: int):
     number zn, according to Noll numbering (Noll, JOSA, 1976)
 
     :parameters:
+
         zn: (int) : zernike number
 
     :returns:
+
         rd: (int) : radial degrees
 
         an: (int) : azimuthal numbers

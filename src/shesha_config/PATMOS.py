@@ -43,8 +43,7 @@ class Param_atmos:
         self.__seeds = None
 
     def set_nscreens(self, n):
-        """
-            Set the number of turbulent layers
+        """ Set the number of turbulent layers
 
         :param n: (long) number of screens.
         """
@@ -53,8 +52,7 @@ class Param_atmos:
     nscreens = property(lambda x: x.__nscreens, set_nscreens)
 
     def set_r0(self, r):
-        """
-            Set the global r0
+        """ Set the global r0
 
         :param r: (float) : global r0
         """
@@ -63,8 +61,7 @@ class Param_atmos:
     r0 = property(lambda x: x.__r0, set_r0)
 
     def set_pupixsize(self, xsize):
-        """
-            Set the pupil pixel size
+        """ Set the pupil pixel size
 
         :param xsize: (float) : pupil pixel size
         """
@@ -73,8 +70,7 @@ class Param_atmos:
     pupixsize = property(lambda x: x.__pupixsize, set_pupixsize)
 
     def set_L0(self, l):
-        """
-            Set the L0 per layers
+        """ Set the L0 per layers
 
         :param l: (lit of float) : L0 for each layers
         """
@@ -84,8 +80,7 @@ class Param_atmos:
     L0 = property(lambda x: x.__L0, set_L0)
 
     def set_dim_screens(self, l):
-        """
-            Set the size of the phase screens
+        """ Set the size of the phase screens
 
         :param l: (lit of float) : phase screens sizes
         """
@@ -95,8 +90,7 @@ class Param_atmos:
     dim_screens = property(lambda x: x.__dim_screens, set_dim_screens)
 
     def set_alt(self, l):
-        """
-            Set the altitudes of each layer
+        """ Set the altitudes of each layer
 
         :param l: (lit of float) : altitudes
         """
@@ -106,8 +100,7 @@ class Param_atmos:
     alt = property(lambda x: x.__alt, set_alt)
 
     def set_winddir(self, l):
-        """
-            Set the wind direction for each layer
+        """ Set the wind direction for each layer
 
         :param l: (lit of float) : wind directions
         """
@@ -117,8 +110,7 @@ class Param_atmos:
     winddir = property(lambda x: x.__winddir, set_winddir)
 
     def set_windspeed(self, l):
-        """
-            Set the the wind speed for each layer
+        """ Set the the wind speed for each layer
 
         :param l: (list of float) : wind speeds
         """
@@ -128,8 +120,7 @@ class Param_atmos:
     windspeed = property(lambda x: x.__windspeed, set_windspeed)
 
     def set_frac(self, l):
-        """
-            Set the fraction of r0 for each layers
+        """ Set the fraction of r0 for each layers
 
         :param l: (lit of float) : fraction of r0
         """
@@ -139,8 +130,7 @@ class Param_atmos:
     frac = property(lambda x: x.__frac, set_frac)
 
     def set_deltax(self, l):
-        """
-            Set the translation speed on axis x for each layer
+        """ Set the translation speed on axis x for each layer
 
         :param l: (lit of float) : translation speed
         """
@@ -150,8 +140,7 @@ class Param_atmos:
     _deltax = property(lambda x: x.__deltax, set_deltax)
 
     def set_deltay(self, l):
-        """
-            Set the translation speed on axis y for each layer
+        """ Set the translation speed on axis y for each layer
 
         :param l: (lit of float) : translation speed
         """
@@ -161,8 +150,7 @@ class Param_atmos:
     _deltay = property(lambda x: x.__deltay, set_deltay)
 
     def set_seeds(self, l):
-        """
-            Set the seed for each layer
+        """ Set the seed for each layer
 
         :param l: (lit of int) : seed
         """

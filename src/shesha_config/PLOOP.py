@@ -21,8 +21,7 @@ class Param_loop:
         self.__devices = np.array([0], dtype=np.int32)
 
     def set_devices(self, devices):
-        """
-            Set the list of GPU devices used
+        """ Set the list of GPU devices used
 
         :parameters:
             devices: (np.ndarray[ndim=1, dtype=np.int32_t]) : list of GPU devices
@@ -34,8 +33,7 @@ class Param_loop:
     devices = property(lambda x: x.__devices, set_devices)
 
     def set_niter(self, n):
-        """
-            Set the number of iteration
+        """ Set the number of iteration
 
         :parameters:
             n: (long) : number of iteration
@@ -45,8 +43,7 @@ class Param_loop:
     niter = property(lambda x: x.__niter, set_niter)
 
     def set_ittime(self, t):
-        """
-            Set iteration time
+        """ Set iteration time
 
         :parameters:
             t: (float) :iteration time

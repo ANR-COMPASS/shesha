@@ -18,14 +18,20 @@ from tqdm import tqdm
 def imat_geom(wfs: Sensors, dms: Dms, p_wfss: List[conf.Param_wfs],
               p_dms: List[conf.Param_dm], p_controller: conf.Param_controller,
               meth: int=0) -> np.ndarray:
-    """Compute the interaction matrix with a geometric method
+    """ Compute the interaction matrix with a geometric method
 
     :parameters:
+
         wfs: (Sensors) : Sensors object
+
         dms: (Dms) : Dms object
+
         p_wfss: (list of Param_wfs) : wfs settings
+
         p_dms: (list of Param_dm) : dms settings
+
         p_controller: (Param_controller) : controller settings
+
         meth: (int) : (optional) method type (0 or 1)
     """
 
@@ -48,7 +54,7 @@ def imat_geom(wfs: Sensors, dms: Dms, p_wfss: List[conf.Param_wfs],
     for nmc in range(ndm):
         nm = p_controller.ndm[nmc]
         dms.resetdm(p_dms[nm].type_dm, p_dms[nm].alt)
-        for i in tqdm(range(p_dms[nm]._ntotact), desc="DM%d"%nmc):
+        for i in tqdm(range(p_dms[nm]._ntotact), desc="DM%d" % nmc):
             dms.oneactu(p_dms[nm].type_dm, p_dms[nm].alt, i, p_dms[nm].push4imat)
             nslps = 0
             for nw in range(nwfs):
@@ -68,19 +74,30 @@ def imat_geom(wfs: Sensors, dms: Dms, p_wfss: List[conf.Param_wfs],
 def imat_init(ncontrol: int, rtc: Rtc, dms: Dms, p_dms: list, wfs: Sensors, p_wfss: list,
               p_tel: conf.Param_tel, p_controller: conf.Param_controller, kl=None,
               dataBase: dict={}, use_DB: bool=False) -> None:
-    """Initialize and compute the interaction matrix on the GPU
+    """ Initialize and compute the interaction matrix on the GPU
 
     :parameters:
+
         ncontrol: (int) : controller's index
+
         rtc: (Rtc) : Rtc object
+
         dms: (Dms) : Dms object
+
         p_dms: (Param_dms) : dms settings
+
         wfs: (Sensors) : Sensors object
+
         p_wfss: (list of Param_wfs) : wfs settings
+
         p_tel: (Param_tel) : telescope settings
+
         p_controller: (Param_controller) : controller settings
+
         kl:(np.array) :  KL_matrix
+
         dataBase:(dict): (optional) dict containing paths to files to load
+
         use_DB:(bool) : (optional) use dataBase flag
     """
     # first check if wfs is using lgs

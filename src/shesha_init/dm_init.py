@@ -5,7 +5,11 @@ Created on 3 aout 2017
 
 @author: fferreira
 '''
-from naga import naga_context
+try:
+    from naga import naga_context
+except:
+    class naga_context:
+        pass
 
 import shesha_config as conf
 import shesha_constants as scons
@@ -26,7 +30,6 @@ from Sensors import Sensors
 from typing import List
 
 from tqdm import tqdm
-
 
 def dm_init(context: naga_context, p_dms: List[conf.Param_dm], p_tel: conf.Param_tel,
             p_geom: conf.Param_geom, p_wfss: List[conf.Param_wfs]=None) -> Dms:
@@ -557,16 +560,19 @@ def comp_dmgeom(p_dm: conf.Param_dm, p_geom: conf.Param_geom):
 
     istart = np.zeros((mpup_dim * mpup_dim), dtype=np.int32)
     npts = np.zeros((mpup_dim * mpup_dim), dtype=np.int32)
+    istart2 = np.zeros((mpup_dim * mpup_dim), dtype=np.int32)
+    npts2 = np.zeros((mpup_dim * mpup_dim), dtype=np.int32)
+    
 
     cpt = 0
     ref = 0
-
+    
     uu, vv = np.unique(tmps, return_counts=True)
-
+    
     for i in tqdm(range(uu.size)):
         npts[uu[i]] = vv[i]
     istart[1:] = np.cumsum(npts[:-1])
-
+    
     p_dm._influpos = itmps[:np.sum(npts)].astype(np.int32)
     p_dm._ninflu = npts.astype(np.int32)
     p_dm._influstart = istart.astype(np.int32)

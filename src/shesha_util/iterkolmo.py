@@ -2,6 +2,8 @@ import numpy as np
 
 
 def create_stencil(n):
+    """ TODO: docstring
+    """
     Zx = np.array(np.tile(np.arange(n), (n, 1)), dtype=np.float64) + 1
     Zy = Zx.T
 
@@ -35,8 +37,10 @@ def create_stencil(n):
 
 
 def stencil_size(n):
-    ns = int(np.log2(n + 1) + 1)
+    """ TODO: docstring
+    """
     stencil = np.zeros((n, n))
+    ns = int(np.log2(n + 1) + 1)
 
     stencil[:, 0] = 1
     for i in range(2, ns):
@@ -56,11 +60,12 @@ def stencil_size(n):
 
 
 def stencil_size_array(size):
-    """compute_size2(np.ndarray[ndim=1, dtype=np.int64_t] size)
+    """ Compute_size2(np.ndarray[ndim=1, dtype=np.int64_t] size)
 
     Compute the size of a stencil, given the screen size
 
     :parameters:
+
         size: (np.ndarray[ndim=1,dtype=np.int64_t]) :screen size
     """
     stsize = np.zeros(len(size), dtype=np.int64)
@@ -71,7 +76,7 @@ def stencil_size_array(size):
 
 
 def Cxz(n, Zx, Zy, Xx, Xy, istencil, L0):
-    """Cxz computes the covariance matrix between the new phase vector x (new
+    """ Cxz computes the covariance matrix between the new phase vector x (new
     column for the phase screen), and the already known phase values z.
 
     The known values z are the values of the phase screen that are pointed by
@@ -101,7 +106,7 @@ def Cxz(n, Zx, Zy, Xx, Xy, istencil, L0):
 
 
 def Cxx(n, Zxn, Zyn, Xx, Xy, L0):
-    """Cxx computes the covariance matrix of the new phase vector x (new
+    """ Cxx computes the covariance matrix of the new phase vector x (new
    column for the phase screen).
     """
     size = Xx.shape[0]
@@ -121,7 +126,7 @@ def Cxx(n, Zxn, Zyn, Xx, Xy, L0):
 
 
 def Czz(n, Zx, Zy, ist, L0):
-    """Czz computes the covariance matrix of the already known phase values z.
+    """ Czz computes the covariance matrix of the already known phase values z.
 
    The known values z are the values of the phase screen that are pointed by
    the stencil indexes (istencil)
@@ -146,7 +151,7 @@ def Czz(n, Zx, Zy, ist, L0):
 
 
 def AB(n, L0, deltax, deltay, rank=0):
-    """DOCUMENT AB, n, A, B, istencil
+    """ DOCUMENT AB, n, A, B, istencil
     This function initializes some matrices A, B and a list of stencil indexes
     istencil for iterative extrusion of a phase screen.
 
@@ -211,7 +216,7 @@ def AB(n, L0, deltax, deltay, rank=0):
 
 
 def extrude(p, r0, A, B, istencil):
-    """DOCUMENT p1 = extrude(p,r0,A,B,istencil)
+    """ DOCUMENT p1 = extrude(p,r0,A,B,istencil)
 
     Extrudes a phase screen p1 from initial phase screen p.
     p1 prolongates p by 1 column on the right end.
@@ -247,6 +252,8 @@ def extrude(p, r0, A, B, istencil):
 
 
 def phase_struct(r, L0=None):
+    """ TODO: docstring
+    """
     if L0 is None:
         return 6.88 * r**(5. / 6.)
     else:
@@ -254,8 +261,7 @@ def phase_struct(r, L0=None):
 
 
 def rodconan(r, L0):
-    """
-         The phase structure function is computed from the expression
+    """ The phase structure function is computed from the expression
      Dphi(r) = k1  * L0^(5./3) * (k2 - (2.pi.r/L0)^5/6 K_{5/6}(2.pi.r/L0))
 
      For small r, the expression is computed from a development of
@@ -295,15 +301,17 @@ def rodconan(r, L0):
 
 
 def asymp_macdo(x):
-    """
-         Computes a term involved in the computation of the phase struct
+    """ Computes a term involved in the computation of the phase struct
      function with a finite outer scale according to the Von-Karman
      model. The term involves the MacDonald function (modified bessel
      function of second kind) K_{5/6}(x), and the algorithm uses the
      asymptotic form for x ~ infinity.
+
      Warnings :
+
          - This function makes a floating point interrupt for x=0
-     and should not be used in this case.
+           and should not be used in this case.
+
          - Works only for x>0.
     """
     # k2 is the value for
@@ -319,8 +327,7 @@ def asymp_macdo(x):
 
 
 def macdo_x56(x, k=10):
-    """
-        Computation of the function
+    """ Computation of the function
     f(x) = x^(5/6)*K_{5/6}(x)
     using a series for the esimation of K_{5/6}, taken from Rod Conan thesis :
     K_a(x)=1/2 \sum_{n=0}^\infty \frac{(-1)^n}{n!}
@@ -406,7 +413,6 @@ def create_screen(r0, pupixsize, screen_size, L0, A, B, ist):
         A           : A array for future extrude
         B           : B array for future extrude
         ist         : istencil array for future extrude
-
      """
 
     # AB, screen_size, A, B, ist,L0   # initialisation for A and B matrices for phase extrusion

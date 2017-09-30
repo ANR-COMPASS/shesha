@@ -14,17 +14,25 @@ from typing import List
 def compute_KL2V(p_controller: conf.Param_controller, dms: Dms, p_dms: list,
                  p_geom: conf.Param_geom, p_atmos: conf.Param_atmos,
                  p_tel: conf.Param_tel):
-    """Compute the Karhunen-Loeve to Volt matrix
+    """ Compute the Karhunen-Loeve to Volt matrix
     (transfer matrix between the KL space and volt space for a pzt dm)
 
     :parameters:
+
         p_controller: (Param_controller) : p_controller settings
+
         dms : (shesha_dms) : Dms object
+
         p_dms: (list of Param_dm) : dms settings
+
         p_geom : (Param_geom) : geometry parameters
+
         p_atmos : (Param_atmos) : atmos parameters
+
         p_tel : (Param_tel) : telescope parameters
+
     :return:
+
         KL2V : (np.array(np.float32,dim=2)) : KL to Volt matrix
     """
     ntotact = np.array([p_dms[i]._ntotact for i in range(len(p_dms))], dtype=np.int64)
@@ -68,18 +76,21 @@ def compute_KL2V(p_controller: conf.Param_controller, dms: Dms, p_dms: list,
 
 
 def compute_DMbasis(g_dm: Dms, p_dm: conf.Param_dm, p_geom: conf.Param_geom):
-    """Compute a the DM basis as a sparse matrix :
+    """ Compute a the DM basis as a sparse matrix :
             - push on each actuator
             - get the corresponding dm shape
             - apply pupil mask and store in a column
 
     :parameters:
+
         g_dm: (Dms) : Dms object
 
         p_dm: (Param_dm) : dm settings
 
         p_geom: (Param_geom) : geom settings
+
     :return:
+
         IFbasis = (csr_matrix) : DM IF basis
     """
     tmp = (p_geom._ipupil.shape[0] - (p_dm._n2 - p_dm._n1 + 1)) // 2
@@ -108,18 +119,21 @@ def compute_DMbasis(g_dm: Dms, p_dm: conf.Param_dm, p_geom: conf.Param_geom):
 
 
 def compute_IFsparse(g_dm: Dms, p_dms: list, p_geom: conf.Param_geom):
-    """Compute the influence functions of all DMs as a sparse matrix :
+    """ Compute the influence functions of all DMs as a sparse matrix :
             - push on each actuator
             - get the corresponding dm shape
             - apply pupil mask and store in a column
 
     :parameters:
+
         g_dm: (Dms) : Dms object
 
         p_dms: (Param_dms) : dms settings
 
         p_geom: (Param_geom) : geom settings
+
     :return:
+
         IFbasis = (csr_matrix) : DM IF basis
     """
     ndm = len(p_dms)
@@ -138,13 +152,19 @@ def compute_IFsparse(g_dm: Dms, p_dms: list, p_geom: conf.Param_geom):
 
 
 def command_on_Btt(rtc: Rtc, dms: Dms, p_dms: list, p_geom: conf.Param_geom, nfilt: int):
-    """Compute a command matrix in Btt modal basis (see error breakdown) and set
+    """ Compute a command matrix in Btt modal basis (see error breakdown) and set
     it on the sutra_rtc. It computes by itself the volts to Btt matrix.
+
     :parameters:
+
         rtc: (Rtc) : rtc object
+
         dms: (Dms): dms object
+
         p_dms: (list of Param_dm): dms settings
+
         p_geom: (Param_geom): geometry settings
+
         nfilt: (int): number of modes to filter
     """
 
@@ -158,12 +178,14 @@ def command_on_Btt(rtc: Rtc, dms: Dms, p_dms: list, p_geom: conf.Param_geom, nfi
 
 
 def compute_cmat_with_Btt(rtc: Rtc, Btt: np.ndarray, nfilt: int):
-    """
-        Compute a command matrix on the Btt basis and load it in the GPU
+    """ Compute a command matrix on the Btt basis and load it in the GPU
 
     :parameters:
+
         rtc: (Rtc): rtc object
+
         Btt: (np.ndarray[ndim=2, dtype=np.float32]) : volts to Btt matrix
+
         nfilt: (int): number of modes to filter
     """
     D = rtc.get_imat(0)
@@ -187,15 +209,23 @@ def compute_cmat_with_Btt(rtc: Rtc, Btt: np.ndarray, nfilt: int):
 def command_on_KL(rtc: Rtc, dms: Dms, p_controller: conf.Param_controller,
                   p_dms: List[conf.Param_dm], p_geom: conf.Param_geom,
                   p_atmos: conf.Param_atmos, p_tel: conf.Param_tel, nfilt: int):
-    """Compute a command matrix in KL modal basis and set
+    """ Compute a command matrix in KL modal basis and set
     it on the sutra_rtc. It computes by itself the volts to KL matrix.
+
     :parameters:
+
         rtc: (Rtc) : rtc object
+
         dms: (Dms): dms object
+
         p_dms: (list of Param_dm): dms settings
+
         p_geom: (Param_geom): geometry settings
+
         p_atmos : (Param_atmos) : atmos parameters
+
         p_tel : (Param_tel) : telescope parameters
+
         nfilt: (int): number of modes to filter
     """
     KL2V = compute_KL2V(p_controller, dms, p_dms, p_geom, p_atmos, p_tel)
@@ -203,14 +233,15 @@ def command_on_KL(rtc: Rtc, dms: Dms, p_controller: conf.Param_controller,
 
 
 def compute_cmat_with_KL(rtc: Rtc, KL2V: np.ndarray, nfilt: int):
-    """
-        Compute a command matrix on the KL basis and load it in the GPU
+    """ Compute a command matrix on the KL basis and load it in the GPU
 
     :parameters:
-        rtc: (Rtc): rtc object
-        KL2V: (np.ndarray[ndim=2, dtype=np.float32]) : volts to KL matrix
-        nfilt: (int): number of modes to filter
 
+        rtc: (Rtc): rtc object
+
+        KL2V: (np.ndarray[ndim=2, dtype=np.float32]) : volts to KL matrix
+
+        nfilt: (int): number of modes to filter
     """
     D = rtc.get_imat(0)
     KL2V_filt = np.zeros((KL2V.shape[0], KL2V.shape[1] - nfilt))
@@ -230,11 +261,17 @@ def compute_cmat_with_KL(rtc: Rtc, KL2V: np.ndarray, nfilt: int):
 
 def compute_Btt(IFpzt, IFtt):
     """ Returns Btt to Volts and Volts to Btt matrices
+
     :parameters:
+
         IFpzt : (csr_matrix) : influence function matrix of pzt DM, sparse and arrange as (Npts in pup x nactus)
+
         IFtt : (np.ndarray(ndim=2,dtype=np.float32)) : Influence function matrix of the TT mirror arrange as (Npts in pup x 2)
+
     :returns:
+
         Btt : (np.ndarray(ndim=2,dtype=np.float32)) : Btt to Volts matrix
+
         P : (np.ndarray(ndim=2,dtype=np.float32)) : Volts to Btt matrix
     """
     N = IFpzt.shape[0]

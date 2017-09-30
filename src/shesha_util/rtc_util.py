@@ -5,6 +5,7 @@ def create_interp_mat(dimx: int, dimy: int):
     """TODO doc
 
     :parameters:
+
         dimx: (int) :
 
         dimy: (int) :
@@ -27,10 +28,15 @@ def create_interp_mat(dimx: int, dimy: int):
 
 def centroid_gain(E, F):
     """ Returns the mean centroid gain
+
     :parameters:
+
         E : (np.array(dtype=np.float32)) : measurements from WFS
+
         F : (np.array(dtype=np.float32)) : geometric measurements
+
     :return:
+
         cgain : (float) : mean centroid gain between the sets of WFS measurements and geometric ones
     """
     if E.ndim == 1:

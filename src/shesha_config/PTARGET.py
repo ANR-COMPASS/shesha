@@ -18,25 +18,24 @@ class Param_target:
 
     def __init__(self):
         self.__ntargets = 0
-        """number of targets"""
+        """ number of targets"""
         self.__apod = False
-        """boolean for apodizer"""
+        """ boolean for apodizer"""
         self.__Lambda = None
-        """observation wavelength for each target"""
+        """ observation wavelength for each target"""
         self.__xpos = None
-        """x positions on sky (in arcsec) for each target"""
+        """ x positions on sky (in arcsec) for each target"""
         self.__ypos = None
-        """y positions on sky (in arcsec) for each target"""
+        """ y positions on sky (in arcsec) for each target"""
         self.__mag = None
-        """magnitude for each target"""
+        """ magnitude for each target"""
         self.__zerop = 1.
-        """target flux for magnitude 0"""
+        """ target flux for magnitude 0"""
         self.__dms_seen = None
-        """index of dms seen by the target"""
+        """ index of dms seen by the target"""
 
     def set_ntargets(self, n):
-        """
-            Set the number of targets
+        """ Set the number of targets
 
         :param n: (long) number of targets
         """
@@ -45,8 +44,7 @@ class Param_target:
     ntargets = property(lambda x: x.__ntargets, set_ntargets)
 
     def set_apod(self, l):
-        """
-            Set apodizer flag
+        """ Set apodizer flag
 
         :param l: (bool) : apod
         """
@@ -55,8 +53,7 @@ class Param_target:
     apod = property(lambda x: x.__apod, set_apod)
 
     def set_Lambda(self, n):
-        """
-            Set the wavelength of targets
+        """ Set the wavelength of targets
 
         :param n: (np.ndarray[ndim=2, dtype=np.float32]) : wavelength of targets
         """
@@ -66,8 +63,7 @@ class Param_target:
     Lambda = property(lambda x: x.__Lambda, set_Lambda)
 
     def set_xpos(self, n):
-        """
-            Set the X-position of targets in the field [arcsec]
+        """ Set the X-position of targets in the field [arcsec]
 
         :param n: (np.ndarray[ndim=2, dtype=np.float32]) : X position of targets [arcsec]
         """
@@ -77,8 +73,7 @@ class Param_target:
     xpos = property(lambda x: x.__xpos, set_xpos)
 
     def set_ypos(self, n):
-        """
-            Set the Y-position of targets in the field [arcsec]
+        """ Set the Y-position of targets in the field [arcsec]
 
         :param n: (np.ndarray[ndim=2, dtype=np.float32]): Y position of targets [arcsec]
         """
@@ -88,8 +83,7 @@ class Param_target:
     ypos = property(lambda x: x.__ypos, set_ypos)
 
     def set_mag(self, n):
-        """
-            Set the magnitudes of targets
+        """ Set the magnitudes of targets
 
         :param n: (np.ndarray[ndim=2, dtype=np.float32]) : magnitudes
         """
@@ -99,8 +93,7 @@ class Param_target:
     mag = property(lambda x: x.__mag, set_mag)
 
     def set_zerop(self, n):
-        """
-            Set the zero point of targets
+        """ Set the zero point of targets
 
         :param n: (float) : zero point of targets
         """
@@ -109,8 +102,7 @@ class Param_target:
     zerop = property(lambda x: x.__zerop, set_zerop)
 
     def set_dms_seen(self, n):
-        """
-            Set the dms_seen by the targets
+        """ Set the dms_seen by the targets
 
         :param n: (np.ndarray[ndim=2, dtype=np.int32]) : index of dms seen
         """

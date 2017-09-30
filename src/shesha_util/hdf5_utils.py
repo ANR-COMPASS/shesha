@@ -10,6 +10,7 @@ def params_dictionary(config):
     corresponding keys for further creation of database and save files
 
     :param config: (module) : simulation parameters
+
     :return param_dict: (dictionary) : dictionary of parameters
     """
 
@@ -134,7 +135,9 @@ def create_file_attributes(filename, param_dict):
     Create an hdf5 file wtih attributes corresponding to all simulation parameters
 
     :param:
+
         filename : (str) : full path + filename to create
+
         config : () : simulation parameters
     """
     f = h5py.File(filename, "w")
@@ -147,6 +150,8 @@ def create_file_attributes(filename, param_dict):
 
 
 def init_hdf5_files(savepath, param_dict, matricesToLoad):
+    """ TODO: docstring
+    """
     commit = check_output(["git", "rev-parse", "--short", "HEAD"]).decode('utf8')
     # if not(matricesToLoad.has_key("A")):
     if "A" not in matricesToLoad:
@@ -176,7 +181,9 @@ def initDataBase(savepath, param_dict):
     will be placed on the top of the savepath and be named matricesDataBase.h5.
 
     :parameters:
+
         savepath : (str) : path to the data repertory
+
         param_dict : (dictionary) : parameters dictionary
     """
     keys = list(param_dict.keys())
@@ -195,8 +202,11 @@ def updateDataBase(h5file, savepath, matrix_type):
     """ Update the database adding a new row to the matrix_type database.
 
     :parameters:
+
         h5file : (str) : path to the new h5 file to add
+
         savepath : (str) : path to the data directory
+
         matrix_type : (str) : type of matrix to store ("A","B","istx","isty"
                                                          "istx","eigenv","imat","U"
                                                          "pztok" or "pztnok")
@@ -222,8 +232,11 @@ def save_hdf5(filename, dataname, data):
     Create a dataset in an existing hdf5 file filename and store data in it
 
     :param:
+
         filename: (str) : full path to the file
+
         dataname : (str) : name of the data (imat, cmat...)
+
         data : np.array : data to save
     """
     f = h5py.File(filename, "r+")
@@ -237,9 +250,13 @@ def save_h5(filename, dataname, config, data):
     Usefull to backtrace data origins
 
     :param:
+
         filename: (str) : full path to the file
+
         dataname : (str) : name of the data (imat, cmat...)
+
         config : (module) : config parameters
+
         data : np.array : data to save
     """
     p_dict = params_dictionary(config)
@@ -256,10 +273,15 @@ def checkMatricesDataBase(savepath, config, param_dict):
     If the database doesn't exist, this function creates it.
 
     :parameters:
+
         savepath : (str) : path to the data repertory
+
         config : (module) : simulation parameters
+
         param_dict : (dictionary) : parameters dictionary
+
     :return:
+
         matricesToLoad : (dictionary) : matrices that will be load and their path
     """
 
@@ -284,7 +306,9 @@ def checkTurbuParams(savepath, config, pdict, matricesToLoad):
     for the A matrix : if we load A, we load B, istx and isty too.
 
     :parameters:
+
         config : (module) : simulation parameters
+
         matricesToLoad : (dictionary) :  matrices that will be load and their path
     """
     dataBase = pandas.read_hdf(savepath + "matricesDataBase.h5", "A")
@@ -339,7 +363,9 @@ def checkControlParams(savepath, config, pdict, matricesToLoad):
     for the imat matrix : if we load imat, we load eigenv and U too.
 
     :parameters:
+
         config : (module) : simulation parameters
+
         matricesToLoad : (dictionary) :  matrices that will be load and their path
     """
     dataBase = pandas.read_hdf(savepath + "matricesDataBase.h5", "imat")
@@ -400,7 +426,9 @@ def checkDmsParams(savepath, config, pdict, matricesToLoad):
     for the pztok matrix : if we load pztok, we load pztnok too.
 
     :parameters:
+
         config : (module) : simulation parameters
+
         matricesToLoad : (dictionary) :  matrices that will be load and their path
     """
     dataBase = pandas.read_hdf(savepath + "matricesDataBase.h5", "dm")
@@ -450,6 +478,8 @@ def checkDmsParams(savepath, config, pdict, matricesToLoad):
 
 
 def validDataBase(savepath, matricesToLoad):
+    """ TODO: docstring
+    """
     store = pandas.HDFStore(savepath + "matricesDataBase.h5")
     if not ("A" in matricesToLoad):
         validInStore(store, savepath, "A")
@@ -461,12 +491,16 @@ def validDataBase(savepath, matricesToLoad):
 
 
 def validFile(filename):
+    """ TODO: docstring
+    """
     f = h5py.File(filename, "r+")
     f.attrs["validity"] = True
     f.close()
 
 
 def validInStore(store, savepath, matricetype):
+    """ TODO: docstring
+    """
     df = store[matricetype]
     ind = len(df.index) - 1
     df.loc[ind, "validity"] = True
@@ -475,6 +509,8 @@ def validInStore(store, savepath, matricetype):
 
 
 def configFromH5(filename, config):
+    """ TODO: docstring
+    """
     #import shesha as ao
 
     f = h5py.File(filename, "r")
@@ -609,10 +645,12 @@ def configFromH5(filename, config):
 
 
 def writeHdf5SingleDataset(filename, data, datasetName="dataset"):
-    """Write a hdf5 file containig a single field
+    """ Write a hdf5 file containig a single field
 
     If the file already exists, it will be overwritten
+
     :parametres:
+
         filename: (str) : name of the file to write
 
         data: (np.ndarray) : content of the file
@@ -626,9 +664,10 @@ def writeHdf5SingleDataset(filename, data, datasetName="dataset"):
 
 
 def readHdf5SingleDataset(filename, datasetName="dataset"):
-    """Read a single dataset from an hdf5 file
+    """ Read a single dataset from an hdf5 file
 
     :parameters:
+
         filename: (str) : name of the file to read from
 
         datasetName: (str) : name of the dataset to read (default="dataset")
@@ -641,10 +680,12 @@ def readHdf5SingleDataset(filename, datasetName="dataset"):
 
 
 def load_AB_from_dataBase(database, ind):
-    """Read and return A, B, istx and isty from the database
+    """ Read and return A, B, istx and isty from the database
 
     :parameters:
+
         database: (dict): dictionary containing paths to matrices to load
+
         ind: (int): layer index
     """
     print("loading", database["A"])
@@ -659,13 +700,18 @@ def load_AB_from_dataBase(database, ind):
 
 
 def save_AB_in_database(k, A, B, istx, isty):
-    """Save A, B, istx and isty in the database
+    """ Save A, B, istx and isty in the database
 
     :parameters:
+
         ind:
+
         A:
+
         B:
+
         istx:
+
         isty:
     """
     commit = check_output(["git", "rev-parse", "--short", "HEAD"]).decode('utf8')
@@ -682,10 +728,12 @@ def save_AB_in_database(k, A, B, istx, isty):
 
 
 def load_dm_geom_from_dataBase(database, ndm):
-    """Read and return the DM geometry
+    """ Read and return the DM geometry
 
     :parameters:
+
         database: (dict): dictionary containing paths to matrices to load
+
         ndm: (int): dm index
     """
     print("loading", database["dm"])
@@ -702,14 +750,20 @@ def load_dm_geom_from_dataBase(database, ndm):
 
 
 def save_dm_geom_in_dataBase(ndm, influpos, ninflu, influstart, i1, j1, ok):
-    """Save the DM geometry in the database
+    """ Save the DM geometry in the database
 
     :parameters:
+
         ndm:
+
         influpos:
+
         ninflu:
+
         influstart:
+
         i1:
+
         j1:
     """
     commit = check_output(["git", "rev-parse", "--short", "HEAD"]).decode('utf8')
@@ -728,9 +782,10 @@ def save_dm_geom_in_dataBase(ndm, influpos, ninflu, influstart, i1, j1, ok):
 
 
 def load_imat_from_dataBase(database):
-    """Read and return the imat
+    """ Read and return the imat
 
     :parameters:
+
         database: (dict): dictionary containing paths to matrices to load
     """
     print("loading", database["imat"])
@@ -742,9 +797,10 @@ def load_imat_from_dataBase(database):
 
 
 def save_imat_in_dataBase(imat):
-    """Save the DM geometry in the database
+    """ Save the DM geometry in the database
 
     :parameters:
+
         imat: (np.ndarray): imat to save
     """
     commit = check_output(["git", "rev-parse", "--short", "HEAD"]).decode('utf8')

@@ -22,6 +22,7 @@ def fft_goodsize(s):
     """find best size for a fft from size s
 
     :parameters:
+
          s: (int) size
     """
     return 2**(int(np.log2(s)) + 1)
@@ -39,10 +40,10 @@ def bin2d(data_in, binfact):
     SEE ALSO: _bin2d
 
     :parmeters:
+
         data_in: (np.ndarray) : data to binned
 
         binfact: (int) : binning factor
-
     """
     if (binfact < 1):
         raise ValueError("binfact has to be >= 1")
@@ -123,11 +124,14 @@ def makegaussian(size, fwhm, xc=-1, yc=-1, norm=0):
     norm returns normalized 2d gaussian
 
     :param size: (int) :
-    :param fwhm: (float) :
-    :param xc: (float) : (optional) center position on x axis
-    :param yc: (float) : (optional) center position on y axis
-    :param norm: (int) : (optional) normalization
 
+    :param fwhm: (float) :
+
+    :param xc: (float) : (optional) center position on x axis
+
+    :param yc: (float) : (optional) center position on y axis
+
+    :param norm: (int) : (optional) normalization
     """
     tmp = np.exp(-(dist(size, xc, yc) / (fwhm / 1.66))**2.)
     if (norm > 0):
@@ -148,6 +152,7 @@ def rotate3d(im, ang, cx=-1, cy=-1, zoom=1.0):
     modif dg : allow to rotate a cube of images with one angle per image
 
     :parameters:
+
         im: (np.ndarray[ndim=3,dtype=np.float32_t]) : array to rotate
 
         ang: (np.ndarray[ndim=1,dtype=np.float32_t]) : rotation angle  (in degrees)
@@ -237,6 +242,7 @@ def rotate(im, ang, cx=-1, cy=-1, zoom=1.0):
     If zoom is not specified, the default value of 1.0 is taken.
 
     :parameters:
+
         im: (np.ndarray[ndim=3,dtype=np.float32_t]) : array to rotate
 
         ang: (float) : rotation angle (in degrees)
@@ -246,7 +252,6 @@ def rotate(im, ang, cx=-1, cy=-1, zoom=1.0):
         cy: (float) : (optional) rotation center on x axis (default: image center)
 
         zoom: (float) : (opional) zoom factor (default =1.0)
-
     """
     # TODO merge it with rotate3d or see if there is any np.rotate or other...
     if (zoom == 0):

@@ -6,7 +6,11 @@ Created on 1 aout 2017
 @author: fferreira
 '''
 
-from naga import naga_context
+try:
+    from naga import naga_context
+except:
+    class naga_context:
+        pass
 
 import shesha_config as conf
 import shesha_constants as scons

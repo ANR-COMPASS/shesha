@@ -41,7 +41,7 @@ class Param_tel:
         self.__vect_seg = None
 
     def set_diam(self, d):
-        """set the telescope diameter
+        """ Set the telescope diameter
 
         :param d: (float) : telescope diameter (in meters)
         """
@@ -50,7 +50,7 @@ class Param_tel:
     diam = property(lambda x: x.__diam, set_diam)
 
     def set_cobs(self, c):
-        """set the central obstruction ratio
+        """ Set the central obstruction ratio
 
         :param c: (float) : central obstruction ratio
         """
@@ -59,7 +59,7 @@ class Param_tel:
     cobs = property(lambda x: x.__cobs, set_cobs)
 
     def set_type_ap(self, t):
-        """set the EELT aperture type
+        """ Set the EELT aperture type
 
         :param t: (str) : EELT aperture type
         """
@@ -68,7 +68,7 @@ class Param_tel:
     type_ap = property(lambda x: x.__type_ap, set_type_ap)
 
     def set_t_spiders(self, spider):
-        """set the secondary supports ratio
+        """ Set the secondary supports ratio
 
         :param spider: (float) : secondary supports ratio
         """
@@ -77,7 +77,7 @@ class Param_tel:
     t_spiders = property(lambda x: x.__t_spiders, set_t_spiders)
 
     def set_spiders_type(self, spider):
-        """set the secondary supports type
+        """ Set the secondary supports type
 
         :param spider: (str) : secondary supports type
         """
@@ -86,7 +86,7 @@ class Param_tel:
     spiders_type = property(lambda x: x.__spiders_type, set_spiders_type)
 
     def set_pupangle(self, p):
-        """set the rotation angle of pupil
+        """ Set the rotation angle of pupil
 
         :param p: (float) : rotation angle of pupil
         """
@@ -95,7 +95,7 @@ class Param_tel:
     pupangle = property(lambda x: x.__pupangle, set_pupangle)
 
     def set_nbrmissing(self, nb):
-        """set the number of missing segments for EELT pupil
+        """ Set the number of missing segments for EELT pupil
 
         :param nb: (long) : number of missing segments for EELT pupil (max is 20)
         """
@@ -104,7 +104,7 @@ class Param_tel:
     nbrmissing = property(lambda x: x.__nbrmissing, set_nbrmissing)
 
     def set_referr(self, ref):
-        """set the std of reflectivity errors for EELT segments
+        """ Set the std of reflectivity errors for EELT segments
 
         :param ref: (float) : std of reflectivity errors for EELT segments (fraction)
         """
@@ -113,7 +113,7 @@ class Param_tel:
     referr = property(lambda x: x.__referr, set_referr)
 
     def set_std_piston(self, piston):
-        """set the std of piston errors for EELT segments
+        """ Set the std of piston errors for EELT segments
 
         :param piston: (float) : std of piston errors for EELT segments
         """
@@ -122,7 +122,7 @@ class Param_tel:
     std_piston = property(lambda x: x.__std_piston, set_std_piston)
 
     def set_std_tt(self, tt):
-        """set the std of tip-tilt errors for EELT segments
+        """ Set the std of tip-tilt errors for EELT segments
 
         :param tt: (float) : std of tip-tilt errors for EELT segments
         """
@@ -131,7 +131,7 @@ class Param_tel:
     std_tt = property(lambda x: x.__std_tt, set_std_tt)
 
     def set_vect_seg(self, vect):
-        """Set the segment number for construct ELT pupil"
+        """ Set the segment number for construct ELT pupil"
 
         :param vect: (list of int32) : segment numbers
         """

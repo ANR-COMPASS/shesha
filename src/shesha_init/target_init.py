@@ -1,4 +1,8 @@
-from naga import naga_context
+try:
+    from naga import naga_context
+except:
+    class naga_context:
+        pass
 
 import shesha_config as conf
 

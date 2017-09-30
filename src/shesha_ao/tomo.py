@@ -18,19 +18,30 @@ def do_tomo_matrices(ncontrol: int, rtc: Rtc, p_wfss: List[conf.Param_wfs], dms:
                      atmos: Atmos, wfs: Sensors, p_controller: conf.Param_controller,
                      p_geom: conf.Param_geom, p_dms: list, p_tel: conf.Param_tel,
                      p_atmos: conf.Param_atmos):
-    """Compute Cmm and Cphim matrices for the MV controller on GPU
+    """ Compute Cmm and Cphim matrices for the MV controller on GPU
 
     :parameters:
+
         ncontrol: (int): controller index
+
         rtc: (Rtc) : rtc object
+
         p_wfss: (list of Param_wfs) : wfs settings
+
         dms: (Dms) : Dms object
+
         atmos: (Atmos) : Atmos object
+
         wfs: (Sensors) : Sensors object
+
         p_controller: (Param_controller): controller settings
+
         p_geom: (Param_geom) : geom settings
+
         p_dms: (list of Param_dms) : dms settings
+
         p_tel: (Param_tel) : telescope settings
+
         p_atmos: (Param_atmos) : atmos settings
     """
     nvalidperwfs = np.array([o._nvalid for o in p_wfss], dtype=np.int64)
@@ -151,10 +162,15 @@ def selectDMforLayers(p_atmos: conf.Param_atmos, p_controller: conf.Param_contro
     """ For each atmos layer, select the DM which have to handle it in the Cphim computation for MV controller
 
     :parameters:
+
         p_atmos : (Param_atmos) : atmos parameters
+
         p_controller : (Param_controller) : controller parameters
+
         p_dms :(list of Param_dm) : dms parameters
+
     :return:
+
         indlayersDM : (np.array(dtype=np.int32)) : for each atmos layer, the Dm number corresponding to it
     """
     indlayersDM = np.zeros(p_atmos.nscreens, dtype=np.int64)
@@ -173,9 +189,11 @@ def create_nact_geom(p_dm: conf.Param_dm):
     """ Compute the DM coupling matrix
 
     :param:
+
         p_dm : (Param_dm) : dm parameters
 
     :return:
+
         Nact : (np.array(dtype=np.float64)) : the DM coupling matrix
     """
     nactu = p_dm._ntotact
@@ -218,10 +236,10 @@ def create_nact_geom(p_dm: conf.Param_dm):
 
 
 def create_piston_filter(p_dm: conf.Param_dm):
-    """
-        Create the piston filter matrix
+    """ Create the piston filter matrix
 
     :parameters:
+
         p_dm: (Param_dm): dm settings
     """
     nactu = p_dm._ntotact

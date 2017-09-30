@@ -1,7 +1,12 @@
 import sys
 import os
 
-from naga import naga_context
+try:
+    from naga import naga_context
+except:
+    class naga_context:
+        def __init__(devices=0):
+            pass
 
 import shesha_init as init
 import shesha_constants as scons
@@ -236,14 +241,17 @@ class Simulator:
     def next(self, *, move_atmos: bool=True, see_atmos: bool=True, nControl: int=0,
              tar_trace: Iterable[int]=None, wfs_trace: Iterable[int]=None,
              apply_control: bool=True) -> None:
-        '''
-            function next
+        ''' function next
             Iterates the AO loop, with optional parameters
 
         :param move_atmos (bool): move the atmosphere for this iteration, default: True
+
         :param nControl (int): Controller number to use, default 0 (single control configurations)
+
         :param tar_trace (None or list[int]): list of targets to trace. None equivalent to all.
+
         :param wfs_trace (None or list[int]): list of WFS to trace. None equivalent to all.
+
         :param apply_control (bool): (optional) if True (default), apply control on DMs
         '''
         if tar_trace is None:

@@ -16,6 +16,7 @@ from docopt import docopt
 import sys
 import os
 import shesha_sim
+from shesha_constants import ControllerType
 
 arguments = docopt(__doc__)
 param_file = arguments["<parameters_filename>"]
@@ -26,7 +27,9 @@ if arguments["--bench"]:
 elif arguments["--brama"]:
     sim = shesha_sim.SimulatorBrama(param_file)
 else:
-    sim = shesha_sim.Simulator(param_file)
+    # sim = shesha_sim.Simulator(param_file)
+    sim = shesha_sim.BenchBrama(param_file)
 
+sim.config.p_controller0.set_type(ControllerType.GENERIC)
 sim.init_sim()
 sim.loop(sim.config.p_loop.niter)

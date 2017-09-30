@@ -19,14 +19,20 @@ import numpy as np
 
 def comp_new_pyr_ampl(rtc: Rtc, n: int, p_centroider: conf.Param_centroider,
                       p_wfss: list, p_tel: conf.Param_tel, ampli: float):
-    """Set the pyramid modulation amplitude
+    """ Set the pyramid modulation amplitude
 
     :parameters:
+
         rtc: (Rtc): rtc object
+
         n : (int): centroider index
+
         p_centroider : (Param_centroider) : pyr centroider settings
+
         ampli : (float) : new amplitude in units of lambda/D
+
         p_wfss : (list of Param_wfs) : list of wfs parameters
+
         p_tel : (Param_tel) : Telescope parameters
     """
     nwfs = p_centroider.nwfs
@@ -52,18 +58,23 @@ def comp_new_pyr_ampl(rtc: Rtc, n: int, p_centroider: conf.Param_centroider,
 
 def noise_cov(nw: int, p_wfs: conf.Param_wfs, p_atmos: conf.Param_atmos,
               p_tel: conf.Param_tel):
-    """Compute the diagonal of the noise covariance matrix for a SH WFS (arcsec^2)
+    """ Compute the diagonal of the noise covariance matrix for a SH WFS (arcsec^2)
     Photon noise: (pi^2/2)*(1/Nphotons)*(d/r0)^2 / (2*pi*d/lambda)^2
     Electronic noise: (pi^2/3)*(wfs.noise^2/N^2photons)*wfs.npix^2*(wfs.npix*wfs.pixsize*d/lambda)^2 / (2*pi*d/lambda)^2
 
     :parameters:
-        nw: wfs number
-        p_wfs: (Param_wfs) : wfs settings
-        p_atmos: (Param_atmos) : atmos settings
-        p_tel: (Param_tel) : telescope settings
-    :return:
-        cov : (np.ndarray(ndim=1,dtype=np.float64)) : noise covariance diagonal
 
+        nw: wfs number
+
+        p_wfs: (Param_wfs) : wfs settings
+
+        p_atmos: (Param_atmos) : atmos settings
+
+        p_tel: (Param_tel) : telescope settings
+
+    :return:
+
+        cov : (np.ndarray(ndim=1,dtype=np.float64)) : noise covariance diagonal
     """
     cov = np.zeros(2 * p_wfs._nvalid)
     if (p_wfs.noise >= 0):
@@ -99,13 +110,16 @@ def noise_cov(nw: int, p_wfs: conf.Param_wfs, p_atmos: conf.Param_atmos,
 
 def comp_new_fstop(wfs: Sensors, n: int, p_wfs: conf.Param_wfs, fssize: float,
                    fstop: bytes):
-    """
-        Compute a new field stop for pyrhr WFS
+    """ Compute a new field stop for pyrhr WFS
 
     :parameters:
+
         n : (int) : WFS index
+
         wfs : (Param_wfs) : WFS parameters
+
         fssize : (float) : field stop size [arcsec]
+
         fstop : (string) : "square" or "round" (field stop shape)
     """
     fsradius_pixels = int(fssize / p_wfs._qpixsize / 2.)

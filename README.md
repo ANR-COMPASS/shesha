@@ -1,3 +1,5 @@
+[![Documentation Status](https://readthedocs.org/projects/shesha/badge/?version=py3)](http://shesha.readthedocs.io/en/py3/?badge=py3)
+
 Installation de COMPASS via conda
 
 ```bash
