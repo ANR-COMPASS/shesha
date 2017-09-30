@@ -1,0 +1,125 @@
+name: compass
+channels:
+- compass
+- defaults
+dependencies:
+- compass=py3=py36_cuda80
+- magma=2.2.0=cuda80
+- astropy=2.0.1=np113py36_0
+- bkcharts=0.2=py36_0
+- blaze=0.10.1=py36_0
+- bokeh=0.12.7=py36_0
+- certifi=2016.2.28=py36_0
+- click=6.7=py36_0
+- cloudpickle=0.4.0=py36_0
+- cycler=0.10.0=py36_0
+- cython=0.26=py36_0
+- cytoolz=0.8.2=py36_0
+- dask=0.15.2=py36_0
+- datashape=0.5.4=py36_0
+- dbus=1.10.20=0
+- decorator=4.1.2=py36_0
+- docopt=0.6.2=py36_0
+- expat=2.1.0=0
+- flask=0.12.2=py36_0
+- flask-cors=3.0.3=py36_0
+- fontconfig=2.12.1=3
+- freetype=2.5.5=2
+- glib=2.50.2=1
+- gst-plugins-base=1.8.0=0
+- gstreamer=1.8.0=0
+- h5py=2.7.0=np113py36_0
+- hdf5=1.8.17=2
+- icu=54.1=0
+- ipython=6.1.0=py36_0
+- ipython_genutils=0.2.0=py36_0
+- itsdangerous=0.24=py36_0
+- jedi=0.10.2=py36_2
+- jinja2=2.9.6=py36_0
+- jpeg=9b=0
+- libffi=3.2.1=1
+- libgcc=4.8.5=2
+- libgfortran=3.0.0=1
+- libiconv=1.14=0
+- libpng=1.6.30=1
+- libxcb=1.12=1
+- libxml2=2.9.4=0
+- llvmlite=0.20.0=py36_0
+- locket=0.2.0=py36_1
+- markupsafe=1.0=py36_0
+- matplotlib=2.0.2=np113py36_0
+- multipledispatch=0.4.9=py36_0
+- networkx=1.11=py36_0
+- nomkl=1.0=0
+- nose=1.3.7=py36_1
+- numba=0.35.0=np113py36_0
+- numexpr=2.6.2=np113py36_nomkl_0
+- numpy=1.13.1=py36_nomkl_0
+- odo=0.5.1=py36_0
+- openblas=0.2.19=0
+- openssl=1.0.2l=0
+- pandas=0.20.3=py36_0
+- partd=0.3.8=py36_0
+- path.py=10.3.1=py36_0
+- pcre=8.39=1
+- pexpect=4.2.1=py36_0
+- pickleshare=0.7.4=py36_0
+- pip=9.0.1=py36_1
+- prompt_toolkit=1.0.15=py36_0
+- psutil=5.2.2=py36_0
+- ptyprocess=0.5.2=py36_0
+- py=1.4.34=py36_0
+- pygments=2.2.0=py36_0
+- pyparsing=2.2.0=py36_0
+- pyqt=5.6.0=py36_2
+- pyqtgraph=0.10.0=py36_0
+- pytables=3.4.2=np113py36_0
+- pytest=3.2.1=py36_0
+- python=3.6.2=0
+- python-dateutil=2.6.1=py36_0
+- pytz=2017.2=py36_0
+- pyyaml=3.12=py36_0
+- qt=5.6.2=5
+- readline=6.2=2
+- requests=2.14.2=py36_0
+- scipy=0.19.1=np113py36_nomkl_0
+- setuptools=36.4.0=py36_1
+- simplegeneric=0.8.1=py36_1
+- sip=4.18=py36_0
+- six=1.10.0=py36_0
+- sqlalchemy=1.1.13=py36_0
+- sqlite=3.13.0=0
+- tk=8.5.18=0
+- toolz=0.8.2=py36_0
+- tornado=4.5.2=py36_0
+- tqdm=4.15.0=py36_0
+- traitlets=4.3.2=py36_0
+- wcwidth=0.1.7=py36_0
+- werkzeug=0.12.2=py36_0
+- wheel=0.29.0=py36_0
+- xz=5.2.3=0
+- yaml=0.1.6=0
+- zlib=1.2.11=0
+- pip:
+  - atmos==0.0.0
+  - camsdk==0.0.0
+  - dms==0.0.0
+  - gamora==0.0.0
+  - groot==0.0.0
+  - ipython-genutils==0.2.0
+  - naga==0.0.0
+  - naga-context==0.0.0
+  - naga-host-obj==0.0.0
+  - naga-magma==0.0.0
+  - naga-obj==0.0.0
+  - naga-sparse-obj==0.0.0
+  - naga-streams==0.0.0
+  - naga-timer==0.0.0
+  - prompt-toolkit==1.0.15
+  - rtc==0.0.0
+  - sensors==0.0.0
+  - tables==3.4.2
+  - target==0.0.0
+  - telescope==0.0.0
+prefix: /home/sevin/miniconda3/envs/compass
+
