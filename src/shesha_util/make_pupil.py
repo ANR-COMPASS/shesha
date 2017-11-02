@@ -1,3 +1,6 @@
+"""
+Pupil creation functions
+"""
 import numpy as np
 import os
 import scipy.ndimage.interpolation as interp

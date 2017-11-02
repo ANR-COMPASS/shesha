@@ -1,9 +1,6 @@
-#!/usr/local/bin/python2.7
-# encoding: utf-8
 '''
-Created on 9 aout 2017
-
-@author: fferreira
+Param_controller class definition
+Parameters for controller
 '''
 
 import numpy as np
@@ -18,7 +15,7 @@ import shesha_constants as scons
 class Param_controller:
 
     def __init__(self):
-        self.__type_control = None
+        self.__type = None
         """ type of controller"""
         self.__kl_imat = False
         """ set imat kl on-off"""
@@ -74,9 +71,9 @@ class Param_controller:
 
         :param t: (string) : type
         """
-        self.__type_control = scons.check_enum(scons.ControllerType, t)
+        self.__type = scons.check_enum(scons.ControllerType, t)
 
-    type_control = property(lambda x: x.__type_control, set_type)
+    type = property(lambda x: x.__type, set_type)
 
     def set_klgain(self, g):
         """ Set klgain for imatkl size = number of kl mode

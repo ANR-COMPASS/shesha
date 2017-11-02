@@ -1,7 +1,11 @@
+"""
+Class SimulatorBrama: Brama overloaded simulator
+"""
 import sys
 import os
 
 from .simulator import Simulator, init
+
 
 class SimulatorBrama(Simulator):
     """
@@ -12,7 +16,7 @@ class SimulatorBrama(Simulator):
 
     def _tar_init(self) -> None:
         '''
-            TODO
+        Initializes a Target_Brama object
         '''
         if self.config.p_target is not None:
             print("->target")
@@ -25,7 +29,7 @@ class SimulatorBrama(Simulator):
 
     def _rtc_init(self, ittime) -> None:
         '''
-            TODO
+        Initializes a Rtc_Brama object
         '''
         if self.config.p_controllers is not None or self.config.p_centroiders is not None:
             print("->rtc")
@@ -39,9 +43,11 @@ class SimulatorBrama(Simulator):
             self.rtc = None
 
     def next(self, **kwargs) -> None:
+        """
+        Overload of the Simulator.next() function with BRAMA publications
+        """
         Simulator.next(self, **kwargs)
         if self.rtc is not None:
             self.rtc.publish()
         if self.tar is not None:
             self.tar.publish()
-

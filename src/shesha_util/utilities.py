@@ -1,9 +1,5 @@
-#!/usr/local/bin/python3.6
-# encoding: utf-8
 '''
-Created on 1 aout 2017
-
-@author: fferreira
+Basic utilities function
 '''
 import numpy as np
 

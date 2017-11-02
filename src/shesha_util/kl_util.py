@@ -1,13 +1,10 @@
-# -*- coding: utf-8 -*-
 """
-Created on Thu Sep  8 15:42:43 2016
-Functions for DM Python kl
-@author: translated by sdurand
-Compass Yorick translation
+Functions for DM KL initialization
 """
 
 import shesha_constants as scons
 import numpy as np
+from scipy import interpolate
 
 from typing import Tuple
 
@@ -28,7 +25,7 @@ def make_radii(cobs: float, nr: int) -> float:
 
 
 def make_kernels(cobs: float, nr: int, radp: np.ndarray, kl_type: bytes,
-                 outscl: float=None) -> np.ndarray:
+                 outscl: float=3.) -> np.ndarray:
     """
     This routine generates the kernel used to find the KL modes.
     The  kernel constructed here should be simply a discretization
@@ -69,12 +66,10 @@ def make_kernels(cobs: float, nr: int, radp: np.ndarray, kl_type: bytes,
                 te = 6.88 * te**(5. / 3.)
 
             elif (kl_type == scons.KLType.KARMAN):
-                if outscl is None:
-                    raise ValueError("p_dm.outscl is not specified")
-                else:
-                    te = 6.88 * te**(5. / 3.) * (1 - 1.485 * (te / outscl)**
-                                                 (1. / 3.) + 5.383 * (te / outscl)**
-                                                 (2) - 6.281 * (te / outscl)**(7. / 3.))
+
+                te = 6.88 * te**(5. / 3.) * (1 - 1.485 * (te / outscl)**
+                                             (1. / 3.) + 5.383 * (te / outscl)**
+                                             (2) - 6.281 * (te / outscl)**(7. / 3.))
 
             else:
 
@@ -531,3 +526,98 @@ def gkl_fcom(kers: np.ndarray, cobs: float, nf: int):
         rabas[:, i] = kers[tord[i] - 1, :, pio[i] - 1]
 
     return evals, nord, npo, ordd, rabas
+
+
+#-------------------------------------------------------------------------
+# function for calculate DM_kl on python
+
+
+def gkl_sfi(p_dm, i):
+    #DOCUMENT
+    #This routine returns the i'th function from the generalised KL
+    #basis bas. bas must be generated first with gkl_bas.
+    nr = p_dm._nr
+    npp = p_dm._npp
+    ordd = p_dm._ord
+    rabas = p_dm._rabas
+    azbas = p_dm._azbas
+    nkl = p_dm.nkl
+
+    if (i > nkl - 1):
+        raise TypeError("kl funct order it's so big")
+
+    else:
+
+        ordi = np.int32(ordd[i])
+        rabasi = rabas[:, i]
+        azbasi = np.transpose(azbas)
+        azbasi = azbasi[ordi, :]
+
+        sf1 = np.zeros((nr, npp), dtype=np.float64)
+        for j in range(npp):
+            sf1[:, j] = rabasi
+
+        sf2 = np.zeros((npp, nr), dtype=np.float64)
+        for j in range(nr):
+            sf2[:, j] = azbasi
+
+        sf = sf1 * np.transpose(sf2)
+
+        return sf
+
+
+def pol2car(pol, p_dm, mask=0):
+    # DOCUMENT cart=pol2car(cpgeom, pol, mask=)
+    # This routine is used for polar to cartesian conversion.
+    # pol is built with gkl_bas and cpgeom with pcgeom.
+    # However, points not in the aperture are actually treated
+    # as though they were at the first or last radial polar value
+    # -- a small fudge, but not serious  ?*******
+    #cd = interpolate.interp2d(cr, cp,pol)
+    ncp = p_dm._ncp
+    cr = p_dm._cr
+    cp = p_dm._cp
+    nr = p_dm._nr
+    npp = p_dm._npp
+
+    r = np.arange(nr, dtype=np.float64)
+    phi = np.arange(npp, dtype=np.float64)
+    tab_phi, tab_r = np.meshgrid(phi, r)
+    tab_x = (tab_r / (nr)) * np.cos((tab_phi / (npp)) * 2 * np.pi)
+    tab_y = (tab_r / (nr)) * np.sin((tab_phi / (npp)) * 2 * np.pi)
+
+    newx = np.linspace(-1, 1, ncp)
+    newy = np.linspace(-1, 1, ncp)
+    tx, ty = np.meshgrid(newx, newy)
+
+    cd = interpolate.griddata((tab_r.flatten(), tab_phi.flatten()),
+                              pol.flatten(), (cr, cp), method='cubic')
+    cdf = interpolate.griddata((tab_r.flatten("F"), tab_phi.flatten("F")),
+                               pol.flatten("F"), (cr, cp), method='cubic')
+    cdxy = interpolate.griddata((tab_y.flatten(), tab_x.flatten()),
+                                pol.flatten(), (tx, ty), method='cubic')
+
+    if (mask == 1):
+        ap = p_dm.ap
+        cd = cd * (ap)
+        cdf = cdf * (ap)
+        cdxy = cdxy * (ap)
+
+    return cd, cdf, cdxy
+
+
+def kl_view(p_dm, mask=1):
+
+    nkl = p_dm.nkl
+    ncp = p_dm._ncp
+
+    tab_kl = np.zeros((nkl, ncp, ncp), dtype=np.float64)
+    tab_klf = np.zeros((nkl, ncp, ncp), dtype=np.float64)
+    tab_klxy = np.zeros((nkl, ncp, ncp), dtype=np.float64)
+
+    for i in range(nkl):
+
+        tab_kl[i, :, :], tab_klf[i, :, :], tab_klxy[i, :, :] = pol2car(
+                gkl_sfi(p_dm, i), p_dm, mask)
+
+    return tab_kl, tab_klf, tab_klxy

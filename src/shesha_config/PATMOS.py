@@ -1,11 +1,7 @@
-#!/usr/local/bin/python2.7
-# encoding: utf-8
 '''
-Created on 13 juil. 2017
-
-@author: vdeo
+Param_atmos class definition
+Parameters for atmosphere
 '''
-
 import numpy as np
 from . import config_setter_utils as csu
 

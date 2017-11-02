@@ -1,3 +1,6 @@
+"""
+Stencil and matrices computation for the creation of a turbulent screen
+"""
 import numpy as np
 
 

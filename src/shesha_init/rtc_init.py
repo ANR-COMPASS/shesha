@@ -1,8 +1,7 @@
-try:
-    from naga import naga_context
-except:
-    class naga_context:
-        pass
+"""
+Initialization of a Rtc object
+"""
+from naga import naga_context
 
 import shesha_config as conf
 import shesha_constants as scons
@@ -88,8 +87,9 @@ def rtc_init(context: naga_context, tel: Telescope, wfs: Sensors, dms: Dms, atmo
                 else:
                     imat = None
 
-                dmi.correct_dm(dms, p_dms, p_controllers[i], p_geom, imat,
-                               dataBase=dataBase, use_DB=use_DB)
+                if p_dms[0].type == scons.DmType.PZT:
+                    dmi.correct_dm(dms, p_dms, p_controllers[i], p_geom, imat,
+                                   dataBase=dataBase, use_DB=use_DB)
 
                 init_controller(i, p_controllers[i], p_wfss, p_geom, p_dms, p_atmos,
                                 ittime, p_tel, rtc, dms, wfs, tel, atmos, do_refslp,
@@ -101,14 +101,13 @@ def rtc_init(context: naga_context, tel: Telescope, wfs: Sensors, dms: Dms, atmo
                 p_controller = p_controllers[0]
                 Nphi = np.where(p_geom._spupil)[0].size
 
-                list_dmseen = [p_dms[j].type_dm for j in p_controller.ndm]
+                list_dmseen = [p_dms[j].type for j in p_controller.ndm]
                 nactu = np.sum([p_dms[j]._ntotact for j in p_controller.ndm])
                 alt = np.array([p_dms[j].alt
                                 for j in p_controller.ndm], dtype=np.float32)
 
-                rtc.add_controller(nactu, p_controller.delay, p_controller.type_control,
-                                   dms, list_dmseen, alt, p_controller.ndm.size, Nphi,
-                                   True)
+                rtc.add_controller(nactu, p_controller.delay, p_controller.type, dms,
+                                   list_dmseen, alt, p_controller.ndm.size, Nphi, True)
 
                 # list_dmseen,alt,p_controller.ndm.size
                 init_controller_geo(ncontrol, rtc, dms, p_geom, p_controller, p_dms,
@@ -129,8 +128,8 @@ def init_centroider(nwfs: int, p_wfs: conf.Param_wfs,
         wfs: (Sensors): Sensor object
         rtc : (Rtc) : Rtc object
     """
-    if (p_wfs.type_wfs == scons.WFSType.SH):
-        if (p_centroider.type_centro != scons.CentroiderType.CORR):
+    if (p_wfs.type == scons.WFSType.SH):
+        if (p_centroider.type != scons.CentroiderType.CORR):
             s_offset = p_wfs.npix // 2. + 0.5
         else:
             if (p_centroider.type_fct == scons.CentroiderFctType.MODEL):
@@ -142,31 +141,30 @@ def init_centroider(nwfs: int, p_wfs: conf.Param_wfs,
                 s_offset = p_wfs.npix // 2 + 0.5
         s_scale = p_wfs.pixsize
 
-    elif (p_wfs.type_wfs == scons.WFSType.PYRHR):
+    elif (p_wfs.type == scons.WFSType.PYRHR):
         s_offset = 0.
         s_scale = (p_wfs.Lambda * 1e-6 / p_tel.diam) * \
             p_wfs.pyr_ampl * CONST.RAD2ARCSEC
 
-    rtc.add_centroider(wfs, nwfs, p_wfs._nvalid, p_centroider.type_centro, s_offset,
-                       s_scale)
+    rtc.add_centroider(wfs, nwfs, p_wfs._nvalid, p_centroider.type, s_offset, s_scale)
 
-    if (p_wfs.type_wfs == scons.WFSType.PYRHR):
+    if (p_wfs.type == scons.WFSType.PYRHR):
         # FIXME SIGNATURE CHANGES
         rtc.set_pyr_method(nwfs, p_centroider.method)
         rtc.set_pyr_thresh(nwfs, p_centroider.thresh)
 
-    elif (p_wfs.type_wfs == scons.WFSType.SH):
-        if (p_centroider.type_centro == scons.CentroiderType.TCOG):
+    elif (p_wfs.type == scons.WFSType.SH):
+        if (p_centroider.type == scons.CentroiderType.TCOG):
             rtc.set_thresh(nwfs, p_centroider.thresh)
-        elif (p_centroider.type_centro == scons.CentroiderType.BPCOG):
+        elif (p_centroider.type == scons.CentroiderType.BPCOG):
             rtc.set_nmax(nwfs, p_centroider.nmax)
-        elif (p_centroider.type_centro == scons.CentroiderType.WCOG or
-              p_centroider.type_centro == scons.CentroiderType.CORR):
+        elif (p_centroider.type == scons.CentroiderType.WCOG or
+              p_centroider.type == scons.CentroiderType.CORR):
             r0 = p_atmos.r0 * (p_wfs.Lambda / 0.5)**(6 / 5.)
             seeing = CONST.RAD2ARCSEC * (p_wfs.Lambda * 1.e-6) / r0
             npix = seeing // p_wfs.pixsize
             comp_weights(p_centroider, p_wfs, npix)
-            if p_centroider.type_centro == scons.CentroiderType.WCOG:
+            if p_centroider.type == scons.CentroiderType.WCOG:
                 rtc.init_weights(nwfs, p_centroider.weights)
             else:
                 corrnorm = np.ones((2 * p_wfs.npix, 2 * p_wfs.npix), dtype=np.float32)
@@ -227,7 +225,7 @@ def comp_weights(p_centroider: conf.Param_centroider, p_wfs: conf.Param_wfs, npi
             p_centroider.weights = util.makegaussian(
                     p_wfs.npix, p_centroider.width, p_wfs.npix // 2 + 1,
                     p_wfs.npix // 2 + 1).astype(np.float32)
-        elif (p_centroider.type_centro == scons.CentroiderType.CORR):
+        elif (p_centroider.type == scons.CentroiderType.CORR):
             p_centroider.weights = util.makegaussian(p_wfs.npix, p_centroider.width,
                                                      p_wfs.npix // 2,
                                                      p_wfs.npix // 2).astype(np.float32)
@@ -260,7 +258,7 @@ def init_controller(i: int, p_controller: conf.Param_controller, p_wfss: list,
         tel: (Telescope) : Telescope object
         atmos: (Atmos) : Atmos object
     """
-    if (p_controller.type_control != scons.ControllerType.GEO):
+    if (p_controller.type != scons.ControllerType.GEO):
         nwfs = p_controller.nwfs
         if (len(p_wfss) == 1):
             nwfs = p_controller.nwfs
@@ -273,34 +271,34 @@ def init_controller(i: int, p_controller: conf.Param_controller, p_wfss: list,
     nactu = np.sum([p_dms[j]._ntotact for j in ndms])
     alt = np.array([p_dms[j].alt for j in p_controller.ndm], dtype=np.float32)
 
-    list_dmseen = [p_dms[j].type_dm for j in p_controller.ndm]
-    if (p_controller.type_control == scons.ControllerType.GEO):
+    list_dmseen = [p_dms[j].type for j in p_controller.ndm]
+    if (p_controller.type == scons.ControllerType.GEO):
         Nphi = np.where(p_geom._spupil)[0].size
     else:
         Nphi = -1
 
-    rtc.add_controller(nactu, p_controller.delay, p_controller.type_control, dms,
-                       list_dmseen, alt, p_controller.ndm.size, Nphi)
+    rtc.add_controller(nactu, p_controller.delay, p_controller.type, dms, list_dmseen,
+                       alt, p_controller.ndm.size, Nphi)
 
     if (p_wfss is not None and do_refslp):
         rtc.do_centroids_ref(i)
 
-    if (p_controller.type_control == scons.ControllerType.GEO):
+    if (p_controller.type == scons.ControllerType.GEO):
         init_controller_geo(i, rtc, dms, p_geom, p_controller, p_dms)
 
-    if (p_controller.type_control == scons.ControllerType.LS):
+    if (p_controller.type == scons.ControllerType.LS):
         init_controller_ls(i, p_controller, p_wfss, p_geom, p_dms, p_atmos, ittime,
                            p_tel, rtc, dms, wfs, tel, atmos, dataBase=dataBase,
                            use_DB=use_DB)
 
-    if (p_controller.type_control == scons.ControllerType.CURED):
+    if (p_controller.type == scons.ControllerType.CURED):
         init_controller_cured(i, rtc, p_controller, p_dms, p_wfss)
 
-    if (p_controller.type_control == scons.ControllerType.MV):
+    if (p_controller.type == scons.ControllerType.MV):
         init_controller_mv(i, p_controller, p_wfss, p_geom, p_dms, p_atmos, p_tel, rtc,
                            dms, wfs, atmos)
 
-    elif (p_controller.type_control == scons.ControllerType.GENERIC):
+    elif (p_controller.type == scons.ControllerType.GENERIC):
         init_controller_generic(i, p_controller, p_dms, rtc)
 
 
@@ -417,7 +415,7 @@ def init_controller_cured(i: int, rtc: Rtc, p_controller: conf.Param_controller,
     """
 
     print("initializing cured controller")
-    if (scons.DmType.TT in [p_dms[j].type_dm for j in range(len(p_dms))]):
+    if (scons.DmType.TT in [p_dms[j].type for j in range(len(p_dms))]):
         tt_flag = True
     else:
         tt_flag = False

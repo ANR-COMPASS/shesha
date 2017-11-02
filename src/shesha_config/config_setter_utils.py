@@ -1,10 +1,4 @@
-#!/usr/local/bin/python2.7
-# encoding: utf-8
 '''
-Created on 13 juil. 2017
-
-@author: vdeo
-
 Utility functions for enforcing types in a property setter
 '''
 

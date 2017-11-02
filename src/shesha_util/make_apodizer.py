@@ -1,9 +1,5 @@
-#!/usr/local/bin/python2.7
-# encoding: utf-8
 '''
-Created on 13 juil. 2017
-
-@author: vdeo
+make_apodizer function
 '''
 
 import numpy as np

@@ -1,16 +1,8 @@
-#!/usr/local/bin/python2.7
-# encoding: utf-8
 '''
-Created on 13 juil. 2017
-
-@author: vdeo
+Initialization of a Atmos object
 '''
 
-try:
-    from naga import naga_context
-except:
-    class naga_context:
-        pass
+from naga import naga_context
 
 import shesha_config as conf
 from shesha_constants import CONST
@@ -26,7 +18,21 @@ def atmos_init(context: naga_context, p_atmos: conf.Param_atmos, p_tel: conf.Par
                p_geom: conf.Param_geom, ittime=None, p_wfss=None, sensors=None,
                p_target=None, dataBase={}, use_DB=False):
     """
-        TODO: docstring
+    Initializes an Atmos object
+
+    :parameters:
+        context: (naga_context): GPU device context
+        p_atmos: (Param_atmos): Atmosphere parameters
+        p_tel: (Param_tel): Telescope parameters
+        p_geom: (Param_geom): Geometry parameters
+        ittime: (float): (optional) exposition time [s]
+        p_wfss: (list of Param_wfs): (optional) WFS parameters
+        sensors: (Wfs): (optional) Wfs object
+        p_target: (Param_target): (optional) target parameters
+        dataBase: (dict): (optional) dictionary for data base
+        use_DB: (bool): (optional) flag for using the dataBase system
+    :return:
+        atm : (Atmos): Atmos object
     """
     if not p_geom.is_init:
         raise RuntimeError("Cannot init atmosphere with uninitialized p_geom.")

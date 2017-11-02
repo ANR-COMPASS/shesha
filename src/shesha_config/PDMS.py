@@ -1,9 +1,6 @@
-#!/usr/local/bin/python2.7
-# encoding: utf-8
 '''
-Created on 12 juil. 2017
-
-@author: vdeo
+Param_dm class definition
+Parameters for DM
 '''
 
 import numpy as np
@@ -39,6 +36,7 @@ class Param_dm:
         self.__pzt_extent = 5.  # Extent of pzt DM (pitches)
 
         # KL DM
+        self.__nfunc = 0
         self.__nkl = 0  # Number of KL for KL dm
         self.__outscl = None  # Outer scale in units of telescope diam for Karman KL
         self.__nr = None  # number of radial points
@@ -49,9 +47,11 @@ class Param_dm:
         self.__ncp = None  # dim of grid
         self.__cr = None  # radial coord in cartesien grid
         self.__cp = None  # phi coord in cartesien grid
+        self.__ap = None
+        self.__nfunc = 0
 
         # Hidden variable safe-typed in shesha_constants
-        self.__type_dm = None  # Private storage of type_dm
+        self.__type = None  # Private storage of type
         self.__type_pattern = None  # Private storage of type_pattern
         self.__influType = scons.InfluType.DEFAULT  # Private storage of influType
         self.__type_kl = scons.KLType.KOLMO  # Private storage for KL type
@@ -91,6 +91,24 @@ class Param_dm:
         self.__ninflu = None
         """ Influence functions"""
         self.__influstart = None  # np.ndarray - Influence function handling
+
+    def set_ap(self, ap):
+        """ Set ap TODO!!!
+
+        :param ap: (float) : TODO
+        """
+        self.__ap = csu.enforce_float(ap)
+
+    ap = property(lambda x: x.__ap, set_ap)
+
+    def set_nfunc(self, nfunc):
+        """ Set nfunc TODO !!!
+
+        :param nfunc: (int) : TODO
+        """
+        self.__nfunc = csu.enforce_int(nfunc)
+
+    nfunc = property(lambda x: x.__nfunc, set_nfunc)
 
     def set_pzt_extent(self, p):
         """ Set extent of pzt dm in pich unit default = 5
@@ -171,9 +189,9 @@ class Param_dm:
 
         :param t: (str) : type of dm
         """
-        self.__type_dm = scons.check_enum(scons.DmType, t)
+        self.__type = scons.check_enum(scons.DmType, t)
 
-    type_dm = property(lambda x: x.__type_dm, set_type)
+    type = property(lambda x: x.__type, set_type)
 
     def set_type_pattern(self, t):
         """ set the pattern type

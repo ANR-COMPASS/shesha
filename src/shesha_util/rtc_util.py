@@ -1,3 +1,6 @@
+"""
+Some utilities functions for RTC
+"""
 import numpy as np
 
 

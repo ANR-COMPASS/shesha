@@ -1,8 +1,7 @@
-try:
-    from naga import naga_context
-except:
-    class naga_context:
-        pass
+"""
+Initialization of a Target object
+"""
+from naga import naga_context
 
 import shesha_config as conf
 
@@ -29,6 +28,8 @@ def target_init(ctxt: naga_context, telescope: Telescope, p_target: conf.Param_t
         p_geom: (Param_geom) : geom settings
         dm: (Param_dm) : (optional) dm settings
         brama: (bool): (optional) BRAMA flag
+    :return:
+        tar: (Target): Target object
     """
     type_target = b"atmos"
 
@@ -106,10 +107,10 @@ def target_init(ctxt: naga_context, telescope: Telescope, p_target: conf.Param_t
                 xoff += pupdiff
                 yoff += pupdiff
 
-                if (dm[k].type_dm == scons.DmType.KL):
+                if (dm[k].type == scons.DmType.KL):
                     xoff += 2
                     yoff += 2
-                target.add_layer(i, dm[k].type_dm, dm[k].alt, xoff, yoff)
+                target.add_layer(i, dm[k].type, dm[k].alt, xoff, yoff)
 
         target.init_strehlmeter(i)
 

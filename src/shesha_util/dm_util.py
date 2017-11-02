@@ -1,9 +1,5 @@
-#!/usr/local/bin/python3.6
-# encoding: utf-8
 '''
-Created on 3 aout 2017
-
-@author: fferreira
+Utilities function for DM geometry initialization
 '''
 import numpy as np
 
@@ -36,7 +32,7 @@ def dim_dm_support(cent: float, extent: int, ssize: int):
     return int(n1), int(n2)
 
 
-def dim_dm_patch(pupdiam: int, diam: float, type_dm: bytes, alt: float,
+def dim_dm_patch(pupdiam: int, diam: float, type: bytes, alt: float,
                  xpos_wfs: List[float], ypos_wfs: List[float]):
     """ compute patchDiam for DM
 
@@ -46,7 +42,7 @@ def dim_dm_patch(pupdiam: int, diam: float, type_dm: bytes, alt: float,
 
         diam: (float) : telescope diameter
 
-        type_dm: (bytes) : type of dm
+        type: (bytes) : type of dm
 
         alt: (float) : altitude of dm
 
@@ -61,9 +57,9 @@ def dim_dm_patch(pupdiam: int, diam: float, type_dm: bytes, alt: float,
         norms = [
                 np.linalg.norm([xpos_wfs[w], ypos_wfs[w]]) for w in range(len(xpos_wfs))
         ]
-    if ((type_dm == scons.DmType.PZT) or (type_dm == scons.DmType.TT)):
+    if ((type == scons.DmType.PZT) or (type == scons.DmType.TT)):
         pp = (diam * pupdiam)
-    elif (type_dm == scons.DmType.KL):
+    elif (type == scons.DmType.KL):
         pp = (pupdiam)
     else:
         raise TypeError("This type of DM doesn't exist ")

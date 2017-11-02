@@ -1,7 +1,5 @@
 '''
-Created on 13 juil. 2017
-
-@author: vdeo
+Python package for COMPASS simulation initialization
 '''
 __all__ = ["atmos_init", "target_init", "dm_init", "wfs_init", "rtc_init", "geom_init"]
 

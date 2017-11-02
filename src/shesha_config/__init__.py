@@ -1,7 +1,6 @@
 '''
-Created on 13 juil. 2017
-
-@author: vdeo
+Parameter classes for COMPASS
+Safe typing
 '''
 
 __all__ = [

@@ -1,9 +1,6 @@
-#!/usr/local/bin/python3.6
-# encoding: utf-8
 '''
-Created on 31 juil. 2017
-
-@author: fferreira
+Param_wfs class definition
+Parameters for WFS
 '''
 
 import numpy as np
@@ -18,69 +15,69 @@ import shesha_constants as scons
 class Param_wfs:
 
     def __init__(self, error_budget=False):
-        self.__type_wfs = None
-        """type of wfs : "sh" or "pyr"."""
+        self.__type = None
+        """ type of wfs : "sh" or "pyr"."""
         self.__nxsub = 0
-        """linear number of subaps."""
+        """ linear number of subaps."""
         self.__npix = 0
-        """number of pixels per subap."""
+        """ number of pixels per subap."""
         self.__pixsize = 0
-        """pixel size (in arcsec) for a subap."""
+        """ pixel size (in arcsec) for a subap."""
         self.__Lambda = 0
-        """observation wavelength (in um) for a subap."""
+        """ observation wavelength (in um) for a subap."""
         self.__optthroughput = 0
-        """wfs global throughput."""
+        """ wfs global throughput."""
         self.__fracsub = 0
-        """minimal illumination fraction for valid subaps."""
+        """ minimal illumination fraction for valid subaps."""
         self.__openloop = False
-        """1 if in "open-loop" mode (i.e. does not see dm)."""
+        """ 1 if in "open-loop" mode (i.e. does not see dm)."""
         self.__fssize = 0
-        """size of field stop in arcsec."""
+        """ size of field stop in arcsec."""
         self.__fstop = None
         """ Fields of the wfs diaphragm shape : "square" or "none" """
 
         self.__atmos_seen = 0
-        """1 if the WFS sees the atmosphere layers"""
+        """ 1 if the WFS sees the atmosphere layers"""
         self.__dms_seen = None
-        """index of dms seen by the WFS"""
+        """ index of dms seen by the WFS"""
         self.__error_budget = error_budget
         """ If True, enable error budget analysis for the simulation"""
 
         # target kwrd
         self.__xpos = 0
-        """guide star x position on sky (in arcsec)."""
+        """ guide star x position on sky (in arcsec)."""
         self.__ypos = 0
-        """guide star x position on sky (in arcsec)."""
+        """ guide star x position on sky (in arcsec)."""
         self.__gsalt = 0
-        """altitude of guide star (in m) 0 if ngs."""
+        """ altitude of guide star (in m) 0 if ngs."""
         self.__gsmag = 0
-        """magnitude of guide star."""
+        """ magnitude of guide star."""
         self.__zerop = 0
-        """detector zero point expressed in ph/m**2/s in the bandwidth of the WFS"""
+        """ detector zero point expressed in ph/m**2/s in the bandwidth of the WFS"""
         self.__noise = 0
-        """desired noise : < 0 = no noise / 0 = photon only / > 0 photon + ron."""
+        """ desired noise : < 0 = no noise / 0 = photon only / > 0 photon + ron."""
 
         self.__kernel = 0  #
         self.__ftkernel = None  # (float*)
 
         # lgs only
         self.__lgsreturnperwatt = 0
-        """return per watt factor (high season : 10 ph/cm2/s/W)."""
+        """ return per watt factor (high season : 10 ph/cm2/s/W)."""
         self.__laserpower = 0
-        """laser power in W."""
+        """ laser power in W."""
         self.__lltx = 0
-        """x position (in meters) of llt."""
+        """ x position (in meters) of llt."""
         self.__llty = 0
-        """y position (in meters) of llt."""
+        """ y position (in meters) of llt."""
         self.__proftype = None
-        """type of sodium profile "gauss", "exp", etc ..."""
+        """ type of sodium profile "gauss", "exp", etc ..."""
         self.__beamsize = None
-        """laser beam fwhm on-sky (in arcsec)."""
+        """ laser beam fwhm on-sky (in arcsec)."""
 
         # misalignment
 
         self.__G = 1.0
-        """Magnifying factor"""
+        """ Magnifying factor"""
         self.__thetaML = 0.0
         """ WFS rotation angle in the pupil"""
         self.__dx = 0.0
@@ -89,7 +86,7 @@ class Param_wfs:
         """ Y axis misalignment in pixels"""
         # internal kwrd
         self.__pdiam = 0
-        """pupil diam for a subap (in pixel)"""
+        """ pupil diam for a subap (in pixel)"""
         self.__Nfft = 0
         """ array size for fft for a subap (in pixel)"""
         self.__Ntot = 0
@@ -116,25 +113,25 @@ class Param_wfs:
         """ (int*) y start indexes for cutting phase screens"""
         # cdef np.ndarray _validsubs    # (i,j) indices of valid subaps
         self.__validsubsx = None
-        """(int*) indices of valid subaps along axis x"""
+        """ (int*) indices of valid subaps along axis x"""
         self.__validsubsy = None
-        """(int*) indices of valid subaps along axis y"""
+        """ (int*) indices of valid subaps along axis y"""
         self.__isvalid = None
-        """(int*) array of 0/1 for valid subaps"""
+        """ (int*) array of 0/1 for valid subaps"""
         self.__phasemap = None
-        """(int*) array of pixels transform from phase screen into subaps phase screens"""
+        """ (int*) array of pixels transform from phase screen into subaps phase screens"""
         self.__hrmap = None
-        """(int*) array of pixels transform from minimal FoV image to (in case type is sh or geo)"""
+        """ (int*) array of pixels transform from minimal FoV image to (in case type is sh or geo)"""
         self.__sincar = None
-        """(float*) array of pixels transform from minimal FoV image to (in case type is "pyr" or "roof")"""
+        """ (float*) array of pixels transform from minimal FoV image to (in case type is "pyr" or "roof")"""
         # full FoV image (array of 0 if the same)
         self.__binmap = None
-        """(int*) array of pixels transform from full FoV hr images to binned images"""
+        """ (int*) array of pixels transform from full FoV hr images to binned images"""
         self.__halfxy = None
-        """(float*) phase offset for 1/2 pixel shift in (x,y)"""
+        """ (float*) phase offset for 1/2 pixel shift in (x,y)"""
 
         self.__submask = None
-        """(float*) fieldstop for each subap"""
+        """ (float*) fieldstop for each subap"""
 
         self.__lgskern = None
         """ lgs kernels for each subap"""
@@ -155,35 +152,35 @@ class Param_wfs:
 
         # pyramid-nly kwrds
         self.__pyr_ampl = 0
-        """pyramid wfs modulation amplitude radius [arcsec]."""
+        """ pyramid wfs modulation amplitude radius [arcsec]."""
         self.__pyr_npts = 0
-        """total number of point along modulation circle [unitless]."""
+        """ total number of point along modulation circle [unitless]."""
         self.__pyr_pos = None
-        """positions for modulation, overwrites ampl and npts [arcsec]"""
+        """ positions for modulation, overwrites ampl and npts [arcsec]"""
         self.__pyr_loc = None
-        """Location of modulation, before/after the field stop.
+        """ Location of modulation, before/after the field stop.
         valid value are "before" or "after" (default "after")."""
         self.__pyrtype = None
-        """Type of pyramid, either 0 for "Pyramid" or 1 for "RoofPrism"."""
+        """ Type of pyramid, either 0 for "Pyramid" or 1 for "RoofPrism"."""
         self.__pyr_pup_sep = -1
-        """Pyramid pupil separation. (default: long(wfs.nxsub))"""
+        """ Pyramid pupil separation. (default: long(wfs.nxsub))"""
 
         # pyramid internal kwrds
         self.__pyr_offsets = None  # (float*)
         self.__pyr_cx = None  # (float*)
         self.__pyr_cy = None  # (float*)
 
-    def set_type(self, type_wfs):
-        """Set the type of wfs
+    def set_type(self, type):
+        """ Set the type of wfs
 
         :param t: (str) : type of wfs ("sh" or "pyr")
         """
-        self.__type_wfs = scons.check_enum(scons.WFSType, type_wfs)
+        self.__type = scons.check_enum(scons.WFSType, type)
 
-    type_wfs = property(lambda x: x.__type_wfs, set_type)
+    type = property(lambda x: x.__type, set_type)
 
     def set_nxsub(self, n):
-        """Set the linear number of subaps
+        """ Set the linear number of subaps
 
         :param n: (long) : linear number of subaps
         """
@@ -192,7 +189,7 @@ class Param_wfs:
     nxsub = property(lambda x: x.__nxsub, set_nxsub)
 
     def set_npix(self, n):
-        """Set the number of pixels per subap
+        """ Set the number of pixels per subap
 
         :param n: (long) : number of pixels per subap
         """
@@ -201,7 +198,7 @@ class Param_wfs:
     npix = property(lambda x: x.__npix, set_npix)
 
     def set_pixsize(self, p):
-        """Set the pixel size
+        """ Set the pixel size
 
         :param p: (float) : pixel size (in arcsec) for a subap
         """
@@ -210,7 +207,7 @@ class Param_wfs:
     pixsize = property(lambda x: x.__pixsize, set_pixsize)
 
     def set_Lambda(self, L):
-        """Set the observation wavelength
+        """ Set the observation wavelength
 
         :param L: (float) : observation wavelength (in um) for a subap
         """
@@ -219,7 +216,7 @@ class Param_wfs:
     Lambda = property(lambda x: x.__Lambda, set_Lambda)
 
     def set_optthroughput(self, o):
-        """Set the wfs global throughput
+        """ Set the wfs global throughput
 
         :param o: (float) : wfs global throughput
         """
@@ -228,7 +225,7 @@ class Param_wfs:
     optthroughput = property(lambda x: x.__optthroughput, set_optthroughput)
 
     def set_fracsub(self, f):
-        """Set the minimal illumination fraction for valid subaps
+        """ Set the minimal illumination fraction for valid subaps
 
         :param f: (float) : minimal illumination fraction for valid subaps
         """
@@ -237,7 +234,7 @@ class Param_wfs:
     fracsub = property(lambda x: x.__fracsub, set_fracsub)
 
     def set_openloop(self, o):
-        """Set the loop state (open or closed)
+        """ Set the loop state (open or closed)
 
         :param o: (long) : 1 if in "open-loop" mode (i.e. does not see dm)
         """
@@ -246,7 +243,7 @@ class Param_wfs:
     openloop = property(lambda x: x.__openloop, set_openloop)
 
     def set_fssize(self, f):
-        """Set the size of field stop
+        """ Set the size of field stop
 
         :param f: (float) : size of field stop in arcsec
         """
@@ -255,7 +252,7 @@ class Param_wfs:
     fssize = property(lambda x: x.__fssize, set_fssize)
 
     def set_fstop(self, f):
-        """Set the size of field stop
+        """ Set the size of field stop
 
         :param f: (str) : size of field stop in arcsec
         """
@@ -264,7 +261,7 @@ class Param_wfs:
     fstop = property(lambda x: x.__fstop, set_fstop)
 
     def set_atmos_seen(self, i):
-        """Tells if the wfs sees the atmosphere layers
+        """ Tells if the wfs sees the atmosphere layers
 
         :param i: (bool) :True if the WFS sees the atmosphere layers
         """
@@ -273,7 +270,7 @@ class Param_wfs:
     atmos_seen = property(lambda x: x.__atmos_seen, set_atmos_seen)
 
     def set_xpos(self, x):
-        """Set the guide star x position on sky
+        """ Set the guide star x position on sky
 
         :param x: (float) : guide star x position on sky (in arcsec)
         """
@@ -282,7 +279,7 @@ class Param_wfs:
     xpos = property(lambda x: x.__xpos, set_xpos)
 
     def set_ypos(self, y):
-        """Set the guide star y position on sky
+        """ Set the guide star y position on sky
 
         :param y: (float) : guide star y position on sky (in arcsec)
         """
@@ -327,7 +324,7 @@ class Param_wfs:
     dy = property(lambda x: x.__dy, set_dy)
 
     def set_gsalt(self, g):
-        """Set the altitude of guide star
+        """ Set the altitude of guide star
 
         :param g: (float) : altitude of guide star (in m) 0 if ngs
         """
@@ -336,7 +333,7 @@ class Param_wfs:
     gsalt = property(lambda x: x.__gsalt, set_gsalt)
 
     def set_gsmag(self, g):
-        """Set the magnitude of guide star
+        """ Set the magnitude of guide star
 
         :param g: (float) : magnitude of guide star
         """
@@ -345,7 +342,7 @@ class Param_wfs:
     gsmag = property(lambda x: x.__gsmag, set_gsmag)
 
     def set_zerop(self, z):
-        """Set the detector zero point
+        """ Set the detector zero point
 
         :param z: (float) : detector zero point
         """
@@ -354,7 +351,7 @@ class Param_wfs:
     zerop = property(lambda x: x.__zerop, set_zerop)
 
     def set_noise(self, n):
-        """Set the desired noise
+        """ Set the desired noise
 
         :param n: (float) : desired noise : < 0 = no noise / 0 = photon only / > 0 photon + ron
         """
@@ -363,7 +360,7 @@ class Param_wfs:
     noise = property(lambda x: x.__noise, set_noise)
 
     def set_nphotons4imat(self, nphot):
-        """Set the desired numner of photons used for doing imat
+        """ Set the desired numner of photons used for doing imat
 
         :param nphot: (float) : desired number of photons
         """
@@ -372,7 +369,7 @@ class Param_wfs:
     nphotons4imat = property(lambda x: x.__nphotons4imat, set_nphotons4imat)
 
     def set_kernel(self, k):
-        """Set the attribute kernel
+        """ Set the attribute kernel
 
         :param k: (float) :
         """
@@ -381,7 +378,7 @@ class Param_wfs:
     kernel = property(lambda x: x.__kernel, set_kernel)
 
     def set_laserpower(self, l):
-        """Set the laser power
+        """ Set the laser power
 
         :param l: (float) : laser power in W
         """
@@ -390,7 +387,7 @@ class Param_wfs:
     laserpower = property(lambda x: x.__laserpower, set_laserpower)
 
     def set_lltx(self, l):
-        """Set the x position of llt
+        """ Set the x position of llt
 
         :param l: (float) : x position (in meters) of llt
         """
@@ -399,7 +396,7 @@ class Param_wfs:
     lltx = property(lambda x: x.__lltx, set_lltx)
 
     def set_llty(self, l):
-        """Set the y position of llt
+        """ Set the y position of llt
 
         :param l: (float) : y position (in meters) of llt
         """
@@ -408,7 +405,7 @@ class Param_wfs:
     llty = property(lambda x: x.__llty, set_llty)
 
     def set_proftype(self, p):
-        """Set the type of sodium profile
+        """ Set the type of sodium profile
 
         :param p: (str) : type of sodium profile "gauss", "exp", etc ...
         """
@@ -417,7 +414,7 @@ class Param_wfs:
     proftype = property(lambda x: x.__proftype, set_proftype)
 
     def set_beamsize(self, b):
-        """Set the laser beam fwhm on-sky
+        """ Set the laser beam fwhm on-sky
 
         :param b: (float) : laser beam fwhm on-sky (in arcsec)
         """
@@ -426,7 +423,7 @@ class Param_wfs:
     beamsize = property(lambda x: x.__beamsize, set_beamsize)
 
     def set_pyr_ampl(self, p):
-        """Set the pyramid wfs modulation amplitude radius
+        """ Set the pyramid wfs modulation amplitude radius
 
         :param p: (float) : pyramid wfs modulation amplitude radius (in arsec)
         """
@@ -435,7 +432,7 @@ class Param_wfs:
     pyr_ampl = property(lambda x: x.__pyr_ampl, set_pyr_ampl)
 
     def set_pyr_npts(self, p):
-        """Set the total number of point along modulation circle
+        """ Set the total number of point along modulation circle
 
         :param p: (long) : total number of point along modulation circle
         """
@@ -444,7 +441,7 @@ class Param_wfs:
     pyr_npts = property(lambda x: x.__pyr_npts, set_pyr_npts)
 
     def set_pyr_loc(self, p):
-        """Set the location of modulation
+        """ Set the location of modulation
 
         :param p: (str) : location of modulation, before/after the field stop.
                           valid value are "before" or "after" (default "after")
@@ -454,7 +451,7 @@ class Param_wfs:
     pyr_loc = property(lambda x: x.__pyr_loc, set_pyr_loc)
 
     def set_pyrtype(self, p):
-        """Set the type of pyramid,
+        """ Set the type of pyramid,
 
         :param p: (str) : type of pyramid, either 0 for "Pyramid" or 1 for "RoofPrism"
         """
@@ -463,7 +460,7 @@ class Param_wfs:
     pyrtype = property(lambda x: x.__pyrtype, set_pyrtype)
 
     def set_pyr_cx(self, cx):
-        """Set the x position of modulation points for pyramid sensor
+        """ Set the x position of modulation points for pyramid sensor
 
         :param cx: (np.ndarray[ndim=1,dtype=np.floatt32_t) : x positions
         """
@@ -472,7 +469,7 @@ class Param_wfs:
     _pyr_cx = property(lambda x: x.__pyr_cx, set_pyr_cx)
 
     def set_pyr_cy(self, cy):
-        """Set the y position of modulation points for pyramid sensor
+        """ Set the y position of modulation points for pyramid sensor
 
         :param cy: (np.ndarray[ndim=1,dtype=np.floatt32_t) : y positions
         """
@@ -481,7 +478,7 @@ class Param_wfs:
     _pyr_cy = property(lambda x: x.__pyr_cy, set_pyr_cy)
 
     def set_dms_seen(self, dms_seen):
-        """Set the index of dms seen by the WFS
+        """ Set the index of dms seen by the WFS
 
         :param dms_seen: (np.ndarray[ndim=1,dtype=np.int32_t) : index of dms seen by the WFS
         """
@@ -491,7 +488,7 @@ class Param_wfs:
     dms_seen = property(lambda x: x.__dms_seen, set_dms_seen)
 
     def set_lgsreturnperwatt(self, lpw):
-        """Set the return per watt factor
+        """ Set the return per watt factor
 
         :param lpw: (float) : return per watt factor (high season : 10 ph/cm2/s/W)
         """
@@ -500,7 +497,7 @@ class Param_wfs:
     lgsreturnperwatt = property(lambda x: x.__lgsreturnperwatt, set_lgsreturnperwatt)
 
     def set_altna(self, a):
-        """Set the corresponding altitude
+        """ Set the corresponding altitude
 
         :param a: (np.ndarray[ndim=1,dtype=np.float32]) : corresponding altitude
         """
@@ -509,7 +506,7 @@ class Param_wfs:
     _altna = property(lambda x: x.__altna, set_altna)
 
     def set_profna(self, p):
-        """Set the sodium profile
+        """ Set the sodium profile
 
         :param p: (np.ndarray[ndim=1,dtype=np.float32]) : sodium profile
         """
@@ -528,7 +525,7 @@ class Param_wfs:
     error_budget = property(lambda x: x.__error_budget, set_error_budget)
 
     def set_pyr_pup_sep(self, pyr_pup_sep):
-        """Set the pyramid pupil separation. (default: long(wfs.nxsub))
+        """ Set the pyramid pupil separation. (default: long(wfs.nxsub))
 
         :param pyr_pup_sep: (long) : pyramid pupil separation wanted
         """
@@ -537,7 +534,7 @@ class Param_wfs:
     pyr_pup_sep = property(lambda x: x.__pyr_pup_sep, set_pyr_pup_sep)
 
     def set_nvalid(self, n):
-        """Set the number of valid subapertures
+        """ Set the number of valid subapertures
 
         :param n: (long) : number of valid subapertures
         """
@@ -546,11 +543,11 @@ class Param_wfs:
     _nvalid = property(lambda x: x.__nvalid, set_nvalid)
 
     def set_validsubsx(self, vx):
-        """Set the valid subapertures along X-axis
+        """ Set the valid subapertures along X-axis
 
         :param vx: (np.array(dim=1, dtype=np.int32)) : validsubsx
         """
-        if self.__type_wfs == scons.WFSType.PYRHR:
+        if self.__type == scons.WFSType.PYRHR:
             self.__validsubsx = csu.enforce_array(vx, 4 * self.__nvalid, dtype=np.int32)
         else:
             self.__validsubsx = csu.enforce_array(vx, self.__nvalid, dtype=np.int32)
@@ -558,11 +555,11 @@ class Param_wfs:
     _validsubsx = property(lambda x: x.__validsubsx, set_validsubsx)
 
     def set_validsubsy(self, vy):
-        """Set the valid subapertures along Y-axis
+        """ Set the valid subapertures along Y-axis
 
         :param vy: (np.array(dim=1, dtype=np.int32)) : validsubsy
         """
-        if self.__type_wfs == scons.WFSType.PYRHR:
+        if self.__type == scons.WFSType.PYRHR:
             self.__validsubsy = csu.enforce_array(vy, 4 * self.__nvalid, dtype=np.int32)
         else:
             self.__validsubsy = csu.enforce_array(vy, self.__nvalid, dtype=np.int32)
@@ -577,7 +574,7 @@ class Param_wfs:
         return self._validsubsx, self._validsubsy
 
     def set_Nfft(self, n):
-        """Set the size of FFT support for a subap
+        """ Set the size of FFT support for a subap
 
         :param n: (long) : size of FFT support
         """
@@ -586,7 +583,7 @@ class Param_wfs:
     _Nfft = property(lambda x: x.__Nfft, set_Nfft)
 
     def set_Ntot(self, n):
-        """Set the size of hr image for a subap
+        """ Set the size of hr image for a subap
 
         :param n: (long) : size of hr image for a subap
         """
@@ -595,7 +592,7 @@ class Param_wfs:
     _Ntot = property(lambda x: x.__Ntot, set_Ntot)
 
     def set_nrebin(self, n):
-        """Set the rebin factor from hr to binned image for a subap
+        """ Set the rebin factor from hr to binned image for a subap
 
         :param n: (long) : rebin factor
         """
@@ -604,7 +601,7 @@ class Param_wfs:
     _nrebin = property(lambda x: x.__nrebin, set_nrebin)
 
     def set_pdiam(self, n):
-        """Set the subap diameter in pixels
+        """ Set the subap diameter in pixels
 
         :param n: (long) : subap diam in pixels
         """
@@ -613,7 +610,7 @@ class Param_wfs:
     _pdiam = property(lambda x: x.__pdiam, set_pdiam)
 
     def set_nphotons(self, n):
-        """Set number of photons per subap
+        """ Set number of photons per subap
 
         :param n: (float) : number of photons per subap
         """
@@ -622,7 +619,7 @@ class Param_wfs:
     _nphotons = property(lambda x: x.__nphotons, set_nphotons)
 
     def set_qpixsize(self, n):
-        """Set the quantum pixel size for the simulation
+        """ Set the quantum pixel size for the simulation
 
         :param n: (float) : quantum pixel size
         """
@@ -631,7 +628,7 @@ class Param_wfs:
     _qpixsize = property(lambda x: x.__qpixsize, set_qpixsize)
 
     def set_subapd(self, n):
-        """Set the subap diameter (m)
+        """ Set the subap diameter (m)
 
         :param n: (float) : subap diameter (m)
         """
@@ -640,11 +637,11 @@ class Param_wfs:
     _subapd = property(lambda x: x.__subapd, set_subapd)
 
     def set_fluxPerSub(self, data):
-        """Set the subap diameter (m)
+        """ Set the subap diameter (m)
 
         :param data: (np.array(ndim=2, dtype=np.float32)) : subap diameter (m)
         """
-        if self.__type_wfs == scons.WFSType.PYRHR:
+        if self.__type == scons.WFSType.PYRHR:
             self.__fluxPerSub = csu.enforce_arrayMultiDim(data.copy(),
                                                           (self.__nxsub + 2,
                                                            self.__nxsub + 2),
@@ -657,7 +654,7 @@ class Param_wfs:
     _fluxPerSub = property(lambda x: x.__fluxPerSub, set_fluxPerSub)
 
     def set_ftkernel(self, data):
-        """TODO : docstring
+        """ TODO : docstring
         """
         self.__ftkernel = csu.enforce_arrayMultiDim(data.copy(), data.shape,
                                                     dtype=np.complex64)
@@ -665,7 +662,7 @@ class Param_wfs:
     _ftkernel = property(lambda x: x.__ftkernel, set_ftkernel)
 
     def set_sincar(self, data):
-        """TODO : docstring
+        """ TODO : docstring
         """
         self.__sincar = csu.enforce_arrayMultiDim(data.copy(), data.shape,
                                                   dtype=np.float32)
@@ -673,7 +670,7 @@ class Param_wfs:
     _sincar = property(lambda x: x.__sincar, set_sincar)
 
     def set_halfxy(self, data):
-        """TODO : docstring
+        """ TODO : docstring
         """
         self.__halfxy = csu.enforce_arrayMultiDim(data.copy(), data.shape,
                                                   dtype=np.float32)
@@ -681,7 +678,7 @@ class Param_wfs:
     _halfxy = property(lambda x: x.__halfxy, set_halfxy)
 
     def set_submask(self, data):
-        """TODO : docstring
+        """ TODO : docstring
         """
         self.__submask = csu.enforce_arrayMultiDim(data.copy(), data.shape,
                                                    dtype=np.float32)
@@ -689,7 +686,7 @@ class Param_wfs:
     _submask = property(lambda x: x.__submask, set_submask)
 
     def set_lgskern(self, data):
-        """TODO : docstring
+        """ TODO : docstring
         """
         self.__lgskern = csu.enforce_arrayMultiDim(data.copy(), data.shape,
                                                    dtype=np.float32)
@@ -697,7 +694,7 @@ class Param_wfs:
     _lgskern = property(lambda x: x.__lgskern, set_lgskern)
 
     def set_azimuth(self, data):
-        """TODO : docstring
+        """ TODO : docstring
         """
         self.__azimuth = csu.enforce_arrayMultiDim(data.copy(), data.shape,
                                                    dtype=np.float32)
@@ -705,7 +702,7 @@ class Param_wfs:
     _azimuth = property(lambda x: x.__azimuth, set_azimuth)
 
     def set_prof1d(self, data):
-        """TODO : docstring
+        """ TODO : docstring
         """
         self.__prof1d = csu.enforce_arrayMultiDim(data.copy(), data.shape,
                                                   dtype=np.float32)
@@ -713,35 +710,35 @@ class Param_wfs:
     _prof1d = property(lambda x: x.__prof1d, set_prof1d)
 
     def set_profcum(self, data):
-        """TODO : docstring
+        """ TODO : docstring
         """
         self.__profcum = csu.enforce_array(data.copy(), data.size, dtype=np.float32)
 
     _profcum = property(lambda x: x.__profcum, set_profcum)
 
     def set_beam(self, data):
-        """TODO : docstring
+        """ TODO : docstring
         """
         self.__beam = csu.enforce_array(data.copy(), data.size, dtype=np.float32)
 
     _beam = property(lambda x: x.__beam, set_beam)
 
     def set_ftbeam(self, data):
-        """TODO : docstring
+        """ TODO : docstring
         """
         self.__ftbeam = csu.enforce_array(data.copy(), data.size, dtype=np.complex64)
 
     _ftbeam = property(lambda x: x.__ftbeam, set_ftbeam)
 
     def set_hrmap(self, data):
-        """TODO : docstring
+        """ TODO : docstring
         """
         self.__hrmap = csu.enforce_arrayMultiDim(data.copy(), data.shape, dtype=np.int32)
 
     _hrmap = property(lambda x: x.__hrmap, set_hrmap)
 
     def set_binmap(self, data):
-        """TODO : docstring
+        """ TODO : docstring
         """
         self.__binmap = csu.enforce_arrayMultiDim(data.copy(), data.shape,
                                                   dtype=np.int32)
@@ -749,7 +746,7 @@ class Param_wfs:
     _binmap = property(lambda x: x.__binmap, set_binmap)
 
     def set_phasemap(self, data):
-        """TODO : docstring
+        """ TODO : docstring
         """
         self.__phasemap = csu.enforce_arrayMultiDim(data.copy(), data.shape,
                                                     dtype=np.int32)
@@ -757,21 +754,21 @@ class Param_wfs:
     _phasemap = property(lambda x: x.__phasemap, set_phasemap)
 
     def set_istart(self, data):
-        """TODO : docstring
+        """ TODO : docstring
         """
         self.__istart = csu.enforce_array(data.copy(), data.size, dtype=np.int32)
 
     _istart = property(lambda x: x.__istart, set_istart)
 
     def set_jstart(self, data):
-        """TODO : docstring
+        """ TODO : docstring
         """
         self.__jstart = csu.enforce_array(data.copy(), data.size, dtype=np.int32)
 
     _jstart = property(lambda x: x.__jstart, set_jstart)
 
     def set_isvalid(self, data):
-        """TODO : docstring
+        """ TODO : docstring
         """
         self.__isvalid = csu.enforce_arrayMultiDim(data.copy(), data.shape,
                                                    dtype=np.int32)
@@ -779,7 +776,7 @@ class Param_wfs:
     _isvalid = property(lambda x: x.__isvalid, set_isvalid)
 
     def set_pyr_pos(self, data):
-        """TODO : docstring
+        """ TODO : docstring
         """
         self.__pyr_pos = csu.enforce_array(data.copy(), data.size, dtype=np.complex64)
 

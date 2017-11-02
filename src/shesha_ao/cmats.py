@@ -1,3 +1,6 @@
+"""
+Computation implementations of command matrix
+"""
 import numpy as np
 import time
 
@@ -39,7 +42,7 @@ def cmat_init(ncontrol: int, rtc: Rtc, p_controller: conf.Param_controller,
 
         nmodes: (int) : (optional) number of kl modes
     """
-    if (p_controller.type_control == scons.ControllerType.LS):
+    if (p_controller.type == scons.ControllerType.LS):
         print("Doing imat svd...")
         t0 = time.time()
         rtc.imat_svd(ncontrol)
@@ -64,7 +67,7 @@ def cmat_init(ncontrol: int, rtc: Rtc, p_controller: conf.Param_controller,
             pii = 0
             for i in range(len(p_dms)):
                 ppz = p_dms[i].push4imat
-                if ((p_dms[i].type_dm == scons.DmType.PZT) & (ppz == 0)):
+                if ((p_dms[i].type == scons.DmType.PZT) & (ppz == 0)):
                     ppz = 1
                     pii = i
             if ((nmodes == 0) & (ppz != 0)):
@@ -87,7 +90,7 @@ def cmat_init(ncontrol: int, rtc: Rtc, p_controller: conf.Param_controller,
 
         print("cmat done in %f s" % (time.time() - t0))
 
-    if (p_controller.type_control == scons.ControllerType.MV):
+    if (p_controller.type == scons.ControllerType.MV):
         Cn = np.zeros(p_controller._imat.shape[0], dtype=np.float32)
         ind = 0
         for k in p_controller.nwfs:
@@ -101,7 +104,7 @@ def cmat_init(ncontrol: int, rtc: Rtc, p_controller: conf.Param_controller,
         if (p_controller.TTcond == 0):
             p_controller.set_TTcond(p_controller.maxcond)
 
-        if ("tt" in [dm.type_dm for dm in p_dms]):
+        if ("tt" in [dm.type for dm in p_dms]):
             rtc.filter_cmat(ncontrol, p_controller.TTcond)
         print("Done")
     p_controller.set_cmat(rtc.get_cmat(ncontrol))

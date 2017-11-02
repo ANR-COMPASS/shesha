@@ -299,9 +299,9 @@ class widgetAOWindow(TemplateBaseClass):
         self.ui.wao_numberofDMs.setText(str(len(self.sim.config.p_dms)))
         self.ui.wao_dmTypeSelector.setCurrentIndex(
                 self.ui.wao_dmTypeSelector.findText(
-                        str(self.sim.config.p_dms[ndm].type_dm)))
+                        str(self.sim.config.p_dms[ndm].type)))
         self.ui.wao_dmAlt.setValue(self.sim.config.p_dms[ndm].alt)
-        if (self.sim.config.p_dms[ndm].type_dm == scons.DmType.KL):
+        if (self.sim.config.p_dms[ndm].type == scons.DmType.KL):
             self.ui.wao_dmNactu.setValue(self.sim.config.p_dms[ndm].nkl)
         else:
             self.ui.wao_dmNactu.setValue(self.sim.config.p_dms[ndm].nact)
@@ -316,7 +316,7 @@ class widgetAOWindow(TemplateBaseClass):
         if (nwfs < 0):
             nwfs = 0
         self.ui.wao_numberofWfs.setText(str(len(self.sim.config.p_wfss)))
-        self.ui.wao_wfsType.setText(str(self.sim.config.p_wfss[nwfs].type_wfs))
+        self.ui.wao_wfsType.setText(str(self.sim.config.p_wfss[nwfs].type))
         self.ui.wao_wfsNxsub.setValue(self.sim.config.p_wfss[nwfs].nxsub)
         self.ui.wao_wfsNpix.setValue(self.sim.config.p_wfss[nwfs].npix)
         self.ui.wao_wfsPixSize.setValue(self.sim.config.p_wfss[nwfs].pixsize)
@@ -347,8 +347,8 @@ class widgetAOWindow(TemplateBaseClass):
         else:
             self.ui.wao_wfsIsLGS.setChecked(False)
 
-        if (self.sim.config.p_wfss[nwfs].type_wfs == b"pyrhr" or
-                    self.sim.config.p_wfss[nwfs].type_wfs == b"pyr"):
+        if (self.sim.config.p_wfss[nwfs].type == b"pyrhr" or
+                    self.sim.config.p_wfss[nwfs].type == b"pyr"):
             self.ui.wao_wfs_plotSelector.setCurrentIndex(3)
         self.updatePlotWfs()
 
@@ -378,18 +378,18 @@ class widgetAOWindow(TemplateBaseClass):
         ncentro = self.ui.wao_selectCentro.currentIndex()
         if (ncentro < 0):
             ncentro = 0
-        type_centro = self.sim.config.p_centroiders[ncentro].type_centro
+        type = self.sim.config.p_centroiders[ncentro].type
         self.ui.wao_centroTypeSelector.setCurrentIndex(
-                self.ui.wao_centroTypeSelector.findText(str(type_centro)))
+                self.ui.wao_centroTypeSelector.findText(str(type)))
 
         self.ui.wao_centroThresh.setValue(self.sim.config.p_centroiders[ncentro].thresh)
-        if type_centro == scons.CentroiderType.BPCOG:
+        if type == scons.CentroiderType.BPCOG:
             self.ui.wao_centroNbrightest.setValue(
                     self.sim.config.p_centroiders[ncentro].nmax)
-        if type_centro == scons.CentroiderType.TCOG:
+        if type == scons.CentroiderType.TCOG:
             self.ui.wao_centroThresh.setValue(
                     self.sim.config.p_centroiders[ncentro].thresh)
-        if type_centro in [scons.CentroiderType.CORR, scons.CentroiderType.WCOG]:
+        if type in [scons.CentroiderType.CORR, scons.CentroiderType.WCOG]:
             self.ui.wao_centroFunctionSelector.setCurrentIndex(
                     self.ui.wao_centroFunctionSelector.findText(
                             str(self.sim.config.p_centroiders[ncentro].type_fct)))
@@ -397,7 +397,7 @@ class widgetAOWindow(TemplateBaseClass):
                     self.sim.config.p_centroiders[ncentro].width)
 
         # Controller panel
-        type_contro = self.sim.config.p_controllers[0].type_control
+        type_contro = self.sim.config.p_controllers[0].type
         if (type_contro == scons.ControllerType.LS and
                     self.sim.config.p_controllers[0].modopti == 0):
             self.ui.wao_controlTypeSelector.setCurrentIndex(0)
@@ -631,7 +631,7 @@ class widgetAOWindow(TemplateBaseClass):
 
         if self.sim is None:
             if self.BRAMA:
-                self.sim = shesha_sim.BenchBrama(configFile)
+                self.sim = shesha_sim.SimulatorBrama(configFile)
             else:
                 self.sim = shesha_sim.Simulator(configFile)
         else:
@@ -650,7 +650,7 @@ class widgetAOWindow(TemplateBaseClass):
                 self.ui.wao_pyr_ampl, self.ui.wao_pyr_ampl_arcsec,
                 self.ui.wao_update_pyr_ampl
         ]
-        if (scons.WFSType.PYRHR in [p_wfs.type_wfs for p_wfs in self.sim.config.p_wfss]):
+        if (scons.WFSType.PYRHR in [p_wfs.type for p_wfs in self.sim.config.p_wfss]):
             self.selector_init = [
                     "Phase - Atmos", "Phase - WFS", "Pyrimg - LR", "Pyrimg - HR",
                     "Centroids - WFS", "Slopes - WFS", "Phase - Target", "Phase - DM",
@@ -789,7 +789,7 @@ class widgetAOWindow(TemplateBaseClass):
             self.SRcircleWFS[i].hide()
 
         for i in range(len(self.sim.config.p_dms)):
-            dm_type = self.sim.config.p_dms[i].type_dm
+            dm_type = self.sim.config.p_dms[i].type
             alt = self.sim.config.p_dms[i].alt
             data = self.sim.dms.get_dm(dm_type, alt)
             cx, cy = self.circleCoords(self.sim.config.p_geom.pupdiam / 2, 1000,
@@ -854,10 +854,10 @@ class widgetAOWindow(TemplateBaseClass):
     def KLCommand(self) -> None:
         if (self.sim.rtc):
             nfilt = int(self.ui.wao_filterBtt.value())
-            cmat = ao.compute_cmatWithKL(self.sim.rtc, self.sim.config.p_controllers[0],
-                                         self.sim.dms, self.sim.config.p_dms,
-                                         self.sim.config.p_geom, self.sim.config.p_atmos,
-                                         self.sim.config.p_tel, nfilt)
+            cmat = ao.command_on_KL(
+                    self.sim.rtc, self.sim.dms, self.sim.config.p_controllers[0],
+                    self.sim.config.p_dms, self.sim.config.p_geom,
+                    self.sim.config.p_atmos, self.sim.config.p_tel, nfilt)
             self.sim.rtc.set_cmat(0, cmat.astype(np.float32))
             print("Loop is commanded from KL basis now")
 
@@ -866,7 +866,7 @@ class widgetAOWindow(TemplateBaseClass):
         n = self.ui.wao_selectWfs.currentIndex()
         self.ui.wao_wfsWindow.canvas.axes.clear()
         ax = self.ui.wao_wfsWindow.canvas.axes
-        if (self.sim.config.p_wfss[n].type_wfs == scons.WFSType.PYRHR and
+        if (self.sim.config.p_wfss[n].type == scons.WFSType.PYRHR and
                     typeText == "Pyramid mod. pts" and self.sim.is_init):
             scale_fact = 2 * np.pi / self.sim.config.p_wfss[n]._Nfft * \
                 self.sim.config.p_wfss[n].Lambda * \
@@ -885,17 +885,17 @@ class widgetAOWindow(TemplateBaseClass):
         if (self.sim.rtc):
             type_matrix = str(self.ui.wao_selectRtcMatrix.currentText())
             if (type_matrix == "imat" and
-                        self.sim.config.p_controllers[0].type_control != "generic" and
-                        self.sim.config.p_controllers[0].type_control != "geo"):
+                        self.sim.config.p_controllers[0].type != "generic" and
+                        self.sim.config.p_controllers[0].type != "geo"):
                 data = self.sim.rtc.get_imat(0)
             elif (type_matrix == "cmat"):
                 data = self.sim.rtc.get_cmat(0)
             elif (type_matrix == "Eigenvalues"):
-                if (self.sim.config.p_controllers[0].type_control == "ls" or
-                            self.sim.config.p_controllers[0].type_control == b"mv"):
+                if (self.sim.config.p_controllers[0].type == "ls" or
+                            self.sim.config.p_controllers[0].type == b"mv"):
                     data = self.sim.rtc.getEigenvals(0)
             elif (type_matrix == "Cmm" and
-                  self.sim.config.p_controllers[0].type_control == b"mv"):
+                  self.sim.config.p_controllers[0].type == b"mv"):
                 tmp = self.sim.rtc.get_cmm(0)
                 ao.doTomoMatrices(0, self.sim.rtc, self.sim.config.p_wfss, self.sim.dms,
                                   self.sim.atm, self.sim.wfs, self.sim.config.p_rtc,
@@ -904,13 +904,13 @@ class widgetAOWindow(TemplateBaseClass):
                 data = self.sim.rtc.get_cmm(0)
                 self.sim.rtc.set_cmm(0, tmp)
             elif (type_matrix == "Cmm inverse" and
-                  self.sim.config.p_controllers[0].type_control == b"mv"):
+                  self.sim.config.p_controllers[0].type == b"mv"):
                 data = self.sim.rtc.get_cmm(0)
             elif (type_matrix == "Cmm eigen" and
-                  self.sim.config.p_controllers[0].type_control == b"mv"):
+                  self.sim.config.p_controllers[0].type == b"mv"):
                 data = self.sim.rtc.getCmmEigenvals(0)
             elif (type_matrix == "Cphim" and
-                  self.sim.config.p_controllers[0].type_control == b"mv"):
+                  self.sim.config.p_controllers[0].type == b"mv"):
                 data = self.sim.rtc.get_cphim(0)
 
             if (data is not None):
@@ -974,7 +974,7 @@ class widgetAOWindow(TemplateBaseClass):
         b = 0
         c = actuPushInMicrons
         d = coupling * actuPushInMicrons
-        if (self.sim.config.p_dms[i].type_dm is not scons.DmType.TT):
+        if (self.sim.config.p_dms[i].type is not scons.DmType.TT):
             dist = self.sim.config.p_tel.diam
         else:
             dist = self.sim.config.p_tel.diam / \
@@ -1074,10 +1074,10 @@ class widgetAOWindow(TemplateBaseClass):
                     if (self.imgType == "Spots - WFS"):
                         self.setupDisp("pg")
                         if (self.sim.config.p_wfss[self.numberSelected]
-                                    .type_wfs == scons.WFSType.SH):
+                                    .type == scons.WFSType.SH):
                             data = self.sim.wfs.get_binimg(self.numberSelected)
                         elif (self.sim.config.p_wfss[self.numberSelected]
-                              .type_wfs == scons.WFSType.PYRHR):
+                              .type == scons.WFSType.PYRHR):
                             data = self.sim.wfs.get_pyrimg(self.numberSelected)
                         if (self.imgType != self.currentViewSelected):
                             self.p1.setRange(xRange=(0, data.shape[0]),
@@ -1087,7 +1087,7 @@ class widgetAOWindow(TemplateBaseClass):
                     if (self.imgType == "Pyrimg - LR"):
                         self.setupDisp("pg")
                         if (self.sim.config.p_wfss[self.numberSelected]
-                                    .type_wfs == scons.WFSType.PYRHR):
+                                    .type == scons.WFSType.PYRHR):
                             data = self.sim.wfs.get_pyrimg(self.numberSelected)
                         if (self.imgType != self.currentViewSelected):
                             self.p1.setRange(xRange=(0, data.shape[0]),
@@ -1097,7 +1097,7 @@ class widgetAOWindow(TemplateBaseClass):
                     if (self.imgType == "Pyrimg - HR"):
                         self.setupDisp("pg")
                         if (self.sim.config.p_wfss[self.numberSelected]
-                                    .type_wfs == scons.WFSType.PYRHR):
+                                    .type == scons.WFSType.PYRHR):
                             data = self.sim.wfs.get_pyrimghr(self.numberSelected)
                         if (self.imgType != self.currentViewSelected):
                             self.p1.setRange(xRange=(0, data.shape[0]),
@@ -1112,7 +1112,7 @@ class widgetAOWindow(TemplateBaseClass):
                         nvalid = [2 * o._nvalid for o in self.sim.config.p_wfss]
                         ind = np.sum(nvalid[:self.numberSelected], dtype=np.int32)
                         if (self.sim.config.p_wfss[self.numberSelected]
-                                    .type_wfs == scons.WFSType.PYRHR):
+                                    .type == scons.WFSType.PYRHR):
                             plpyr(centroids[ind:ind + nvalid[self.numberSelected]],
                                   self.sim.config.p_wfs0._isvalid)
                         else:
@@ -1147,7 +1147,7 @@ class widgetAOWindow(TemplateBaseClass):
                 if (self.sim.dms):
                     if (self.imgType == "Phase - DM"):
                         self.setupDisp("pg")
-                        dm_type = self.sim.config.p_dms[self.numberSelected].type_dm
+                        dm_type = self.sim.config.p_dms[self.numberSelected].type
                         alt = self.sim.config.p_dms[self.numberSelected].alt
                         data = self.sim.dms.get_dm(dm_type, alt)
 
@@ -1280,7 +1280,7 @@ class widgetAOWindow(TemplateBaseClass):
                     signal_le = ""
                     signal_se = ""
                     for t in range(self.sim.config.p_target.ntargets):
-                        self.sim.tar.comp_image(0)
+                        self.sim.tar.comp_image(t)
                         SR = self.sim.tar.get_strehl(t)
                         if (t == self.numberSelected):  # Plot on the wfs selected
                             self.updateSRDisplay(SR[1], SR[0], self.sim.iter)

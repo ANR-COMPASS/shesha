@@ -1,10 +1,8 @@
-#!/usr/local/bin/python2.7
-# encoding: utf-8
 '''
-Created on 8 aout 2017
-
-@author: fferreira
+Param_target class definition
+Parameters for target
 '''
+''
 
 import numpy as np
 from . import config_setter_utils as csu

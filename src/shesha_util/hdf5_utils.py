@@ -1,3 +1,7 @@
+"""
+Functions for handling the database system
+Wrapping of some h5py function for quick HDF5 save
+"""
 import h5py
 import pandas
 import os
@@ -374,17 +378,17 @@ def checkControlParams(savepath, config, pdict, matricesToLoad):
             "_Param_tel__diam", "_Param_tel__t_spiders", "_Param_tel__spiders_type",
             "_Param_tel__pupangle", "_Param_tel__referr", "_Param_tel__std_piston",
             "_Param_tel__std_tt", "_Param_tel__type_ap", "_Param_tel__nbrmissing",
-            "_Param_tel__cobs", "_Param_geom__pupdiam", "nwfs", "_Param_wfs__type_wfs",
+            "_Param_tel__cobs", "_Param_geom__pupdiam", "nwfs", "_Param_wfs__type",
             "_Param_wfs__nxsub", "_Param_wfs__npix", "_Param_wfs__pixsize",
             "_Param_wfs__fracsub", "_Param_wfs__xpos", "_Param_wfs__ypos",
             "_Param_wfs__Lambda", "_Param_wfs__dms_seen", "_Param_wfs__fssize",
             "_Param_wfs__fstop", "_Param_wfs__pyr_ampl", "_Param_wfs__pyr_loc",
             "_Param_wfs__pyr_npts", "_Param_wfs__pyr_pup_sep", "_Param_wfs__pyrtype",
-            "ndms", "_Param_dm__type_dm", "_Param_dm__alt", "_Param_dm__coupling",
+            "ndms", "_Param_dm__type", "_Param_dm__alt", "_Param_dm__coupling",
             "_Param_dm__margin_in", "_Param_dm__margin_out", "_Param_dm__nact",
             "_Param_dm__nkl", "_Param_dm__type_kl", "_Param_dm__push4imat",
             "_Param_dm__thresh", "_Param_dm__unitpervolt", "ncentroiders",
-            "_Param_centroider__type_centro", "_Param_centroider__nmax",
+            "_Param_centroider__type", "_Param_centroider__nmax",
             "_Param_centroider__nwfs", "_Param_centroider__sizex",
             "_Param_centroider__sizey", "_Param_centroider__thresh",
             "_Param_centroider__type_fct", "_Param_centroider__weights",
@@ -437,13 +441,13 @@ def checkDmsParams(savepath, config, pdict, matricesToLoad):
             "_Param_tel__diam", "_Param_tel__t_spiders", "_Param_tel__spiders_type",
             "_Param_tel__pupangle", "_Param_tel__referr", "_Param_tel__std_piston",
             "_Param_tel__std_tt", "_Param_tel__type_ap", "_Param_tel__nbrmissing",
-            "_Param_tel__cobs", "_Param_geom__pupdiam", "nwfs", "_Param_wfs__type_wfs",
+            "_Param_tel__cobs", "_Param_geom__pupdiam", "nwfs", "_Param_wfs__type",
             "_Param_wfs__nxsub", "_Param_wfs__npix", "_Param_wfs__pixsize",
             "_Param_wfs__fracsub", "_Param_wfs__xpos", "_Param_wfs__ypos",
             "_Param_wfs__Lambda", "_Param_wfs__dms_seen", "_Param_wfs__fssize",
             "_Param_wfs__fstop", "_Param_wfs__pyr_ampl", "_Param_wfs__pyr_loc",
             "_Param_wfs__pyr_npts", "_Param_wfs__pyrtype", "_Param_wfs__pyr_pup_sep",
-            "ndms", "_Param_dm__type_dm", "_Param_dm__alt", "_Param_dm__coupling",
+            "ndms", "_Param_dm__type", "_Param_dm__alt", "_Param_dm__coupling",
             "_Param_dm__margin_in", "_Param_dm__margin_out", "_Param_dm__nkl",
             "_Param_dm__nact", "_Param_dm__type_kl", "_Param_dm__push4imat",
             "_Param_dm__thresh", "_Param_dm__unitpervolt"
@@ -559,7 +563,7 @@ def configFromH5(filename, config):
     config.p_wfss = []
     for i in range(f.attrs.get("nwfs")):
         config.p_wfss.append(ao.Param_wfs())
-        config.p_wfss[i].set_type(str(f.attrs.get("type_wfs")[i]))
+        config.p_wfss[i].set_type(str(f.attrs.get("type")[i]))
         config.p_wfss[i].set_nxsub(f.attrs.get("nxsub")[i])
         config.p_wfss[i].set_npix(f.attrs.get("npix")[i])
         config.p_wfss[i].set_pixsize(f.attrs.get("pixsize")[i])
@@ -595,7 +599,7 @@ def configFromH5(filename, config):
     if (f.attrs.get("ndms")):
         for i in range(f.attrs.get("ndms")):
             config.p_dms.append(ao.Param_dm())
-            config.p_dms[i].set_type(str(f.attrs.get("type_dm")[i]))
+            config.p_dms[i].set_type(str(f.attrs.get("type")[i]))
             config.p_dms[i].set_nact(f.attrs.get("nact")[i])
             config.p_dms[i].set_alt(f.attrs.get("dm.alt")[i])
             config.p_dms[i].set_thresh(f.attrs.get("dm.thresh")[i])
@@ -609,7 +613,7 @@ def configFromH5(filename, config):
         for i in range(f.attrs.get("ncentroiders")):
             config.p_centroiders.append(ao.Param_centroider())
             config.p_centroiders[i].set_nwfs(f.attrs.get("centro.nwfs")[i])
-            config.p_centroiders[i].set_type(str(f.attrs.get("type_centro")[i]))
+            config.p_centroiders[i].set_type(str(f.attrs.get("type")[i]))
             config.p_centroiders[i].set_type_fct(str(f.attrs.get("type_fct")[i]))
             config.p_centroiders[i].set_nmax(f.attrs.get("nmax")[i])
             config.p_centroiders[i].set_thresh(f.attrs.get("centroider.thresh")[i])
@@ -623,7 +627,7 @@ def configFromH5(filename, config):
     if (f.attrs.get("ncontrollers")):
         for i in range(f.attrs.get("ncontrollers")):
             config.p_controllers.append(ao.Param_controller())
-            config.p_controllers[i].set_type(str(f.attrs.get("type_control")[i]))
+            config.p_controllers[i].set_type(str(f.attrs.get("type")[i]))
             config.p_controllers[i].set_nwfs(f.attrs.get("control.nwfs")[i])
             config.p_controllers[i].set_ndm(f.attrs.get("ndm")[i])
             config.p_controllers[i].set_maxcond(f.attrs.get("maxcond")[i])

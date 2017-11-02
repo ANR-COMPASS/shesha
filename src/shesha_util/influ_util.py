@@ -1,9 +1,5 @@
-#!/usr/local/bin/python3.6
-# encoding: utf-8
 '''
-Created on 3 aout 2017
-
-@author: fferreira
+Computation of the influence functions used by the DM
 '''
 import numpy as np
 import scipy.special as sp

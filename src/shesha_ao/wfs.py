@@ -1,9 +1,5 @@
-#!/usr/local/bin/python3.6
-# encoding: utf-8
 '''
-Created on 1 aout 2017
-
-@author: fferreira
+On the fly modification of the WFS
 '''
 import shesha_config as conf
 import shesha_constants as scons

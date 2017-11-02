@@ -1,3 +1,6 @@
+"""
+Computation of tomographic reconstructor
+"""
 import numpy as np
 
 import shesha_config as conf
@@ -79,7 +82,7 @@ def do_tomo_matrices(ncontrol: int, rtc: Rtc, p_wfss: List[conf.Param_wfs], dms:
     nactu = 0
     npzt = 0
     for k in p_controller.ndm:
-        if (p_dms[k].type_dm == scons.DmType.PZT):
+        if (p_dms[k].type == scons.DmType.PZT):
             nactu += p_dms[k]._ntotact
             npzt += 1
 
@@ -91,7 +94,7 @@ def do_tomo_matrices(ncontrol: int, rtc: Rtc, p_wfss: List[conf.Param_wfs], dms:
     ind = 0
     indk = 0
     for k in p_controller.ndm:
-        if (p_dms[k].type_dm == scons.DmType.PZT):
+        if (p_dms[k].type == scons.DmType.PZT):
             p2m = p_tel.diam / p_geom.pupdiam
             # Conversion in meters in the center of ipupil
             actu_x = (p_dms[k]._xpos - ipup.shape[0] / 2) * p2m
@@ -147,7 +150,7 @@ def do_tomo_matrices(ncontrol: int, rtc: Rtc, p_wfss: List[conf.Param_wfs], dms:
     F = np.zeros([nactu, nactu], dtype=np.float32)
     ind = 0
     for k in range(len(p_controller.ndm)):
-        if (p_dms[k].type_dm == b"pzt"):
+        if (p_dms[k].type == b"pzt"):
             Nact[ind:ind + p_dms[k]._ntotact, ind:
                  ind + p_dms[k]._ntotact] = create_nact_geom(p_dms[k])
             F[ind:ind + p_dms[k]._ntotact, ind:

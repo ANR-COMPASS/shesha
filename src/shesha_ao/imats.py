@@ -1,3 +1,6 @@
+"""
+Computation implementations of interaction matrix
+"""
 import numpy as np  # type: ignore
 import time
 
@@ -53,9 +56,9 @@ def imat_geom(wfs: Sensors, dms: Dms, p_wfss: List[conf.Param_wfs],
     print("Doing imat geom...")
     for nmc in range(ndm):
         nm = p_controller.ndm[nmc]
-        dms.resetdm(p_dms[nm].type_dm, p_dms[nm].alt)
+        dms.resetdm(p_dms[nm].type, p_dms[nm].alt)
         for i in tqdm(range(p_dms[nm]._ntotact), desc="DM%d" % nmc):
-            dms.oneactu(p_dms[nm].type_dm, p_dms[nm].alt, i, p_dms[nm].push4imat)
+            dms.oneactu(p_dms[nm].type, p_dms[nm].alt, i, p_dms[nm].push4imat)
             nslps = 0
             for nw in range(nwfs):
                 n = p_controller.nwfs[nw]
@@ -66,7 +69,7 @@ def imat_geom(wfs: Sensors, dms: Dms, p_wfss: List[conf.Param_wfs],
             imat_cpu[:, ind] = imat_cpu[:, ind] / p_dms[nm].push4imat
             ind = ind + 1
             cc = cc + 1
-            dms.resetdm(p_dms[nm].type_dm, p_dms[nm].alt)
+            dms.resetdm(p_dms[nm].type, p_dms[nm].alt)
 
     return imat_cpu
 
@@ -115,7 +118,7 @@ def imat_init(ncontrol: int, rtc: Rtc, dms: Dms, p_dms: list, wfs: Sensors, p_wf
     else:
         t0 = time.time()
         if kl is not None:
-            ntt = scons.DmType.TT in [d.type_dm for d in p_dms]
+            ntt = scons.DmType.TT in [d.type for d in p_dms]
             rtc.do_imat_kl(ncontrol, p_controller, dms, p_dms, kl, ntt)
         else:
             rtc.do_imat(ncontrol, dms)

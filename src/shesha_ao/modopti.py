@@ -1,3 +1,6 @@
+"""
+Functions used for modal optimization control
+"""
 import numpy as np
 
 from Telescope import Telescope

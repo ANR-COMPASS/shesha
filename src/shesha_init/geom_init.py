@@ -1,16 +1,8 @@
-#!/usr/local/bin/python3.6
-# encoding: utf-8
 '''
-Created on 1 aout 2017
-
-@author: fferreira
+Initialization of the system geometry and of the Telescope object
 '''
 
-try:
-    from naga import naga_context
-except:
-    class naga_context:
-        pass
+from naga import naga_context
 
 import shesha_config as conf
 import shesha_constants as scons
@@ -37,13 +29,15 @@ def tel_init(context: naga_context, p_geom: conf.Param_geom, p_tel: conf.Param_t
         ittime: (float) : 1/loop frequency [s]
         p_wfss: (list of Param_wfs) : wfs settings
         dm: (list of Param_dm) : (optional) dms settings [=None]
+    :return:
+        telescope: (Telescope): Telescope object
 
     """
     if p_wfss is not None:
         # WFS geometry
         nsensors = len(p_wfss)
 
-        any_sh = [o.type_wfs for o in p_wfss].count(scons.WFSType.SH) > 0
+        any_sh = [o.type for o in p_wfss].count(scons.WFSType.SH) > 0
         # dm = None
         if (p_wfss[0].dms_seen is None and dm is not None):
             for i in range(nsensors):
@@ -53,9 +47,8 @@ def tel_init(context: naga_context, p_geom: conf.Param_geom, p_tel: conf.Param_t
         # first get the wfs with max # of subaps
         # we'll derive the geometry from the requirements in terms of sampling
         if (any_sh):
-            indmax = np.argsort([
-                    o.nxsub for o in p_wfss if o.type_wfs == scons.WFSType.SH
-            ])[-1]
+            indmax = np.argsort([o.nxsub for o in p_wfss
+                                 if o.type == scons.WFSType.SH])[-1]
         else:
             indmax = np.argsort([o.nxsub for o in p_wfss])[-1]
 
@@ -104,7 +97,7 @@ def init_wfs_geom(p_wfs: conf.Param_wfs, r0: float, p_tel: conf.Param_tel,
     """
 
     if (p_geom.pupdiam):
-        if (p_wfs.type_wfs == scons.WFSType.SH):
+        if (p_wfs.type == scons.WFSType.SH):
             pdiam = p_geom.pupdiam // p_wfs.nxsub
             if (p_geom.pupdiam % p_wfs.nxsub > 0):
                 pdiam += 1
@@ -120,15 +113,15 @@ def init_wfs_geom(p_wfs: conf.Param_wfs, r0: float, p_tel: conf.Param_tel,
         # the overall geometry is deduced from it
         if not p_geom.pupdiam:
             p_geom.pupdiam = p_wfs._pdiam * p_wfs.nxsub
-        if p_wfs.type_wfs == scons.WFSType.PYRHR:
+        if p_wfs.type == scons.WFSType.PYRHR:
             geom_init(p_geom, p_tel, padding=p_wfs._nrebin)
         else:
             geom_init(p_geom, p_tel)
 
-    if (p_wfs.type_wfs == scons.WFSType.PYRHR):
+    if (p_wfs.type == scons.WFSType.PYRHR):
         init_pyrhr_geom(p_wfs, r0, p_tel, p_geom, ittime, verbose=1)
 
-    if (p_wfs.type_wfs == scons.WFSType.SH):
+    if (p_wfs.type == scons.WFSType.SH):
         init_sh_geom(p_wfs, r0, p_tel, p_geom, ittime, verbose=1)
 
 
@@ -136,13 +129,11 @@ def init_wfs_size(p_wfs: conf.Param_wfs, r0: float, p_tel: conf.Param_tel, verbo
     """Compute all the parameters usefull for further WFS image computation (array sizes)
 
     :parameters:
-        wfs: (Param_wfs) : wfs settings
+        p_wfs: (Param_wfs) : wfs settings
 
         r0: (float) : atmos r0 @ 0.5 microns
 
         p_tel: (Param_tel) : telescope settings
-
-        psize: (int) : unused TODO: remove it
 
         verbose: (int) : (optional) display informations if 0
 
@@ -204,7 +195,7 @@ def init_wfs_size(p_wfs: conf.Param_wfs, r0: float, p_tel: conf.Param_tel, verbo
         if ((pdiam * p_wfs.nxsub) % 2):
             pdiam += 1
 
-        if (p_wfs.type_wfs == scons.WFSType.SH):
+        if (p_wfs.type == scons.WFSType.SH):
             nrebin = int(2 * subapdiam * p_wfs.pixsize /
                          (p_wfs.Lambda * 1.e-6) / CONST.RAD2ARCSEC) + 1
             nrebin = max(2, nrebin)
@@ -220,7 +211,7 @@ def init_wfs_size(p_wfs: conf.Param_wfs, r0: float, p_tel: conf.Param_tel, verbo
             qpixsize = (pdiam *
                         (p_wfs.Lambda * 1.e-6) / subapdiam * CONST.RAD2ARCSEC) / Nfft
 
-        if (p_wfs.type_wfs == scons.WFSType.PYRHR):
+        if (p_wfs.type == scons.WFSType.PYRHR):
             # while (pdiam % p_wfs.npix != 0) pdiam+=1;
             k = 3
             pdiam = int(p_tel.diam / r0 * k)
@@ -261,7 +252,7 @@ def init_wfs_size(p_wfs: conf.Param_wfs, r0: float, p_tel: conf.Param_tel, verbo
             (p_wfs.Lambda * 1.e-6) / subapdiam * CONST.RAD2ARCSEC / Nfft
         # quantum pixel size
 
-    if (p_wfs.type_wfs == scons.WFSType.SH):
+    if (p_wfs.type == scons.WFSType.SH):
         # actual rebin factor
         if (p_wfs.pixsize / qpixsize - int(p_wfs.pixsize / qpixsize) > 0.5):
             nrebin = int(p_wfs.pixsize / qpixsize) + 1
@@ -298,7 +289,7 @@ def init_wfs_size(p_wfs: conf.Param_wfs, r0: float, p_tel: conf.Param_tel, verbo
         print("size of fft support : ", Nfft)
         print("size of HR spot support : ", Ntot)
 
-        if (p_wfs.type_wfs == scons.WFSType.PYRHR):
+        if (p_wfs.type == scons.WFSType.PYRHR):
             print("quantum pixsize in pyr image : ", "%5.4f" % qpixsize, "\"")
             print("simulated FoV : ", "%3.2f" % (Nfft * qpixsize), "\" x ",
                   "%3.2f" % (Nfft * qpixsize), "\"")

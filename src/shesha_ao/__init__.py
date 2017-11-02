@@ -1,3 +1,6 @@
+"""
+Python package for AO operations on COMPASS simulation
+"""
 __all__ = ['imats', 'basis', 'modopti', 'cmats', 'wfs', 'tomo']
 
 from shesha_ao.imats import *

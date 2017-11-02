@@ -1,12 +1,6 @@
-# encoding: utf-8
 """
-Created on 5 juil. 2017
-
-@author: vdeo
-
 Numerical constants for shesha
 Config enumerations for safe-typing
-
 """
 
 import numpy as np

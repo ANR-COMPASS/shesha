@@ -1,15 +1,7 @@
-#!/usr/local/bin/python3.6
-# encoding: utf-8
 '''
-Created on 3 aout 2017
-
-@author: fferreira
+Initialization of a Dms object
 '''
-try:
-    from naga import naga_context
-except:
-    class naga_context:
-        pass
+from naga import naga_context
 
 import shesha_config as conf
 import shesha_constants as scons
@@ -31,6 +23,7 @@ from typing import List
 
 from tqdm import tqdm
 
+
 def dm_init(context: naga_context, p_dms: List[conf.Param_dm], p_tel: conf.Param_tel,
             p_geom: conf.Param_geom, p_wfss: List[conf.Param_wfs]=None) -> Dms:
     """Create and initialize a Dms object on the gpu
@@ -41,6 +34,8 @@ def dm_init(context: naga_context, p_dms: List[conf.Param_dm], p_tel: conf.Param
         p_tel: (Param_tel) : telescope settings
         p_geom: (Param_geom) : geom settings
         p_wfss: (list of Param_wfs) : wfs settings
+    :return:
+        Dms: (Dms): Dms object
     """
     max_extent = [0]
     xpos_wfs = []
@@ -87,10 +82,10 @@ def _dm_init(dms: Dms, p_dm: conf.Param_dm, xpos_wfs: list, ypos_wfs: list,
         p_dm._puppixoffset = p_dm.pupoffset / diam * p_geom.pupdiam
 
     # For patchDiam
-    patchDiam = dm_util.dim_dm_patch(p_geom.pupdiam, diam, p_dm.type_dm, p_dm.alt,
-                                     xpos_wfs, ypos_wfs)
+    patchDiam = dm_util.dim_dm_patch(p_geom.pupdiam, diam, p_dm.type, p_dm.alt, xpos_wfs,
+                                     ypos_wfs)
 
-    if (p_dm.type_dm == scons.DmType.PZT):
+    if (p_dm.type == scons.DmType.PZT):
         if p_dm.file_influ_hdf5 == None:
             p_dm._pitch = patchDiam / float(p_dm.nact - 1)
             # + 2.5 pitch each side
@@ -110,13 +105,13 @@ def _dm_init(dms: Dms, p_dm: conf.Param_dm, xpos_wfs: list, ypos_wfs: list,
         ninflupos = p_dm._influpos.size
         n_npts = p_dm._ninflu.size
 
-        dms.add_dm(p_dm.type_dm, p_dm.alt, dim, p_dm._ntotact, p_dm._influsize,
-                   ninflupos, n_npts, p_dm.push4imat)
+        dms.add_dm(p_dm.type, p_dm.alt, dim, p_dm._ntotact, p_dm._influsize, ninflupos,
+                   n_npts, p_dm.push4imat)
         dms.load_pzt(p_dm.alt, p_dm._influ,
                      p_dm._influpos.astype(np.int32), p_dm._ninflu, p_dm._influstart,
                      p_dm._i1, p_dm._j1)
 
-    elif (p_dm.type_dm == scons.DmType.TT):
+    elif (p_dm.type == scons.DmType.TT):
 
         if (p_dm.alt == 0):
             extent = int(max_extent[0] * 1.05)
@@ -130,10 +125,10 @@ def _dm_init(dms: Dms, p_dm: conf.Param_dm, xpos_wfs: list, ypos_wfs: list,
 
         dim = p_dm._n2 - p_dm._n1 + 1
         make_tiptilt_dm(p_dm, patchDiam, p_geom, diam)
-        dms.add_dm(p_dm.type_dm, p_dm.alt, dim, 2, dim, 1, 1, p_dm.push4imat)
+        dms.add_dm(p_dm.type, p_dm.alt, dim, 2, dim, 1, 1, p_dm.push4imat)
         dms.load_tt(p_dm.alt, p_dm._influ)
 
-    elif (p_dm.type_dm == scons.DmType.KL):
+    elif (p_dm.type == scons.DmType.KL):
 
         extent = p_geom.pupdiam + 16
         p_dm._n1, p_dm._n2 = dm_util.dim_dm_support(p_geom.cent, extent, p_geom.ssize)
@@ -146,8 +141,9 @@ def _dm_init(dms: Dms, p_dm: conf.Param_dm, xpos_wfs: list, ypos_wfs: list,
 
         ninflu = p_dm.nkl
 
-        dms.add_dm(p_dm.type_dm, p_dm.alt, dim, p_dm.nkl, p_dm._ncp, p_dm._nr, p_dm._npp,
-                   p_dm.push4imat)
+        dms.add_dm(p_dm.type, p_dm.alt, dim, p_dm.nkl, p_dm._ncp, p_dm._nr, p_dm._npp,
+                   p_dm.push4imat, nord=p_dm._ord.max())
+
         dms.load_kl(p_dm.alt, p_dm._rabas, p_dm._azbas, p_dm._ord, p_dm._cr, p_dm._cp)
 
     else:
@@ -510,6 +506,7 @@ def make_kl_dm(p_dm: conf.Param_dm, patchDiam: int, p_geom: conf.Param_geom,
     p_dm._j1 = np.zeros((p_dm.nkl), dtype=np.int32) + \
         (dim - patchDiam) // 2
     p_dm._ntotact = p_dm.nkl
+    p_dm.ap = ap
 
 
 def comp_dmgeom(p_dm: conf.Param_dm, p_geom: conf.Param_geom):
@@ -530,14 +527,6 @@ def comp_dmgeom(p_dm: conf.Param_dm, p_geom: conf.Param_geom):
     else:
         offs = 0
         mpup_dim = dm_dim
-
-    mapactu = np.ones((mpup_dim, mpup_dim), dtype=np.float32)
-
-    if (offs > 0):
-        mapactu[:offs, :] = 0
-        mapactu[:, :offs] = 0
-        mapactu[mapactu.shape[0] - offs:, :] = 0
-        mapactu[:, mapactu.shape[1] - offs:] = 0
 
     indgen = np.tile(np.arange(smallsize, dtype=np.int32), (smallsize, 1))
 
@@ -560,19 +549,16 @@ def comp_dmgeom(p_dm: conf.Param_dm, p_geom: conf.Param_geom):
 
     istart = np.zeros((mpup_dim * mpup_dim), dtype=np.int32)
     npts = np.zeros((mpup_dim * mpup_dim), dtype=np.int32)
-    istart2 = np.zeros((mpup_dim * mpup_dim), dtype=np.int32)
-    npts2 = np.zeros((mpup_dim * mpup_dim), dtype=np.int32)
-    
 
-    cpt = 0
-    ref = 0
-    
-    uu, vv = np.unique(tmps, return_counts=True)
-    
-    for i in tqdm(range(uu.size)):
-        npts[uu[i]] = vv[i]
+    tmps_unique, cpt = np.unique(tmps, return_counts=True)
+    if (tmps_unique > npts.size - 1).any():
+        tmps_unique = tmps_unique[:-1]
+        cpt = cpt[:-1]
+
+    for i in range(tmps_unique.size):
+        npts[tmps_unique[i]] = cpt[i]
     istart[1:] = np.cumsum(npts[:-1])
-    
+
     p_dm._influpos = itmps[:np.sum(npts)].astype(np.int32)
     p_dm._ninflu = npts.astype(np.int32)
     p_dm._influstart = istart.astype(np.int32)
@@ -599,7 +585,7 @@ def correct_dm(dms: Dms, p_dms: list, p_controller: conf.Param_controller,
     ndm = p_controller.ndm.size
     for i in range(ndm):
         nm = p_controller.ndm[i]
-        dms.remove_dm(p_dms[nm].type_dm, p_dms[nm].alt)
+        dms.remove_dm(p_dms[nm].type, p_dms[nm].alt)
 
     if imat is not None:
         resp = np.sqrt(np.sum(imat**2, axis=0))
@@ -610,7 +596,7 @@ def correct_dm(dms: Dms, p_dms: list, p_controller: conf.Param_controller,
         nm = p_controller.ndm[nmc]
         nactu_nm = p_dms[nm]._ntotact
         # filter actuators only in stackarray mirrors:
-        if (p_dms[nm].type_dm == scons.DmType.PZT):
+        if (p_dms[nm].type == scons.DmType.PZT):
             if "dm" in dataBase:
                 influpos, ninflu, influstart, i1, j1, ok = h5u.load_dm_geom_from_dataBase(
                         dataBase, nmc)
@@ -646,24 +632,23 @@ def correct_dm(dms: Dms, p_dms: list, p_controller: conf.Param_controller,
             ninflupos = p_dms[nm]._influpos.size
             n_npts = p_dms[nm]._ninflu.size
 
-            dms.add_dm(p_dms[nm].type_dm, p_dms[nm].alt, dim, p_dms[nm]._ntotact,
+            dms.add_dm(p_dms[nm].type, p_dms[nm].alt, dim, p_dms[nm]._ntotact,
                        p_dms[nm]._influsize, ninflupos, n_npts, p_dms[nm].push4imat)
             dms.load_pzt(p_dms[nm].alt, p_dms[nm]._influ,
                          p_dms[nm]._influpos.astype(np.int32), p_dms[nm]._ninflu,
                          p_dms[nm]._influstart, p_dms[nm]._i1, p_dms[nm]._j1)
 
-        elif (p_dms[nm].type_dm == scons.DmType.TT):
+        elif (p_dms[nm].type == scons.DmType.TT):
             dim = p_dms[nm]._n2 - p_dms[nm]._n1 + 1
-            dms.add_dm(p_dms[nm].type_dm, p_dms[nm].alt, dim, 2, dim, 1, 1,
+            dms.add_dm(p_dms[nm].type, p_dms[nm].alt, dim, 2, dim, 1, 1,
                        p_dms[nm].push4imat)
             dms.load_tt(p_dms[nm].alt, p_dms[nm]._influ)
 
-        elif (p_dms[nm].type_dm == scons.DmType.KL):
+        elif (p_dms[nm].type == scons.DmType.KL):
             dim = int(p_dms[nm]._n2 - p_dms[nm]._n1 + 1)
 
-            dms.add_dm(p_dms[nm].type_dm, p_dms[nm].alt, dim, p_dms[nm].nkl,
-                       p_dms[nm]._ncp, p_dms[nm]._nr, p_dms[nm]._npp,
-                       p_dms[nm].push4imat)
+            dms.add_dm(p_dms[nm].type, p_dms[nm].alt, dim, p_dms[nm].nkl, p_dms[nm]._ncp,
+                       p_dms[nm]._nr, p_dms[nm]._npp, p_dms[nm].push4imat)
             dms.load_kl(p_dms[nm].alt, p_dms[nm]._rabas, p_dms[nm]._azbas,
                         p_dms[nm]._ord, p_dms[nm]._cr, p_dms[nm]._cp)
         else:

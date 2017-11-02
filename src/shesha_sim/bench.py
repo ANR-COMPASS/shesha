@@ -1,3 +1,7 @@
+"""
+Benchmark class for COMPASS simulation timing
+(Not used, incomplete)
+"""
 import time
 
 from typing import Callable, TypeVar
@@ -5,6 +9,7 @@ from typing import Callable, TypeVar
 from .simulator import Simulator
 
 _O = TypeVar('_O')
+
 
 def timeit(function: Callable[..., _O]) -> Callable[..., _O]:
     '''

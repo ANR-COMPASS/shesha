@@ -1,10 +1,8 @@
-#!/usr/local/bin/python2.7
-# encoding: utf-8
 '''
-Created on 13 juil. 2017
+Param_geom class definition
+Parameters for system geometry
+'''
 
-@author: vdeo
-'''
 from . import config_setter_utils as csu
 import numpy as np
 
