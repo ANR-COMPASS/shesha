@@ -5,7 +5,13 @@ Must be instantiated for running a COMPASS simulation script easily
 import sys
 import os
 
-from naga import naga_context
+try:
+    from naga import naga_context
+except:
+    class naga_context:
+        def __init__(devices=0):
+            pass
+
 
 import shesha_init as init
 import shesha_constants as scons

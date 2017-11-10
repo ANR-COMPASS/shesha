@@ -1,7 +1,10 @@
 """
 Initialization of a Target object
 """
-from naga import naga_context
+try:
+    from naga import naga_context
+except:
+    pass
 
 import shesha_config as conf
 

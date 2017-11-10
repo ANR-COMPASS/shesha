@@ -3,3 +3,4 @@ sutra_bind
 test/scripts
 widgets/*canapass*
 widgets/*fab*
+.mypy_cache
