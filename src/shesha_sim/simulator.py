@@ -7,7 +7,7 @@ import os
 
 try:
     from naga import naga_context
-except:
+except ImportError as err:
     class naga_context:
         def __init__(devices=0):
             pass
@@ -17,10 +17,32 @@ import shesha_init as init
 import shesha_constants as scons
 import shesha_util.hdf5_utils as h5u
 
-import Atmos, Telescope, Target, Rtc, Dms, Sensors
 import time
 
 from typing import Iterable, Any, Dict
+
+try:
+    from Dms import Dms
+    from Sensors import Sensors
+    from Telescope import Telescope
+    from Atmos import Atmos
+    from Target import Target
+    from Rtc import Rtc, Rtc_brama
+except ImportError as err:
+    class Dms:
+        pass
+    class Sensors:
+        pass
+    class Telescope:
+        pass
+    class Atmos:
+        pass
+    class Target:
+        pass
+    class Rtc:
+        pass
+    class Rtc_brama:
+        pass
 
 
 class Simulator:
@@ -43,12 +65,12 @@ class Simulator:
         self.iter = 0  # type: int
 
         self.c = None  # type: naga_context
-        self.atm = None  # type: Atmos.Atmos
-        self.tel = None  # type: Telescope.Telescope
-        self.tar = None  # type: Target.Target
-        self.rtc = None  # type: Rtc.Rtc
-        self.wfs = None  # type: Sensors.Sensors
-        self.dms = None  # type: Dms.Dms
+        self.atm = None  # type: Atmos
+        self.tel = None  # type: Telescope
+        self.tar = None  # type: Target
+        self.rtc = None  # type: Rtc
+        self.wfs = None  # type: Sensors
+        self.dms = None  # type: Dms
 
         self.matricesToLoad = {}  # type: Dict[str,str]
         self.use_DB = use_DB  # type: bool

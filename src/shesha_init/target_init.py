@@ -3,8 +3,9 @@ Initialization of a Target object
 """
 try:
     from naga import naga_context
-except:
-    pass
+except ImportError as err:
+    class naga_context:
+        pass
 
 import shesha_config as conf
 
@@ -13,8 +14,17 @@ from shesha_constants import CONST
 
 import numpy as np
 
-from Telescope import Telescope
-from Target import Target, Target_brama
+try:
+    from Telescope import Telescope
+    from Target import Target, Target_brama
+except ImportError as err:
+    class Telescope:
+        pass
+    class Target:
+        pass
+    class Target_brama:
+        pass
+
 
 
 def target_init(ctxt: naga_context, telescope: Telescope, p_target: conf.Param_target,

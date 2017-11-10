@@ -6,8 +6,6 @@
 Welcome to COMPASS's documentation!
 ===================================
 
-Version PDF_
-
 Contents:
 ---------
 

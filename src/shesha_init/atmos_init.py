@@ -3,15 +3,20 @@ Initialization of a Atmos object
 '''
 try:
     from naga import naga_context
-except:
-    pass
+except ImportError as err:
+    class naga_context:
+        pass
 
 import shesha_config as conf
 from shesha_constants import CONST
 import shesha_util.iterkolmo as itK
 import shesha_util.hdf5_utils as h5u
 
-from Atmos import Atmos
+try:
+    from Atmos import Atmos
+except ImportError as err:
+    class Atmos:
+        pass
 
 import numpy as np
 

@@ -15,9 +15,14 @@ print("shesha_savepath:", shesha_savepath)
 import shesha_config as conf
 import shesha_constants as scons
 from shesha_util import utilities as util
-from Sensors import Sensors
 import numpy as np
 
+try:
+    from Sensors import Sensors
+except ImportError as err:
+    class Sensors:
+        pass
+    
 
 def make_lgs_prof1d(p_wfs: conf.Param_wfs, p_tel: conf.Param_tel, prof: np.ndarray,
                     h: np.ndarray, beam: float, center=b""):

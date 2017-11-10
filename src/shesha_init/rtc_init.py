@@ -3,8 +3,9 @@ Initialization of a Rtc object
 """
 try:
     from naga import naga_context
-except:
-    pass
+except ImportError as err:
+    class naga_context:
+        pass
 
 import shesha_config as conf
 import shesha_constants as scons
@@ -18,13 +19,28 @@ from shesha_init import dm_init as dmi
 
 import numpy as np
 
-from Dms import Dms
-from Sensors import Sensors
-from Telescope import Telescope
-from Atmos import Atmos
-from Target import Target
-from Rtc import Rtc, Rtc_brama
-
+try:
+    from Dms import Dms
+    from Sensors import Sensors
+    from Telescope import Telescope
+    from Atmos import Atmos
+    from Target import Target
+    from Rtc import Rtc, Rtc_brama
+except ImportError as err:
+    class Dms:
+        pass
+    class Sensors:
+        pass
+    class Telescope:
+        pass
+    class Atmos:
+        pass
+    class Target:
+        pass
+    class Rtc:
+        pass
+    class Rtc_brama:
+        pass
 
 def rtc_init(context: naga_context, tel: Telescope, wfs: Sensors, dms: Dms, atmos: Atmos,
              p_wfss: list, p_tel: conf.Param_tel, p_geom: conf.Param_geom,

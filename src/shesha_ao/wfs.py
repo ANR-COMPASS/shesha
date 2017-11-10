@@ -7,8 +7,14 @@ from shesha_constants import CONST
 
 import shesha_util.utilities as util
 
-from Sensors import Sensors
-from Rtc import Rtc
+try:
+    from Sensors import Sensors
+    from Rtc import Rtc
+except ImportError as err:
+    class Sensors:
+        pass
+    class Rtc:
+        pass
 
 import numpy as np
 

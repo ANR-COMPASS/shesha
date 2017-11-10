@@ -4,8 +4,9 @@ Initialization of the system geometry and of the Telescope object
 
 try:
     from naga import naga_context
-except:
-    pass
+except ImportError as err:
+    class naga_context:
+        pass
 
 import shesha_config as conf
 import shesha_constants as scons
@@ -14,7 +15,12 @@ from shesha_constants import CONST
 import shesha_util.make_pupil as mkP
 import shesha_util.utilities as util
 
-from Telescope import Telescope
+try:
+    from Telescope import Telescope
+except ImportError as err:
+    class Telescope:
+        pass
+
 
 import numpy as np
 

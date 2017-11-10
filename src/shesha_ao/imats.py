@@ -9,9 +9,17 @@ import shesha_constants as scons
 import shesha_init.lgs_init as lgs
 import shesha_util.hdf5_utils as h5u
 
-from Sensors import Sensors
-from Dms import Dms
-from Rtc import Rtc
+try:
+    from Sensors import Sensors
+    from Dms import Dms
+    from Rtc import Rtc
+except ImportError as err:
+    class Sensors:
+        pass
+    class Dms:
+        pass
+    class Rtc:
+        pass
 
 from typing import List  # Mypy checker
 

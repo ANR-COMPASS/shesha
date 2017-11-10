@@ -7,11 +7,20 @@ import shesha_config as conf
 import shesha_constants as scons
 from shesha_constants import CONST
 
-from Sensors import Sensors
-from Dms import Dms
-from Rtc import Rtc
-from Atmos import Atmos
-from Rtc import Rtc
+try:
+    from Sensors import Sensors
+    from Dms import Dms
+    from Rtc import Rtc
+    from Atmos import Atmos
+except ImportError as err:
+    class Sensors:
+        pass
+    class Dms:
+        pass
+    class Rtc:
+        pass
+    class Atmos:
+        pass
 
 import typing
 from typing import List

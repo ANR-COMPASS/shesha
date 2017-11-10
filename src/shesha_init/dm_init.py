@@ -3,8 +3,9 @@ Initialization of a Dms object
 '''
 try:
     from naga import naga_context
-except:
-    pass
+except ImportError as err:
+    class naga_context:
+        pass
 
 import shesha_config as conf
 import shesha_constants as scons
@@ -19,8 +20,11 @@ import numpy as np
 import pandas as pd
 from scipy import interpolate
 
-from Dms import Dms
-from Sensors import Sensors
+try:
+    from Dms import Dms
+except ImportError as err:
+    class Dms:
+        pass
 
 from typing import List
 

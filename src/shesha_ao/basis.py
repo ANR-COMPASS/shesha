@@ -3,8 +3,14 @@ Functions for modal basis (DM basis, KL, Btt, etc...)
 """
 import numpy as np
 
-from Dms import Dms
-from Rtc import Rtc
+try:
+    from Dms import Dms
+    from Rtc import Rtc
+except ImportError as err:
+    class Dms:
+        pass
+    class Rtc:
+        pass
 
 import shesha_config as conf
 import shesha_constants as scons
