@@ -5,8 +5,10 @@ Initialization of the system geometry and of the Telescope object
 try:
     from naga import naga_context
 except ImportError as err:
+
     class naga_context:
         pass
+
 
 import shesha_config as conf
 import shesha_constants as scons
@@ -18,6 +20,7 @@ import shesha_util.utilities as util
 try:
     from Telescope import Telescope
 except ImportError as err:
+
     class Telescope:
         pass
 
@@ -110,6 +113,11 @@ def init_wfs_geom(p_wfs: conf.Param_wfs, r0: float, p_tel: conf.Param_tel,
             pdiam = p_geom.pupdiam // p_wfs.nxsub
             if (p_geom.pupdiam % p_wfs.nxsub > 0):
                 pdiam += 1
+        if (p_wfs.type == scons.WFSType.PYRHR):
+            print("WARNING : Custom pupdiam not implemented for pyrhr wfs")
+            print("WARNING: pupdiam will be set as default")
+            pdiam = -1
+            p_geom.pupdiam = 0
     else:
         pdiam = -1
 
