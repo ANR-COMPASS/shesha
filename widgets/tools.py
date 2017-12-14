@@ -25,7 +25,7 @@ def clr(*figs):
     clears the current figure (no arg) or specified window
 
     """
-    if(figs):
+    if (figs):
         for fig in figs:
             # fig = fig[i]
             plt.figure(num=fig)
@@ -53,18 +53,19 @@ def system(cmd, output=False):
     out, err = proc.communicate()
     exitcode = proc.returncode
     #
-    if('\n' in out):
+    if ('\n' in out):
         out = out.split('\n')[:-1]
 
     for i in range(len(out)):
-        print out[i]
+        print((out[i]))
 
-    if(output):
-        # print "here"
+    if (output):
+        # print("here")
         return out, exitcode, err
 
 
-def pli(data, color='gist_earth', cmin=9998, cmax=9998, win=1, origin=None, aspect='equal'):
+def pli(data, color='gist_earth', cmin=9998, cmax=9998, win=1, origin=None,
+        aspect='equal'):
     """
     plots the transpose of the data
 
@@ -73,23 +74,23 @@ def pli(data, color='gist_earth', cmin=9998, cmax=9998, win=1, origin=None, aspe
 
     """
     options = ''
-    if(cmin != 9998):
+    if (cmin != 9998):
         exec('options += ",vmin=cmin"')
 
-    if(cmax != 9998):
+    if (cmax != 9998):
         exec('options += ",vmax=cmax"')
 
-    if(color == 'yorick'):
+    if (color == b'yorick'):
         color = 'gist_earth'
-    if(origin is None):
+    if (origin is None):
         origin = ""
-    if(aspect is not 'auto'):
+    if (aspect is not 'auto'):
         aspect = "\'" + aspect + "\'"
     else:
         aspect = "\'auto\'"
 
-    exec('plt.matshow(data, aspect=' + aspect +
-         ', fignum=win, cmap=color' + options + origin + ")")
+    exec('plt.matshow(data, aspect=' + aspect + ', fignum=win, cmap=color' + options +
+         origin + ")")
 
 
 def binning(w, footprint):
@@ -97,9 +98,9 @@ def binning(w, footprint):
     # the averaging block
     # prelocate memory
     binned = np.zeros(w.shape[0] * w.shape[1]).reshape(w.shape[0], w.shape[1])
-    # print w
-    for i in xrange(w.shape[0]):
-        for j in xrange(w.shape[1]):
+    # print(w)
+    for i in range(w.shape[0]):
+        for j in range(w.shape[1]):
             binned[i, j] = w[i, j].sum() / (footprint * footprint + 0.0)
 
     return binned
@@ -110,7 +111,13 @@ def minmax(tab):
     return [np.min(tabVect), np.max(tabVect)]
 
 
-def plg(data, x="", win=1, xlog=0, ylog=0, color="black", ):
+def plg(
+        data,
+        x="",
+        win=1,
+        xlog=0,
+        ylog=0,
+        color="black", ):
     """
 
 
@@ -126,21 +133,22 @@ def plg(data, x="", win=1, xlog=0, ylog=0, color="black", ):
     ax = fig.add_subplot(1, 1, 1)
     try:
         data.ndim
-        if(data.ndim > 1):
-            print "Warning %dD dimensions. Cannot plot data. Use pli instead. " % data.ndim
+        if (data.ndim > 1):
+            print(("Warning %dD dimensions. Cannot plot data. Use pli instead. " %
+                   data.ndim))
     except:
         return
-    if(x == ""):
+    if (x == b""):
         ax.plot(data, color=color)
     else:
         ax.plot(x, data, color=color)
 
-    if(xlog == 1):
+    if (xlog == 1):
         ax.set_xscale('log')
     else:
         ax.set_xscale('linear')
 
-    if(ylog == 1):
+    if (ylog == 1):
         ax.set_yscale('log')
     else:
         ax.set_yscale('linear')
@@ -150,8 +158,8 @@ def plg(data, x="", win=1, xlog=0, ylog=0, color="black", ):
 
 def zcen(data):
     data = np.array(data)
-    if(len(data.shape) > 1):
-        print "oups zcen with dims > 1 not coded yet..."
+    if (len(data.shape) > 1):
+        print("oups zcen with dims > 1 not coded yet...")
         return 0
     tmp = tmp2 = []
     for i in range(len(data) - 1):
@@ -162,13 +170,13 @@ def zcen(data):
 
 def getValidSubapArray(nssp, rext, rint, return2d=False):
     # The Grata case, tip-tilt sensor only.
-    if(nssp == 1):
+    if (nssp == 1):
         return [1]
     # to avoid some bug that eliminates useful central subapertures when
     # obs=0.286
-    if((nssp == 7) and (rint > 0.285 and rint < 0.29)):
+    if ((nssp == 7) and (rint > 0.285 and rint < 0.29)):
         rint = 0.285
-        print "cas particulier"
+        print("cas particulier")
     x = zcen(np.linspace(-1, 1, num=nssp + 1))
     xx = []
     for i in range(nssp):
@@ -180,12 +188,13 @@ def getValidSubapArray(nssp, rext, rint, return2d=False):
     valid2dint = ((r >= rint)) * 1
     valid2d = valid2dint * valid2dext
 
-    if(return2d):
+    if (return2d):
         return valid2d
     else:
         valid = np.reshape(valid2d, [nssp * nssp])
 
     return valid.tolist()
+
 
 """
 def plsh(slopesvector,  nssp=14,  rmax=0.98, obs=0, win=1, invertxy=False):
@@ -221,6 +230,7 @@ def plpyr(slopesvector, validArray):
     x, y = np.where(validArray.T)
     plt.quiver(x, y, slopesvector[0:nslopes], slopesvector[nslopes:])
 
+
 def plsh(slopesvector, nssp, validint, sparta=False, invertxy=False, returnquiver=False):
     """
     <slopesvector> is the input vector of slopes
@@ -238,7 +248,7 @@ def plsh(slopesvector, nssp, validint, sparta=False, invertxy=False, returnquive
     known, that’s why <validint> has to be passed in the argument list.
 
     """
-    nsub = slopesvector.shape[0] / 2
+    nsub = slopesvector.shape[0] // 2
     x = np.linspace(-1, 1, nssp)
     x, y = np.meshgrid(x, x)
     r = np.sqrt(x * x + y * y)
@@ -248,7 +258,7 @@ def plsh(slopesvector, nssp, validint, sparta=False, invertxy=False, returnquive
     # subapertures in slopesvector
     rorder = np.sort(r.reshape(nssp * nssp))
     # number of subapertures not valid due to central obscuration
-    ncentral = nssp * nssp - np.sum(r >= validint)
+    ncentral = nssp * nssp - np.sum(r >= validint, dtype=np.int32)
     # determine value of external radius so that the test (validint < r < validext)
     # leads to the correct number of subapertures
     validext = rorder[ncentral + nsub]
@@ -258,7 +268,7 @@ def plsh(slopesvector, nssp, validint, sparta=False, invertxy=False, returnquive
     # feeding data <slopesvector> into <vv>
     vx = np.zeros([nssp, nssp])
     vy = np.zeros([nssp, nssp])
-    if(sparta is False):
+    if (sparta is False):
         # Canary, compass, etc..  slopes ordered xxxxxxxyyyyyyy
         vy[ivalid] = slopesvector[0:nsub]
         vx[ivalid] = slopesvector[nsub:]
@@ -266,12 +276,12 @@ def plsh(slopesvector, nssp, validint, sparta=False, invertxy=False, returnquive
         # SPARTA case, slopes ordered xyxyxyxyxyxy...
         vx[ivalid] = slopesvector[0::2]
         vy[ivalid] = slopesvector[1::2]
-    if(invertxy is True):
+    if (invertxy is True):
         # swaps X and Y
         tmp = vx
         vx = vy
         vy = tmp
-    if(returnquiver):
+    if (returnquiver):
         return x, y, vx, vy
     else:
         plt.quiver(x, y, vx, vy, pivot='mid')
@@ -317,7 +327,7 @@ def computePSD(zerall, fe, izerNum, wfsNum):
         PSD = FFThz(zerall[ii][izerNum, :], fe)
 
     PSD /= len(wfsNum)
-    if(len(wfsNum) > 1):
+    if (len(wfsNum) > 1):
         ff = FFThz(zerall[wfsNum][izerNum, :], fe, freq=1)
     else:
         ff = FFThz(zerall[wfsNum[0]][izerNum, :], fe, freq=1)

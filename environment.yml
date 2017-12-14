@@ -1,0 +1,9 @@
+name: compass
+channels:
+- compass
+- defaults
+dependencies:
+- compass=v0.4=py36_cuda90
+# - cudatoolkit=9.0
+prefix: /home/sevin/miniconda3/envs/compass
+

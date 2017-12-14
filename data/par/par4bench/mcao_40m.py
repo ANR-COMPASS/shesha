@@ -1,57 +1,50 @@
-import sys, os
-sys.path.insert(0, os.environ["SHESHA_ROOT"])
-import shesha as ao
+import shesha_config as conf
 
-simul_name="mcao_40m_80_8pix"
+simul_name = "mcao_40m_80_8pix"
 
-#loop
-p_loop = ao.Param_loop()
+# loop
+p_loop = conf.Param_loop()
 
 p_loop.set_niter(5000)
-p_loop.set_ittime(0.002) #=1/500
+p_loop.set_ittime(0.002)  # =1/500
 
-
-#geom
-p_geom=ao.Param_geom()
+# geom
+p_geom = conf.Param_geom()
 
 p_geom.set_zenithangle(0.)
 
-
-#tel
-p_tel=ao.Param_tel()
+# tel
+p_tel = conf.Param_tel()
 
 p_tel.set_diam(40.0)
 p_tel.set_cobs(0.12)
 
-
-#atmos
-p_atmos=ao.Param_atmos()
+# atmos
+p_atmos = conf.Param_atmos()
 
 p_atmos.set_r0(0.16)
 p_atmos.set_nscreens(4)
-p_atmos.set_frac([0.5,0.2,0.2,0.1])
-p_atmos.set_alt([0.0,4499.,4500.,9000.])
-p_atmos.set_windspeed([10.0,10.0,10.0,10.0])
-p_atmos.set_winddir([0,10,20,25])
-p_atmos.set_L0([25.,25.,25.,25.])
+p_atmos.set_frac([0.5, 0.2, 0.2, 0.1])
+p_atmos.set_alt([0.0, 4499., 4500., 9000.])
+p_atmos.set_windspeed([10.0, 10.0, 10.0, 10.0])
+p_atmos.set_winddir([0., 10., 20., 25.])
+p_atmos.set_L0([25., 25., 25., 25.])
 
+# target
+p_target = conf.Param_target()
 
-#target
-p_target=ao.Param_target()
-
-p_target.set_nTargets(1)
+p_target.set_ntargets(1)
 p_target.set_xpos([0.])
 p_target.set_ypos([0.])
 p_target.set_Lambda([1.65])
 p_target.set_mag([10.])
 
-
-#wfs
-p_wfs1= ao.Param_wfs()
-p_wfs2= ao.Param_wfs()
-p_wfs3= ao.Param_wfs()
-p_wfs4= ao.Param_wfs()
-p_wfss=[p_wfs1,p_wfs2,p_wfs3,p_wfs4]
+# wfs
+p_wfs1 = conf.Param_wfs()
+p_wfs2 = conf.Param_wfs()
+p_wfs3 = conf.Param_wfs()
+p_wfs4 = conf.Param_wfs()
+p_wfss = [p_wfs1, p_wfs2, p_wfs3, p_wfs4]
 
 p_wfs1.set_type("sh")
 p_wfs1.set_nxsub(80)
@@ -64,7 +57,7 @@ p_wfs1.set_Lambda(0.5)
 p_wfs1.set_gsmag(8.)
 p_wfs1.set_optthroughput(0.5)
 p_wfs1.set_zerop(1.e11)
-p_wfs1.set_noise(1)
+p_wfs1.set_noise(1.)
 p_wfs1.set_atmos_seen(1)
 
 p_wfs2.set_type("sh")
@@ -78,7 +71,7 @@ p_wfs2.set_Lambda(0.5)
 p_wfs2.set_gsmag(8.)
 p_wfs2.set_optthroughput(0.5)
 p_wfs2.set_zerop(1.e11)
-p_wfs2.set_noise(1)
+p_wfs2.set_noise(1.)
 p_wfs2.set_atmos_seen(1)
 
 p_wfs3.set_type("sh")
@@ -92,7 +85,7 @@ p_wfs3.set_Lambda(0.5)
 p_wfs3.set_gsmag(8.)
 p_wfs3.set_optthroughput(0.5)
 p_wfs3.set_zerop(1.e11)
-p_wfs3.set_noise(1)
+p_wfs3.set_noise(1.)
 p_wfs3.set_atmos_seen(1)
 
 p_wfs4.set_type("sh")
@@ -106,25 +99,24 @@ p_wfs4.set_Lambda(0.5)
 p_wfs4.set_gsmag(8.)
 p_wfs4.set_optthroughput(0.5)
 p_wfs4.set_zerop(1.e11)
-p_wfs4.set_noise(1)
+p_wfs4.set_noise(1.)
 p_wfs4.set_atmos_seen(1)
 
+# lgs parameters
+# p_wfs0.set_gsalt(90*1.e3)
+# p_wfs0.set_lltx(0.)
+# p_wfs0.set_llty(0.)
+# p_wfs0.set_laserpower(10)
+# p_wfs0.set_lgsreturnperwatt(1.e3)
+# p_wfs0.set_proftype("Exp")
+# p_wfs0.set_beamsize(0.8)
 
-#lgs parameters
-#p_wfs0.set_gsalt(90*1.e3)
-#p_wfs0.set_lltx(0.)
-#p_wfs0.set_llty(0.)
-#p_wfs0.set_laserpower(10)
-#p_wfs0.set_lgsreturnperwatt(1.e3)
-#p_wfs0.set_proftype("Exp")
-#p_wfs0.set_beamsize(0.8)
-
-#dm
-p_dm0=ao.Param_dm()
-p_dm1=ao.Param_dm()
-p_dm2=ao.Param_dm()
-p_dm3=ao.Param_dm()
-p_dms=[p_dm0,p_dm1,p_dm2,p_dm3]
+# dm
+p_dm0 = conf.Param_dm()
+p_dm1 = conf.Param_dm()
+p_dm2 = conf.Param_dm()
+p_dm3 = conf.Param_dm()
+p_dms = [p_dm0, p_dm1, p_dm2, p_dm3]
 
 p_dm0.set_type("pzt")
 p_dm0.set_nact(81)
@@ -155,14 +147,12 @@ p_dm3.set_alt(0.)
 p_dm3.set_unitpervolt(0.0005)
 p_dm3.set_push4imat(10.)
 
-
-
-#centroiders
-p_centroider0=ao.Param_centroider()
-p_centroider1=ao.Param_centroider()
-p_centroider2=ao.Param_centroider()
-p_centroider3=ao.Param_centroider()
-p_centroiders=[p_centroider0,p_centroider1,p_centroider2,p_centroider3]
+# centroiders
+p_centroider0 = conf.Param_centroider()
+p_centroider1 = conf.Param_centroider()
+p_centroider2 = conf.Param_centroider()
+p_centroider3 = conf.Param_centroider()
+p_centroiders = [p_centroider0, p_centroider1, p_centroider2, p_centroider3]
 
 p_centroider0.set_nwfs(0)
 p_centroider0.set_type("cog")
@@ -176,23 +166,13 @@ p_centroider2.set_type("cog")
 p_centroider3.set_nwfs(3)
 p_centroider3.set_type("cog")
 
-
-
-#controllers
-p_controller0=ao.Param_controller()
-p_controllers=[p_controller0]
+# controllers
+p_controller0 = conf.Param_controller()
+p_controllers = [p_controller0]
 
 p_controller0.set_type("mv")
-p_controller0.set_nwfs([0,1,2,3])
-p_controller0.set_ndm([0,1,2,3])
+p_controller0.set_nwfs([0, 1, 2, 3])
+p_controller0.set_ndm([0, 1, 2, 3])
 p_controller0.set_maxcond(1500.)
 p_controller0.set_delay(1.)
 p_controller0.set_gain(0.3)
-
-
-#rtc
-p_rtc=ao.Param_rtc()
-
-p_rtc.set_nwfs(4)
-p_rtc.set_centroiders(p_centroiders)
-p_rtc.set_controllers(p_controllers)
