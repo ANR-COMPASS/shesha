@@ -109,15 +109,11 @@ def init_wfs_geom(p_wfs: conf.Param_wfs, r0: float, p_tel: conf.Param_tel,
     """
 
     if (p_geom.pupdiam):
-        if (p_wfs.type == scons.WFSType.SH):
+        if (p_wfs.type == scons.WFSType.SH or p_wfs.type == scons.WFSType.PYRHR):
             pdiam = p_geom.pupdiam // p_wfs.nxsub
             if (p_geom.pupdiam % p_wfs.nxsub > 0):
                 pdiam += 1
-        if (p_wfs.type == scons.WFSType.PYRHR):
-            print("WARNING : Custom pupdiam not implemented for pyrhr wfs")
-            print("WARNING: pupdiam will be set as default")
-            pdiam = -1
-            p_geom.pupdiam = 0
+
     else:
         pdiam = -1
 
@@ -128,8 +124,11 @@ def init_wfs_geom(p_wfs: conf.Param_wfs, r0: float, p_tel: conf.Param_tel,
     if not p_geom.is_init:
         # this is the wfs with largest # of subaps
         # the overall geometry is deduced from it
-        if not p_geom.pupdiam:
-            p_geom.pupdiam = p_wfs._pdiam * p_wfs.nxsub
+        #if not p_geom.pupdiam:
+        if (p_geom.pupdiam != 0 and p_geom.pupdiam != p_wfs._pdiam * p_wfs.nxsub):
+            print("WARNING: pupdiam set value not correct")
+        p_geom.pupdiam = p_wfs._pdiam * p_wfs.nxsub
+        print("pupdiam used: ", p_geom.pupdiam)
         if p_wfs.type == scons.WFSType.PYRHR:
             geom_init(p_geom, p_tel, padding=p_wfs._nrebin)
         else:
@@ -202,17 +201,18 @@ def init_wfs_size(p_wfs: conf.Param_wfs, r0: float, p_tel: conf.Param_tel, verbo
     if (p_wfs._pdiam <= 0):
         # this case is usualy for the wfs with max # of subaps
         # we look for the best compromise between pixsize and fov
-        subapdiam = p_tel.diam / float(p_wfs.nxsub)  # diam of subap
-        k = 6
-        pdiam = int(k * subapdiam / r0)  # number of phase points per subap
-        if (pdiam < 16):
-            pdiam = 16
-
-        # Must be even to keep ssp and actuators grids aligned in the pupil
-        if ((pdiam * p_wfs.nxsub) % 2):
-            pdiam += 1
-
         if (p_wfs.type == scons.WFSType.SH):
+
+            subapdiam = p_tel.diam / float(p_wfs.nxsub)  # diam of subap
+            k = 6
+            pdiam = int(k * subapdiam / r0)  # number of phase points per subap
+            if (pdiam < 16):
+                pdiam = 16
+
+            # Must be even to keep ssp and actuators grids aligned in the pupil
+            if ((pdiam * p_wfs.nxsub) % 2):
+                pdiam += 1
+
             nrebin = int(2 * subapdiam * p_wfs.pixsize /
                          (p_wfs.Lambda * 1.e-6) / CONST.RAD2ARCSEC) + 1
             nrebin = max(2, nrebin)
@@ -222,11 +222,6 @@ def init_wfs_size(p_wfs: conf.Param_wfs, r0: float, p_tel: conf.Param_tel, verbo
             Nfft = util.fft_goodsize(
                     int(pdiam / subapdiam * nrebin / p_wfs.pixsize * CONST.RAD2ARCSEC * (
                             p_wfs.Lambda * 1.e-6)))
-            # size of the support in fourier domain
-
-            # qpixsize = k * (p_wfs.Lambda*1.e-6) / r0 * CONST.RAD2ARCSEC / Nfft
-            qpixsize = (pdiam *
-                        (p_wfs.Lambda * 1.e-6) / subapdiam * CONST.RAD2ARCSEC) / Nfft
 
         if (p_wfs.type == scons.WFSType.PYRHR):
             # while (pdiam % p_wfs.npix != 0) pdiam+=1;
@@ -234,43 +229,28 @@ def init_wfs_size(p_wfs: conf.Param_wfs, r0: float, p_tel: conf.Param_tel, verbo
             pdiam = int(p_tel.diam / r0 * k)
             while (pdiam % p_wfs.nxsub != 0):
                 pdiam += 1  # we choose to have a multiple of p_wfs.nxsub
-
-            m = 3
-            # fft_goodsize( m * pdiam)
-            Nfft = int(2**np.ceil(np.log2(m * pdiam)))
-
-            nrebin = pdiam // p_wfs.nxsub
-            while (Nfft % nrebin != 0):
-                nrebin += 1  # we choose to have a divisor of Nfft
-                pdiam = nrebin * p_wfs.nxsub
-                Nfft = int(2**np.ceil(np.log2(m * pdiam)))
-
-            qpixsize = (pdiam *
-                        (p_wfs.Lambda * 1.e-6) / p_tel.diam * CONST.RAD2ARCSEC) / Nfft
-
-            padding = 2
-            nphase = pdiam + 2 * padding
-
-            fssize_pixels = int(p_wfs.fssize / qpixsize / 2.)
-
-            Ntot = Nfft // pdiam * p_wfs.nxsub
-            pixsize = qpixsize * nrebin
             pdiam = pdiam // p_wfs.nxsub
 
         # quantum pixel size
     else:
         pdiam = p_wfs._pdiam
         # this case is for a wfs with fixed # of phase points
-        subapdiam = p_tel.diam / float(p_wfs.nxsub)  # diam of subap
         Nfft = util.fft_goodsize(2 * pdiam)
-        # size of the support in fourier domain
+    # size of the support in fourier domain
 
-        qpixsize = pdiam * \
-            (p_wfs.Lambda * 1.e-6) / subapdiam * CONST.RAD2ARCSEC / Nfft
-        # quantum pixel size
+    # qpixsize = pdiam * \
+    #     (p_wfs.Lambda * 1.e-6) / subapdiam * CONST.RAD2ARCSEC / Nfft
+    # # quantum pixel size
 
     if (p_wfs.type == scons.WFSType.SH):
-        # actual rebin factor
+        subapdiam = p_tel.diam / float(p_wfs.nxsub)  # diam of subap
+
+        # size of the support in fourier domain
+
+        # qpixsize = k * (p_wfs.Lambda*1.e-6) / r0 * CONST.RAD2ARCSEC / Nfft
+        qpixsize = (pdiam * (p_wfs.Lambda * 1.e-6) / subapdiam * CONST.RAD2ARCSEC) / Nfft
+
+        # # actual rebin factor
         if (p_wfs.pixsize / qpixsize - int(p_wfs.pixsize / qpixsize) > 0.5):
             nrebin = int(p_wfs.pixsize / qpixsize) + 1
         else:
@@ -286,6 +266,25 @@ def init_wfs_size(p_wfs: conf.Param_wfs, r0: float, p_tel: conf.Param_tel, verbo
 
         if (Ntot % 2 != Nfft % 2):
             Ntot += 1
+
+    if (p_wfs.type == scons.WFSType.PYRHR):
+        pdiam = pdiam * p_wfs.nxsub
+        m = 3
+        # fft_goodsize( m * pdiam)
+        Nfft = int(2**np.ceil(np.log2(m * pdiam)))
+
+        nrebin = pdiam // p_wfs.nxsub
+        while (Nfft % nrebin != 0):
+            nrebin += 1  # we choose to have a divisor of Nfft
+            pdiam = nrebin * p_wfs.nxsub
+            Nfft = int(2**np.ceil(np.log2(m * pdiam)))
+
+        qpixsize = (pdiam *
+                    (p_wfs.Lambda * 1.e-6) / p_tel.diam * CONST.RAD2ARCSEC) / Nfft
+
+        Ntot = Nfft // pdiam * p_wfs.nxsub
+        pixsize = qpixsize * nrebin
+        pdiam = pdiam // p_wfs.nxsub
 
     p_wfs._pdiam = pdiam
     p_wfs.pixsize = pixsize
