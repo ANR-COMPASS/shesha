@@ -2,28 +2,12 @@
 Initialization of a Sensors object
 '''
 
-try:
-    from naga import naga_context
-except ImportError as err:
-    class naga_context:
-        pass
-
 import shesha_config as conf
 import shesha_constants as scons
 from shesha_constants import CONST
 
 from . import lgs_init as LGS
-
-try:
-    from Sensors import Sensors
-    from Telescope import Telescope
-except ImportError as err:
-    class Sensors:
-        pass
-    class Telescope:
-        pass
-
-
+from sutra_bind.wrap import naga_context, Sensors, Telescope
 import numpy as np
 
 

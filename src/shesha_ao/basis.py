@@ -3,14 +3,7 @@ Functions for modal basis (DM basis, KL, Btt, etc...)
 """
 import numpy as np
 
-try:
-    from Dms import Dms
-    from Rtc import Rtc
-except ImportError as err:
-    class Dms:
-        pass
-    class Rtc:
-        pass
+from sutra_bind.wrap import Dms, Rtc
 
 import shesha_config as conf
 import shesha_constants as scons
@@ -70,7 +63,8 @@ def compute_KL2V(p_controller: conf.Param_controller, dms: Dms, p_dms: list,
             indx_act += ntotact[ndm]
         elif (p_dms[ndm].type == scons.DmType.TT):
             nTT += 1
-    if (p_controller.nmodes != 0 and p_controller.nmodes < KL2V.shape[1] - 2 * nTT):
+    if (p_controller.nmodes is not None and
+                p_controller.nmodes < KL2V.shape[1] - 2 * nTT):
         KL2V = KL2V[:, :p_controller.nmodes]
     else:
         KL2V = KL2V[:, :KL2V.shape[1] - 2 * nTT]
@@ -266,6 +260,49 @@ def compute_cmat_with_KL(rtc: Rtc, KL2V: np.ndarray, nfilt: int):
     rtc.set_cmat(0, cmat.astype(np.float32))
 
     return cmat.astype(np.float32)
+
+
+def compute_fourier(nActu: int, pitch: float, actu_x_pos: np.ndarray,
+                    actu_y_pos: np.ndarray, periodic='n'):
+    # Offset xpos and ypos to get integer indices.
+    # Compute nact x nact x nact x nact Fourier basis # Periodic condition n / n-1 as option
+    # Extract values for actuators - flatten
+
+    # Periodic may be 'n' or 'n-1'
+    # Will work only for squared pitch mirrors so far
+    if periodic == 'n':
+        n = nActu
+    elif periodic == 'n-1':
+        n = nActu - 1
+    else:
+        raise ValueError('periodic can only be "n" or "n-1" to set boundary condition.')
+    xnorm = (np.round((actu_x_pos - np.min(actu_x_pos)) / pitch).astype(np.int32)) % n
+    ynorm = (np.round((actu_y_pos - np.min(actu_y_pos)) / pitch).astype(np.int32)) % n
+    totActu = len(xnorm)
+
+    data = np.zeros((n, n, n, n), dtype=np.float32)
+    for i in range(n):
+        for j in range(n):
+            data[i, j, i, j] = 1.
+
+    data = np.fft.fftn(data, axes=(2, 3))
+
+    takeSine = np.zeros((n, n), dtype=bool)  # Where to take sine instead of cosine
+    takeSine[0, n // 2 + 1:] = 1  # Half of first line
+    if n % 2 == 0:
+        takeSine[n // 2, n // 2 + 1:] = 1  # Half of waffle line
+
+    takeSine[n // 2 + 1:, :] = 1  # Bottom half
+
+    data[takeSine] *= 1j
+    data = data.real
+
+    # Extract actuators
+    actuPush = data[:, :, xnorm, ynorm]
+
+    # Add a renorm ?
+
+    return actuPush
 
 
 def compute_Btt(IFpzt, IFtt):

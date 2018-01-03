@@ -7,16 +7,8 @@ from shesha_constants import CONST
 
 import shesha_util.utilities as util
 
-try:
-    from Sensors import Sensors
-    from Rtc import Rtc
-except ImportError as err:
-    class Sensors:
-        pass
-    class Rtc:
-        pass
-
 import numpy as np
+from sutra_bind.wrap import Sensors, Rtc
 
 
 def comp_new_pyr_ampl(rtc: Rtc, n: int, p_centroider: conf.Param_centroider,

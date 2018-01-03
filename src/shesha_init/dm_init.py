@@ -1,11 +1,6 @@
 '''
 Initialization of a Dms object
 '''
-try:
-    from naga import naga_context
-except ImportError as err:
-    class naga_context:
-        pass
 
 import shesha_config as conf
 import shesha_constants as scons
@@ -19,12 +14,7 @@ import numpy as np
 
 import pandas as pd
 from scipy import interpolate
-
-try:
-    from Dms import Dms
-except ImportError as err:
-    class Dms:
-        pass
+from sutra_bind.wrap import naga_context, Dms
 
 from typing import List
 

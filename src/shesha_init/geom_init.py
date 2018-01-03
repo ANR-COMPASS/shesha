@@ -2,28 +2,13 @@
 Initialization of the system geometry and of the Telescope object
 '''
 
-try:
-    from naga import naga_context
-except ImportError as err:
-
-    class naga_context:
-        pass
-
-
 import shesha_config as conf
 import shesha_constants as scons
 from shesha_constants import CONST
 
 import shesha_util.make_pupil as mkP
 import shesha_util.utilities as util
-
-try:
-    from Telescope import Telescope
-except ImportError as err:
-
-    class Telescope:
-        pass
-
+from sutra_bind.wrap import naga_context, Telescope
 
 import numpy as np
 
@@ -605,17 +590,18 @@ def init_sh_geom(p_wfs: conf.Param_wfs, r0: float, p_tel: conf.Param_tel,
         y = X[0]
         # hrpix
         tmp = np.zeros((p_wfs._Ntot, p_wfs._Ntot))
-        tmp[indi:indj, indi:indj] = np.roll(x + (y - 1) * p_wfs._Nfft, p_wfs._Nfft / 2,
+        tmp[indi:indj, indi:indj] = np.roll(x + (y - 1) * p_wfs._Nfft, p_wfs._Nfft // 2,
                                             axis=0)
-        tmp[indi:indj, indi:indj] = np.roll(tmp[indi:indj, indi:indj], p_wfs._Nfft / 2,
+        tmp[indi:indj, indi:indj] = np.roll(tmp[indi:indj, indi:indj], p_wfs._Nfft // 2,
                                             axis=1)
         # hrmap=roll(hrpix)
-        tmp = np.roll(tmp, p_wfs._Ntot / 2, axis=0)
-        tmp = np.roll(tmp, p_wfs._Ntot / 2, axis=1)
+        tmp = np.roll(tmp, p_wfs._Ntot // 2, axis=0)
+        tmp = np.roll(tmp, p_wfs._Ntot // 2, axis=1)
 
         tmp = np.where(tmp.flatten())[0]
 
         p_wfs._hrmap = np.copy(tmp.astype(np.int32))
+        p_wfs._hrmap = np.reshape(p_wfs._hrmap, (p_wfs._hrmap.shape[0], 1))
         # must be set even if unused
 
     else:
