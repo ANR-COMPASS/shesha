@@ -17,7 +17,8 @@ def smart_import(mod, cls, verbose=False, silent=False):
         class tmp_cls:
 
             def __init__(self, *args, **kwargs):
-                self.is_fake = True
+                raise RuntimeError(
+                    "Can not initilize the simulation with fake objects")
 
         return tmp_cls
 

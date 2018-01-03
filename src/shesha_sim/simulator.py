@@ -172,9 +172,6 @@ class Simulator:
                     param_dict)
         self.c = naga_context(devices=self.config.p_loop.devices)
 
-        if hasattr(self.c, "is_fake"):
-            raise RuntimeError("Can not initilize the simulation with fake objects")
-
         self.force_context()
 
         if self.config.p_tel is None or self.config.p_geom is None:
