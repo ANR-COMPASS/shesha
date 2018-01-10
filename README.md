@@ -38,6 +38,8 @@ ipython -i test/closed_loop.py data/par/par4bench/scao_sh_16x16_8pix.py
 
 ## More documentation (maybe not fully up-to-date)
 
+Project GitHub pages with a detailed user manual : https://anr-compass.github.io/compass/
+
 doc auto-generated from code: http://shesha.readthedocs.io
 
 wiki page of the COMPASS project: https://projets-lesia.obspm.fr/projects/compass/wiki/Wiki
