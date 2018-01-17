@@ -98,7 +98,7 @@ def make_pupil_generic(dim, pupd, t_spiders=0.01, spiders_type=SpiderType.SIX, x
     if (real == 1):
         pup = np.exp(-(pup / (pupd * 0.5))**60.0)**0.69314
     else:
-        pup = (pup < (pupd + 1.) / 2.).astype(np.float32)
+        pup = (pup < (pupd + 1.) / 2).astype(np.float32)
 
     if (cobs > 0):
         if (real == 1):
@@ -180,8 +180,8 @@ def make_VLT(dim, pupd, tel):
     else:
         spiders_map = (
                 (X.T >
-                 (X - tel.cobs / 2. + tel.t_spiders / np.sin(angle)) * np.tan(angle)) +
-                (X.T < (X - tel.cobs / 2.) * np.tan(angle))) * (X > 0) * (X.T > 0)
+                 (X - tel.cobs / 2 + tel.t_spiders / np.sin(angle)) * np.tan(angle)) +
+                (X.T < (X - tel.cobs / 2) * np.tan(angle))) * (X > 0) * (X.T > 0)
         spiders_map += np.fliplr(spiders_map)
         spiders_map += np.flipud(spiders_map)
         spiders_map = interp.rotate(spiders_map, tel.pupangle, order=0, reshape=False)
@@ -229,7 +229,7 @@ def make_EELT(dim, pupd, tel, N_seg=-1):
         print("creating EELT pupil...")
         file = EELT_data + "Coord_" + tel.type_ap.decode('UTF-8') + ".dat"
         data = np.fromfile(file, sep="\n")
-        data = np.reshape(data, (data.size / 2, 2))
+        data = np.reshape(data, (data.size // 2, 2))
         x_seg = data[:, 0]
         y_seg = data[:, 1]
 
@@ -366,7 +366,7 @@ def make_phase_ab(dim, pupd, tel, pup):
 
         file = EELT_data + "Coord_" + tel.type_ap.decode('UTF-8') + ".dat"
         data = np.fromfile(file, sep="\n")
-        data = np.reshape(data, (data.size / 2, 2))
+        data = np.reshape(data, (data.size // 2, 2))
         x_seg = data[:, 0]
         y_seg = data[:, 1]
 

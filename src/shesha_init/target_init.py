@@ -1,11 +1,6 @@
 """
 Initialization of a Target object
 """
-try:
-    from naga import naga_context
-except ImportError as err:
-    class naga_context:
-        pass
 
 import shesha_config as conf
 
@@ -13,18 +8,7 @@ import shesha_constants as scons
 from shesha_constants import CONST
 
 import numpy as np
-
-try:
-    from Telescope import Telescope
-    from Target import Target, Target_brama
-except ImportError as err:
-    class Telescope:
-        pass
-    class Target:
-        pass
-    class Target_brama:
-        pass
-
+from sutra_bind.wrap import naga_context, Target, Target_brama, Telescope
 
 
 def target_init(ctxt: naga_context, telescope: Telescope, p_target: conf.Param_target,

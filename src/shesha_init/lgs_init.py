@@ -17,12 +17,8 @@ import shesha_constants as scons
 from shesha_util import utilities as util
 import numpy as np
 
-try:
-    from Sensors import Sensors
-except ImportError as err:
-    class Sensors:
-        pass
-    
+from sutra_bind.wrap import Sensors
+
 
 def make_lgs_prof1d(p_wfs: conf.Param_wfs, p_tel: conf.Param_tel, prof: np.ndarray,
                     h: np.ndarray, beam: float, center=b""):
@@ -133,10 +129,8 @@ def make_lgs_prof1d(p_wfs: conf.Param_wfs, p_tel: conf.Param_tel, prof: np.ndarr
 
     im = np.zeros((p1d.shape[1], p1d.shape[0], p1d.shape[0]), dtype=np.float32)
 
-    for i in range(p1d.shape[1]):
-        for l in range(p1d.shape[0]):
-            for c in range(p1d.shape[0]):
-                im[i, l, c] = g[l] * p1d[c, i]
+    for i in range(p1d.shape[0]):
+        im[:, i, :] = g[i] * p1d.T
 
     if (ysubs.size > 1):
         azimuth = np.arctan2(ysubs[p_wfs._validsubsy] - p_wfs.llty,

@@ -5,14 +5,6 @@ Must be instantiated for running a COMPASS simulation script easily
 import sys
 import os
 
-try:
-    from naga import naga_context
-except ImportError as err:
-    class naga_context:
-        def __init__(devices=0):
-            pass
-
-
 import shesha_init as init
 import shesha_constants as scons
 import shesha_util.hdf5_utils as h5u
@@ -20,29 +12,7 @@ import shesha_util.hdf5_utils as h5u
 import time
 
 from typing import Iterable, Any, Dict
-
-try:
-    from Dms import Dms
-    from Sensors import Sensors
-    from Telescope import Telescope
-    from Atmos import Atmos
-    from Target import Target
-    from Rtc import Rtc, Rtc_brama
-except ImportError as err:
-    class Dms:
-        pass
-    class Sensors:
-        pass
-    class Telescope:
-        pass
-    class Atmos:
-        pass
-    class Target:
-        pass
-    class Rtc:
-        pass
-    class Rtc_brama:
-        pass
+from sutra_bind.wrap import naga_context, Sensors, Dms, Rtc, Atmos, Telescope, Target
 
 
 class Simulator:
@@ -131,17 +101,11 @@ class Simulator:
         if (pathfile not in sys.path):
             sys.path.insert(0, pathfile)
 
-        if self.config is not None:
-            name = self.config.__name__
-            print("Removing previous config")
-            self.config = None
-            try:
-                del sys.modules[name]
-            except:
-                pass
-
         print("loading: %s" % filename.split(".py")[0])
         self.config = __import__(filename.split(".py")[0])
+        del sys.modules[self.config.__name__]  # Forced reload
+        self.config = __import__(filename.split(".py")[0])
+
         # exec("import %s as wao_config" % filename.split(".py")[0])
         sys.path.remove(pathfile)
 
@@ -161,9 +125,9 @@ class Simulator:
         if not hasattr(self.config, 'p_wfss'):
             self.config.p_wfss = None
         if not hasattr(self.config, 'p_centroiders'):
-            self.config.p_tel = None
+            self.config.p_centroiders = None
         if not hasattr(self.config, 'p_controllers'):
-            self.config.p_tel = None
+            self.config.p_controllers = None
 
         if not hasattr(self.config, 'simul_name'):
             self.config.simul_name = None
@@ -207,6 +171,7 @@ class Simulator:
                     os.environ["SHESHA_ROOT"] + "/data/dataBase/", self.config,
                     param_dict)
         self.c = naga_context(devices=self.config.p_loop.devices)
+
         self.force_context()
 
         if self.config.p_tel is None or self.config.p_geom is None:

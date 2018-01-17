@@ -3,27 +3,15 @@ Computation implementations of interaction matrix
 """
 import numpy as np  # type: ignore
 import time
+from typing import List  # Mypy checker
+from tqdm import tqdm
 
 import shesha_config as conf
 import shesha_constants as scons
 import shesha_init.lgs_init as lgs
 import shesha_util.hdf5_utils as h5u
 
-try:
-    from Sensors import Sensors
-    from Dms import Dms
-    from Rtc import Rtc
-except ImportError as err:
-    class Sensors:
-        pass
-    class Dms:
-        pass
-    class Rtc:
-        pass
-
-from typing import List  # Mypy checker
-
-from tqdm import tqdm
+from sutra_bind.wrap import Sensors, Dms, Rtc
 
 
 def imat_geom(wfs: Sensors, dms: Dms, p_wfss: List[conf.Param_wfs],
