@@ -17,6 +17,7 @@ import time
 import pyqtgraph as pg
 from pyqtgraph.dockarea import Dock, DockArea
 sys.path.insert(0, os.environ["SHESHA_ROOT"] + "/AOlib")
+sys.path.insert(0, os.environ["SHESHA_ROOT"] + "/src/shesha_util")
 
 from tools import plsh, plpyr
 
@@ -57,9 +58,10 @@ class widgetAOWindow(TemplateBaseClass):
         TemplateBaseClass.__init__(self)
 
         self.BRAMA = BRAMA
-        self.SRLE = deque(maxlen=20)
-        self.SRSE = deque(maxlen=20)
-        self.numiter = deque(maxlen=20)
+        self.rollingWindow = 100
+        self.SRLE = deque(maxlen=self.rollingWindow)
+        self.SRSE = deque(maxlen=self.rollingWindow)
+        self.numiter = deque(maxlen=self.rollingWindow)
         self.expert = expert
 
         self.ui = WindowTemplate()
@@ -288,7 +290,7 @@ class widgetAOWindow(TemplateBaseClass):
                 for win in st["float"]:
                     self.restoreState(win[0]['main'])
 
-                # rearange docks as in stored state
+                # rearange dock s as in stored state
                 self.area.restoreState(st)
         except FileNotFoundError as err:
             warnings.warn(filename + "not found")
@@ -619,18 +621,27 @@ class widgetAOWindow(TemplateBaseClass):
 
         self.loadConfig()
 
-    def update_displayDock(self, state: bool):
+    def update_displayDock(self):
         guilty_guy = self.sender().text()
+        state = self.sender().isChecked()
         if state:
             self.area.addDock(self.docks[guilty_guy])
         elif self.docks[guilty_guy].isVisible():
             self.docks[guilty_guy].close()
 
     def add_dispDock(self, name: str, parent, type: str="pg") -> None:
-        w = QtGui.QCheckBox(name)
-        w.clicked.connect(self.update_displayDock)
-        parent.children()[0].addWidget(w)
-        self.disp_checkboxes.append(w)
+        # action = parent.addAction(name)
+        # action.setCheckable(True)
+        # action.changed.connect(self.update_displayDock)
+        # self.disp_checkboxes.append(action)
+
+        checkBox = QtGui.QCheckBox(name, parent)
+        checkBox.clicked.connect(self.update_displayDock)
+        checkableAction = QtGui.QWidgetAction(parent)
+        checkableAction.setDefaultWidget(checkBox)
+        parent.addAction(checkableAction)
+        self.disp_checkboxes.append(checkBox)
+
         d = Dock(name)  # , closable=True)
         self.docks[name] = d
         if type == "pg":
@@ -685,13 +696,14 @@ class widgetAOWindow(TemplateBaseClass):
             pass
 
         for groupbox in [
-                self.ui.wao_phasesgroup, self.ui.wao_imagesgroup, self.ui.wao_graphgroup
+                self.ui.wao_phasesgroup_tb, self.ui.wao_imagesgroup_tb,
+                self.ui.wao_graphgroup_tb
         ]:
-            layout = groupbox.layout()
-            while not layout.isEmpty():
-                w = layout.itemAt(0)
-                layout.removeItem(w)
-                w.widget().setParent(None)
+            layout = groupbox.menu()
+            while layout and not layout.isEmpty():
+                w = layout.children()[0]
+                layout.removeAction(w)
+                w.setParent(None)
         self.disp_checkboxes.clear()
 
         for key, pgpl in self.SRcircles.items():
@@ -716,54 +728,69 @@ class widgetAOWindow(TemplateBaseClass):
         self.imgs.clear()
         self.viewboxes.clear()
 
+        self.wao_phasesgroup_cb = QtGui.QMenu(self)
+        self.ui.wao_phasesgroup_tb.setMenu(self.wao_phasesgroup_cb)
+        self.ui.wao_phasesgroup_tb.setText('Select')
+        self.ui.wao_phasesgroup_tb.setPopupMode(QtWidgets.QToolButton.InstantPopup)
+
+        self.wao_graphgroup_cb = QtGui.QMenu(self)
+        self.ui.wao_graphgroup_tb.setMenu(self.wao_graphgroup_cb)
+        self.ui.wao_graphgroup_tb.setText('Select')
+        self.ui.wao_graphgroup_tb.setPopupMode(QtWidgets.QToolButton.InstantPopup)
+
+        self.ui.wao_imagesgroup_tb.setText('Select')
+        self.wao_imagesgroup_cb = QtGui.QMenu(self)
+        self.ui.wao_imagesgroup_tb.setMenu(self.wao_imagesgroup_cb)
+        self.ui.wao_imagesgroup_tb.setPopupMode(QtWidgets.QToolButton.InstantPopup)
+
         self.natm = len(self.sim.config.p_atmos.alt)
         for atm in range(self.natm):
-            name = 'atm%d' % atm
-            self.add_dispDock(name, self.ui.wao_phasesgroup)
+            name = 'atm_%d' % atm
+            self.add_dispDock(name, self.wao_phasesgroup_cb)
 
         self.nwfs = len(self.sim.config.p_wfss)
         for wfs in range(self.nwfs):
-            name = 'wfs%d' % wfs
-            self.add_dispDock(name, self.ui.wao_phasesgroup)
-            name = 'slpComp%d' % wfs
-            self.add_dispDock(name, self.ui.wao_graphgroup, "MPL")
-            name = 'slpGeom%d' % wfs
-            self.add_dispDock(name, self.ui.wao_graphgroup, "MPL")
+            name = 'wfs_%d' % wfs
+            self.add_dispDock(name, self.wao_phasesgroup_cb)
+            name = 'slpComp_%d' % wfs
+            self.add_dispDock(name, self.wao_graphgroup_cb, "MPL")
+            name = 'slpGeom_%d' % wfs
+            self.add_dispDock(name, self.wao_graphgroup_cb, "MPL")
             if self.sim.config.p_wfss[wfs].type == scons.WFSType.SH:
-                name = 'SH%d' % wfs
-                self.add_dispDock(name, self.ui.wao_imagesgroup)
+                name = 'SH_%d' % wfs
+                self.add_dispDock(name, self.wao_imagesgroup_cb)
             elif self.sim.config.p_wfss[wfs].type == scons.WFSType.PYRHR:
-                name = 'pyrHR%d' % wfs
-                self.add_dispDock(name, self.ui.wao_imagesgroup)
-                name = 'pyrLR%d' % wfs
-                self.add_dispDock(name, self.ui.wao_imagesgroup)
+                name = 'pyrHR_%d' % wfs
+                self.add_dispDock(name, self.wao_imagesgroup_cb)
+                name = 'pyrLR_%d' % wfs
+                self.add_dispDock(name, self.wao_imagesgroup_cb)
             else:
                 raise "Analyser unknown"
 
         self.ndm = len(self.sim.config.p_dms)
         for dm in range(self.ndm):
-            name = 'dm%d' % dm
+            name = 'dm_%d' % dm
             w = QtGui.QCheckBox(name)
-            self.add_dispDock(name, self.ui.wao_phasesgroup)
+            self.add_dispDock(name, self.wao_phasesgroup_cb)
 
         self.ntar = self.sim.config.p_target.ntargets
         for tar in range(self.ntar):
-            name = 'tar%d' % tar
-            self.add_dispDock(name, self.ui.wao_phasesgroup)
+            name = 'tar_%d' % tar
+            self.add_dispDock(name, self.wao_phasesgroup_cb)
         for tar in range(self.ntar):
-            name = 'psfSE%d' % tar
-            self.add_dispDock(name, self.ui.wao_imagesgroup)
+            name = 'psfSE_%d' % tar
+            self.add_dispDock(name, self.wao_imagesgroup_cb)
         for tar in range(self.ntar):
-            name = 'psfLE%d' % tar
-            self.add_dispDock(name, self.ui.wao_imagesgroup)
+            name = 'psfLE_%d' % tar
+            self.add_dispDock(name, self.wao_imagesgroup_cb)
 
-        self.add_dispDock("Strehl", self.ui.wao_graphgroup, "SR")
+        self.add_dispDock("Strehl", self.wao_graphgroup_cb, "SR")
 
         self.ui.wao_resetSR_tarNum.setValue(0)
-        self.ui.wao_resetSR_tarNum.setMaximum(self.sim.config.p_target.ntargets)
+        self.ui.wao_resetSR_tarNum.setMaximum(self.sim.config.p_target.ntargets - 1)
 
         self.ui.wao_dispSR_tar.setValue(0)
-        self.ui.wao_dispSR_tar.setMaximum(self.sim.config.p_target.ntargets)
+        self.ui.wao_dispSR_tar.setMaximum(self.sim.config.p_target.ntargets - 1)
 
         pyrSpecifics = [
                 self.ui.ui_modradiusPanel, self.ui.ui_modradiusPanelarcesec,
@@ -855,7 +882,7 @@ class widgetAOWindow(TemplateBaseClass):
         self.currentViewSelected = None  # type: str
 
         for i in range(self.natm):
-            key = "atm%d" % i
+            key = "atm_%d" % i
             data = self.sim.atm.get_screen(self.sim.config.p_atmos.alt[i])
             cx, cy = self.circleCoords(self.sim.config.p_geom.pupdiam / 2, 1000,
                                        data.shape[0], data.shape[1])
@@ -864,18 +891,18 @@ class widgetAOWindow(TemplateBaseClass):
             self.SRcircles[key].setPoints(cx, cy)
 
         for i in range(self.nwfs):
-            key = "wfs%d" % i
+            key = "wfs_%d" % i
             data = self.sim.wfs.get_phase(i)
             cx, cy = self.circleCoords(self.sim.config.p_geom.pupdiam / 2, 1000,
                                        data.shape[0], data.shape[1])
             self.SRcircles[key] = pg.ScatterPlotItem(cx, cy, pen='r', size=1)
             self.viewboxes[key].addItem(self.SRcircles[key])
             self.SRcircles[key].setPoints(cx, cy)
-            key = 'slpComp%d' % i
-            key = 'slpGeom%d' % i
+            key = 'slpComp_%d' % i
+            key = 'slpGeom_%d' % i
 
         for i in range(self.ndm):
-            key = "dm%d" % i
+            key = "dm_%d" % i
             dm_type = self.sim.config.p_dms[i].type
             alt = self.sim.config.p_dms[i].alt
             data = self.sim.dms.get_dm(dm_type, alt)
@@ -886,7 +913,7 @@ class widgetAOWindow(TemplateBaseClass):
             self.SRcircles[key].setPoints(cx, cy)
 
         for i in range(self.sim.config.p_target.ntargets):
-            key = "tar%d" % i
+            key = "tar_%d" % i
             data = self.sim.tar.get_phase(i)
             cx, cy = self.circleCoords(self.sim.config.p_geom.pupdiam / 2, 1000,
                                        data.shape[0], data.shape[1])
@@ -895,7 +922,7 @@ class widgetAOWindow(TemplateBaseClass):
             self.SRcircles[key].setPoints(cx, cy)
 
             data = self.sim.tar.get_image(i, b"se")
-            for psf in ["psfSE", "psfLE"]:
+            for psf in ["psfSE_", "psfLE_"]:
                 key = psf + str(i)
                 Delta = 5
                 self.SRCrossX[key] = pg.PlotCurveItem(
@@ -1115,14 +1142,11 @@ class widgetAOWindow(TemplateBaseClass):
             return
         else:
             try:
-                if self.natm > 9 or self.natm > 9 or self.natm > 9 or self.natm > 9:
-                    raise "this method will not working"
-
                 for key, dock in self.docks.items():
                     if key == "Strehl":
                         continue
                     elif dock.isVisible():
-                        index = int(key[-1])
+                        index = int(key.split("_")[-1])
                         data = None
                         if "atm" in key:
                             data = self.sim.atm.get_screen(

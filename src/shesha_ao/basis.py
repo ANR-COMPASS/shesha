@@ -11,6 +11,7 @@ import shesha_constants as scons
 from scipy.sparse import csr_matrix
 
 from typing import List
+from tqdm import tqdm
 
 
 def compute_KL2V(p_controller: conf.Param_controller, dms: Dms, p_dms: list,
@@ -103,7 +104,7 @@ def compute_DMbasis(g_dm: Dms, p_dm: conf.Param_dm, p_geom: conf.Param_geom):
     indx_valid = np.where(pup.flatten("F") > 0)[0].astype(np.int32)
 
     #IFbasis = np.ndarray((indx_valid.size, p_dm._ntotact), dtype=np.float32)
-    for i in range(p_dm._ntotact):
+    for i in tqdm(range(p_dm._ntotact)):
         g_dm.resetdm(p_dm.type, p_dm.alt)
         g_dm.comp_oneactu(p_dm.type, p_dm.alt, i, 1.0)
         shape = g_dm.get_dm(p_dm.type, p_dm.alt)
@@ -349,7 +350,7 @@ def compute_Btt(IFpzt, IFtt):
     B = G.dot(U).dot(L)
 
     # Rajout du TT
-    TT = (IFtt.T.dot(IFtt) / N)
+    TT = IFtt.T.dot(IFtt) / N
     Btt = np.zeros((n + 2, n - 1))
     Btt[:B.shape[0], :B.shape[1]] = B
     mini = 1. / np.sqrt(np.abs(TT))
@@ -358,10 +359,10 @@ def compute_Btt(IFpzt, IFtt):
     Btt[n:, n - 3:] = mini
 
     # Calcul du projecteur actus-->modes
-    delta = np.zeros((n + IFtt.shape[1], n + IFtt.shape[1]))
+    Delta = np.zeros((n + IFtt.shape[1], n + IFtt.shape[1]))
     #IFpzt = rtc.get_IFpztsparse(1).T
-    delta[:-2, :-2] = IFpzt.T.dot(IFpzt).toarray() / N
-    delta[-2:, -2:] = IFtt.T.dot(IFtt) / N
-    P = Btt.T.dot(delta)
+    Delta[:-2, :-2] = delta
+    Delta[-2:, -2:] = TT
+    P = Btt.T.dot(Delta)
 
     return Btt.astype(np.float32), P.astype(np.float32)

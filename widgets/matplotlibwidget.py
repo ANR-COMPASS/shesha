@@ -32,7 +32,6 @@ class MatplotlibWidget(QtGui.QWidget):
         self.setLayout(self.vbl)
 """
 
-
 #!/usr/bin/python
 import sys
 import platform
@@ -49,16 +48,21 @@ import matplotlib
 #matplotlib.rcParams['backend.qt4']='PySide'
 #matplotlib.style.use('ggplot')
 matplotlib.style.use('seaborn-muted')
+
+
 #Embeddable matplotlib figure/canvas
 class MplCanvas(FigureCanvas):
+
     def __init__(self):
         self.fig = Figure(frameon=True)
         self.gs1 = gridspec.GridSpec(1, 1)
         self.axes = self.fig.add_subplot(self.gs1[0], aspect="auto")
 
         FigureCanvas.__init__(self, self.fig)
-        FigureCanvas.setSizePolicy(self, QtWidgets.QSizePolicy.Expanding,QtWidgets.QSizePolicy.Expanding)
+        FigureCanvas.setSizePolicy(self, QtWidgets.QSizePolicy.Expanding,
+                                   QtWidgets.QSizePolicy.Expanding)
         FigureCanvas.updateGeometry(self)
+
 
 #creates embeddable matplotlib figure/canvas with toolbar
 class MatplotlibWidget(QtWidgets.QWidget):
@@ -68,7 +72,7 @@ class MatplotlibWidget(QtWidgets.QWidget):
         self.create_framentoolbar()
 
     def create_framentoolbar(self):
-        self.frame = QWidget()
+        self.frame = QtWidgets.QWidget()
         self.canvas = MplCanvas()
         self.canvas.setParent(self.frame)
         self.mpltoolbar = Navigationtoolbar(self.canvas, self.frame)

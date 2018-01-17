@@ -100,7 +100,7 @@ p_controllers = [p_controller0]
 p_controller0.set_type("ls")
 p_controller0.set_nwfs([0])
 p_controller0.set_ndm([0, 1])
-p_controller0.set_maxcond(15.)
+p_controller0.set_maxcond(1500.)
 p_controller0.set_delay(1.)
 p_controller0.set_gain(0.4)
 
