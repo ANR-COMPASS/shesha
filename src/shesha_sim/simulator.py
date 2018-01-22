@@ -196,9 +196,10 @@ class Simulator:
         if self.config.p_atmos is not None:
             #   atmos
             print("->atmos")
-            self.atm = init.atmos_init(self.c, self.config.p_atmos, self.config.p_tel,
-                                       self.config.p_geom, ittime,
-                                       dataBase=self.matricesToLoad, use_DB=self.use_DB)
+            self.atm = init.atmos_init(
+                    self.c, self.config.p_atmos, self.config.p_tel, self.config.p_geom,
+                    ittime, p_wfss=self.config.p_wfss, p_target=self.config.p_target,
+                    dataBase=self.matricesToLoad, use_DB=self.use_DB)
         else:
             self.atm = None
 

@@ -30,7 +30,7 @@ class Param_dm:
         self.__push4imat = 1.  # nominal voltage for imat
 
         # Margins for actuator selection
-        self.__margin_out = -1.  # outer margin (pitches) from pupil diameter
+        self.__margin_out = None  # outer margin (pitches) from pupil diameter
         # inner margin (pitches) from central obstruction
         self.__margin_in = 0.
         self.__pzt_extent = 5.  # Extent of pzt DM (pitches)

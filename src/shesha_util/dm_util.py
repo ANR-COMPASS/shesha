@@ -58,7 +58,7 @@ def dim_dm_patch(pupdiam: int, diam: float, type: bytes, alt: float,
                 np.linalg.norm([xpos_wfs[w], ypos_wfs[w]]) for w in range(len(xpos_wfs))
         ]
     if ((type == scons.DmType.PZT) or (type == scons.DmType.TT)):
-        pp = (diam * pupdiam)
+        pp = (diam / pupdiam)
     elif (type == scons.DmType.KL):
         pp = (pupdiam)
     else:

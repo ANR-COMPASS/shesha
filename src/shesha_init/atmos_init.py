@@ -12,8 +12,8 @@ import numpy as np
 
 
 def atmos_init(context: naga_context, p_atmos: conf.Param_atmos, p_tel: conf.Param_tel,
-               p_geom: conf.Param_geom, ittime=None, p_wfss=None, sensors=None,
-               p_target=None, dataBase={}, use_DB=False):
+               p_geom: conf.Param_geom, ittime=None, p_wfss=None, p_target=None,
+               dataBase={}, use_DB=False):
     """
     Initializes an Atmos object
 
@@ -24,7 +24,6 @@ def atmos_init(context: naga_context, p_atmos: conf.Param_atmos, p_tel: conf.Par
         p_geom: (Param_geom): Geometry parameters
         ittime: (float): (optional) exposition time [s]
         p_wfss: (list of Param_wfs): (optional) WFS parameters
-        sensors: (Wfs): (optional) Wfs object
         p_target: (Param_target): (optional) target parameters
         dataBase: (dict): (optional) dictionary for data base
         use_DB: (bool): (optional) flag for using the dataBase system

@@ -38,7 +38,7 @@ class SimulatorBrama(Simulator):
                     self.c, self.tel, self.wfs, self.dms, self.atm, self.config.p_wfss,
                     self.config.p_tel, self.config.p_geom, self.config.p_atmos, ittime,
                     self.config.p_centroiders, self.config.p_controllers,
-                    self.config.p_dms, brama=True)
+                    self.config.p_dms, brama=True, tar=self.tar)
         else:
             self.rtc = None
 
