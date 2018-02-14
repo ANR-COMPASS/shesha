@@ -22,7 +22,8 @@ from tqdm import tqdm
 
 
 def dm_init(context: naga_context, p_dms: List[conf.Param_dm], p_tel: conf.Param_tel,
-            p_geom: conf.Param_geom, p_wfss: List[conf.Param_wfs]=None) -> Dms:
+            p_geom: conf.Param_geom, p_wfss: List[conf.Param_wfs]=None,
+            keepAllActu: bool=False) -> Dms:
     """Create and initialize a Dms object on the gpu
 
     :parameters:
@@ -47,13 +48,14 @@ def dm_init(context: naga_context, p_dms: List[conf.Param_dm], p_tel: conf.Param
             # max_extent
             #_dm_init(dms, p_dms[i], p_wfss, p_geom, p_tel, & max_extent)
             _dm_init(dms, p_dms[i], xpos_wfs, ypos_wfs, p_geom, p_tel.diam, p_tel.cobs,
-                     max_extent)
+                     max_extent, keepAllActu=keepAllActu)
 
     return dms
 
 
 def _dm_init(dms: Dms, p_dm: conf.Param_dm, xpos_wfs: list, ypos_wfs: list,
-             p_geom: conf.Param_geom, diam: float, cobs: float, max_extent: list):
+             p_geom: conf.Param_geom, diam: float, cobs: float, max_extent: list,
+             keepAllActu: bool=False):
     """ inits a Dms object on the gpu
 
     :parameters:
@@ -91,7 +93,7 @@ def _dm_init(dms: Dms, p_dm: conf.Param_dm, xpos_wfs: list, ypos_wfs: list,
                                                         p_geom.ssize)
 
             # calcul defaut influsize
-            make_pzt_dm(p_dm, p_geom, cobs)
+            make_pzt_dm(p_dm, p_geom, cobs, keepAllActu=keepAllActu)
         else:
             init_pzt_from_hdf5(p_dm, p_geom, diam)
 
@@ -177,7 +179,8 @@ def dm_init_standalone(p_dms: list, p_geom: conf.Param_geom, diam=1., cobs=0.,
     return dms
 
 
-def make_pzt_dm(p_dm: conf.Param_dm, p_geom: conf.Param_geom, cobs: float):
+def make_pzt_dm(p_dm: conf.Param_dm, p_geom: conf.Param_geom, cobs: float,
+                keepAllActu: bool=False):
     """Compute the actuators positions and the influence functions for a pzt DM
 
     :parameters:
@@ -233,9 +236,12 @@ def make_pzt_dm(p_dm: conf.Param_dm, p_geom: conf.Param_geom, cobs: float):
     else:
         raise ValueError("This pattern does not exist for pzt dm")
 
-    inbigcirc = dm_util.select_actuators(cub[0, :], cub[1, :], p_dm.nact, p_dm._pitch,
-                                         cobs, p_dm.margin_in, p_dm.margin_out,
-                                         p_dm._ntotact)
+    if keepAllActu:
+        inbigcirc = np.arange(cub.shape[1])
+    else:
+        inbigcirc = dm_util.select_actuators(cub[0, :], cub[1, :], p_dm.nact,
+                                             p_dm._pitch, cobs, p_dm.margin_in,
+                                             p_dm.margin_out, p_dm._ntotact)
     p_dm._ntotact = inbigcirc.size
 
     # print(('inbigcirc',inbigcirc.shape))

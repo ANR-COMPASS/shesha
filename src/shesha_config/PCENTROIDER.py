@@ -36,10 +36,10 @@ class Param_centroider:
         self.__interpmat = None
         """ optional reference function(s) used for corr centroiding"""
         self.__method = 1
-        """ optional method used in the pyrhr centroider (0: nosinus global
-                                                 1: sinus global
-                                                 2: nosinus local
-                                                 3: sinus local)"""
+        """ optional method used in the pyrhr centroider (0: sinus global
+                                                 1: nosinus global
+                                                 2: sinus local
+                                                 3: nosinus local)"""
 
     def set_nwfs(self, n):
         """ Set the index of the WFS handled by the centroider

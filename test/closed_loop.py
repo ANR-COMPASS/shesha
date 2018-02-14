@@ -28,10 +28,9 @@ else:
     sim = shesha_sim.Simulator(param_file)
 
 if arguments["--devices"]:
-    devices = []
-    for k in range(len(arguments["--devices"])):
-        devices.append(int(arguments["--devices"][k]))
-    sim.config.p_loop.set_devices(devices)
+    sim.config.p_loop.set_devices([
+            int(device) for device in arguments["--devices"].split(",")
+    ])
 
 sim.init_sim()
 sim.loop(sim.config.p_loop.niter)

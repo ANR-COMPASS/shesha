@@ -67,7 +67,7 @@ class MplCanvas(FigureCanvas):
 #creates embeddable matplotlib figure/canvas with toolbar
 class MatplotlibWidget(QtWidgets.QWidget):
 
-    def __init__(self, parent = None):
+    def __init__(self, parent=None):
         QtWidgets.QWidget.__init__(self, parent)
         self.create_framentoolbar()
 

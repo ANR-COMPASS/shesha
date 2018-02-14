@@ -77,7 +77,7 @@ def atmos_init(context: naga_context, p_atmos: conf.Param_atmos, p_tel: conf.Par
     L0_pix = p_atmos.L0 * p_geom.pupdiam / p_tel.diam
 
     if p_atmos.seeds is None:
-        p_atmos.seeds = (np.arange(p_atmos.nscreens, dtype=np.int64) + 1) * 1234
+        p_atmos.seeds = np.arange(p_atmos.nscreens, dtype=np.int64) + 1234
 
     atm = Atmos(context, p_atmos.nscreens, p_atmos.r0, p_atmos.pupixsize,
                 p_atmos.dim_screens, p_atmos.frac, p_atmos.alt, p_atmos.windspeed,

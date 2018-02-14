@@ -189,10 +189,35 @@ class Simulator:
                     'An ittime (iteration time in seconds) value through a Param_loop is required.'
             )
 
+        self._tel_init(r0, ittime)
+
+        self._atm_init(ittime)
+
+        self._dms_init()
+
+        self._tar_init()
+
+        self._wfs_init()
+
+        self._rtc_init(ittime)
+
+        self.is_init = True
+        if self.use_DB:
+            h5u.validDataBase(os.environ["SHESHA_ROOT"] + "/data/dataBase/",
+                              self.matricesToLoad)
+
+    def _tel_init(self, r0: float, ittime: float) -> None:
+        """
+        Initializes the Telescope object in the simulator
+        """
         print("->tel")
         self.tel = init.tel_init(self.c, self.config.p_geom, self.config.p_tel, r0,
                                  ittime, self.config.p_wfss)
 
+    def _atm_init(self, ittime: float) -> None:
+        """
+        Initializes the Atmos object in the simulator
+        """
         if self.config.p_atmos is not None:
             #   atmos
             print("->atmos")
@@ -203,6 +228,10 @@ class Simulator:
         else:
             self.atm = None
 
+    def _dms_init(self) -> None:
+        """
+        Initializes the DMs object in the simulator
+        """
         if self.config.p_dms is not None:
             #   dm
             print("->dm")
@@ -210,23 +239,6 @@ class Simulator:
                                     self.config.p_geom, self.config.p_wfss)
         else:
             self.dms = None
-
-        self._tar_init()
-
-        if self.config.p_wfss is not None:
-            print("->wfs")
-            self.wfs = init.wfs_init(self.c, self.tel, self.config.p_wfss,
-                                     self.config.p_tel, self.config.p_geom,
-                                     self.config.p_dms, self.config.p_atmos)
-        else:
-            self.wfs = None
-
-        self._rtc_init(ittime)
-
-        self.is_init = True
-        if self.use_DB:
-            h5u.validDataBase(os.environ["SHESHA_ROOT"] + "/data/dataBase/",
-                              self.matricesToLoad)
 
     def _tar_init(self) -> None:
         """
@@ -240,6 +252,18 @@ class Simulator:
                                         brama=False)
         else:
             self.tar = None
+
+    def _wfs_init(self) -> None:
+        """
+        Initializes the WFS object in the simulator
+        """
+        if self.config.p_wfss is not None:
+            print("->wfs")
+            self.wfs = init.wfs_init(self.c, self.tel, self.config.p_wfss,
+                                     self.config.p_tel, self.config.p_geom,
+                                     self.config.p_dms, self.config.p_atmos)
+        else:
+            self.wfs = None
 
     def _rtc_init(self, ittime: float) -> None:
         """
@@ -282,7 +306,9 @@ class Simulator:
         if move_atmos:
             self.atm.move_atmos()
 
-        if (self.config.p_controllers[nControl].type == scons.ControllerType.GEO):
+        if (
+                self.config.p_controllers is not None and
+                self.config.p_controllers[nControl].type == scons.ControllerType.GEO):
             for t in tar_trace:
                 if see_atmos:
                     self.tar.raytrace(t, b"atmos", atmos=self.atm)
