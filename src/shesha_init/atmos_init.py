@@ -7,7 +7,7 @@ from shesha_constants import CONST
 import shesha_util.iterkolmo as itK
 import shesha_util.hdf5_utils as h5u
 from sutra_bind.wrap import naga_context, Atmos
-
+from tqdm import tqdm
 import numpy as np
 
 
@@ -58,9 +58,10 @@ def atmos_init(context: naga_context, p_atmos: conf.Param_atmos, p_tel: conf.Par
     max_size = max(norms)
 
     # Meta-pupil diameter for all layers depending on altitude
-    patch_diam = p_geom._n + 2 * (
-            max_size * CONST.ARCSEC2RAD * p_atmos.alt) / p_atmos.pupixsize + 4
-    p_atmos.dim_screens = (patch_diam + patch_diam % 2).astype(np.int64)
+    patch_diam = (p_geom._n + 2 *
+                  (max_size * CONST.ARCSEC2RAD * p_atmos.alt) / p_atmos.pupixsize +
+                  4).astype(np.int64)
+    p_atmos.dim_screens = (patch_diam + patch_diam % 2)
 
     # Phase screen speeds
     lin_delta = p_geom.pupdiam / p_tel.diam * p_atmos.windspeed * \
@@ -83,7 +84,8 @@ def atmos_init(context: naga_context, p_atmos: conf.Param_atmos, p_tel: conf.Par
                 p_atmos.dim_screens, p_atmos.frac, p_atmos.alt, p_atmos.windspeed,
                 p_atmos.winddir, p_atmos._deltax, p_atmos._deltay)
 
-    for i in range(p_atmos.nscreens):
+    print("Creating turbulent layers :")
+    for i in tqdm(range(p_atmos.nscreens)):
         if "A" in dataBase:
             A, B, istx, isty = h5u.load_AB_from_dataBase(dataBase, i)
         else:

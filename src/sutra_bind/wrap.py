@@ -24,11 +24,11 @@ def smart_import(mod, cls, verbose=False, silent=False):
 
 Dms = smart_import("Dms", "Dms")
 Rtc = smart_import("Rtc", "Rtc")
-Rtc_brama = smart_import("Rtc", "Rtc_brama", silent=True)
+Rtc_brahma = smart_import("Rtc", "Rtc_brahma", silent=True)
 Sensors = smart_import("Sensors", "Sensors")
 Atmos = smart_import("Atmos", "Atmos")
 Telescope = smart_import("Telescope", "Telescope")
 Target = smart_import("Target", "Target")
-Target_brama = smart_import("Target", "Target_brama", silent=True)
+Target_brahma = smart_import("Target", "Target_brahma", silent=True)
 
 naga_context = smart_import("naga", "naga_context")

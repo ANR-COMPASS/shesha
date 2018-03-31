@@ -12,9 +12,9 @@
 .. autoclass:: shesha_sim.Bench
    :members:
 
-.. _shesha_sim.BenchBrama class:
+.. _shesha_sim.BenchBrahma class:
 
-.. autoclass:: shesha_sim.BenchBrama
+.. autoclass:: shesha_sim.BenchBrahma
    :members:
 
 .. _shesha_sim.Simulator class:
@@ -22,7 +22,7 @@
 .. autoclass:: shesha_sim.Simulator
    :members:
 
-.. _shesha_sim.SimulatorBrama class:
+.. _shesha_sim.SimulatorBrahma class:
 
-.. autoclass:: shesha_sim.SimulatorBrama
+.. autoclass:: shesha_sim.SimulatorBrahma
    :members:

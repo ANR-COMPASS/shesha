@@ -356,63 +356,61 @@ def init_pyrhr_geom(p_wfs: conf.Param_wfs, r0: float, p_tel: conf.Param_tel,
     x = y.T
 
     Pangle = pup_sep * nrebin  # Pyramid angle in HR pixels
-    K = 2 * np.pi * Pangle / pyrsize
-    pyr = K * (np.abs(x) + np.abs(y))  # Pyramide
-    pyr = np.fft.fftshift(pyr)
+    centers = Pangle * np.array([[-1, 1], [1, 1], [-1, -1], [1, -1]], dtype=np.float32)
+    if p_wfs.pyr_misalignments is not None:
+        mis = np.asarray(p_wfs.pyr_misalignments) * nrebin
+    else:
+        mis = np.zeros((4, 2), dtype=np.float32)
+    # Pyrarmid as minimal intersect of 4 tilting planes
+    pyr = 2 * np.pi / pyrsize * np.min(
+            np.asarray([(c[0] + m[0]) * x + (c[1] + m[1]) * y
+                        for c, m in zip(centers, mis)]), axis=0)
 
-    p_wfs._halfxy = pyr
+    p_wfs._halfxy = np.fft.fftshift(pyr.T)
 
     # Valid pixels identification
-    mypup = util.dist(pyrsize, xc=pyrsize / 2. + 0.5, yc=pyrsize / 2. + 0.5) < (rpup)
-    # mypup = p_geom._ipupil
-    # mypyr = np.abs(np.fft.ifft2(np.fft.fft2(mypup)*np.exp(1j*pyr)))**2
+    # Generate buffer with pupil at center
+    pup = np.zeros((pyrsize, pyrsize), dtype=np.int32)
+    pup[pyrsize // 2 - p_geom._n // 2:pyrsize // 2 + p_geom._n // 2,
+        pyrsize // 2 - p_geom._n // 2:pyrsize // 2 + p_geom._n // 2] = p_geom._mpupil
 
-    xcc = pyrsize / 2 - Pangle + 0.5
-    ycc = pyrsize / 2 + Pangle + 0.5
+    for qIdx in range(4):
+        quadOnCenter = np.roll(pup,
+                               tuple((centers[qIdx] + mis[qIdx]).astype(np.int32)), (0,
+                                                                                     1))
+        mskRebin = util.rebin(quadOnCenter.copy(),
+                              [pyrsize // nrebin, pyrsize // nrebin])
+        if qIdx == 0:
+            stackedSubap = np.roll(mskRebin >= fracsub,
+                                   tuple((-centers[qIdx] / nrebin).astype(np.int32)),
+                                   (0, 1))
+            mskRebTot = (mskRebin >= fracsub).astype(np.int32)
+        else:
+            stackedSubap += np.roll(mskRebin >= fracsub,
+                                    tuple((-centers[qIdx] / nrebin).astype(np.int32)),
+                                    (0, 1))
+            mskRebTot += (mskRebin >= fracsub).astype(np.int32) * (qIdx + 1)
 
-    pyrtmp = np.zeros((pyrsize, pyrsize), dtype=np.int32)
+    validRow = []
+    validCol = []
 
-    pyrtmp[pyrsize // 2 - p_geom._n // 2:pyrsize // 2 + p_geom._n // 2,
-           pyrsize // 2 - p_geom._n // 2:pyrsize // 2 + p_geom._n // 2] = p_geom._mpupil
-    pyrtmp2 = np.roll(pyrtmp.copy(), -Pangle, axis=0)
-    pyrtmp2 = np.roll(pyrtmp2.copy(), -Pangle, axis=1)
-    mskreb = util.rebin(pyrtmp2.copy(), [pyrsize // nrebin, pyrsize // nrebin])
-    validx = np.where(mskreb >= fracsub)[1].astype(np.int32)
-    validy = np.where(mskreb >= fracsub)[0].astype(np.int32)
-    nvalid = validx.size
-    mskrebtot = mskreb
+    for qIdx in [
+            2, 1, 3, 0
+    ]:  # Do not change order !! Corresponds to what happens A-B-C-D x-y // row-col
+        tmpWh = np.where(
+                np.roll(stackedSubap,
+                        tuple((centers[qIdx] / nrebin).astype(np.int32)), (0, 1)))
+        validRow += [tmpWh[0].astype(np.int32)]
+        validCol += [tmpWh[1].astype(np.int32)]
 
-    pyrtmp2 = np.roll(pyrtmp.copy(), Pangle, axis=0)
-    pyrtmp2 = np.roll(pyrtmp2.copy(), Pangle, axis=1)
-    mskreb = util.rebin(pyrtmp2.copy(), [pyrsize // nrebin, pyrsize // nrebin])
-    tmpx = np.where(mskreb >= fracsub)[1].astype(np.int32)
-    tmpy = np.where(mskreb >= fracsub)[0].astype(np.int32)
-    validx = np.concatenate((validx, tmpx))
-    validy = np.concatenate((validy, tmpy))
-    mskrebtot += mskreb * 2
-
-    pyrtmp2 = np.roll(pyrtmp.copy(), Pangle, axis=0)
-    pyrtmp2 = np.roll(pyrtmp2.copy(), -Pangle, axis=1)
-    mskreb = util.rebin(pyrtmp2.copy(), [pyrsize // nrebin, pyrsize // nrebin])
-    tmpx = np.where(mskreb >= fracsub)[1].astype(np.int32)
-    tmpy = np.where(mskreb >= fracsub)[0].astype(np.int32)
-    validx = np.concatenate((validx, tmpx))
-    validy = np.concatenate((validy, tmpy))
-    mskrebtot += mskreb * 3
-
-    pyrtmp2 = np.roll(pyrtmp.copy(), -Pangle, axis=0)
-    pyrtmp2 = np.roll(pyrtmp2.copy(), Pangle, axis=1)
-    mskreb = util.rebin(pyrtmp2.copy(), [pyrsize // nrebin, pyrsize // nrebin])
-    tmpx = np.where(mskreb >= fracsub)[1].astype(np.int32)
-    tmpy = np.where(mskreb >= fracsub)[0].astype(np.int32)
-    validx = np.concatenate((validx, tmpx))
-    validy = np.concatenate((validy, tmpy))
-    mskrebtot += mskreb * 4
+    nvalid = validRow[0].size
+    validRow = np.asarray(validRow).flatten()
+    validCol = np.asarray(validCol).flatten()
 
     p_wfs._nvalid = nvalid
-    p_wfs._validsubsx = validx
-    p_wfs._validsubsy = validy
-    p_wfs._hrmap = mskrebtot.astype(np.int32)
+    p_wfs._validsubsx = validCol
+    p_wfs._validsubsy = validRow
+    p_wfs._hrmap = mskRebTot.astype(np.int32)
 
     if (p_wfs.pyr_pos == None):
         pixsize = (np.pi * p_wfs._qpixsize) / (3600 * 180)
@@ -451,7 +449,6 @@ def init_pyrhr_geom(p_wfs: conf.Param_wfs, r0: float, p_tel: conf.Param_tel,
     # sincar = np.roll(np.pi*x*np.pi*y,x.shape[1],axis=1)
     p_wfs._sincar = sincar.astype(np.float32)
 
-    pup = pyrtmp.copy()  # p_geom._ipupil
     #pup = p_geom._mpupil
     pupreb = util.rebin(pup * 1., [pyrsize // nrebin, pyrsize // nrebin])
     a = pyrsize // nrebin
@@ -490,7 +487,7 @@ def init_pyrhr_geom(p_wfs: conf.Param_wfs, r0: float, p_tel: conf.Param_tel,
 
     pyrtmp = np.zeros((p_geom._n, p_geom._n), dtype=np.int32)
 
-    for i in range(p_wfs._nvalid):
+    for i in range(len(validsubsx)):
         indi = istart[validsubsy[i]]  # +2-1 (yorick->python
         indj = jstart[validsubsx[i]]
         phasemap[:, i] = tmp[indi:indi + p_wfs.npix, indj:indj + p_wfs.npix].flatten("C")

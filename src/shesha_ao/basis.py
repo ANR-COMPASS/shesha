@@ -11,7 +11,7 @@ import shesha_constants as scons
 from scipy.sparse import csr_matrix
 
 from typing import List
-from tqdm import tqdm
+from tqdm import trange
 
 
 def compute_KL2V(p_controller: conf.Param_controller, dms: Dms, p_dms: list,
@@ -104,7 +104,7 @@ def compute_DMbasis(g_dm: Dms, p_dm: conf.Param_dm, p_geom: conf.Param_geom):
     indx_valid = np.where(pup.flatten("F") > 0)[0].astype(np.int32)
 
     #IFbasis = np.ndarray((indx_valid.size, p_dm._ntotact), dtype=np.float32)
-    for i in tqdm(range(p_dm._ntotact)):
+    for i in trange(p_dm._ntotact):
         g_dm.resetdm(p_dm.type, p_dm.alt)
         g_dm.comp_oneactu(p_dm.type, p_dm.alt, i, 1.0)
         shape = g_dm.get_dm(p_dm.type, p_dm.alt)

@@ -7,11 +7,12 @@ p_loop = conf.Param_loop()
 
 p_loop.set_niter(1000)
 p_loop.set_ittime(0.002)  # =1/500
-
+p_loop.set_devices([0])
 # geom
 p_geom = conf.Param_geom()
 
 p_geom.set_zenithangle(0.)
+#p_geom.set_pupdiam(288)
 
 # tel
 p_tel = conf.Param_tel()

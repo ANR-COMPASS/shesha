@@ -164,9 +164,12 @@ class Param_wfs:
         """ Type of pyramid, either 0 for "Pyramid" or 1 for "RoofPrism"."""
         self.__pyr_pup_sep = -1
         """ Pyramid pupil separation. (default: long(wfs.nxsub))"""
+        self.__pyr_misalignments = None
+        """ Pyramid quadrant misalignments: by how much pupil subimages
+        are off from their expected positions (in rebinned pixels)"""
 
         # pyramid internal kwrds
-        self.__pyr_offsets = None  # (float*)
+        self._pyr_offsets = None  # (float*)
         self.__pyr_cx = None  # (float*)
         self.__pyr_cy = None  # (float*)
 
@@ -532,6 +535,13 @@ class Param_wfs:
         self.__pyr_pup_sep = csu.enforce_int(pyr_pup_sep)
 
     pyr_pup_sep = property(lambda x: x.__pyr_pup_sep, set_pyr_pup_sep)
+
+    def set_pyr_misalignments(self, misalignments: np.ndarray) -> None:
+
+        self.__pyr_misalignments = csu.enforce_arrayMultiDim(misalignments.copy(),
+                                                             (4, 2), dtype=np.float32)
+
+    pyr_misalignments = property(lambda x: x.__pyr_misalignments, set_pyr_misalignments)
 
     def set_nvalid(self, n):
         """ Set the number of valid subapertures

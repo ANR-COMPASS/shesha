@@ -8,12 +8,12 @@ import shesha_constants as scons
 from shesha_constants import CONST
 
 import numpy as np
-from sutra_bind.wrap import naga_context, Target, Target_brama, Telescope
+from sutra_bind.wrap import naga_context, Target, Target_brahma, Telescope
 
 
 def target_init(ctxt: naga_context, telescope: Telescope, p_target: conf.Param_target,
                 p_atmos: conf.Param_atmos, p_tel: conf.Param_tel,
-                p_geom: conf.Param_geom, dm=None, brama=False):
+                p_geom: conf.Param_geom, dm=None, brahma=False):
     """Create a cython target from parametres structures
 
     :parameters:
@@ -24,7 +24,7 @@ def target_init(ctxt: naga_context, telescope: Telescope, p_target: conf.Param_t
         p_tel: (Param_tel) : telescope settings
         p_geom: (Param_geom) : geom settings
         dm: (Param_dm) : (optional) dm settings
-        brama: (bool): (optional) BRAMA flag
+        brahma: (bool): (optional) BRAHMA flag
     :return:
         tar: (Target): Target object
     """
@@ -46,10 +46,10 @@ def target_init(ctxt: naga_context, telescope: Telescope, p_target: conf.Param_t
         # TODO apodizer, Npts=nb element of apodizer>0
         ceiled_apodizer = np.ceil(p_geom._apodizer * p_geom._spupil)
         ceiled_apodizer[np.where(ceiled_apodizer > 1)] = 1
-        if (brama):
-            target = Target_brama(ctxt, telescope, p_target.ntargets, p_target.xpos,
-                                  p_target.ypos, p_target.Lambda, p_target.mag,
-                                  p_target.zerop, sizes, Npts)
+        if (brahma):
+            target = Target_brahma(ctxt, telescope, p_target.ntargets, p_target.xpos,
+                                   p_target.ypos, p_target.Lambda, p_target.mag,
+                                   p_target.zerop, sizes, Npts)
         else:
             target = Target(ctxt, telescope, p_target.ntargets, p_target.xpos,
                             p_target.ypos, p_target.Lambda, p_target.mag, p_target.zerop,
@@ -57,10 +57,10 @@ def target_init(ctxt: naga_context, telescope: Telescope, p_target: conf.Param_t
 
     else:
         Npts = np.sum(ceiled_pupil)
-        if (brama):
-            target = Target_brama(ctxt, telescope, p_target.ntargets, p_target.xpos,
-                                  p_target.ypos, p_target.Lambda, p_target.mag,
-                                  p_target.zerop, sizes, Npts)
+        if (brahma):
+            target = Target_brahma(ctxt, telescope, p_target.ntargets, p_target.xpos,
+                                   p_target.ypos, p_target.Lambda, p_target.mag,
+                                   p_target.zerop, sizes, Npts)
         else:
             target = Target(ctxt, telescope, p_target.ntargets, p_target.xpos,
                             p_target.ypos, p_target.Lambda, p_target.mag, p_target.zerop,

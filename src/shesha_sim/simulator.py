@@ -249,7 +249,7 @@ class Simulator:
             self.tar = init.target_init(self.c, self.tel, self.config.p_target,
                                         self.config.p_atmos, self.config.p_tel,
                                         self.config.p_geom, self.config.p_dms,
-                                        brama=False)
+                                        brahma=False)
         else:
             self.tar = None
 
@@ -276,7 +276,7 @@ class Simulator:
                     self.c, self.tel, self.wfs, self.dms, self.atm, self.config.p_wfss,
                     self.config.p_tel, self.config.p_geom, self.config.p_atmos, ittime,
                     self.config.p_centroiders, self.config.p_controllers,
-                    self.config.p_dms, brama=False, dataBase=self.matricesToLoad,
+                    self.config.p_dms, brahma=False, dataBase=self.matricesToLoad,
                     use_DB=self.use_DB)
         else:
             self.rtc = None

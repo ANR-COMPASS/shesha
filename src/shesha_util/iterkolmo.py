@@ -167,17 +167,17 @@ def AB(n, L0, deltax, deltay, rank=0):
     SEE ALSO: extrude createStencil Cxx Cxz Czz
     """
 
-    if (rank == 0):
-        print("create stencil and Z,X matrices")
+    #   if (rank == 0):
+    #        print("create stencil and Z,X matrices")
     Zx, Zy, Xx, Xy, istencil = create_stencil(n)
-    if (rank == 0):
-        print("create zz")
+    #    if (rank == 0):
+    #        print("create zz")
     zz = Czz(n, Zx, Zy, istencil, L0)
-    if (rank == 0):
-        print("create xz")
+    #    if (rank == 0):
+    #        print("create xz")
     xz = Cxz(n, Zx, Zy, Xx, Xy, istencil, L0)
-    if (rank == 0):
-        print("create xx")
+    #    if (rank == 0):
+    #        print("create xx")
     xx = Cxx(n, Zx[0, n - 1], Zy[0, n - 1], Xx, Xy, L0)
 
     U, s, V = np.linalg.svd(zz)
@@ -186,22 +186,22 @@ def AB(n, L0, deltax, deltay, rank=0):
     s1 = 1. / s1
     s1[s.size - 1] = 0
     zz1 = np.dot(np.dot(U, np.diag(s1)), V)
-    if (rank == 0):
-        print("compute zz pseudo_inverse")
+    #    if (rank == 0):
+    #        print("compute zz pseudo_inverse")
     # zz1=np.linalg.pinv(zz)
 
-    if (rank == 0):
-        print("compute A")
+    #    if (rank == 0):
+    #        print("compute A")
     A = np.dot(xz, zz1)
 
-    if (rank == 0):
-        print("compute bbt")
+    #    if (rank == 0):
+    #        print("compute bbt")
     bbt = xx - np.dot(A, xz.T)
-    if (rank == 0):
-        print("svd of bbt")
+    #    if (rank == 0):
+    #        print("svd of bbt")
     U1, l, V1 = np.linalg.svd(bbt)
-    if (rank == 0):
-        print("compute B")
+    #    if (rank == 0):
+    #        print("compute B")
     B = np.dot(U1, np.sqrt(np.diag(l)))
 
     test = np.zeros((n * n), np.float32)
