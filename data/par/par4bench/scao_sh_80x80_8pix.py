@@ -1,4 +1,4 @@
-import shesha_config as conf
+import shesha.config as conf
 
 simul_name = "scao_sh_40m_80_8pix"
 
