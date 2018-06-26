@@ -1,28 +1,33 @@
 *****************
-:mod:`shesha_sim`
+:mod:`shesha.sim`
 *****************
 
-.. _shesha_sim module:
+.. _shesha.sim module:
 
-.. automodule:: shesha_sim
+.. automodule:: shesha.sim
    :members:
 
-.. _shesha_sim.Bench class:
+.. _shesha.sim.bench.Bench class:
 
-.. autoclass:: shesha_sim.Bench
+.. autoclass:: shesha.sim.bench.Bench
    :members:
 
-.. _shesha_sim.BenchBrahma class:
+.. _shesha.sim.simulator.Simulator class:
 
-.. autoclass:: shesha_sim.BenchBrahma
+.. autoclass:: shesha.sim.simulator.Simulator
    :members:
 
-.. _shesha_sim.Simulator class:
+.. _shesha.sim.simulatorRTC.SimulatorRTC class:
 
-.. autoclass:: shesha_sim.Simulator
+.. autoclass:: shesha.sim.simulatorRTC.SimulatorRTC
    :members:
 
-.. _shesha_sim.SimulatorBrahma class:
+.. _shesha.sim.benchBrahma.BenchBrahma class:
 
-.. autoclass:: shesha_sim.SimulatorBrahma
+.. autoclass:: shesha.sim.benchBrahma.BenchBrahma
+   :members:
+
+.. _shesha.sim.simulatorBrahma.SimulatorBrahma class:
+
+.. autoclass:: shesha.sim.simulatorBrahma.SimulatorBrahma
    :members:

@@ -1,53 +1,53 @@
 ******************
-:mod:`shesha_util`
+:mod:`shesha.util`
 ******************
 
-.. _shesha_util module:
+.. _shesha.util module:
 
-.. automodule:: shesha_util
+.. automodule:: shesha.util
    :members:
 
-.. _shesha_util.dm_util module:
+.. _shesha.util.dm_util module:
 
-.. automodule:: shesha_util.dm_util
+.. automodule:: shesha.util.dm_util
    :members:
 
-.. _shesha_util.hdf5_utils module:
+.. _shesha.util.hdf5_utils module:
 
-.. automodule:: shesha_util.hdf5_utils
+.. automodule:: shesha.util.hdf5_utils
    :members:
 
-.. _shesha_util.influ_util module:
+.. _shesha.util.influ_util module:
 
-.. automodule:: shesha_util.influ_util
+.. automodule:: shesha.util.influ_util
    :members:
 
-.. _shesha_util.iterkolmo module:
+.. _shesha.util.iterkolmo module:
 
-.. automodule:: shesha_util.iterkolmo
+.. automodule:: shesha.util.iterkolmo
    :members:
 
-.. _shesha_util.kl_util module:
+.. _shesha.util.kl_util module:
 
-.. automodule:: shesha_util.kl_util
+.. automodule:: shesha.util.kl_util
    :members:
 
-.. _shesha_util.make_apodizer module:
+.. _shesha.util.make_apodizer module:
 
-.. automodule:: shesha_util.make_apodizer
+.. automodule:: shesha.util.make_apodizer
    :members:
 
-.. _shesha_util.make_pupil module:
+.. _shesha.util.make_pupil module:
 
-.. automodule:: shesha_util.make_pupil
+.. automodule:: shesha.util.make_pupil
    :members:
 
-.. _shesha_util.rtc_util module:
+.. _shesha.util.rtc_util module:
 
-.. automodule:: shesha_util.rtc_util
+.. automodule:: shesha.util.rtc_util
    :members:
 
-.. _shesha_util.utilities module:
+.. _shesha.util.utilities module:
 
-.. automodule:: shesha_util.utilities
+.. automodule:: shesha.util.utilities
    :members:

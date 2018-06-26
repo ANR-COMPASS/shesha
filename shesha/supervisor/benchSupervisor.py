@@ -3,6 +3,8 @@ import numpy as np
 from shesha.constants import CentroiderType, WFSType
 from shesha.init.dm_init import dm_init_standalone
 from shesha.init.rtc_init import rtc_standalone
+from shesha.sim.simulator import Simulator
+from shesha.sim.simulatorBrahma import SimulatorBrahma
 from shesha.sutra_bind.wrap import naga_context
 
 from .abstractSupervisor import AbstractSupervisor
@@ -184,10 +186,8 @@ class BenchSupervisor(AbstractSupervisor):
 
         if self._sim is None:
             if BRAMA:
-                from shesha.sim.simulatorBrahma import SimulatorBrahma
                 self._sim = SimulatorBrahma(configFile)
             else:
-                from shesha.sim.simulator import Simulator
                 self._sim = Simulator(configFile)
         else:
             self._sim.clear_init()

@@ -24,8 +24,9 @@ export PATH=/home/sevin/miniconda3/bin:$PATH
 conda install -c compass compass -y
 ```
 
-Note: conda main channel is compiled with CUDA 9.1, for previous version please use:
+Note: conda main channel is compiled with CUDA 9.2, for previous version please use:
 ```bash
+conda install -c compass/label/cuda91 compass
 conda install -c compass/label/cuda90 compass
 conda install -c compass/label/cuda80 compass 
 ```
@@ -36,10 +37,10 @@ conda install -c compass/label/cuda80 compass
 cd
 git clone https://github.com/ANR-COMPASS/shesha.git
 export SHESHA_ROOT=$HOME/shesha
-export PYTHONPATH=$SHESHA_ROOT/src:$PYTHONPATH
+export PYTHONPATH=$SHESHA_ROOT:$PYTHONPATH
 export PYTHONDONTWRITEBYTECODE=1
 cd $SHESHA_ROOT
-ipython -i test/closed_loop.py data/par/par4bench/scao_sh_16x16_8pix.py
+ipython -i shesha/scripts/closed_loop.py data/par/par4bench/scao_sh_16x16_8pix.py
 ```
 
 ## More documentation (maybe not fully up-to-date)

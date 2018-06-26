@@ -19,7 +19,7 @@ import os
 import subprocess
 # import sphinx_bootstrap_theme
 
-os.environ["SHESHA_ROOT"] = os.getcwd() + "/../src"
+os.environ["SHESHA_ROOT"] = os.getcwd() + "/.."
 sys.path.insert(0, os.environ["SHESHA_ROOT"])
 
 # If extensions (or modules to document with autodoc) are in another directory,

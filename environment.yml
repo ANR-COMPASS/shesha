@@ -3,7 +3,7 @@ channels:
 - compass
 - defaults
 dependencies:
-- compass=1.0=py36_cuda91
+- compass=2.0=py36_cuda92
 # - cudatoolkit=9.0
 prefix: /home/sevin/miniconda3/envs/compass
 

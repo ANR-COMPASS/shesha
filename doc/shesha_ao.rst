@@ -1,38 +1,38 @@
 ****************
-:mod:`shesha_ao`
+:mod:`shesha.ao`
 ****************
 
-.. _shesha_ao module:
+.. _shesha.ao module:
 
-.. automodule:: shesha_ao
+.. automodule:: shesha.ao
    :members:
 
-.. _shesha_ao basis module:
+.. _shesha.ao basis module:
 
-.. automodule:: shesha_ao.basis
+.. automodule:: shesha.ao.basis
   :members:
 
-.. _shesha_ao cmats module:
+.. _shesha.ao cmats module:
 
-.. automodule:: shesha_ao.cmats
+.. automodule:: shesha.ao.cmats
    :members:
 
-.. _shesha_ao imats module:
+.. _shesha.ao imats module:
 
-.. automodule:: shesha_ao.imats
+.. automodule:: shesha.ao.imats
    :members:
 
-.. _shesha_ao modopti module:
+.. _shesha.ao modopti module:
 
-.. automodule:: shesha_ao.modopti
+.. automodule:: shesha.ao.modopti
    :members:
 
-.. _shesha_ao tomo module:
+.. _shesha.ao tomo module:
 
-.. automodule:: shesha_ao.tomo
+.. automodule:: shesha.ao.tomo
    :members:
 
-.. _shesha_ao wfs module:
+.. _shesha.ao wfs module:
 
-.. automodule:: shesha_ao.wfs
+.. automodule:: shesha.ao.wfs
    :members:

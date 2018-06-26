@@ -1,8 +1,8 @@
 ***********************
-:mod:`shesha_constants`
+:mod:`shesha.constants`
 ***********************
 
-.. _shesha_constants module:
+.. _shesha.constants module:
 
-.. automodule:: shesha_constants
+.. automodule:: shesha.constants
    :members:

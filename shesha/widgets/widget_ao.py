@@ -37,7 +37,7 @@ from typing import Any, Dict, Tuple, Callable, List
 from docopt import docopt
 from collections import deque
 
-from .widget_base import WidgetBase, uiLoader
+from shesha.widgets.widget_base import WidgetBase, uiLoader
 
 AOWindowTemplate, AOClassTemplate = uiLoader('widget_ao')
 
