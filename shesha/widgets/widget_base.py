@@ -240,7 +240,7 @@ class WidgetBase(BaseClassTemplate):
         #     d.addWidget(self.uiBase.wao_Strehl)
         return d
 
-    def loadConfig(self) -> None:
+    def loadConfig(self, *args, **kwargs) -> None:
         '''
             Callback when 'LOAD' button is hit
         '''

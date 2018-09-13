@@ -14,7 +14,7 @@ import shesha.constants as scons
 
 class Param_wfs:
 
-    def __init__(self, error_budget=False):
+    def __init__(self, roket=False):
         self.__type = None
         """ type of wfs : "sh" or "pyr"."""
         self.__nxsub = 0
@@ -40,9 +40,10 @@ class Param_wfs:
         """ 1 if the WFS sees the atmosphere layers"""
         self.__dms_seen = None
         """ index of dms seen by the WFS"""
-        self.__error_budget = error_budget
+        self.__roket = roket
         """ If True, enable error budget analysis for the simulation"""
-
+        self.__is_low_order = False
+        """If True, WFS is considered as a low order one and so will not profit from array mutualisation"""
         # target kwrd
         self.__xpos = 0
         """ guide star x position on sky (in arcsec)."""
@@ -163,6 +164,8 @@ class Param_wfs:
         self.__pyrtype = None
         """ Type of pyramid, either 0 for "Pyramid" or 1 for "RoofPrism"."""
         self.__pyr_pup_sep = -1
+        """ Number of Pyramid facets """
+        self.__nPupils = 4
         """ Pyramid pupil separation. (default: long(wfs.nxsub))"""
         self.__pyr_misalignments = None
         """ Pyramid quadrant misalignments: by how much pupil subimages
@@ -173,12 +176,12 @@ class Param_wfs:
         self.__pyr_cx = None  # (float*)
         self.__pyr_cy = None  # (float*)
 
-    def set_type(self, type):
+    def set_type(self, typewfs):
         """ Set the type of wfs
 
         :param t: (str) : type of wfs ("sh" or "pyr")
         """
-        self.__type = scons.check_enum(scons.WFSType, type)
+        self.__type = typewfs  #scons.check_enum(scons.WFSType, type)0
 
     type = property(lambda x: x.__type, set_type)
 
@@ -190,6 +193,15 @@ class Param_wfs:
         self.__nxsub = csu.enforce_int(n)
 
     nxsub = property(lambda x: x.__nxsub, set_nxsub)
+
+    def set_nPupils(self, n):
+        """ Set the number of pupil images
+
+        :param n: (long) : number of pupil images
+        """
+        self.__nPupils = csu.enforce_int(n)
+
+    nPupils = property(lambda x: x.__nPupils, set_nPupils)
 
     def set_npix(self, n):
         """ Set the number of pixels per subap
@@ -517,15 +529,24 @@ class Param_wfs:
 
     _profna = property(lambda x: x.__profna, set_profna)
 
-    def set_error_budget(self, error_budget):
+    def set_roket(self, roket):
         """ Set the error budget flag : if True, enable error budget analysis
         for this simulation
 
-        :param error_budget: (bool) : error budget flag
+        :param roket: (bool) : error budget flag
         """
-        self.__error_budget = csu.enforce_or_cast_bool(error_budget)
+        self.__roket = csu.enforce_or_cast_bool(roket)
 
-    error_budget = property(lambda x: x.__error_budget, set_error_budget)
+    roket = property(lambda x: x.__roket, set_roket)
+
+    def set_is_low_order(self, is_low_order):
+        """ Set the low order flag : if True, WFS arrays will not be mutualised
+
+        :param is_low_order: (bool) : low order flag
+        """
+        self.__is_low_order = csu.enforce_or_cast_bool(is_low_order)
+
+    is_low_order = property(lambda x: x.__is_low_order, set_is_low_order)
 
     def set_pyr_pup_sep(self, pyr_pup_sep):
         """ Set the pyramid pupil separation. (default: long(wfs.nxsub))
@@ -539,7 +560,8 @@ class Param_wfs:
     def set_pyr_misalignments(self, misalignments: np.ndarray) -> None:
 
         self.__pyr_misalignments = csu.enforce_arrayMultiDim(misalignments.copy(),
-                                                             (4, 2), dtype=np.float32)
+                                                             (self.nPupils,
+                                                              2), dtype=np.float32)
 
     pyr_misalignments = property(lambda x: x.__pyr_misalignments, set_pyr_misalignments)
 
@@ -557,8 +579,8 @@ class Param_wfs:
 
         :param vx: (np.array(dim=1, dtype=np.int32)) : validsubsx
         """
-        if self.__type == scons.WFSType.PYRHR:
-            self.__validsubsx = csu.enforce_array(vx, 4 * self.__nvalid, dtype=np.int32)
+        if self.__type == scons.WFSType.PYRHR or self.__type == scons.WFSType.PYRLR:
+            self.__validsubsx = csu.enforce_array(vx, vx.size, dtype=np.int32)
         else:
             self.__validsubsx = csu.enforce_array(vx, self.__nvalid, dtype=np.int32)
 
@@ -569,8 +591,8 @@ class Param_wfs:
 
         :param vy: (np.array(dim=1, dtype=np.int32)) : validsubsy
         """
-        if self.__type == scons.WFSType.PYRHR:
-            self.__validsubsy = csu.enforce_array(vy, 4 * self.__nvalid, dtype=np.int32)
+        if self.__type == scons.WFSType.PYRHR or self.__type == scons.WFSType.PYRLR:
+            self.__validsubsy = csu.enforce_array(vy, vy.size, dtype=np.int32)
         else:
             self.__validsubsy = csu.enforce_array(vy, self.__nvalid, dtype=np.int32)
 
@@ -651,7 +673,7 @@ class Param_wfs:
 
         :param data: (np.array(ndim=2, dtype=np.float32)) : subap diameter (m)
         """
-        if self.__type == scons.WFSType.PYRHR:
+        if self.__type == scons.WFSType.PYRHR or self.__type == scons.WFSType.PYRLR:
             self.__fluxPerSub = csu.enforce_arrayMultiDim(data.copy(),
                                                           (self.__nxsub + 2,
                                                            self.__nxsub + 2),
@@ -778,7 +800,9 @@ class Param_wfs:
     _jstart = property(lambda x: x.__jstart, set_jstart)
 
     def set_isvalid(self, data):
-        """ TODO : docstring
+        """ Set the valid subapertures array
+
+        :param data: (int*) array of 0/1 for valid subaps
         """
         self.__isvalid = csu.enforce_arrayMultiDim(data.copy(), data.shape,
                                                    dtype=np.int32)

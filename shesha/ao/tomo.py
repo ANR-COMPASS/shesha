@@ -6,7 +6,7 @@ import numpy as np
 import shesha.config as conf
 import shesha.constants as scons
 from shesha.constants import CONST
-from shesha.sutra_bind.wrap import Sensors, Dms, Rtc, Atmos
+from shesha.sutra_wrap import Sensors, Dms, Rtc, Atmos
 
 import typing
 from typing import List
@@ -131,28 +131,29 @@ def do_tomo_matrices(ncontrol: int, rtc: Rtc, p_wfss: List[conf.Param_wfs], dms:
     frac_d = np.copy(p_atmos.frac * (p_atmos.r0**(-5.0 / 3.0))).astype(np.float64)
 
     print("Computing Cphim...")
-    rtc.compute_Cphim(ncontrol, atmos, wfs, dms, L0_d, frac_d, alphaX, alphaY, X, Y,
-                      Xactu, Yactu, p_tel.diam, k2, NlayersDM, indlayersDM, FoV, pitch,
-                      alt_DM.astype(np.float64))
+    rtc.d_control[ncontrol].compute_Cphim(atmos, wfs, dms, L0_d, frac_d, alphaX, alphaY,
+                                          X, Y, Xactu, Yactu, p_tel.diam, k2, NlayersDM,
+                                          indlayersDM, FoV, pitch,
+                                          alt_DM.astype(np.float64))
     print("Done")
 
     print("Computing Cmm...")
-    rtc.compute_Cmm(ncontrol, atmos, wfs, L0_d, frac_d, alphaX, alphaY, p_tel.diam,
-                    p_tel.cobs)
+    rtc.d_control[ncontrol].compute_Cmm(atmos, wfs, L0_d, frac_d, alphaX, alphaY,
+                                        p_tel.diam, p_tel.cobs)
     print("Done")
 
     Nact = np.zeros([nactu, nactu], dtype=np.float32)
     F = np.zeros([nactu, nactu], dtype=np.float32)
     ind = 0
     for k in range(len(p_controller.ndm)):
-        if (p_dms[k].type == b"pzt"):
+        if (p_dms[k].type == "pzt"):
             Nact[ind:ind + p_dms[k]._ntotact, ind:
                  ind + p_dms[k]._ntotact] = create_nact_geom(p_dms[k])
             F[ind:ind + p_dms[k]._ntotact, ind:
               ind + p_dms[k]._ntotact] = create_piston_filter(p_dms[k])
             ind += p_dms[k]._ntotact
 
-    rtc.filter_cphim(ncontrol, F, Nact)
+    rtc.d_control[ncontrol].filter_cphim(F, Nact)
 
 
 def selectDMforLayers(p_atmos: conf.Param_atmos, p_controller: conf.Param_controller,

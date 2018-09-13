@@ -13,7 +13,7 @@ from shesha.constants import ApertureType, SpiderType
 EELT_data = os.environ.get('SHESHA_ROOT') + "/data/apertures/"
 
 
-def make_pupil(dim, pupd, tel, xc=-1, yc=-1, real=0):
+def make_pupil(dim, pupd, tel, xc=-1, yc=-1, real=0, halfSpider=0):
     """Initialize the system pupil
 
     :parameters:
@@ -35,11 +35,12 @@ def make_pupil(dim, pupd, tel, xc=-1, yc=-1, real=0):
     TODO: complete
     """
 
-    #TODO other types
     if tel.type_ap == ApertureType.EELT_NOMINAL:
-        print("ELT_pup_cobs = %5.3f" % 0.3)
         N_seg = 798
         return make_EELT(dim, pupd, tel, N_seg)
+    elif (tel.type_ap == ApertureType.EELT):
+        return generateEeltPupilMask(dim, tel.t_spiders, xc, yc, tel.diam / dim,
+                                     tel.pupangle, D=tel.diam, halfSpider=halfSpider)
     elif tel.type_ap == ApertureType.EELT_BP1:
         print("ELT_pup_cobs = %5.3f" % 0.339)
         N_seg = 768
@@ -115,7 +116,7 @@ def make_pupil_generic(dim, pupd, t_spiders=0.01, spiders_type=SpiderType.SIX, x
                 t_spiders = 0.01
             t_spiders = t_spiders * pupd / dim
 
-            if (spiders_type == b"four"):
+            if (spiders_type == "four"):
 
                 s4_2 = 2 * np.sin(np.pi / 4)
                 t4 = np.tan(np.pi / 4)
@@ -127,7 +128,7 @@ def make_pupil_generic(dim, pupd, t_spiders=0.01, spiders_type=SpiderType.SIX, x
 
                 pup = pup * spiders_map
 
-            elif (spiders_type == b"six"):
+            elif (spiders_type == "six"):
 
                 #angle = np.pi/(180/15.)
                 angle = 0
@@ -327,7 +328,8 @@ def make_phase_ab(dim, pupd, tel, pup):
     TODO: complete
     """
 
-    if ((tel.type_ap == ApertureType.GENERIC) or (tel.type_ap == ApertureType.VLT)):
+    if ((tel.type_ap == ApertureType.GENERIC) or (tel.type_ap == ApertureType.VLT) or
+        (tel.type_ap == ApertureType.EELT)):
         return np.zeros((dim, dim)).astype(np.float32)
 
     ab_file = EELT_data + "aberration_" + tel.type_ap.decode('UTF-8') + \
@@ -415,3 +417,336 @@ def make_phase_ab(dim, pupd, tel, pup):
         h5u.writeHdf5SingleDataset(ab_file, phase_error)
 
     return phase_error
+
+
+"""
+
+ _____ _   _____   ____  ___ ____ ___
+| ____| | |_   _| |  _ \|_ _/ ___/ _ \
+|  _| | |   | |   | |_) || | |  | | | |
+| |___| |___| |   |  _ < | | |__| |_| |
+|_____|_____|_|   |_| \_\___\____\___/
+
+
+"""
+
+
+def generateEeltPupilMask(npt, dspider, i0, j0, pixscale, rotdegree, D=39.0,
+                          halfSpider=0):
+    """
+    Generates a boolean pupil mask of the binary EELT pupil
+    on a map of size (npt, npt).
+
+
+    :returns: pupil image (npt, npt), boolean
+    :param int npt: size of the output array
+    :param float dspider: width of spiders in meters
+    :param float i0, j0: index of pixels where the pupil should be centred.
+                         Can be floating-point indexes.
+    :param float pixscale: size of a pixel of the image, in meters.
+    :param float rotdegree: rotation angle of the pupil, in degrees.
+    :param float D: diameter of the pupil. For the nominal EELT, D shall
+                    be set to 39.0
+
+    :Example:
+    npt = 800
+    i0 = npt/2+0.5
+    j0 = npt/2+0.5
+    rotdegree = 10.0
+    pixscale = 41./npt
+    dspider = 0.51
+    pup = generateEeltPupil(npt, dspider, i0, j0, pixscale, rotdegree)
+
+    """
+    rot = rotdegree * np.pi / 180
+
+    # generation des coord des segments
+    hx, hy = generateCoordSegments(D, rot)
+
+    # generation pupille
+    pup = generateSegmentProperties(True, hx, hy, i0, j0, pixscale, npt, D)
+
+    # SPIDERS ............................................
+    nspider = 3  # pour le jour ou on voudra plus de spiders..
+    if (dspider > 0 and nspider > 0):
+        if (halfSpider != 0):
+            pup = pup & fillHalfSpider(npt, nspider, dspider, i0, j0, pixscale, rot)
+        else:
+            pup = pup & fillSpider(npt, nspider, dspider, i0, j0, pixscale, rot)
+
+    return pup
+
+
+def fillPolygon(x, y, i0, j0, scale, N, index=False):
+    """
+    From a list of points defined by their 2 coordinates list
+    x and y, creates a filled polygon with sides joining the points.
+    The polygon is created in an image of size (N, N).
+    The origin (x,y)=(0,0) is mapped at pixel i0, j0 (both can be
+    floating-point values).
+    Arrays x and y are supposed to be in unit U, and scale is the
+    pixel size in U units.
+
+    :returns: filled polygon (N, N), boolean
+    :param float x, y: list of points defining the polygon
+    :param float i0, j0: index of pixels where the pupil should be centred.
+                         Can be floating-point indexes.
+    :param float scale: size of a pixel of the image, in same unit as x and y.
+    :param float N: size of output image.
+
+    :Example:
+    >>> pol = fillPolygon(np.array([1,-1,0]), np.array([1,1.5,-2]),
+                          100,100,0.05,200)
+
+    """
+    # define coordinates map centred on (i0,j0) with same units as x,y.
+    X = (np.arange(N) - i0) * scale
+    Y = (np.arange(N) - j0) * scale
+    X, Y = np.meshgrid(Y, X)
+
+    # define centre where polygon is
+    x0 = np.mean(x)
+    y0 = np.mean(y)
+
+    # compute angles of all pixels coordinates of the map, and all
+    # corners of the polygon
+    T = (np.arctan2(Y - y0, X - x0) + 2 * np.pi) % (2 * np.pi)
+    t = (np.arctan2(y - y0, x - x0) + 2 * np.pi) % (2 * np.pi)
+
+    # on va voir dans quel sens ca tourne. Je rajoute ca pour que ca marche
+    # quel que soit le sens de rotation des points du polygone.
+    # En fait, j'aurais peut etre pu classer les points par leur angle, pour
+    # etre sur que ca marche meme si les points sont donnes dans ts les cas
+    sens = np.median(np.diff(t))
+    if sens < 0:
+        x = x[::-1]
+        y = y[::-1]
+        t = t[::-1]
+
+    # re-organise order of polygon points so that it starts from
+    # angle = 0, or at least closest to 0.
+    imin = t.argmin()  # position of the minimum
+    if imin != 0:
+        x = np.roll(x, -imin)
+        y = np.roll(y, -imin)
+        t = np.roll(t, -imin)
+
+    # For each couple of consecutive corners A, B, of the polygon, one fills
+    # the triangle AOB with True.
+    # Last triangle has a special treatment because it crosses the axis
+    # with theta=0=2pi
+    n = x.shape[0]  # number of corners of polygon
+    indx, indy = (np.array([], dtype=np.int), np.array([], dtype=np.int))
+    for i in range(n):
+        j = i + 1  # j=element next i except when i==n : then j=0 (cycling)
+        if j == n:
+            j = 0
+            sub = np.where((T >= t[-1]) | (T <= (t[0])))
+        else:
+            sub = np.where((T >= t[i]) & (T <= t[j]))
+        tmp = ((y[j] - y[i]) * (X[sub] - x[i]) - (x[j] - x[i]) *
+               (Y[sub] - y[i])) < -1e-12
+        indx = np.append(indx, sub[0][tmp])
+        indy = np.append(indy, sub[1][tmp])
+
+    # choice of what is returned : either only the indexes, or the
+    # boolean map
+    if index == True:
+        return (indx, indy)
+    else:
+        a = np.zeros((N, N), dtype=np.bool)
+        a[indx, indy] = True
+
+    return a
+
+
+def fillSpider(N, nspider, dspider, i0, j0, scale, rot):
+    """
+    Creates a boolean spider mask on a map of dimensions (N,N)
+    The spider is centred at floating-point coords (i0,j0).
+
+    :returns: spider image (boolean)
+    :param int N: size of output image
+    :param int nspider: number of spiders
+    :param float dspider: width of spiders
+    :param float i0: coord of spiders symmetry centre
+    :param float j0: coord of spiders symmetry centre
+    :param float scale: size of a pixel in same unit as dspider
+    :param float rot: rotation angle in radians
+
+    """
+    a = np.ones((N, N), dtype=np.bool)
+    X = (np.arange(N) - i0) * scale
+    Y = (np.arange(N) - j0) * scale
+    X, Y = np.meshgrid(X, Y)
+    w = 2 * np.pi / nspider
+    for i in range(nspider):
+        nn = (abs(X * np.cos(i * w - rot) + Y * np.sin(i * w - rot)) < dspider / 2.)
+        a[nn] = False
+    return a
+
+
+def fillHalfSpider(N, nspider, dspider, i0, j0, scale, rot):
+    a = np.ones((N, N), dtype=np.bool)
+    b = np.ones((N, N), dtype=np.bool)
+    X = (np.arange(N) - i0) * scale
+    Y = (np.arange(N) - j0) * scale
+    X, Y = np.meshgrid(X, Y)
+    w = 2 * np.pi / nspider
+    for i in range(nspider):
+        right = (X * np.cos(i * w - rot) + Y * np.sin(i * w - rot) < dspider / 2) * (
+                X * np.cos(i * w - rot) + Y * np.sin(i * w - rot) > 0.)
+        left = (X * np.cos(i * w - rot) + Y * np.sin(i * w - rot) > -dspider / 2) * (
+                X * np.cos(i * w - rot) + Y * np.sin(i * w - rot) < 0.)
+
+        a[right] = False
+        b[left] = False
+    return a, b
+
+
+def createHexaPattern(pitch, supportSize):
+    """
+    Cree une liste de coordonnees qui decrit un maillage hexagonal.
+    Retourne un tuple (x,y).
+
+    Le maillage est centre sur 0, l'un des points est (0,0).
+    Une des pointes de l'hexagone est dirigee selon l'axe X, au sens ou le
+    tuple de sortie est (x,y).
+
+    """
+    V3 = np.sqrt(3)
+    nx = int(np.ceil((supportSize / 2.0) / pitch) + 1)
+    x = pitch * (np.arange(2 * nx + 1, dtype=np.float32) - nx)
+    Nx = x.shape[0]
+    ny = int(np.ceil((supportSize / 2.0) / pitch / V3) + 1)
+    y = (V3 * pitch) * (np.arange(2 * ny + 1) - ny)
+    Ny = y.shape[0]
+    x = np.tile(x, (Ny, 1)).flatten()
+    y = np.tile(y, (Nx, 1)).T.flatten()
+    x1 = np.append(x, x + pitch / 2.)
+    y1 = np.append(y, y + pitch * V3 / 2.)
+    return x1, y1
+
+
+def generateCoordSegments(D, rot):
+    """
+    Computes the coordinates of the corners of all the hexagonal
+    segments of M1.
+    Result is a tuple of arrays(6, 798).
+
+    :param float D: D is the pupil diameter in meters, it must be set to 39.0 m
+    for the nominal EELT.
+    :param float rot: pupil rotation angle in radians
+
+    """
+    V3 = np.sqrt(3)
+    pitch = 1.227314  # no correction du bol
+    pitch = 1.244683637214
+    # diamseg = pitch*2/V3
+    # print("segment diameter : %.6f\n" % diamseg)
+    ly, lx = createHexaPattern(pitch, 35 * pitch)
+    ll = np.sqrt(lx**2 + ly**2)
+    # Elimination des segments non valides grace a 2 nombres parfaitement
+    # empiriques ajustes alamano.
+    nn = ((ll > 4.1 * pitch) & (ll < 15.4 * pitch))
+    lx = lx[nn]
+    ly = ly[nn]
+    ll = ll[nn]
+
+    # n = ll.shape[0]
+    # print("Nbre de segments : %d\n" % n)
+    th = np.linspace(2 * np.pi, 0, 7)[0:6]
+    hx = np.cos(th) * pitch / V3
+    hy = np.sin(th) * pitch / V3
+
+    x = (lx[None, :] + hx[:, None])
+    y = (ly[None, :] + hy[:, None])
+    r = np.sqrt(x**2 + y**2)
+    R = 95.7853
+    rrc = R / r * np.arctan(r / R)  # correction factor
+    x *= rrc
+    y *= rrc
+
+    if D != 39.0:
+        x *= D / 39.0
+        y *= D / 39.0
+
+    # Rotation matrices
+    mrot = np.array([[np.cos(rot), np.sin(rot)], [-np.sin(rot), np.cos(rot)]])
+
+    # rotation of coordinates
+    # le tableau [x,y] est de taille (2,6,798)
+    xyrot = np.dot(mrot, np.transpose(np.array([x, y]), (1, 0, 2)))
+
+    return xyrot[0], xyrot[1]
+
+
+def getdatatype(truc):
+    """
+    Returns the data type of a numpy variable, either scalar value or array
+    """
+    if np.isscalar(truc):
+        return type(truc)
+    else:
+        return type(truc.flatten()[0])
+
+
+def generateSegmentProperties(attribute, hx, hy, i0, j0, scale, N, D):
+    """
+    Builds a 2D image of the pupil with some attributes for each of the
+    segments. Those segments are described from arguments hx and hy, that
+    are produced by the function generateCoordSegments(D, rot).
+
+    The output image has a size (N,N).
+    :return: pupil image
+
+    attribute = np.ones(798)+np.random.randn(798)/20.
+    N = 800
+    i0 = N/2
+    j0 = N/2
+    rotdegree = 0.0
+    scale = 41./N
+
+    """
+
+    # number of segments
+    nseg = hx.shape[-1]
+    # Si la propriete est un scalaire, on en fait une liste
+    if np.isscalar(attribute):
+        attribute = np.array([attribute] * nseg)
+
+    # on cree la map de pupille avec le mm type que attribute
+    map = np.zeros((N, N), dtype=getdatatype(attribute))
+
+    # average coord of segments
+    x0 = np.mean(hx, axis=0)
+    y0 = np.mean(hy, axis=0)
+    # avg coord of segments in pixel indexes
+    x0 = x0 / scale + i0
+    y0 = y0 / scale + j0
+    # size of mini-support
+    hexrad = 0.75 * D / 39. / scale
+    ix0 = np.floor(x0 - hexrad).astype(int) - 1
+    iy0 = np.floor(y0 - hexrad).astype(int) - 1
+    segdiam = np.ceil(hexrad * 2 + 1).astype(int) + 1
+
+    n = attribute.shape[0]
+    if n != 3:
+        # attribute is a signel value : either reflectivity, or boolean,
+        # or just piston.
+        for i in range(nseg):
+            ind = fillPolygon(hy[:, i], hx[:, i], i0 - ix0[i], j0 - iy0[i], scale,
+                              segdiam, index=True)
+            map[ind[1] + iy0[i], ind[0] + ix0[i]] = attribute[i]
+    else:
+        # attribute is [piston, tip, tilt]
+        minimap = np.zeros((segdiam, segdiam))
+        xmap = np.arange(segdiam) - segdiam / 2
+        xmap, ymap = np.meshgrid(xmap, xmap)
+        for i in range(nseg):
+            ind = fillPolygon(hy[:, i], hx[:, i], i0 - ix0[i], j0 - iy0[i], scale,
+                              segdiam, index=True)
+            minimap = attribute[0, i] + attribute[1, i] * xmap + attribute[2, i] * ymap
+            map[ind[1] + iy0[i], ind[0] + ix0[i]] = minimap[ind]
+
+    return map

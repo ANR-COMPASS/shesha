@@ -6,13 +6,13 @@ import shesha.config as conf
 from shesha.constants import CONST
 import shesha.util.iterkolmo as itK
 import shesha.util.hdf5_utils as h5u
-from shesha.sutra_bind.wrap import naga_context, Atmos
+from shesha.sutra_wrap import naga_context, Atmos
 from tqdm import tqdm
 import numpy as np
 
 
 def atmos_init(context: naga_context, p_atmos: conf.Param_atmos, p_tel: conf.Param_tel,
-               p_geom: conf.Param_geom, ittime=None, p_wfss=None, p_target=None,
+               p_geom: conf.Param_geom, ittime=None, p_wfss=None, p_targets=None,
                dataBase={}, use_DB=False):
     """
     Initializes an Atmos object
@@ -24,7 +24,7 @@ def atmos_init(context: naga_context, p_atmos: conf.Param_atmos, p_tel: conf.Par
         p_geom: (Param_geom): Geometry parameters
         ittime: (float): (optional) exposition time [s]
         p_wfss: (list of Param_wfs): (optional) WFS parameters
-        p_target: (Param_target): (optional) target parameters
+        p_targets: (list of Param_target): (optional) target parameters
         dataBase: (dict): (optional) dictionary for data base
         use_DB: (bool): (optional) flag for using the dataBase system
     :return:
@@ -52,8 +52,8 @@ def atmos_init(context: naga_context, p_atmos: conf.Param_atmos, p_tel: conf.Par
     norms = [0.]
     if p_wfss is not None:
         norms += [(w.xpos**2 + w.ypos**2)**0.5 for w in p_wfss]
-    if p_target is not None:
-        norms += list((p_target.xpos**2 + p_target.ypos**2)**0.5)
+    if p_targets is not None:
+        norms += [(p_target.xpos**2 + p_target.ypos**2)**0.5 for p_target in p_targets]
 
     max_size = max(norms)
 
@@ -80,9 +80,12 @@ def atmos_init(context: naga_context, p_atmos: conf.Param_atmos, p_tel: conf.Par
     if p_atmos.seeds is None:
         p_atmos.seeds = np.arange(p_atmos.nscreens, dtype=np.int64) + 1234
 
-    atm = Atmos(context, p_atmos.nscreens, p_atmos.r0, p_atmos.pupixsize,
-                p_atmos.dim_screens, p_atmos.frac, p_atmos.alt, p_atmos.windspeed,
-                p_atmos.winddir, p_atmos._deltax, p_atmos._deltay)
+    r0_layers = p_atmos.r0 / (p_atmos.frac**(3. / 5.) * p_atmos.pupixsize)
+    stencil_size = itK.stencil_size_array(p_atmos.dim_screens)
+
+    atm = Atmos(context, p_atmos.nscreens, p_atmos.r0, r0_layers, p_atmos.dim_screens,
+                stencil_size, p_atmos.alt, p_atmos.windspeed, p_atmos.winddir,
+                p_atmos._deltax, p_atmos._deltay, context.activeDevice)
 
     print("Creating turbulent layers :")
     for i in tqdm(range(p_atmos.nscreens)):
@@ -94,6 +97,6 @@ def atmos_init(context: naga_context, p_atmos: conf.Param_atmos, p_tel: conf.Par
             if use_DB:
                 h5u.save_AB_in_database(i, A, B, istx, isty)
 
-        atm.init_screen(p_atmos.alt[i], A, B, istx, isty, p_atmos.seeds[i])
+        atm.init_screen(i, A, B, istx, isty, p_atmos.seeds[i])
 
     return atm

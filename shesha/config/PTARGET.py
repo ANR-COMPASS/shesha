@@ -15,8 +15,6 @@ from . import config_setter_utils as csu
 class Param_target:
 
     def __init__(self):
-        self.__ntargets = 0
-        """ number of targets"""
         self.__apod = False
         """ boolean for apodizer"""
         self.__Lambda = None
@@ -32,15 +30,6 @@ class Param_target:
         self.__dms_seen = None
         """ index of dms seen by the target"""
 
-    def set_ntargets(self, n):
-        """ Set the number of targets
-
-        :param n: (long) number of targets
-        """
-        self.__ntargets = csu.enforce_int(n)
-
-    ntargets = property(lambda x: x.__ntargets, set_ntargets)
-
     def set_apod(self, l):
         """ Set apodizer flag
 
@@ -55,8 +44,7 @@ class Param_target:
 
         :param n: (np.ndarray[ndim=2, dtype=np.float32]) : wavelength of targets
         """
-        self.__Lambda = csu.enforce_array(n, size=self.ntargets, dtype=np.float32,
-                                          scalar_expand=True)
+        self.__Lambda = csu.enforce_float(n)
 
     Lambda = property(lambda x: x.__Lambda, set_Lambda)
 
@@ -65,8 +53,7 @@ class Param_target:
 
         :param n: (np.ndarray[ndim=2, dtype=np.float32]) : X position of targets [arcsec]
         """
-        self.__xpos = csu.enforce_array(n, size=self.ntargets, dtype=np.float32,
-                                        scalar_expand=True)
+        self.__xpos = csu.enforce_float(n)
 
     xpos = property(lambda x: x.__xpos, set_xpos)
 
@@ -75,8 +62,7 @@ class Param_target:
 
         :param n: (np.ndarray[ndim=2, dtype=np.float32]): Y position of targets [arcsec]
         """
-        self.__ypos = csu.enforce_array(n, size=self.ntargets, dtype=np.float32,
-                                        scalar_expand=True)
+        self.__ypos = csu.enforce_float(n)
 
     ypos = property(lambda x: x.__ypos, set_ypos)
 
@@ -85,8 +71,7 @@ class Param_target:
 
         :param n: (np.ndarray[ndim=2, dtype=np.float32]) : magnitudes
         """
-        self.__mag = csu.enforce_array(n, size=self.ntargets, dtype=np.float32,
-                                       scalar_expand=True)
+        self.__mag = csu.enforce_float(n)
 
     mag = property(lambda x: x.__mag, set_mag)
 
@@ -104,6 +89,8 @@ class Param_target:
 
         :param n: (np.ndarray[ndim=2, dtype=np.int32]) : index of dms seen
         """
+        if (isinstance(n, list)):
+            n = np.array(n)
         self.__dms_seen = csu.enforce_array(n, size=n.size, dtype=np.int32,
                                             scalar_expand=True)
 

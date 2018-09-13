@@ -8,46 +8,59 @@ from shesha.constants import CONST
 import shesha.util.utilities as util
 
 import numpy as np
-from shesha.sutra_bind.wrap import Sensors, Rtc
+from shesha.sutra_wrap import Sensors, Rtc
 
 
-def comp_new_pyr_ampl(rtc: Rtc, n: int, p_centroider: conf.Param_centroider,
-                      p_wfss: list, p_tel: conf.Param_tel, ampli: float):
+def comp_new_pyr_ampl(nwfs: int, ampli: float, wfs: Sensors, rtc: Rtc, p_wfss: list,
+                      p_tel: conf.Param_tel, npts_force: int=None):
     """ Set the pyramid modulation amplitude
 
     :parameters:
 
-        rtc: (Rtc): rtc object
-
-        n : (int): centroider index
-
-        p_centroider : (Param_centroider) : pyr centroider settings
+        nwfs : (int): WFS index
 
         ampli : (float) : new amplitude in units of lambda/D
+
+        rtc: (Rtc): rtc object
+
+        p_centroider : (Param_centroider) : pyr centroider settings
 
         p_wfss : (list of Param_wfs) : list of wfs parameters
 
         p_tel : (Param_tel) : Telescope parameters
     """
-    nwfs = p_centroider.nwfs
+
     pwfs = p_wfss[nwfs]
     pwfs.set_pyr_ampl(ampli)
+    nFace = pwfs.nPupils
+
+    if npts_force is None:
+        if ampli == 0.:
+            pyr_npts = 1
+        elif ampli < 2.:
+            pyr_npts = int(np.ceil(int(2 * 2 * np.pi) / nFace) * nFace)
+        else:
+            pyr_npts = int(np.ceil(int(ampli * 2 * np.pi) / nFace) * nFace)
+    else:
+        pyr_npts = npts_force
 
     pixsize = pwfs._qpixsize * CONST.ARCSEC2RAD
-    scale_fact = 2 * np.pi / pwfs._Nfft * \
-        (pwfs.Lambda * 1e-6 / p_tel.diam) / pixsize * ampli
+    scale_fact = 2 * np.pi / pwfs._Nfft * (
+            pwfs.Lambda * 1e-6 / p_tel.diam) / pixsize * ampli
     cx = scale_fact * \
-        np.sin((np.arange(pwfs.pyr_npts, dtype=np.float32))
-               * 2. * np.pi / pwfs.pyr_npts)
+        np.sin((np.arange(pyr_npts, dtype=np.float32)) * 2. * np.pi / pyr_npts)
     cy = scale_fact * \
-        np.cos((np.arange(pwfs.pyr_npts, dtype=np.float32))
-               * 2. * np.pi / pwfs.pyr_npts)
+        np.cos((np.arange(pyr_npts, dtype=np.float32)) * 2. * np.pi / pyr_npts)
+
+    pwfs.set_pyr_npts(pyr_npts)
     pwfs.set_pyr_cx(cx)
     pwfs.set_pyr_cy(cy)
+    wfs.d_wfs[nwfs].set_pyr_modulation(cx, cy, pyr_npts)
 
     scale = pwfs.Lambda * 1e-6 / p_tel.diam * ampli * 180. / np.pi * 3600.
+    rtc.d_centro[nwfs].set_scale(scale)
 
-    rtc.set_pyr_ampl(nwfs, cx, cy, scale)
+    return cx, cy, scale, pyr_npts
 
 
 def noise_cov(nw: int, p_wfs: conf.Param_wfs, p_atmos: conf.Param_atmos,
@@ -119,8 +132,8 @@ def comp_new_fstop(wfs: Sensors, n: int, p_wfs: conf.Param_wfs, fssize: float,
     fsradius_pixels = int(fssize / p_wfs._qpixsize / 2.)
     if (fstop == scons.FieldStopType.ROUND):
         p_wfs.fstop = fstop
-        focmask = util.dist(p_wfs._Nfft, xc=p_wfs._Nfft / 2. + 0.5,
-                            yc=p_wfs._Nfft / 2. + 0.5) < (fsradius_pixels)
+        focmask = util.dist(p_wfs._Nfft, xc=p_wfs._Nfft / 2. - 0.5,
+                            yc=p_wfs._Nfft / 2. - 0.5) < (fsradius_pixels)
         # fstop_area = np.pi * (p_wfs.fssize/2.)**2. #UNUSED
     elif (p_wfs.fstop == scons.FieldStopType.SQUARE):
         p_wfs.fstop = fstop
@@ -139,4 +152,4 @@ def comp_new_fstop(wfs: Sensors, n: int, p_wfs: conf.Param_wfs, fssize: float,
     pyr_focmask = focmask * 1.0  # np.fft.fftshift(focmask*1.0)
     p_wfs._submask = np.fft.fftshift(pyr_focmask).astype(np.float32)
     p_wfs_fssize = fssize
-    wfs.set_submask(n, p_wfs._submask)
+    wfs.d_wfs[n].set_submask(p_wfs._submask)

@@ -2,7 +2,7 @@
 Functions used for modal optimization control
 """
 import numpy as np
-from shesha.sutra_bind.wrap import Sensors, Telescope, Rtc, Atmos
+from shesha.sutra_wrap import Sensors, Telescope, Rtc, Atmos
 
 
 def openLoopSlp(tel: Telescope, atmos: Atmos, wfs: Sensors, rtc: Rtc, nrec: int,
@@ -35,10 +35,11 @@ def openLoopSlp(tel: Telescope, atmos: Atmos, wfs: Sensors, rtc: Rtc, nrec: int,
 
         if (p_wfss is not None and wfs is not None):
             for j in range(len(p_wfss)):
-                wfs.raytrace(j, b"atmos", tel, atmos)
-                wfs.comp_img(j)
-                rtc.comp_slopes(ncontrol)
+                wfs.d_wfs[j].d_gs.raytrace(atmos)
+                wfs.d_wfs[j].d_gs.raytrace(tel)
+                wfs.d_wfs[j].comp_image()
+                rtc.d_centro[j].get_cog()
                 ol_slopes[j * p_wfss[j]._nvalid * 2:(j + 1) * p_wfss[j]._nvalid * 2,
-                          i] = wfs.get_slopes(j)
+                          i] = np.array(wfs.d_wfs[j].d_slopes)
     print("Done")
     return ol_slopes

@@ -29,7 +29,7 @@ class AbstractSupervisor(ABC):
     ''' Immediately sets provided command to DMs - does not affect integrator '''
 
     @abstractmethod
-    def setPerturbationVoltage(self, command: np.ndarray) -> None:
+    def setPerturbationVoltage(self, nControl: int, command: np.ndarray) -> None:
         ...
 
     ''' Add this offset value to integrator (will be applied at the end of next iteration)'''

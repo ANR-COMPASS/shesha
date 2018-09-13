@@ -117,14 +117,14 @@ def make_azimuth(nord: int, npp: int) -> np.ndarray:
             azbas:
     """
 
-    azbas = np.zeros((np.int32(1 + nord), npp), dtype=np.float32)
+    azbas = np.zeros((npp, np.int32(1 + nord)), dtype=np.float32)
     th = np.arange(npp, dtype=np.float32) * (2. * np.pi / npp)
 
-    azbas[0, :] = 1.0
+    azbas[:, 0] = 1.0
     for i in np.arange(1, nord, 2):
-        azbas[np.int32(i), :] = np.cos((np.int32(i) // 2 + 1) * th)
+        azbas[:, np.int32(i)] = np.cos((np.int32(i) // 2 + 1) * th)
     for i in np.arange(2, nord, 2):
-        azbas[np.int32(i), :] = np.sin((np.int32(i) // 2) * th)
+        azbas[:, np.int32(i)] = np.sin((np.int32(i) // 2) * th)
 
     return azbas
 

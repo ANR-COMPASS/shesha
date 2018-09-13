@@ -284,15 +284,18 @@ def makeGaussian(pitch: float, coupling: float, x=None, y=None):
     if (x is None or y is None):
         return smallsize
     else:
-        xdg = np.linspace(-1, 1, smallsize, dtype=np.float32)
-        x = np.tile(xdg, (smallsize, 1))
-        y = x.T
-        sig = 0.8
-        gauss = 1 / np.cos(np.exp(-(x**2 / sig + y**2 / sig))**2)
-        # Force value at zero on array limits
-        gauss -= gauss[gauss.shape[0] / 2.].min()
-        gauss[gauss < 0.] = 0
-        gauss /= gauss.max()  # Normalize
+        sig = pitch / np.sqrt(-2 * np.log(coupling))
+        gauss = np.exp(-0.5 * ((x / sig)**2 + (y / sig)**2))
+        # gauss /= gauss.max()
+        # xdg = np.linspace(-1, 1, smallsize, dtype=np.float32)
+        # x = np.tile(xdg, (smallsize, 1))
+        # y = x.T
+        # sig = 0.8
+        # gauss = 1 / np.cos(np.exp(-(x**2 / sig + y**2 / sig))**2)
+        # # Force value at zero on array limits
+        # gauss -= gauss[gauss.shape[0] // 2].min()
+        # gauss[gauss < 0.] = 0
+        # gauss /= gauss.max()  # Normalize
         return gauss
 
 

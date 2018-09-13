@@ -168,7 +168,7 @@ def createDoubleHexaPattern(pitch: float, supportSize: int):
         yy = -np.sin(k * pi / 3) * x + np.cos(k * pi / 3) * y
         X = np.r_[X, xx]
         Y = np.r_[Y, yy]
-    return np.float32(np.array([Y, X]))
+    return np.float32(np.array([X, Y]))
 
 
 def select_actuators(xc: np.ndarray, yc: np.ndarray, nxact: int, pitch: int, cobs: float,

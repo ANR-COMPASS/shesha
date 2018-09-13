@@ -11,7 +11,7 @@ import shesha.constants as scons
 import shesha.init.lgs_init as lgs
 import shesha.util.hdf5_utils as h5u
 
-from shesha.sutra_bind.wrap import Sensors, Dms, Rtc
+from shesha.sutra_wrap import Sensors, Dms, Rtc
 
 
 def imat_geom(wfs: Sensors, dms: Dms, p_wfss: List[conf.Param_wfs],
@@ -52,26 +52,27 @@ def imat_geom(wfs: Sensors, dms: Dms, p_wfss: List[conf.Param_wfs],
     print("Doing imat geom...")
     for nmc in range(ndm):
         nm = p_controller.ndm[nmc]
-        dms.resetdm(p_dms[nm].type, p_dms[nm].alt)
+        dms.d_dms[nm].reset_shape()
         for i in tqdm(range(p_dms[nm]._ntotact), desc="DM%d" % nmc):
-            dms.oneactu(p_dms[nm].type, p_dms[nm].alt, i, p_dms[nm].push4imat)
+            dms.d_dms[nm].comp_oneactu(i, p_dms[nm].push4imat)
             nslps = 0
             for nw in range(nwfs):
                 n = p_controller.nwfs[nw]
-                wfs.raytrace(n, b"dm", tel=None, atmos=None, dms=dms, rst=1)
-                wfs.slopes_geom(n, meth)
-                imat_cpu[nslps:nslps + p_wfss[n]._nvalid * 2, ind] = wfs.get_slopes(n)
+                wfs.d_wfs[n].d_gs.raytrace(dms, rst=1)
+                wfs.d_wfs[n].slopes_geom(meth)
+                imat_cpu[nslps:nslps + p_wfss[n]._nvalid * 2, ind] = np.array(
+                        wfs.d_wfs[n].d_slopes)
                 nslps += p_wfss[n]._nvalid * 2
             imat_cpu[:, ind] = imat_cpu[:, ind] / p_dms[nm].push4imat
             ind = ind + 1
             cc = cc + 1
-            dms.resetdm(p_dms[nm].type, p_dms[nm].alt)
+            dms.d_dms[nm].reset_shape()
 
     return imat_cpu
 
 
 def imat_init(ncontrol: int, rtc: Rtc, dms: Dms, p_dms: list, wfs: Sensors, p_wfss: list,
-              p_tel: conf.Param_tel, p_controller: conf.Param_controller, kl=None,
+              p_tel: conf.Param_tel, p_controller: conf.Param_controller, M2V=None,
               dataBase: dict={}, use_DB: bool=False) -> None:
     """ Initialize and compute the interaction matrix on the GPU
 
@@ -93,7 +94,7 @@ def imat_init(ncontrol: int, rtc: Rtc, dms: Dms, p_dms: list, wfs: Sensors, p_wf
 
         p_controller: (Param_controller) : controller settings
 
-        kl:(np.array) :  KL_matrix
+        M2V:(np.array) :  KL_matrix
 
         dataBase:(dict): (optional) dict containing paths to files to load
 
@@ -110,18 +111,19 @@ def imat_init(ncontrol: int, rtc: Rtc, dms: Dms, p_dms: list, wfs: Sensors, p_wf
 
     if "imat" in dataBase:
         imat = h5u.load_imat_from_dataBase(dataBase)
-        rtc.set_imat(ncontrol, imat)
+        rtc.d_control[ncontrol].set_imat(imat)
     else:
         t0 = time.time()
-        if kl is not None:
-            ntt = scons.DmType.TT in [d.type for d in p_dms]
-            rtc.do_imat_kl(ncontrol, p_controller, dms, p_dms, kl, ntt)
+        if M2V is not None:
+            p_controller._M2V = M2V.copy()
+            rtc.do_imat_basis(ncontrol, dms, M2V.shape[1], M2V, p_controller.klpush)
         else:
             rtc.do_imat(ncontrol, dms)
         print("done in %f s" % (time.time() - t0))
+        imat = np.array(rtc.d_control[ncontrol].d_imat)
         if use_DB:
-            h5u.save_imat_in_dataBase(rtc.get_imat(ncontrol))
-    p_controller.set_imat(rtc.get_imat(ncontrol))
+            h5u.save_imat_in_dataBase(imat)
+    p_controller.set_imat(imat)
 
     # Restore original profile in lgs spots
     for i in range(len(p_wfss)):

@@ -18,10 +18,7 @@ def check_enum(cls, name):
         Create a safe-type enum instance from bytes contents
     """
 
-    if isinstance(name, str):
-        name = bytes(name.encode('UTF-8'))
-
-    if not isinstance(name, bytes) or \
+    if not isinstance(name, str) or \
             not name in vars(cls).values():
         raise ValueError("Invalid enumeration value for enum %s, value %s" % (cls, name))
     return name
@@ -32,9 +29,9 @@ class DmType:
         Types of deformable mirrors
     """
 
-    PZT = b'pzt'
-    TT = b'tt'
-    KL = b'kl'
+    PZT = 'pzt'
+    TT = 'tt'
+    KL = 'kl'
 
 
 class PatternType:
@@ -42,9 +39,9 @@ class PatternType:
         Types of Piezo DM patterns
     """
 
-    SQUARE = b'square'
-    HEXA = b'hexa'
-    HEXAM4 = b'hexaM4'
+    SQUARE = 'square'
+    HEXA = 'hexa'
+    HEXAM4 = 'hexaM4'
 
 
 class KLType:
@@ -52,8 +49,8 @@ class KLType:
         Possible KLs for computations
     """
 
-    KOLMO = b'kolmo'
-    KARMAN = b'karman'
+    KOLMO = 'kolmo'
+    KARMAN = 'karman'
 
 
 class InfluType:
@@ -61,12 +58,12 @@ class InfluType:
         Influence function types
     """
 
-    DEFAULT = b'default'
-    RADIALSCHWARTZ = b'radialSchwartz'
-    SQUARESCHWARTZ = b'squareSchwartz'
-    BLACKNUTT = b'blacknutt'
-    GAUSSIAN = b'gaussian'
-    BESSEL = b'bessel'
+    DEFAULT = 'default'
+    RADIALSCHWARTZ = 'radialSchwartz'
+    SQUARESCHWARTZ = 'squareSchwartz'
+    BLACKNUTT = 'blacknutt'
+    GAUSSIAN = 'gaussian'
+    BESSEL = 'bessel'
 
 
 class ControllerType:
@@ -74,14 +71,14 @@ class ControllerType:
         Controller types
     """
 
-    GENERIC = b'generic'
-    LS = b'ls'
-    MV = b'mv'
-    CURED = b'cured'
-    GEO = b'geo'
-    KALMAN_C = b'kalman_CPU'
-    KALMAN_G = b'kalman_GPU'
-    KALMAN_UN = b'kalman_uninitialized'
+    GENERIC = 'generic'
+    LS = 'ls'
+    MV = 'mv'
+    CURED = 'cured'
+    GEO = 'geo'
+    KALMAN_C = 'kalman_CPU'
+    KALMAN_G = 'kalman_GPU'
+    KALMAN_UN = 'kalman_uninitialized'
 
 
 class CentroiderType:
@@ -89,17 +86,18 @@ class CentroiderType:
         Centroider types
     """
 
-    COG = b'cog'
-    TCOG = b'tcog'
-    WCOG = b'wcog'
-    BPCOG = b'bpcog'
-    CORR = b'corr'
-    PYR = b'pyr'
+    COG = 'cog'
+    TCOG = 'tcog'
+    WCOG = 'wcog'
+    BPCOG = 'bpcog'
+    CORR = 'corr'
+    PYR = 'pyr'
+    MASKEDPIX = 'maskedpix'
 
 
 class CentroiderFctType:
-    MODEL = b'model'
-    GAUSS = b'gauss'
+    MODEL = 'model'
+    GAUSS = 'gauss'
 
 
 class PyrCentroiderMethod:
@@ -121,8 +119,9 @@ class WFSType:
     """
         WFS Types
     """
-    SH = b'sh'
-    PYRHR = b'pyrhr'
+    SH = 'sh'
+    PYRHR = 'pyrhr'
+    PYRLR = 'pyrlr'
 
 
 class TargetImageType:
@@ -130,39 +129,40 @@ class TargetImageType:
         Target Images
     """
 
-    SE = b'se'
-    LE = b'le'
+    SE = 'se'
+    LE = 'le'
 
 
 class ApertureType:
     """
         Telescope apertures
     """
-    GENERIC = b'Generic'
-    EELT_NOMINAL = b'EELT-Nominal'
-    EELT_BP1 = b'EELT-BP1'
-    EELT_BP3 = b'EELT-BP3'
-    EELT_BP5 = b'EELT-BP5'
-    EELT_CUSTOM = b'EELT-Custom'
-    VLT = b'VLT'
+    GENERIC = 'Generic'
+    EELT_NOMINAL = 'EELT-Nominal'  # Alexis Carlotti method
+    EELT = 'EELT'  # E. Gendron method
+    EELT_BP1 = 'EELT-BP1'
+    EELT_BP3 = 'EELT-BP3'
+    EELT_BP5 = 'EELT-BP5'
+    EELT_CUSTOM = 'EELT-Custom'
+    VLT = 'VLT'
 
 
 class SpiderType:
     """
         Spiders
     """
-    FOUR = b'four'
-    SIX = b'six'
+    FOUR = 'four'
+    SIX = 'six'
 
 
 class ProfType:
     """
         Sodium profile for LGS
     """
-    GAUSS1 = b'Gauss1'
-    GAUSS2 = b'Gauss2'
-    GAUSS3 = b'Gauss3'
-    EXP = b'Exp'
+    GAUSS1 = 'Gauss1'
+    GAUSS2 = 'Gauss2'
+    GAUSS3 = 'Gauss3'
+    EXP = 'Exp'
     FILES = dict({
             GAUSS1: "allProfileNa_withAltitude_1Gaussian.npy",
             GAUSS2: "allProfileNa_withAltitude_2Gaussian.npy",
@@ -175,5 +175,5 @@ class FieldStopType:
     """
         WFS field stop
     """
-    SQUARE = b'square'
-    ROUND = b'round'
+    SQUARE = 'square'
+    ROUND = 'round'

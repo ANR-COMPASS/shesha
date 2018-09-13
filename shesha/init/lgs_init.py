@@ -17,11 +17,12 @@ import shesha.constants as scons
 from shesha.util import utilities as util
 import numpy as np
 
-from shesha.sutra_bind.wrap import Sensors
+from shesha.sutra_wrap import Sensors
+import scipy.ndimage.interpolation as sci
 
 
 def make_lgs_prof1d(p_wfs: conf.Param_wfs, p_tel: conf.Param_tel, prof: np.ndarray,
-                    h: np.ndarray, beam: float, center=b""):
+                    h: np.ndarray, beam: float, center=""):
     """same as prep_lgs_prof but cpu only. original routine from rico
 
     :parameters:
@@ -98,14 +99,14 @@ def make_lgs_prof1d(p_wfs: conf.Param_wfs, p_tel: conf.Param_tel, prof: np.ndarr
         # TODO what is n
         n = 1
         g = np.zeros(n, dtype=np.float32)
-        if (center == b"image"):
+        if (center == "image"):
             g[n / 2 - 1] = 0.5
             g[n / 2] = 0.5
         else:
             g[n / 2] = 1
 
     else:
-        if (center == b"image"):
+        if (center == "image"):
             if ((p_wfs.npix * p_wfs._nrebin) % 2 != p_wfs._Nfft % 2):
                 g = np.exp(-(x + p_wfs._qpixsize)**2 / (2 * w**2.))
             else:
@@ -124,11 +125,10 @@ def make_lgs_prof1d(p_wfs: conf.Param_wfs, p_tel: conf.Param_tel, prof: np.ndarr
             np.fft.fft(profi, axis=0) * np.fft.fft(g_extended, axis=0),
             axis=0).real.astype(np.float32)
     p1d = p1d * p1d.shape[0]
-    p1d = np.roll(p1d, int(p_wfs._Ntot / 2. + 0.5), axis=0)
+    p1d = np.roll(p1d, int(p_wfs._Ntot / 2. - 0.5), axis=0)
     p1d = np.abs(p1d)
 
     im = np.zeros((p1d.shape[1], p1d.shape[0], p1d.shape[0]), dtype=np.float32)
-
     for i in range(p1d.shape[0]):
         im[:, i, :] = g[i] * p1d.T
 
@@ -140,27 +140,32 @@ def make_lgs_prof1d(p_wfs: conf.Param_wfs, p_tel: conf.Param_tel, prof: np.ndarr
 
     p_wfs._azimuth = azimuth
 
-    if (center == b"image"):
-        xcent = p_wfs._Ntot / 2. + 0.5
+    if (center == "image"):
+        xcent = p_wfs._Ntot / 2. - 0.5
         ycent = xcent
     else:
-        xcent = p_wfs._Ntot / 2. + 1
+        xcent = p_wfs._Ntot / 2.  #+ 1
         ycent = xcent
 
     if (ysubs.size > 0):
         # TODO rotate
-        im = util.rotate3d(im, azimuth * 180 / np.pi, xcent, ycent)
-        max_im = np.max(im, axis=(1, 2))
-        im = (im.T / max_im).T
+        # im = util.rotate3d(im, azimuth * 180 / np.pi, xcent, ycent) --> ça marche pas !!
+        # max_im = np.max(im, axis=(1, 2))
+        # im = (im.T / max_im).T
+        for k in range(im.shape[0]):
+            img = im[k, :, :] / im[k, :, :].max()
+            im[k, :, :] = sci.rotate(img, azimuth[k] * 180 / np.pi, reshape=False)
+
     else:
-        im = util.rotate(im, azimuth * 180 / np.pi, xcent, ycent)
-        im = im / np.max(im)
+        # im = util.rotate(im, azimuth * 180 / np.pi, xcent, ycent)
+        # im = im / np.max(im)
+        im = sci.rotate(img, azimuth * 180 / np.pi, reshape=False)
 
     p_wfs._lgskern = im.T
 
 
 def prep_lgs_prof(p_wfs: conf.Param_wfs, nsensors: int, p_tel: conf.Param_tel,
-                  sensors: Sensors, center=b"", imat=0):
+                  sensors: Sensors, center="", imat=0):
     """The function returns an image array(double,n,n) of a laser beacon elongated by perpective
     effect. It is obtaind by convolution of a gaussian of width "lgsWidth" arcseconds, with the
     line of the sodium profile "prof". The altitude of the profile is the array "h".
@@ -195,7 +200,7 @@ def prep_lgs_prof(p_wfs: conf.Param_wfs, nsensors: int, p_tel: conf.Param_tel,
     Now, if the initial profile is a coarse one, and that one has to oversample it, then a
     simple re-sampling of the profile is adequate.
     """
-    if (p_wfs.proftype is None or p_wfs.proftype == b""):
+    if (p_wfs.proftype is None or p_wfs.proftype == ""):
         p_wfs.set_proftype(scons.ProfType.GAUSS1)
 
     profilename = scons.ProfType.FILES[p_wfs.proftype]
@@ -244,14 +249,14 @@ def prep_lgs_prof(p_wfs: conf.Param_wfs, nsensors: int, p_tel: conf.Param_tel,
         # TODO what is n
         n = 1
         g = np.zeros(n, dtype=np.float32)
-        if (center == b"image"):
+        if (center == "image"):
             g[n / 2 - 1] = 0.5
             g[n / 2] = 0.5
         else:
             g[n / 2] = 1
 
     else:
-        if (center == b"image"):
+        if (center == "image"):
             g = np.exp(-(x + p_wfs._qpixsize / 2)**2 / (2 * w**2.))
         else:
             g = np.exp(-x**2 / (2 * w**2.))
@@ -268,6 +273,6 @@ def prep_lgs_prof(p_wfs: conf.Param_wfs, nsensors: int, p_tel: conf.Param_tel,
 
     p_wfs._azimuth = azimuth
 
-    sensors.init_lgs(nsensors, p_wfs._prof1d.size, hG, p_wfs._altna[0], dh,
-                     p_wfs._qpixsize, dOffAxis, p_wfs._prof1d, p_wfs._profcum,
-                     p_wfs._beam, p_wfs._ftbeam, p_wfs._azimuth)
+    sensors.d_wfs[nsensors].d_gs.d_lgs.lgs_init(
+            p_wfs._prof1d.size, hG, p_wfs._altna[0], dh, p_wfs._qpixsize, dOffAxis,
+            p_wfs._prof1d, p_wfs._profcum, p_wfs._beam, p_wfs._ftbeam, p_wfs._azimuth)

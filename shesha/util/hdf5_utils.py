@@ -9,6 +9,31 @@ import numpy as np
 from subprocess import check_output
 
 
+def updateParamDict(pdict, pClass, prefix):
+    """
+    Update parameters dictionnary pdict with all the parameters of pClass.
+    Prefix must be set to define the key value of the new dict entries
+    """
+    if (isinstance(pClass, list)):
+        params = [
+                i for i in dir(pClass[0])
+                if (not i.startswith('_') and not i.startswith('set_') and
+                    not i.startswith('get_'))
+        ]
+        for k in params:
+            pdict.update({prefix + k: [p.__dict__[prefix + k] for p in pClass]})
+
+    else:
+        params = [
+                i for i in dir(pClass)
+                if (not i.startswith('_') and not i.startswith('set_') and
+                    not i.startswith('get_'))
+        ]
+
+        for k in params:
+            pdict.update({prefix + k: pClass.__dict__[prefix + k]})
+
+
 def params_dictionary(config):
     """ Create and returns a dictionary of all the config parameters with the
     corresponding keys for further creation of database and save files
@@ -22,108 +47,25 @@ def params_dictionary(config):
 
     param_dict = {"simul_name": config.simul_name.encode('utf8'), "commit": commit}
 
-    param_loop = [
-            i for i in dir(config.p_loop)
-            if (not i.startswith('_') and not i.startswith('set_') and
-                not i.startswith('get_'))
-    ]
-    for k in param_loop:
-        param_dict.update({
-                "_Param_loop__" + k: config.p_loop.__dict__["_Param_loop__" + k]
-        })
-    param_geom = [
-            i for i in dir(config.p_geom)
-            if (not i.startswith('_') and not i.startswith('set_') and
-                not i.startswith('get_'))
-    ]
-    for k in param_geom:
-        param_dict.update({
-                "_Param_geom__" + k: config.p_geom.__dict__["_Param_geom__" + k]
-        })
-    param_tel = [
-            i for i in dir(config.p_tel)
-            if (not i.startswith('_') and not i.startswith('set_') and
-                not i.startswith('get_'))
-    ]
-    for k in param_tel:
-        param_dict.update({
-                "_Param_tel__" + k: config.p_tel.__dict__["_Param_tel__" + k]
-        })
+    updateParamDict(param_dict, config.p_loop, "_Param_loop__")
+    updateParamDict(param_dict, config.p_geom, "_Param_geom__")
+    updateParamDict(param_dict, config.p_tel, "_Param_tel__")
     if config.p_atmos is not None:
-        param_atmos = [
-                i for i in dir(config.p_atmos)
-                if (not i.startswith('_') and not i.startswith('set_') and
-                    not i.startswith('get_'))
-        ]
-        for k in param_atmos:
-            param_dict.update({
-                    "_Param_atmos__" + k: config.p_atmos.__dict__["_Param_atmos__" + k]
-            })
-
+        updateParamDict(param_dict, config.p_atmos, "_Param_atmos__")
     if config.p_target is not None:
-        param_target = [
-                i for i in dir(config.p_target)
-                if (not i.startswith('_') and not i.startswith('set_') and
-                    not i.startswith('get_'))
-        ]
-        for k in param_target:
-            param_dict.update({
-                    "_Param_target__" + k:
-                            config.p_target.__dict__["_Param_target__" + k]
-            })
+        updateParamDict(param_dict, config.p_targets, "_Param_target__")
+        param_dict.update({"ntargets": len(config.p_targets)})
     if config.p_wfss is not None:
-        param_wfs = [
-                i for i in dir(config.p_wfss[0])
-                if (not i.startswith('_') and not i.startswith('set_') and
-                    not i.startswith('get_'))
-        ]
-        for k in param_wfs:
-            param_dict.update({
-                    "_Param_wfs__" + k: [
-                            w.__dict__["_Param_wfs__" + k] for w in config.p_wfss
-                    ]
-            })
+        updateParamDict(param_dict, config.p_wfss, "_Param_wfs__")
         param_dict.update({"nwfs": len(config.p_wfss)})
     if config.p_dms is not None:
-        param_dm = [
-                i for i in dir(config.p_dms[0])
-                if (not i.startswith('_') and not i.startswith('set_') and
-                    not i.startswith('get_'))
-        ]
-        for k in param_dm:
-            param_dict.update({
-                    "_Param_dm__" + k: [
-                            w.__dict__["_Param_dm__" + k] for w in config.p_dms
-                    ]
-            })
+        updateParamDict(param_dict, config.p_dms, "_Param_dm__")
         param_dict.update({"ndms": len(config.p_dms)})
-
     if config.p_controllers is not None:
-        param_controller = [
-                i for i in dir(config.p_controllers[0])
-                if (not i.startswith('_') and not i.startswith('set_') and
-                    not i.startswith('get_'))
-        ]
-        for k in param_controller:
-            param_dict.update({
-                    "_Param_controller__" + k: [
-                            w.__dict__["_Param_controller__" + k]
-                            for w in config.p_controllers
-                    ]
-            })
+        updateParamDict(param_dict, config.p_controllers, "_Param_controller__")
+        param_dict.update({"ncontrollers": len(config.p_controllers)})
     if config.p_centroiders is not None:
-        param_centroider = [
-                i for i in dir(config.p_centroiders[0])
-                if (not i.startswith('_') and not i.startswith('set_') and
-                    not i.startswith('get_'))
-        ]
-        for k in param_centroider:
-            param_dict.update({
-                    "_Param_centroider__" + k: [
-                            w.__dict__["_Param_centroider__" + k]
-                            for w in config.p_centroiders
-                    ]
-            })
+        updateParamDict(param_dict, config.p_centroiders, "_Param_centroider__")
         param_dict.update({"ncentroiders": len(config.p_centroiders)})
 
     for k in param_dict.keys():
@@ -147,7 +89,16 @@ def create_file_attributes(filename, param_dict):
     f = h5py.File(filename, "w")
 
     for i in list(param_dict.keys()):
-        f.attrs.create(i, param_dict[i])
+        print(param_dict[i])
+        if (isinstance(param_dict[i], str)):
+            attr = param_dict[i].encode("utf-8")
+        elif (isinstance(param_dict[i], list)):
+            attr = [
+                    s.encode("utf-8") if isinstance(s, str) else s for s in param_dict[i]
+            ]
+        else:
+            attr = param_dict[i]
+        f.attrs.create(i, attr)
     f.attrs.create("validity", False)
     print(filename, "initialized")
     f.close()

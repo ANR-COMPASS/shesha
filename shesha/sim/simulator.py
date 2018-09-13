@@ -8,15 +8,13 @@ import os
     Binding struct for all initializers - good for subclassing modules
 '''
 
-
-class init:
-    from shesha.init.geom_init import tel_init
-    from shesha.init.atmos_init import atmos_init
-    from shesha.init.rtc_init import rtc_init
-    from shesha.init.dm_init import dm_init
-    from shesha.init.target_init import target_init
-    from shesha.init.wfs_init import wfs_init
-
+from shesha.init.geom_init import tel_init
+from shesha.init.atmos_init import atmos_init
+from shesha.init.rtc_init import rtc_init
+from shesha.init.dm_init import dm_init
+from shesha.init.target_init import target_init
+from shesha.init.wfs_init import wfs_init
+from shesha.util.utilities import load_config_from_file
 
 import shesha.constants as scons
 import shesha.util.hdf5_utils as h5u
@@ -24,7 +22,7 @@ import shesha.util.hdf5_utils as h5u
 import time
 
 from typing import Iterable, Any, Dict
-from shesha.sutra_bind.wrap import naga_context, Sensors, Dms, Rtc, Atmos, Telescope, Target
+from shesha.sutra_wrap import Sensors, Dms, Rtc, Atmos, Telescope, Target, naga_context
 
 
 class Simulator:
@@ -90,7 +88,7 @@ class Simulator:
         Active all the GPU devices specified in the parameters file
         """
         if self.loaded and self.c is not None:
-            current_Id = self.c.get_activeDevice()
+            current_Id = self.c.activeDevice
             for devIdx in range(len(self.config.p_loop.devices)):
                 self.c.set_activeDeviceForce(devIdx)
             self.c.set_activeDevice(current_Id)
@@ -141,9 +139,13 @@ class Simulator:
             self.matricesToLoad = h5u.checkMatricesDataBase(
                     os.environ["SHESHA_ROOT"] + "/data/dataBase/", self.config,
                     param_dict)
-        self.c = naga_context(devices=self.config.p_loop.devices)
-
-        self.force_context()
+        # self.c = naga_context(devices=self.config.p_loop.devices)
+        if (self.config.p_loop.devices.size > 1):
+            self.c = naga_context.get_instance_ngpu(self.config.p_loop.devices.size,
+                                                    self.config.p_loop.devices)
+        else:
+            self.c = naga_context.get_instance_1gpu(self.config.p_loop.devices[0])
+        # self.force_context()
 
         if self.config.p_tel is None or self.config.p_geom is None:
             raise ValueError("Telescope geometry must be defined (p_geom and p_tel)")
@@ -182,8 +184,8 @@ class Simulator:
         Initializes the Telescope object in the simulator
         """
         print("->tel")
-        self.tel = init.tel_init(self.c, self.config.p_geom, self.config.p_tel, r0,
-                                 ittime, self.config.p_wfss)
+        self.tel = tel_init(self.c, self.config.p_geom, self.config.p_tel, r0, ittime,
+                            self.config.p_wfss)
 
     def _atm_init(self, ittime: float) -> None:
         """
@@ -192,10 +194,10 @@ class Simulator:
         if self.config.p_atmos is not None:
             #   atmos
             print("->atmos")
-            self.atm = init.atmos_init(
-                    self.c, self.config.p_atmos, self.config.p_tel, self.config.p_geom,
-                    ittime, p_wfss=self.config.p_wfss, p_target=self.config.p_target,
-                    dataBase=self.matricesToLoad, use_DB=self.use_DB)
+            self.atm = atmos_init(self.c, self.config.p_atmos, self.config.p_tel,
+                                  self.config.p_geom, ittime, p_wfss=self.config.p_wfss,
+                                  p_targets=self.config.p_targets,
+                                  dataBase=self.matricesToLoad, use_DB=self.use_DB)
         else:
             self.atm = None
 
@@ -206,8 +208,8 @@ class Simulator:
         if self.config.p_dms is not None:
             #   dm
             print("->dm")
-            self.dms = init.dm_init(self.c, self.config.p_dms, self.config.p_tel,
-                                    self.config.p_geom, self.config.p_wfss)
+            self.dms = dm_init(self.c, self.config.p_dms, self.config.p_tel,
+                               self.config.p_geom, self.config.p_wfss)
         else:
             self.dms = None
 
@@ -215,12 +217,11 @@ class Simulator:
         """
         Initializes the Target object in the simulator
         """
-        if self.config.p_target is not None:
+        if self.config.p_targets is not None:
             print("->target")
-            self.tar = init.target_init(self.c, self.tel, self.config.p_target,
-                                        self.config.p_atmos, self.config.p_tel,
-                                        self.config.p_geom, self.config.p_dms,
-                                        brahma=False)
+            self.tar = target_init(self.c, self.tel, self.config.p_targets,
+                                   self.config.p_atmos, self.config.p_tel,
+                                   self.config.p_geom, self.config.p_dms, brahma=False)
         else:
             self.tar = None
 
@@ -230,9 +231,9 @@ class Simulator:
         """
         if self.config.p_wfss is not None:
             print("->wfs")
-            self.wfs = init.wfs_init(self.c, self.tel, self.config.p_wfss,
-                                     self.config.p_tel, self.config.p_geom,
-                                     self.config.p_dms, self.config.p_atmos)
+            self.wfs = wfs_init(self.c, self.tel, self.config.p_wfss, self.config.p_tel,
+                                self.config.p_geom, self.config.p_dms,
+                                self.config.p_atmos)
         else:
             self.wfs = None
 
@@ -243,12 +244,12 @@ class Simulator:
         if self.config.p_controllers is not None or self.config.p_centroiders is not None:
             print("->rtc")
             #   rtc
-            self.rtc = init.rtc_init(
-                    self.c, self.tel, self.wfs, self.dms, self.atm, self.config.p_wfss,
-                    self.config.p_tel, self.config.p_geom, self.config.p_atmos, ittime,
-                    self.config.p_centroiders, self.config.p_controllers,
-                    self.config.p_dms, brahma=False, dataBase=self.matricesToLoad,
-                    use_DB=self.use_DB)
+            self.rtc = rtc_init(self.c, self.tel, self.wfs, self.dms, self.atm,
+                                self.config.p_wfss, self.config.p_tel,
+                                self.config.p_geom, self.config.p_atmos, ittime,
+                                self.config.p_centroiders, self.config.p_controllers,
+                                self.config.p_dms, brahma=False,
+                                dataBase=self.matricesToLoad, use_DB=self.use_DB)
         else:
             self.rtc = None
 
@@ -270,58 +271,62 @@ class Simulator:
              apply_control: (bool): (optional) if True (default), apply control on DMs
         '''
         if tar_trace is None and self.tar is not None:
-            tar_trace = range(self.config.p_target.ntargets)
+            tar_trace = range(len(self.tar.d_targets))
         if wfs_trace is None and self.wfs is not None:
-            wfs_trace = range(len(self.config.p_wfss))
+            wfs_trace = range(len(self.wfs.d_wfs))
 
         if move_atmos and self.atm is not None:
-            self.atm.move_atmos()
+            self.moveAtmos()
 
         if (
                 self.config.p_controllers is not None and
                 self.config.p_controllers[nControl].type == scons.ControllerType.GEO):
-            for t in tar_trace:
-                if see_atmos:
-                    self.tar.raytrace(t, b"atmos", atmos=self.atm)
-                else:
-                    self.tar.reset_phase(t)
-                self.tar.raytrace(t, b"telncpa", tel=self.tel, ncpa=1)
-                self.tar.raytrace(t, b"dm", dms=self.dms)
-                self.rtc.do_control_geo(nControl, self.dms, self.tar, t)
-                self.rtc.apply_control(nControl, self.dms)
+            if tar_trace is not None:
+                for t in tar_trace:
+                    if see_atmos:
+                        self.raytraceTar(t, ["atmos", "tel"])
+                    else:
+                        self.raytraceTar(t, "tel")
+
+                    if self.rtc is not None:
+                        self.doControl(nControl)
+                        self.raytraceTar(t, ["dm", "ncpa"], rst=False)
+                        self.applyControl(nControl)
         else:
-            for t in tar_trace:
-                if see_atmos:
-                    self.tar.raytrace(t, b"atmos", atmos=self.atm)
-                else:
-                    self.tar.reset_phase(t)
-                self.tar.raytrace(t, b"dm", tel=self.tel, dms=self.dms, ncpa=1)
-            for w in wfs_trace:
+            if tar_trace is not None:
+                for t in tar_trace:
+                    if see_atmos:
+                        self.raytraceTar(t, "all")
+                    else:
+                        self.raytraceTar(t, ["tel", "dm", "ncpa"])
+            if wfs_trace is not None:
+                for w in wfs_trace:
+                    if see_atmos:
+                        self.raytraceWfs(w, ["atmos", "tel", "ncpa"])
+                    else:
+                        self.raytraceWfs(w, ["tel", "ncpa"])
 
-                if see_atmos:
-                    self.wfs.raytrace(w, b"atmos", tel=self.tel, atmos=self.atm, ncpa=1)
-                else:
-                    self.wfs.raytrace(w, b"telncpa", tel=self.tel, rst=1, ncpa=1)
+                    if not self.config.p_wfss[w].openloop and self.dms is not None:
+                        self.raytraceWfs(w, "dm", rst=False)
+                    self.compWfsImage(w)
+            if do_control and self.rtc is not None:
+                self.doCentroids(nControl)
+                self.doControl(nControl)
+                self.doClipping(nControl, -1e5, 1e5)
 
-                if not self.config.p_wfss[w].openloop and self.dms is not None:
-                    self.wfs.raytrace(w, b"dm", dms=self.dms)
-                self.wfs.comp_img(w)
-        if do_control:
-            self.rtc.do_centroids(nControl)
-            self.rtc.do_control(nControl)
-            self.rtc.do_clipping(0, -1e5, 1e5)
             if apply_control:
-                self.rtc.apply_control(nControl, self.dms)
+                self.applyControl(nControl)
         self.iter += 1
 
     def print_strehl(self, monitoring_freq: int, t1: float, nCur: int=0, nTot: int=0,
                      nTar: int=0):
         framerate = monitoring_freq / t1
-        self.tar.comp_image(nTar)
-        strehltmp = self.tar.get_strehl(nTar)
+        self.compTarImage(nTar)
+        self.compStrehl(nTar)
+        strehl = self.getStrehl(nTar)
         etr = (nTot - nCur) / framerate
-        print("%d \t %.3f \t  %.3f\t     %.1f \t %.1f" % (nCur + 1, strehltmp[0],
-                                                          strehltmp[1], etr, framerate))
+        print("%d \t %.3f \t  %.3f\t     %.1f \t %.1f" % (nCur + 1, strehl[0], strehl[1],
+                                                          etr, framerate))
 
     def loop(self, n: int=1, monitoring_freq: int=100, **kwargs):
         """
@@ -334,6 +339,7 @@ class Simulator:
         print("----------------------------------------------------")
         print("iter# | S.E. SR | L.E. SR | ETR (s) | Framerate (Hz)")
         print("----------------------------------------------------")
+        # self.next(**kwargs)
         t0 = time.time()
         t1 = time.time()
         if n == -1:
@@ -354,54 +360,199 @@ class Simulator:
         print(" loop execution time:", t1 - t0, "  (", n, "iterations), ", (t1 - t0) / n,
               "(mean)  ", n / (t1 - t0), "Hz")
 
+#  ██╗    ██╗██████╗  █████╗ ██████╗
+#  ██║    ██║██╔══██╗██╔══██╗██╔══██╗
+#  ██║ █╗ ██║██████╔╝███████║██████╔╝
+#  ██║███╗██║██╔══██╗██╔══██║██╔═══╝
+#  ╚███╔███╔╝██║  ██║██║  ██║██║
+#   ╚══╝╚══╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝
+#
 
-def load_config_from_file(sim_class, filepath: str) -> None:
-    """
-    Load the parameters from the parameters file
+    def moveAtmos(self):
+        """
+        Move the turbulent layers according to wind speed and direction for a single iteration
+        """
+        self.atm.move_atmos()
 
-    :parameters:
-        filepath: (str): path to the parameters file
+    def raytraceTar(self, tarNum, layers: list, rst: bool=True):
+        """
+        Performs the raytracing operation to obtain the phase seen by the tarNum target
+        The phase screen is reset before the operations if rst is not set to False
 
-    """
-    sim_class.loaded = False
-    sim_class.is_init = False
-    filename = filepath.split('/')[-1]
-    if (len(filepath.split('.')) > 1 and filepath.split('.')[-1] != "py"):
-        raise ValueError("Config file must be .py")
+        Parameters
+        ------------
+        tarNum: (int): target index
+        layers: (list): list of string containing the layers to raytrace through.
+                        Accepted are : "all" -> raytrace through all layers
+                                       "atmos" -> raytrace through turbulent layers only
+                                       "dm" -> raytrace through DM shape only
+                                       "ncpa" -> raytrace through NCPA only
+                                       "tel" -> raytrace through telescope aberrations only
+        rst: (bool): reset the phase screen before raytracing (default = True)
+        """
+        target = self.tar.d_targets[tarNum]
+        if (isinstance(layers, str)):
+            layers = [layers]
+        self._raytrace(target, layers, rst=rst)
 
-    pathfile = filepath.split(filename)[0]
-    if (pathfile not in sys.path):
-        sys.path.insert(0, pathfile)
+    def raytraceWfs(self, wfsNum, layers: list, rst: bool=True):
+        """
+        Performs the raytracing operation to obtain the phase seen by the wfsNum Wfs
+        The phase screen is reset before the operations if rst is not set to False
 
-    print("loading: %s" % filename.split(".py")[0])
-    sim_class.config = __import__(filename.split(".py")[0])
-    del sys.modules[sim_class.config.__name__]  # Forced reload
-    sim_class.config = __import__(filename.split(".py")[0])
+        Parameters
+        ------------
+        wfsNum: (int): wfs index
+        layers: (list): list of string containing the layers to raytrace through.
+                        Accepted are : "all" -> raytrace through all layers
+                                       "atmos" -> raytrace through turbulent layers only
+                                       "dm" -> raytrace through DM shape only
+                                       "ncpa" -> raytrace through NCPA only
+                                       "tel" -> raytrace through telescope aberrations only
+        rst: (bool): reset the phase screen before raytracing (default = True)
+        """
+        gs = self.wfs.d_wfs[wfsNum].d_gs
+        if (isinstance(layers, str)):
+            layers = [layers]
+        self._raytrace(gs, layers, rst=rst)
 
-    # exec("import %s as wao_config" % filename.split(".py")[0])
-    sys.path.remove(pathfile)
+    def _raytrace(self, source, layers: list, rst: bool=True):
+        """
+        Performs the raytracing operation to obtain the phase screen of the given sutra_source
 
-    # Set missing config attributes to None
-    if not hasattr(sim_class.config, 'p_loop'):
-        sim_class.config.p_loop = None
-    if not hasattr(sim_class.config, 'p_geom'):
-        sim_class.config.p_geom = None
-    if not hasattr(sim_class.config, 'p_tel'):
-        sim_class.config.p_tel = None
-    if not hasattr(sim_class.config, 'p_atmos'):
-        sim_class.config.p_atmos = None
-    if not hasattr(sim_class.config, 'p_dms'):
-        sim_class.config.p_dms = None
-    if not hasattr(sim_class.config, 'p_target'):
-        sim_class.config.p_target = None
-    if not hasattr(sim_class.config, 'p_wfss'):
-        sim_class.config.p_wfss = None
-    if not hasattr(sim_class.config, 'p_centroiders'):
-        sim_class.config.p_centroiders = None
-    if not hasattr(sim_class.config, 'p_controllers'):
-        sim_class.config.p_controllers = None
+        Parameters
+        ------------
+        source : (sutra_source): Source object
+        layers: (list): list of string containing the layers to raytrace through.
+                Accepted are : "all" -> raytrace through all layers
+                                "atmos" -> raytrace through turbulent layers only
+                                "dm" -> raytrace through DM shape only
+                                "ncpa" -> raytrace through NCPA only
+                                "tel" -> raytrace through telescope aberrations only
+        rst: (bool): reset the phase screen before raytracing (default = True)
+        """
+        if (rst):
+            source.d_phase.reset()
 
-    if not hasattr(sim_class.config, 'simul_name'):
-        sim_class.config.simul_name = None
+        for s in layers:
+            if (s == "all"):
+                source.raytrace(self.tel, self.atm, self.dms)
+            elif (s == "atmos"):
+                source.raytrace(self.atm)
+            elif (s == "dm"):
+                source.raytrace(self.dms)
+            elif (s == "tel"):
+                source.raytrace(self.tel)
+            elif (s == "ncpa"):
+                source.raytrace()
+            else:
+                raise ValueError("Unknown layer type : " + str(s) +
+                                 ". See help for accepted layers")
 
-    sim_class.loaded = True
+    def compWfsImage(self, wfsNum: int=0):
+        """
+        Computes the image produced by the WFS from its phase screen
+
+        Parameters
+        ------------
+        wfsNum: (int): wfs index
+        """
+        self.wfs.d_wfs[wfsNum].comp_image()
+
+    def compTarImage(self, tarNum: int=0, puponly: int=0, compLE: bool=True):
+        """
+        Computes the PSF
+
+        Parameters
+        ------------
+        tarNum: (int): (optionnal) target index (default=0)
+        puponly: (int): (optionnal) if set to 1, computes Airy (default=0)
+        compLE: (bool): (optionnal) if True, the computed image is taken into account in long exposure image (default=True)
+        """
+        self.tar.d_targets[tarNum].comp_image(puponly, compLE)
+
+    def compStrehl(self, tarNum: int=0):
+        """
+        Computes the Strehl ratio
+
+        Parameters
+        ------------
+        tarNum: (int): (optionnal) target index (default 0)
+        """
+        self.tar.d_targets[tarNum].comp_strehl()
+
+    def doControl(self, nControl: int, n: int=0, wfs_direction: bool=False):
+        '''
+        Computes the command from the Wfs slopes
+
+        Parameters
+        ------------
+        nControl: (int): controller index
+        n: (int) : target or wfs index (only used with GEO controller)
+        '''
+        if (self.rtc.d_control[nControl].type == scons.ControllerType.GEO):
+            if (wfs_direction):
+                self.rtc.d_control[nControl].comp_dphi(self.wfs.d_wfs[n].d_gs,
+                                                       wfs_direction)
+            else:
+                self.rtc.d_control[nControl].comp_dphi(self.tar.d_targets[n], False)
+        self.rtc.do_control(nControl)
+
+    def doCentroids(self, nControl: int):
+        '''
+        Computes the centroids from the Wfs image
+
+        Parameters
+        ------------
+        nControl: (int): controller index
+        '''
+        self.rtc.do_centroids(nControl)
+
+    def doCentroidsGeom(self, nControl: int):
+        '''
+        Computes the centroids geom from the Wfs image
+
+        Parameters
+        ------------
+        nControl: (int): controller index
+        '''
+        self.rtc.do_centroids_geom(nControl)
+
+    def applyControl(self, nControl: int):
+        """
+        Computes the final voltage vector to apply on the DM by taking into account delay and perturbation voltages, and shape the DMs
+
+        Parameters
+        ------------
+        nControl: (int): controller index
+        """
+        self.rtc.apply_control(nControl, self.dms)
+
+    def doClipping(self, nControl: int, vmin: float, vmax: float):
+        '''
+        Clip the commands between vmin and vmax values
+
+        Parameters
+        ------------
+        nControl: (int): controller index
+        vmin: (float): minimum value
+        vmax: (float): maximum value
+        '''
+        if (vmin > vmax):
+            raise ValueError("vmax must be greater than vmin")
+        self.rtc.do_clipping(nControl, vmin, vmax)
+
+    def getStrehl(self, numTar: int):
+        '''
+        Return the Strehl Ratio of target number numTar as [SR short exp., SR long exp., np.var(phiSE), np.var(phiLE)]
+
+        Parameters
+        ------------
+        numTar: (int): target index
+        '''
+        src = self.tar.d_targets[numTar]
+        src.comp_strehl()
+        avgVar = 0
+        if (src.phase_var_count > 0):
+            avgVar = src.phase_var_avg / src.phase_var_count
+        return [src.strehl_se, src.strehl_le, src.phase_var, avgVar]

@@ -7,7 +7,7 @@ p_loop = conf.Param_loop()
 
 p_loop.set_niter(1000)
 p_loop.set_ittime(0.002)  # =1/500
-p_loop.set_devices([0])
+p_loop.set_devices([0, 1, 2, 3])
 # geom
 p_geom = conf.Param_geom()
 
@@ -33,12 +33,11 @@ p_atmos.set_L0([100.])
 
 # target
 p_target = conf.Param_target()
-
-p_target.set_ntargets(1)
-p_target.set_xpos([0])
-p_target.set_ypos([0.])
-p_target.set_Lambda([1.6])
-p_target.set_mag([10])
+p_targets = [p_target]
+p_target.set_xpos(0.)
+p_target.set_ypos(0.)
+p_target.set_Lambda(1.65)
+p_target.set_mag(10.)
 
 # wfs
 p_wfs0 = conf.Param_wfs()

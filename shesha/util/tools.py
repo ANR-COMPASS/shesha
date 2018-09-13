@@ -137,7 +137,7 @@ def plg(
                    data.ndim))
     except:
         return
-    if (x == b""):
+    if (x == ""):
         ax.plot(data, color=color)
     else:
         ax.plot(x, data, color=color)
@@ -340,3 +340,17 @@ def countExample(seconds):
         stdout.flush()
         sleep(1)
     stdout.write("\n")
+
+
+def plotSubapRectangles(pup, isvalid, istart, jstart):
+    fig = plt.matshow(pup)
+    pdiam = istart[1] - istart[0]
+    for i in istart:
+        for j in jstart:
+            if (isvalid[i // pdiam, j // pdiam]):
+                color = "green"
+            else:
+                color = "red"
+            fig.axes.add_patch(
+                    plt.Rectangle((i - 0.5, j - 0.5), pdiam, pdiam, fill=False,
+                                  color=color))

@@ -9,6 +9,7 @@ from PyQt5.uic import loadUiType
 import shesha.ao as ao
 import shesha.constants as scons
 from shesha.constants import CONST
+from shesha.ao.wfs import comp_new_pyr_ampl
 
 from .widget_base import uiLoader
 ExpertWidgetTemplate, ExpertClassTemplate = uiLoader('widget_ao_expert')
@@ -81,9 +82,10 @@ class WidgetAOExpert(ExpertClassTemplate):
 
     def updatePyrAmpl(self) -> None:
         if (self.sim.rtc):
-            self.sim.rtc.set_pyr_ampl(0,
-                                      self.uiExpert.wao_pyr_ampl.value(),
-                                      self.sim.config.p_wfss, self.sim.config.p_tel)
+            comp_new_pyr_ampl(0,
+                              self.uiExpert.wao_pyr_ampl.value(), self.sim.wfs,
+                              self.sim.rtc, self.sim.config.p_wfss,
+                              self.sim.config.p_tel)
             print("Pyramid modulation updated on GPU")
             self.updatePlotWfs()
 
@@ -167,8 +169,8 @@ class WidgetAOExpert(ExpertClassTemplate):
         else:
             self.uiExpert.wao_wfsIsLGS.setChecked(False)
 
-        if (self.sim.config.p_wfss[nwfs].type == b"pyrhr" or
-                    self.sim.config.p_wfss[nwfs].type == b"pyr"):
+        if (self.sim.config.p_wfss[nwfs].type == "pyrhr" or
+                    self.sim.config.p_wfss[nwfs].type == "pyr"):
             self.uiExpert.wao_wfs_plotSelector.setCurrentIndex(3)
         self.updatePlotWfs()
 
@@ -247,11 +249,11 @@ class WidgetAOExpert(ExpertClassTemplate):
         ntarget = self.uiExpert.wao_selectTarget.currentIndex()
         if (ntarget < 0):
             ntarget = 0
-        self.uiExpert.wao_numberofTargets.setText(str(self.sim.config.p_target.ntargets))
-        self.uiExpert.wao_targetMag.setValue(self.sim.config.p_target.mag[ntarget])
-        self.uiExpert.wao_targetXpos.setValue(self.sim.config.p_target.xpos[ntarget])
-        self.uiExpert.wao_targetYpos.setValue(self.sim.config.p_target.ypos[ntarget])
-        self.uiExpert.wao_targetLambda.setValue(self.sim.config.p_target.Lambda[ntarget])
+        self.uiExpert.wao_numberofTargets.setText(str(len(self.sim.config.p_targets)))
+        self.uiExpert.wao_targetMag.setValue(self.sim.config.p_target[ntarget].mag)
+        self.uiExpert.wao_targetXpos.setValue(self.sim.config.p_target[ntarget].xpos)
+        self.uiExpert.wao_targetYpos.setValue(self.sim.config.p_target[ntarget].ypos)
+        self.uiExpert.wao_targetLambda.setValue(self.sim.config.p_target[ntarget].Lambda)
 
     def updatePanels(self) -> None:
         self.updateTelescopePanel()
@@ -402,7 +404,8 @@ class WidgetAOExpert(ExpertClassTemplate):
         n = self.uiExpert.wao_selectWfs.currentIndex()
         self.uiExpert.wao_wfsWindow.canvas.axes.clear()
         ax = self.uiExpert.wao_wfsWindow.canvas.axes
-        if (self.sim.config.p_wfss[n].type == scons.WFSType.PYRHR and
+        if ((self.sim.config.p_wfss[n].type == scons.WFSType.PYRHR or
+             self.sim.config.p_wfss[n].type == scons.WFSType.PYRLR) and
                     typeText == "Pyramid mod. pts" and self.sim.is_init):
             scale_fact = 2 * np.pi / self.sim.config.p_wfss[n]._Nfft * \
                 self.sim.config.p_wfss[n].Lambda * \
@@ -444,13 +447,13 @@ class WidgetAOExpert(ExpertClassTemplate):
                 data = self.sim.rtc.get_cmm(0)
                 self.sim.rtc.set_cmm(0, tmp)
             elif (type_matrix == "Cmm inverse" and
-                  self.sim.config.p_controllers[0].type == b"mv"):
+                  self.sim.config.p_controllers[0].type == "mv"):
                 data = self.sim.rtc.get_cmm(0)
             elif (type_matrix == "Cmm eigen" and
-                  self.sim.config.p_controllers[0].type == b"mv"):
+                  self.sim.config.p_controllers[0].type == "mv"):
                 data = self.sim.rtc.getCmmEigenvals(0)
             elif (type_matrix == "Cphim" and
-                  self.sim.config.p_controllers[0].type == b"mv"):
+                  self.sim.config.p_controllers[0].type == "mv"):
                 data = self.sim.rtc.get_cphim(0)
 
             if (data is not None):

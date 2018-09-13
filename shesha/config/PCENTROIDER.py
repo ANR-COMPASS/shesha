@@ -19,6 +19,8 @@ class Param_centroider:
         """ index of wfs in y_wfs structure on which we want to do centroiding"""
         self.__type = None
         """ type of centroiding cog, tcog, bpcog, wcog, corr"""
+        self.__nslope = 0
+        """ Number of output slopes"""
         self.__type_fct = scons.CentroiderFctType.GAUSS
         """ type of ref function gauss, file, model"""
         self.__weights = None
@@ -36,10 +38,14 @@ class Param_centroider:
         self.__interpmat = None
         """ optional reference function(s) used for corr centroiding"""
         self.__method = 1
-        """ optional method used in the pyrhr centroider (0: sinus global
-                                                 1: nosinus global
-                                                 2: sinus local
-                                                 3: nosinus local)"""
+        """ optional method used in the pyrhr centroider (
+                    0: nosinus global
+                    1: sinus global
+                    2: nosinus local
+                    3: sinus local)"""
+        self.__pyrscale = 0
+        """ pyrscale = (p_wfs.Lambda * 1e-6 / sim.config.p_tel.diam) * p_wfs.pyr_ampl * CONST.RAD2ARCSEC
+        """
 
     def set_nwfs(self, n):
         """ Set the index of the WFS handled by the centroider
@@ -49,6 +55,15 @@ class Param_centroider:
         self.__nwfs = csu.enforce_int(n)
 
     nwfs = property(lambda x: x.__nwfs, set_nwfs)
+
+    def set_nslope(self, n):
+        """ Set the number of slope
+
+        :param n: (long) :number of slope
+        """
+        self.__nslope = csu.enforce_int(n)
+
+    _nslope = property(lambda x: x.__nslope, set_nslope)
 
     def set_type(self, t):
         """ Set the centroider type
@@ -143,3 +158,13 @@ class Param_centroider:
         self.__method = csu.enforce_int(n)
 
     method = property(lambda x: x.__method, set_method)
+
+    def set_pyrscale(self, t):
+        """ TODO
+        Set the ... (p_wfs.Lambda * 1e-6 / sim.config.p_tel.diam) * p_wfs.pyr_ampl * CONST.RAD2ARCSEC
+
+        :param t: (float) : pyrscale
+        """
+        self.__pyrscale = csu.enforce_float(t)
+
+    pyrscale = property(lambda x: x.__pyrscale, set_pyrscale)

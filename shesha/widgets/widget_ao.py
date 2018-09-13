@@ -79,7 +79,6 @@ class widgetAOWindow(AOClassTemplate, WidgetBase):
         self.nbiter = self.uiAO.wao_nbiters.value()
         self.refreshTime = 0  # type: float  # System time at last display refresh
         self.assistant = None  # type: Any
-        self.see_atmos = 1
 
         #############################################################
         #                 CONNECTED BUTTONS                         #
@@ -144,7 +143,7 @@ class widgetAOWindow(AOClassTemplate, WidgetBase):
         if configFile is not None:
             self.uiBase.wao_selectConfig.clear()
             self.uiBase.wao_selectConfig.addItem(configFile)
-            self.loadConfig()
+            self.loadConfig(configFile=configFile)
             self.initConfig()
 
     # def on_help_triggered(self, i: Any=None) -> None:
@@ -171,11 +170,11 @@ class widgetAOWindow(AOClassTemplate, WidgetBase):
         self.uiAO.wao_nbiters.setDisabled(state)
 
     def set_see_atmos(self, atmos):
-        self.see_atmos = atmos
+        self.supervisor.enableAtmos(atmos)
 
     def resetSR(self) -> None:
         if self.uiAO.wao_allTarget.isChecked():
-            for t in range(self.config.p_target.ntargets):
+            for t in range(len(self.config.p_targets)):
                 self.supervisor.resetStrehl(t)
         else:
             tarnum = self.uiAO.wao_resetSR_tarNum.value()
@@ -187,13 +186,14 @@ class widgetAOWindow(AOClassTemplate, WidgetBase):
         if type == "SR":
             d.addWidget(self.uiAO.wao_Strehl)
 
-    def loadConfig(self, *, ISupervisor=CompassSupervisor) -> None:
+    def loadConfig(self, *args, configFile=None, supervisor=None, **kwargs) -> None:
         '''
             Callback when 'LOAD' button is hit
             * required to catch positionals, as by default
             if a positional is allowed the QPushButton will send a boolean value
-            and hence overwrite ISupervisor...
+            and hence overwrite supervisor...
         '''
+
         WidgetBase.loadConfig(self)
         for key, pgpl in self.SRcircles.items():
             self.viewboxes[key].removeItem(pgpl)
@@ -204,10 +204,15 @@ class widgetAOWindow(AOClassTemplate, WidgetBase):
         for key, pgpl in self.SRCrossY.items():
             self.viewboxes[key].removeItem(pgpl)
 
-        configFile = str(self.uiBase.wao_selectConfig.currentText())
-        sys.path.insert(0, self.defaultParPath)
+        if configFile is None:
+            configFile = str(self.uiBase.wao_selectConfig.currentText())
+            sys.path.insert(0, self.defaultParPath)
 
-        self.supervisor = ISupervisor(configFile, self.BRAHMA)
+        if supervisor is None:
+            self.supervisor = CompassSupervisor()
+            self.supervisor.loadConfig(configFile=configFile)
+        else:
+            self.supervisor = supervisor
         self.config = self.supervisor.getConfig()
 
         if self.devices:
@@ -240,7 +245,7 @@ class widgetAOWindow(AOClassTemplate, WidgetBase):
             if self.config.p_wfss[wfs].type == scons.WFSType.SH:
                 name = 'SH_%d' % wfs
                 self.add_dispDock(name, self.wao_imagesgroup_cb)
-            elif self.config.p_wfss[wfs].type == scons.WFSType.PYRHR:
+            elif self.config.p_wfss[wfs].type == scons.WFSType.PYRHR or self.config.p_wfss[wfs].type == scons.WFSType.PYRLR:
                 name = 'pyrHR_%d' % wfs
                 self.add_dispDock(name, self.wao_imagesgroup_cb)
                 name = 'pyrLR_%d' % wfs
@@ -253,7 +258,7 @@ class widgetAOWindow(AOClassTemplate, WidgetBase):
             name = 'dm_%d' % dm
             self.add_dispDock(name, self.wao_phasesgroup_cb)
 
-        self.ntar = self.config.p_target.ntargets
+        self.ntar = len(self.config.p_targets)
         for tar in range(self.ntar):
             name = 'tar_%d' % tar
             self.add_dispDock(name, self.wao_phasesgroup_cb)
@@ -267,10 +272,10 @@ class widgetAOWindow(AOClassTemplate, WidgetBase):
         self.add_dispDock("Strehl", self.wao_graphgroup_cb, "SR")
 
         self.uiAO.wao_resetSR_tarNum.setValue(0)
-        self.uiAO.wao_resetSR_tarNum.setMaximum(self.config.p_target.ntargets - 1)
+        self.uiAO.wao_resetSR_tarNum.setMaximum(len(self.config.p_targets) - 1)
 
         self.uiAO.wao_dispSR_tar.setValue(0)
-        self.uiAO.wao_dispSR_tar.setMaximum(self.config.p_target.ntargets - 1)
+        self.uiAO.wao_dispSR_tar.setMaximum(len(self.config.p_targets) - 1)
 
         self.uiAO.wao_run.setDisabled(True)
         self.uiAO.wao_next.setDisabled(True)
@@ -330,7 +335,7 @@ class widgetAOWindow(AOClassTemplate, WidgetBase):
 
         for i in range(self.natm):
             key = "atm_%d" % i
-            data = self.supervisor.getAtmScreen(self.config.p_atmos.alt[i])
+            data = self.supervisor.getAtmScreen(i)
             cx, cy = self.circleCoords(self.config.p_geom.pupdiam / 2, 1000,
                                        data.shape[0], data.shape[1])
             self.SRcircles[key] = pg.ScatterPlotItem(cx, cy, pen='r', size=1)
@@ -357,14 +362,14 @@ class widgetAOWindow(AOClassTemplate, WidgetBase):
             key = "dm_%d" % i
             dm_type = self.config.p_dms[i].type
             alt = self.config.p_dms[i].alt
-            data = self.supervisor.getDmPhase(dm_type, alt)
+            data = self.supervisor.getDmShape(i)
             cx, cy = self.circleCoords(self.config.p_geom.pupdiam / 2, 1000,
                                        data.shape[0], data.shape[1])
             self.SRcircles[key] = pg.ScatterPlotItem(cx, cy, pen='r', size=1)
             self.viewboxes[key].addItem(self.SRcircles[key])
             self.SRcircles[key].setPoints(cx, cy)
 
-        for i in range(self.config.p_target.ntargets):
+        for i in range(len(self.config.p_targets)):
             key = "tar_%d" % i
             data = self.supervisor.getTarPhase(i)
             cx, cy = self.circleCoords(self.config.p_geom.pupdiam / 2, 1000,
@@ -444,14 +449,13 @@ class widgetAOWindow(AOClassTemplate, WidgetBase):
                         index = int(key.split("_")[-1])
                         data = None
                         if "atm" in key:
-                            data = self.supervisor.getAtmScreen(
-                                    self.config.p_atmos.alt[index])
+                            data = self.supervisor.getAtmScreen(index)
                         if "wfs" in key:
                             data = self.supervisor.getWfsPhase(index)
                         if "dm" in key:
                             dm_type = self.config.p_dms[index].type
                             alt = self.config.p_dms[index].alt
-                            data = self.supervisor.getDmPhase(dm_type, alt)
+                            data = self.supervisor.getDmShape(index)
                         if "tar" in key:
                             data = self.supervisor.getTarPhase(index)
                         if "psfLE" in key:
@@ -462,9 +466,7 @@ class widgetAOWindow(AOClassTemplate, WidgetBase):
                         if "psf" in key:
                             if (self.uiAO.actionPSF_Log_Scale.isChecked()):
                                 if np.any(data <= 0):
-                                    warnings.warn(
-                                            "\nZeros founds, filling with min nonzero value.\n"
-                                    )
+                                    # warnings.warn("\nZeros founds, filling with min nonzero value.\n")
                                     data[data <= 0] = np.min(data[data > 0])
                                 data = np.log10(data)
 
@@ -501,8 +503,9 @@ class widgetAOWindow(AOClassTemplate, WidgetBase):
                                         2 * p_wfs._nvalid for p_wfs in self.config.p_wfss
                                 ]
                                 first_ind = np.sum(nmes[:index], dtype=np.int32)
-                                if (self.config.p_wfss[index].type ==
-                                            scons.WFSType.PYRHR):
+                                if (self.config.p_wfss[index].type == scons.WFSType.PYRHR
+                                            or self.config.p_wfss[index].type ==
+                                            scons.WFSType.PYRLR):
                                     #TODO: DEBUG...
                                     plpyr(centroids[first_ind:first_ind + nmes[index]],
                                           np.stack([
@@ -537,7 +540,9 @@ class widgetAOWindow(AOClassTemplate, WidgetBase):
         else:
             try:
                 start = time.time()
-                self.supervisor.singleNext(showAtmos=self.see_atmos)
+                self.supervisor.singleNext(showAtmos=self.supervisor._seeAtmos)
+                for t in self.supervisor._sim.tar.d_targets:
+                    t.comp_image()
                 loopTime = time.time() - start
 
                 refreshDisplayTime = 1. / self.uiBase.wao_frameRate.value()
@@ -545,7 +550,7 @@ class widgetAOWindow(AOClassTemplate, WidgetBase):
                 if (time.time() - self.refreshTime > refreshDisplayTime):
                     signal_le = ""
                     signal_se = ""
-                    for t in range(self.config.p_target.ntargets):
+                    for t in range(len(self.config.p_targets)):
                         SR = self.supervisor.getStrehl(t)
                         # TODO: handle that !
                         if (t == self.uiAO.wao_dispSR_tar.value(

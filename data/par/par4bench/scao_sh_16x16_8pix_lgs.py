@@ -32,12 +32,11 @@ p_atmos.set_L0([1.e5])
 
 # target
 p_target = conf.Param_target()
-
-p_target.set_ntargets(1)
-p_target.set_xpos([0])
-p_target.set_ypos([0.])
-p_target.set_Lambda([1.65])
-p_target.set_mag([10])
+p_targets = [p_target]
+p_target.set_xpos(0.)
+p_target.set_ypos(0.)
+p_target.set_Lambda(1.65)
+p_target.set_mag(10.)
 
 # wfs
 p_wfs0 = conf.Param_wfs()

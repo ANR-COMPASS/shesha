@@ -60,7 +60,13 @@ def enforce_arrayMultiDim(data, shape, dtype=np.float32):
     if not isinstance(data, np.ndarray):
         raise TypeError("Input argument must be a np.ndarray")
     else:
-        if data.shape != shape:
+        doRaise = False
+        if len(data.shape) != len(shape):
+            doRaise = True
+        for (i, j) in zip(data.shape, shape):
+            if j != -1 and i != j:
+                doRaise = True
+        if doRaise:
             raise TypeError(
                     "Input has wrong dimensions, expect multi dimensional arrays")
 

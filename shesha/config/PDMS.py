@@ -97,7 +97,8 @@ class Param_dm:
 
         :param ap: (float) : TODO
         """
-        self.__ap = csu.enforce_float(ap)
+        self.__ap = csu.enforce_arrayMultiDim(ap, (ap.shape[0], ap.shape[1]),
+                                              dtype=np.float32)
 
     ap = property(lambda x: x.__ap, set_ap)
 

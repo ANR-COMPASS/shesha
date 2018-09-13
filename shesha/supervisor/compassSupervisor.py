@@ -27,7 +27,7 @@ class CompassSupervisor(AbstractSupervisor):
         '''
         return self._sim.config
 
-    def enableAtmos(self, enable=True) -> None:
+    def enableAtmos(self, enable) -> None:
         ''' TODO
         Set or unset whether atmos is enabled when running loop (see singleNext)
         '''
@@ -37,13 +37,13 @@ class CompassSupervisor(AbstractSupervisor):
         '''
         Immediately sets provided command to DMs - does not affect integrator
         '''
-        self._sim.dms.set_full_comm((command).astype(np.float32).copy())
+        self._sim.dms.set_full_com(command)
 
-    def setPerturbationVoltage(self, command: np.ndarray) -> None:
+    def setPerturbationVoltage(self, nControl: int, command: np.ndarray) -> None:
         '''
         Add this offset value to integrator (will be applied at the end of next iteration)
         '''
-        self._sim.rtc.set_perturbcom(0, command.astype(np.float32).copy())
+        self._sim.rtc.d_control[nControl].set_perturbcom(command, command.shape[0])
 
     def getSlope(self) -> np.ndarray:
         '''
@@ -63,7 +63,7 @@ class CompassSupervisor(AbstractSupervisor):
         with/without atmos shown to WFS
         '''
         raise NotImplementedError("Not implemented")
-        return np.empty(1)
+        # return np.empty(1)
 
     def next(self, nbiters, see_atmos=True):
         for _ in trange(nbiters):
@@ -80,88 +80,112 @@ class CompassSupervisor(AbstractSupervisor):
         '''
         DM receives controller output + pertuVoltage
         '''
-        self._sim.rtc.set_openloop(0, 0)  # closeLoop
+        self._sim.rtc.d_control[0].set_openloop(0)  # closeLoop
 
     def openLoop(self) -> None:
         '''
         Integrator computation goes to /dev/null but pertuVoltage still applied
         '''
-        self._sim.rtc.set_openloop(0, 1)  # openLoop
+        self._sim.rtc.d_control[0].set_openloop(1)  # openLoop
 
     def setRefSlopes(self, refSlopes: np.ndarray) -> None:
         '''
         Set given ref slopes in controller
         '''
-        self._sim.rtc.set_centroids_ref(0, refSlopes)
+        self._sim.rtc.d_control[0].set_centroids_ref(refSlopes)
 
     def getRefSlopes(self) -> np.ndarray:
         '''
         Get the currently used reference slopes
         '''
-        self._sim.rtc.get_centroids_ref(0)
+        return np.array(self._sim.rtc.d_control[0].d_centroids_ref)
 
     def setGain(self, gainMat) -> None:
         '''
         Set the scalar gain of feedback controller loop
         '''
-        if ((type(gainMat) is float) or (type(gainMat) is int)):
+        if type(gainMat) in [int, float]:
             gainMat = np.ones(
                     np.sum(self._sim.config.p_controller0.nactu),
                     dtype=np.float32) * gainMat
-        self._sim.rtc.set_mgain(0, gainMat)
+        self._sim.rtc.d_control[0].set_mgain(gainMat)
 
     def setCommandMatrix(self, cMat: np.ndarray) -> None:
         '''
         Set the cmat for the controller to use
         '''
-        self._sim.rtc.set_cmat(0, cMat)
+        self._sim.rtc.d_control[0].set_cmat(cMat)
 
     def setNoise(self, noise, numwfs=0):
         '''
         Set noise value of WFS numwfs
         '''
-        self._sim.wfs.set_noise(numwfs, noise)
+        self._sim.wfs.d_wfs[numwfs].set_noise(noise)
         print("Noise set to: %d" % noise)
 
     def setPyrModulation(self, pyrMod: float) -> None:
         '''
         Set pyramid modulation value - in l/D units
         '''
-        self._sim.rtc.set_pyr_ampl(0, pyrMod, self._sim.config.p_wfss,
-                                   self._sim.config.p_tel)
-        print("PYR modulation set to: %f L/D" % pyrMod)
+        from shesha.ao.wfs import comp_new_pyr_ampl
+
+        _, _, _, pyr_npts = comp_new_pyr_ampl(0, pyrMod, self._sim.wfs, self._sim.rtc,
+                                              self._sim.config.p_wfss,
+                                              self._sim.config.p_tel)
+
+        print("PYR modulation set to: %f L/D using %d points" % (pyrMod, pyr_npts))
 
     def setPyrMethod(self, pyrMethod):
         '''
         Set pyramid compute method
         '''
-        self._sim.rtc.set_pyr_method(
-                0, pyrMethod, self._sim.config.p_centroiders)  # Sets the pyr method
-        print("PYR method set to: %d" % self._sim.rtc.get_pyr_method(0))
+        self._sim.rtc.d_centro[0].set_pyr_method(pyrMethod)  # Sets the pyr method
+        print("PYR method set to: %d" % self._sim.rtc.d_centro[0].pyr_method)
+
+    def getPyrMethod(self):
+        return self._sim.rtc.d_centro[0].pyr_method
+
+    def setGSmag(self, mag, numwfs=0):
+        numwfs = int(numwfs)
+        sim = self._sim
+        wfs = sim.wfs.d_wfs[numwfs]
+        if (sim.config.p_wfs0.type == "pyrhr"):
+            r = wfs.comp_nphot(sim.config.p_loop.ittime,
+                               sim.config.p_wfss[numwfs].optthroughput,
+                               sim.config.p_tel.diam, sim.config.p_tel.cobs,
+                               sim.config.p_wfss[numwfs].zerop, mag)
+        else:
+            r = wfs.comp_nphot(sim.config.p_loop.ittime,
+                               sim.config.p_wfss[numwfs].optthroughput,
+                               sim.config.p_tel.diam, sim.config.p_wfss[numwfs].nxsub,
+                               sim.config.p_wfss[numwfs].zerop, mag)
+        if (r == 0):
+            print("GS magnitude is now %f on WFS %d" % (mag, numwfs))
 
     def getRawWFSImage(self, numWFS: int=0) -> np.ndarray:
         '''
         Get an image from the WFS
         '''
-        if self._sim.config.p_wfss[numWFS].type == scons.WFSType.PYRHR:
-            return self._sim.wfs.get_pyrimg(numWFS)
-        elif self._sim.config.p_wfss[numWFS].type == scons.WFSType.SH:
-            return self._sim.wfs.get_binimg(numWFS)
-        else:
-            raise "WFSType not handled"
+        return np.array(self._sim.wfs.d_wfs[numWFS].d_binimg)
 
     def getTarImage(self, tarID, expoType: str="se") -> np.ndarray:
         '''
         Get an image from a target
         '''
-        return self._sim.tar.get_image(tarID, bytes(expoType, "utf-8"))
+        if (expoType == "se"):
+            return np.fft.fftshift(np.array(self._sim.tar.d_targets[tarID].d_image_se))
+        elif (expoType == "le"):
+            return np.fft.fftshift(np.array(self._sim.tar.d_targets[
+                    tarID].d_image_le)) / self._sim.tar.d_targets[tarID].strehl_counter
+        else:
+            raise ValueError("Unknown exposure type")
 
     def getIntensities(self) -> np.ndarray:
         '''
         Return sum of intensities in subaps. Size nSubaps, same order as slopes
         '''
         raise NotImplementedError("Not implemented")
-        return np.empty(1)
+        # return np.empty(1)
 
     def getAllDataLoop(self, nIter: int, slope: bool, command: bool, target: bool,
                        intensity: bool, targetPhase: bool) -> np.ndarray:
@@ -170,7 +194,7 @@ class CompassSupervisor(AbstractSupervisor):
         Requires loop to be asynchronously running
         '''
         raise NotImplementedError("Not implemented")
-        return np.empty(1)
+        # return np.empty(1)
 
     #  ____                  _ _   _        __  __      _   _               _
     # / ___| _ __   ___  ___(_) |_(_) ___  |  \/  | ___| |_| |__   ___   __| |___
@@ -185,30 +209,40 @@ class CompassSupervisor(AbstractSupervisor):
         '''
         self._sim = None
         self._seeAtmos = False
+        self.config = None
+        self.BRAHMA = BRAHMA
 
         if configFile is not None:
-            self.loadConfig(configFile, BRAHMA)
+            self.loadConfig(configFile=configFile)
 
     def __repr__(self):
         return str(self._sim)
 
+    def loop(self, n: int=1, monitoring_freq: int=100, **kwargs):
+        """
+        Perform the AO loop for n iterations
+
+        :parameters:
+            n: (int): (optional) Number of iteration that will be done
+            monitoring_freq: (int): (optional) Monitoring frequency [frames]
+        """
+        self._sim.loop(n, monitoring_freq=monitoring_freq)
+
     def computeSlopes(self):
-        for w in range(len(self._sim.config.p_wfss)):
-            self._sim.wfs.comp_img(w)
+        for w in self._sim.wfs.d_wfs:
+            w.d_gs.comp_image()
         self._sim.rtc.do_centroids(0)
-        return self._sim.rtc.get_centroids(0)
+        return np.array(self._sim.rtc.d_control[0].d_centroids)
 
     def resetDM(self, numdm: int=-1) -> None:
         '''
         Reset the DM number nDM or all DMs if  == -1
         '''
         if (numdm == -1):  # All Dms reset
-            for numdm in range(len(self._sim.config.p_dms)):
-                self._sim.dms.resetdm(self._sim.config.p_dms[numdm].type,
-                                      self._sim.config.p_dms[numdm].alt)
+            for dm in self._sim.dms.d_dms:
+                dm.reset_shape()
         else:
-            self._sim.dms.resetdm(self._sim.config.p_dms[numdm].type,
-                                  self._sim.config.p_dms[numdm].alt)
+            self._sim.dms[numdm].reset_shape()
 
     def resetSimu(self, noiseList):
         self.resetTurbu()
@@ -216,35 +250,44 @@ class CompassSupervisor(AbstractSupervisor):
 
     def resetTurbu(self):
         ilayer = 0
-        for layerAlt in self._sim.atm.list_alt().tolist():
-            self._sim.atm.set_seed(layerAlt, 1234 + ilayer)
-            self._sim.atm.refresh_screen(layerAlt)
+        for k in range(self._sim.atm.nscreens):
+            self._sim.atm.set_seed(k, 1234 + ilayer)
+            self._sim.atm.refresh_screen(k)
             ilayer += 1
 
     def resetNoise(self, noiseList):
         for nwfs in range(len(self._sim.config.p_wfss)):
-            self._sim.wfs.set_noise(nwfs, noiseList[nwfs], 1234 + nwfs)
+            self._sim.wfs.d_wfs[nwfs].set_noise(noiseList[nwfs], 1234 + nwfs)
 
     def resetStrehl(self, nTar: int) -> None:
         '''
         Reset the Strehl Ratio of the target nTar
         '''
-        self._sim.tar.reset_strehl(nTar)
+        self._sim.tar.d_targets[nTar].reset_strehlmeter()
 
-    def loadConfig(self, configFile: str, BRAMA: bool=False) -> None:
+    def resetTarPhase(self, nTar: int) -> None:
+        '''
+        Reset the phase screen of the target nTar
+        '''
+        self._sim.tar.d_targets[nTar].d_phase.reset()
+
+    def loadConfig(self, configFile: str=None, sim=None) -> None:
         '''
         Init the COMPASS wih the configFile
         '''
         if self._sim is None:
-            if BRAMA:
-                from shesha.sim.simulatorBrahma import SimulatorBrahma
-                self._sim = SimulatorBrahma(configFile)
+            if sim is None:
+                if self.BRAHMA:
+                    from shesha.sim.simulatorBrahma import SimulatorBrahma as Simulator
+                else:
+                    from shesha.sim.simulator import Simulator
+                self._sim = Simulator(filepath=configFile)
             else:
-                from shesha.sim.simulator import Simulator
-                self._sim = Simulator(configFile)
+                self._sim = sim
         else:
             self._sim.clear_init()
             self._sim.load_from_file(configFile)
+        self.config = self._sim.config
 
     def isInit(self) -> bool:
         '''
@@ -269,46 +312,50 @@ class CompassSupervisor(AbstractSupervisor):
         Initialize the simulation
         '''
         self._sim.init_sim()
+        self.enableAtmos(True)
 
-    def getAtmScreen(self, alt: int) -> np.ndarray:
+    def getAtmScreen(self, indx: int) -> np.ndarray:
         '''
-        return the atmos screen at the altitude alt
+        return the selected atmos screen
         '''
-        return self._sim.atm.get_screen(alt)
+        return np.array(self._sim.atm.d_screens[indx].d_screen)
 
     def getWfsPhase(self, numWFS: int) -> np.ndarray:
         '''
         return the WFS screen of WFS number numWFS
         '''
-        return self._sim.wfs.get_phase(numWFS)
+        return np.array(self._sim.wfs.d_wfs[numWFS].d_gs.d_phase)
 
-    def getDmPhase(self, dm_type: str, alt: int) -> np.ndarray:
+    def getDmShape(self, indx: int) -> np.ndarray:
         '''
-        return the DM screen of type dm_type conjugatide at the altitude alt
+        return the selected DM screen
         '''
-        return self._sim.dms.get_dm(dm_type, alt)
+        return np.array(self._sim.dms.d_dms[indx].d_shape)
 
     def getTarPhase(self, numTar: int) -> np.ndarray:
         '''
         return the target screen of target number numTar
         '''
-        return self._sim.tar.get_phase(numTar)
+        return np.array(self._sim.tar.d_targets[numTar].d_phase)
 
     def getPyrHRImage(self, numWFS: int=0) -> np.ndarray:
         '''
         Get an HR image from the WFS
         '''
-        if self._sim.config.p_wfss[numWFS].type == scons.WFSType.PYRHR:
-            return self._sim.wfs.get_pyrimghr(numWFS)
-        else:
-            raise "WFSType not handled"
+        return np.array(self._sim.wfs.d_wfs[numWFS].d_hrimg)
+
+    def getWfsImage(self, numWFS: int=0) -> np.ndarray:
+        '''
+        Get an image from the WFS
+        '''
+        return np.array(self._sim.wfs.d_wfs[numWFS].d_binimg)
 
     def getSlopeGeom(self, numWFS: int) -> np.ndarray:
         '''
         return the slopes geom of WFS number numWFS
         '''
         self._sim.rtc.do_centroids_geom(0)
-        slopesGeom = self._sim.rtc.get_centroids(0)
+        slopesGeom = np.array(self._sim.rtc.d_control[0].d_centroids)
         self._sim.rtc.do_centroids(0)
         return slopesGeom
 
@@ -316,11 +363,129 @@ class CompassSupervisor(AbstractSupervisor):
         '''
         return the Strehl Ratio of target number numTar
         '''
-        self._sim.tar.comp_image(numTar)
-        return self._sim.tar.get_strehl(numTar)
+        src = self._sim.tar.d_targets[numTar]
+        src.comp_strehl()
+        avgVar = 0
+        if (src.phase_var_count > 0):
+            avgVar = src.phase_var_avg / src.phase_var_count
+        return [src.strehl_se, src.strehl_le, src.phase_var, avgVar]
 
     def getFrameCounter(self) -> int:
         '''
         return the current frame counter of the loop
         '''
         return self._sim.iter
+
+    def getIFsparse(self, nControl: int):
+        '''
+        Return the IF of DM as a sparse matrix
+        '''
+        return self._sim.rtc.d_control[nControl].d_IFsparse.get_csr()
+
+    def getIFtt(self, nControl: int):
+        '''
+        Return the IF of a TT DM as a sparse matrix
+        '''
+        return np.array(self._sim.rtc.d_control[nControl].d_TT)
+
+    def getCentroids(self, nControl: int):
+        '''
+        Return the centroids of the nControl controller
+        '''
+        return np.array(self._sim.rtc.d_control[nControl].d_centroids)
+
+    def getCom(self, nControl: int):
+        '''
+        Get command from nControl controller
+        '''
+        return np.array(self._sim.rtc.d_control[nControl].d_com)
+
+    def getErr(self, nControl: int):
+        '''
+        Get command increment from nControl controller
+        '''
+        return np.array(self._sim.rtc.d_control[nControl].d_err)
+
+    def getVoltage(self, nControl: int):
+        '''
+        Get voltages from nControl controller
+        '''
+        return np.array(self._sim.rtc.d_control[nControl].d_voltage)
+
+    def setIntegratorLaw(self):
+        self._sim.rtc.d_control[0].set_commandlaw("integrator")
+
+    def setDecayFactor(self, decay):
+        self._sim.rtc.d_control[0].set_decayFactor(decay)
+
+    def setEMatrix(self, eMat):
+        self._sim.rtc.d_control[0].set_matE(eMat)
+
+    def doRefslopes(self):
+        print("Doing refslopes...")
+        self._sim.rtc.do_centroids_ref(0)
+        print("refslopes done")
+
+    def resetRefslopes(self):
+        self._sim.rtc.d_control[0].d_centroids_ref.reset()
+
+    def setNcpaWfs(self, ncpa, wfsnum):
+        self._sim.wfs.d_wfs[wfsnum].d_gs.set_ncpa(ncpa)
+
+    def setNcpaTar(self, ncpa, tarnum):
+        self._sim.tar.d_targets[tarnum].set_ncpa(ncpa)
+
+    def setWfsPhase(self, numwfs, phase):
+        self._sim.wfs.d_wfs[numwfs].d_gs.set_phase(pph)
+
+    def setMpupil(self, mpupil, numwfs=0):
+        oldmpup = self.getMpupil()
+        dimx = oldmpup.shape[0]
+        dimy = oldmpup.shape[1]
+        if ((mpupil.shape[0] != dimx) or (mpupil.shape[1] != dimy)):
+            print("Error mpupil shape on wfs %d must be: (%d,%d)" % (numwfs, dimx, dimy))
+        else:
+            self._sim.wfs.d_wfs[numwfs].set_pupil(mpupil.copy())
+
+    def getIpupil(self):
+        return self._sim.config.p_geom._ipupil
+
+    def getSpupil(self):
+        return self._sim.config.p_geom._spupil
+
+    def getMpupil(self):
+        return self._sim.config.p_geom._mpupil
+
+    def getTarAmplipup(self, tarnum):
+        return self._sim.config.tar.get_amplipup(tarnum)
+
+    def getImat(self, nControl: int):
+        """
+        Return the interaction matrix of the controller
+
+        Parameters
+        ------------
+        nControl: (int): controller index
+        """
+        return np.array(self._sim.rtc.d_control[nControl].d_imat)
+
+    def getCmat(self, nControl: int):
+        """
+        Return the command matrix of the controller
+
+        Parameters
+        ------------
+        nControl: (int): controller index
+        """
+        return np.array(self._sim.rtc.d_control[nControl].d_cmat)
+
+    def setCentroThresh(self, nCentro: int, thresh: float):
+        """
+        Set the threshold value of a thresholded COG
+
+        Parameters
+        ------------
+        nCentro: (int): centroider index
+        thresh: (float): new threshold value
+        """
+        self._sim.rtc.d_centro[nCentro].set_threshold(thresh)

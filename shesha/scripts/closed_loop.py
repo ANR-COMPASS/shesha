@@ -18,31 +18,29 @@ Options:
 from docopt import docopt
 
 if __name__ == "__main__":
-    import shesha.sim
-
     arguments = docopt(__doc__)
     param_file = arguments["<parameters_filename>"]
 
     # Get parameters from file
     if arguments["--bench"]:
-        from shesha.sim.bench import Bench as Simulator
+        from shesha.supervisor.benchSupervisor import BenchSupervisor as Supervisor
 
     elif arguments["--brahma"]:
-        from shesha.sim.simulatorBrahma import SimulatorBrahma as Simulator
+        from shesha.supervisor.canapassSupervisor import CanapassSupervisor as Supervisor
     elif arguments["--rtcsim"]:
-        from shesha.sim.simulatorRTC import SimulatorRTC as Simulator
+        from shesha.supervisor.rtcSupervisor import RTCSupervisor as Supervisor
     else:
-        from shesha.sim.simulator import Simulator
+        from shesha.supervisor.compassSupervisor import CompassSupervisor as Supervisor
 
-    sim = Simulator(param_file)
+    supervisor = Supervisor(param_file)
 
     if arguments["--devices"]:
-        sim.config.p_loop.set_devices([
+        supervisor.config.p_loop.set_devices([
                 int(device) for device in arguments["--devices"].split(",")
         ])
 
-    sim.init_sim()
-    sim.loop(sim.config.p_loop.niter)
+    supervisor.initConfig()
+    supervisor.loop(supervisor.config.p_loop.niter)
 
     if arguments["--interactive"]:
         from shesha.util.ipython_embed import embed
