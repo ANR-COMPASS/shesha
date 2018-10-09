@@ -57,7 +57,7 @@ def target_init(ctxt: naga_context, telescope: Telescope, p_targets: list,
     zerop = p_targets[0].zerop
 
     if (brahma):
-        target = Target_brahma(ctxt, "target_brahma", telescope, 1,
+        target = Target_brahma(ctxt, "target_brahma", telescope, 0,
                                len(p_targets), xpos, ypos, Lambda, mag, zerop, sizes,
                                Npts, ctxt.activeDevice)
     else:

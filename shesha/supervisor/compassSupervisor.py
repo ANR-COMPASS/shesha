@@ -33,17 +33,41 @@ class CompassSupervisor(AbstractSupervisor):
         '''
         self._seeAtmos = enable
 
-    def setCommand(self, command: np.ndarray) -> None:
+    def setOneActu(self, ndm: int, nactu: int, ampli: float=1) -> None:
+        '''
+        Push the selected actuator
+        '''
+        self._sim.dms.d_dms[ndm].comp_oneactu(nactu, ampli)
+
+    def setDmShapeFrom(self, command: np.ndarray) -> None:
         '''
         Immediately sets provided command to DMs - does not affect integrator
         '''
         self._sim.dms.set_full_com(command)
 
+    def setCommand(self, nctrl: int, command: np.ndarray) -> None:
+        '''
+        Set the RTC command vector
+        '''
+        self._sim.rtc.d_control[nctrl].set_com(command, command.size)
+
     def setPerturbationVoltage(self, nControl: int, command: np.ndarray) -> None:
         '''
         Add this offset value to integrator (will be applied at the end of next iteration)
         '''
-        self._sim.rtc.d_control[nControl].set_perturbcom(command, command.shape[0])
+        if len(command.shape) == 1:
+            self._sim.rtc.d_control[nControl].set_perturbcom(command, 1)
+        elif len(command.shape) == 2:
+            self._sim.rtc.d_control[nControl].set_perturbcom(command, command.shape[0])
+        else:
+            raise AttributeError("command should be a 1D or 2D array")
+
+    def resetPerturbationVoltage(self, nControl: int) -> None:
+        '''
+        Reset the perturbation voltage of the nControl controller
+        '''
+        if self._sim.rtc.d_control[nControl].d_perturb is not None:
+            self._sim.rtc.d_control[nControl].d_perturb.reset()
 
     def getSlope(self) -> np.ndarray:
         '''
@@ -82,11 +106,11 @@ class CompassSupervisor(AbstractSupervisor):
         '''
         self._sim.rtc.d_control[0].set_openloop(0)  # closeLoop
 
-    def openLoop(self) -> None:
+    def openLoop(self, rst=True) -> None:
         '''
         Integrator computation goes to /dev/null but pertuVoltage still applied
         '''
-        self._sim.rtc.d_control[0].set_openloop(1)  # openLoop
+        self._sim.rtc.d_control[0].set_openloop(1, rst)  # openLoop
 
     def setRefSlopes(self, refSlopes: np.ndarray) -> None:
         '''
@@ -116,12 +140,12 @@ class CompassSupervisor(AbstractSupervisor):
         '''
         self._sim.rtc.d_control[0].set_cmat(cMat)
 
-    def setNoise(self, noise, numwfs=0):
+    def setNoise(self, noise, numwfs=0, seed=1234):
         '''
         Set noise value of WFS numwfs
         '''
-        self._sim.wfs.d_wfs[numwfs].set_noise(noise)
-        print("Noise set to: %d" % noise)
+        self._sim.wfs.d_wfs[numwfs].set_noise(noise, int(seed + numwfs))
+        print("Noise set to: %f on WFS %d" % (noise, numwfs))
 
     def setPyrModulation(self, pyrMod: float) -> None:
         '''
@@ -140,7 +164,7 @@ class CompassSupervisor(AbstractSupervisor):
         Set pyramid compute method
         '''
         self._sim.rtc.d_centro[0].set_pyr_method(pyrMethod)  # Sets the pyr method
-        print("PYR method set to: %d" % self._sim.rtc.d_centro[0].pyr_method)
+        print("PYR method set to " + self._sim.rtc.d_centro[0].pyr_method)
 
     def getPyrMethod(self):
         return self._sim.rtc.d_centro[0].pyr_method
@@ -242,7 +266,17 @@ class CompassSupervisor(AbstractSupervisor):
             for dm in self._sim.dms.d_dms:
                 dm.reset_shape()
         else:
-            self._sim.dms[numdm].reset_shape()
+            self._sim.dms.d_dms[numdm].reset_shape()
+
+    def resetCommand(self, nctrl: int=-1) -> None:
+        '''
+        Reset the nctrl Controller command buffer, reset all controllers if nctrl  == -1
+        '''
+        if (nctrl == -1):  # All Dms reset
+            for control in self._sim.rtc.d_control:
+                control.d_com.reset()
+        else:
+            self._sim.rtc.d_control[nctrl].d_com.reset()
 
     def resetSimu(self, noiseList):
         self.resetTurbu()

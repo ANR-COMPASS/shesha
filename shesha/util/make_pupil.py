@@ -18,15 +18,15 @@ def make_pupil(dim, pupd, tel, xc=-1, yc=-1, real=0, halfSpider=0):
 
     :parameters:
 
-        dim: (long) : linear size of ???
+        dim: (long) : = p_geom.pupdiam
 
-        pupd: (long) : linear size of total pupil
+        pupd: (long) : linear size of total pupil = p_geom.pupdiam
 
         tel: (Param_tel) : Telescope structure
 
-        xc: (int)
+        xc: (int) = p_geom.pupdiam / 2. - 0.5
 
-        yc: (int)
+        yc: (int) = p_geom.pupdiam / 2. - 0.5
 
         real: (int)
 
@@ -441,21 +441,21 @@ def generateEeltPupilMask(npt, dspider, i0, j0, pixscale, rotdegree, D=39.0,
     :returns: pupil image (npt, npt), boolean
     :param int npt: size of the output array
     :param float dspider: width of spiders in meters
-    :param float i0, j0: index of pixels where the pupil should be centred.
+    :param float i0, j0: index of pixels where the pupil should be centred = p_geom.pupdiam / 2. - 0.5
                          Can be floating-point indexes.
-    :param float pixscale: size of a pixel of the image, in meters.
+    :param float pixscale: size of a pixel of the image, in meters = ptel.diam/(p_geom.pupdiam / 2. - 0.5)
     :param float rotdegree: rotation angle of the pupil, in degrees.
     :param float D: diameter of the pupil. For the nominal EELT, D shall
                     be set to 39.0
 
     :Example:
-    npt = 800
-    i0 = npt/2+0.5
-    j0 = npt/2+0.5
-    rotdegree = 10.0
-    pixscale = 41./npt
+    npt = p_geom.pupdiam
+    i0 = p_geom.pupdiam / 2. - 0.5
+    j0 = p_geom.pupdiam / 2. - 0.5
+    rotdegree = 0.
+    pixscale = p_tel.diam/(p_geom.pupdiam / 2. - 0.5)
     dspider = 0.51
-    pup = generateEeltPupil(npt, dspider, i0, j0, pixscale, rotdegree)
+    pup = generateEeltPupilMask(p_tel.diam, dspider, i0, j0, pixscale, rotdegree)
 
     """
     rot = rotdegree * np.pi / 180
@@ -557,6 +557,52 @@ def fillPolygon(x, y, i0, j0, scale, N, index=False):
         a = np.zeros((N, N), dtype=np.bool)
         a[indx, indy] = True
 
+    return a
+
+
+def compute6Segments(pupNoSpiders, N, pixscale, dspider, i0, j0, rot=0):
+    """
+    N = p_geom.pupdiam
+    i0 = j0 = p_geom.pupdiam / 2. - 0.5
+    pixscale = p_tel.diam/p_geom.pupdiam
+    dspider = 0.51
+    """
+    npts = 200
+    msk = np.zeros((6, pupNoSpiders.shape[0], pupNoSpiders.shape[1]))
+    mid = int(pupNoSpiders.shape[0] / 2)
+    tmp = np.zeros((pupNoSpiders.shape[0], pupNoSpiders.shape[1]))
+    for angle in np.linspace(0, 60, npts):
+        tmp += compute1Spider(0, N, dspider, i0, j0, pixscale, angle * 2 * np.pi / 360)
+    msk[5, :, :] = tmp < npts * pupNoSpiders
+    msk[5, mid:, :] = 0
+    msk[2, :, :] = tmp < npts * pupNoSpiders
+    msk[2, :mid, :] = 0
+    tmp *= 0
+    for angle in np.linspace(0, 60, npts):
+        tmp += compute1Spider(1, N, dspider, i0, j0, pixscale, angle * 2 * np.pi / 360)
+    msk[0, :, :] = tmp < npts * pupNoSpiders
+    msk[0, mid:, :] = 0
+    msk[3, :, :] = tmp < npts * pupNoSpiders
+    msk[3, :mid, :] = 0
+    tmp *= 0
+    for angle in np.linspace(0, 60, npts):
+        tmp += compute1Spider(2, N, dspider, i0, j0, pixscale, angle * 2 * np.pi / 360)
+    msk[1, :, :] = tmp < npts * pupNoSpiders
+    msk[1, :, :mid] = 0
+    msk[4, :, :] = tmp < npts * pupNoSpiders
+    msk[4, :, mid:] = 0
+    return msk
+
+
+def compute1Spider(nspider, N, dspider, i0, j0, scale, rot):
+    a = np.ones((N, N), dtype=np.bool)
+    X = (np.arange(N) - i0) * scale
+    Y = (np.arange(N) - j0) * scale
+    X, Y = np.meshgrid(X, Y)
+    w = 2 * np.pi / 6
+    i = nspider
+    nn = (abs(X * np.cos(i * w - rot) + Y * np.sin(i * w - rot)) < dspider / 2.)
+    a[nn] = False
     return a
 
 

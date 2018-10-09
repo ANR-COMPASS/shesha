@@ -449,7 +449,7 @@ class Simulator:
                 raise ValueError("Unknown layer type : " + str(s) +
                                  ". See help for accepted layers")
 
-    def compWfsImage(self, wfsNum: int=0):
+    def compWfsImage(self, wfsNum: int=0, noise: bool=True):
         """
         Computes the image produced by the WFS from its phase screen
 
@@ -457,7 +457,7 @@ class Simulator:
         ------------
         wfsNum: (int): wfs index
         """
-        self.wfs.d_wfs[wfsNum].comp_image()
+        self.wfs.d_wfs[wfsNum].comp_image(noise)
 
     def compTarImage(self, tarNum: int=0, puponly: int=0, compLE: bool=True):
         """

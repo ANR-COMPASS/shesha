@@ -123,6 +123,7 @@ class widgetAOWindow(AOClassTemplate, WidgetBase):
         self.ndm = 0
         self.ntar = 0
         self.PSFzoom = 50
+        self.firstTime = 1
         self.uiAO.wao_SRDock.setVisible(False)
 
         self.addDockWidget(Qt.DockWidgetArea(1), self.uiBase.wao_ConfigDock)
@@ -469,12 +470,14 @@ class widgetAOWindow(AOClassTemplate, WidgetBase):
                                     # warnings.warn("\nZeros founds, filling with min nonzero value.\n")
                                     data[data <= 0] = np.min(data[data > 0])
                                 data = np.log10(data)
+                            if (self.supervisor.getFrameCounter() < 10):
+                                self.viewboxes[key].setRange(
+                                        xRange=(data.shape[0] / 2 + 0.5 - self.PSFzoom,
+                                                data.shape[0] / 2 + 0.5 + self.PSFzoom),
+                                        yRange=(data.shape[1] / 2 + 0.5 - self.PSFzoom,
+                                                data.shape[1] / 2 + 0.5 + self.PSFzoom),
+                                )
 
-                            self.viewboxes[key].setRange(
-                                    xRange=(data.shape[0] / 2 + 0.5 - self.PSFzoom,
-                                            data.shape[0] / 2 + 0.5 + self.PSFzoom),
-                                    yRange=(data.shape[1] / 2 + 0.5 - self.PSFzoom,
-                                            data.shape[1] / 2 + 0.5 + self.PSFzoom), )
                         if "SH" in key:
                             data = self.supervisor.getRawWFSImage(index)
                         if "pyrLR" in key:
@@ -520,7 +523,7 @@ class widgetAOWindow(AOClassTemplate, WidgetBase):
                                     )  # Preparing mesh and vector for display
                                 self.imgs[key].canvas.axes.quiver(x, y, vx, vy)
                             self.imgs[key].canvas.draw()
-
+                self.firstTime = 1
             finally:
                 self.loopLock.release()
 
