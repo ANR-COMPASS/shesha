@@ -21,7 +21,7 @@ def updateParamDict(pdict, pClass, prefix):
                     not i.startswith('get_'))
         ]
         for k in params:
-            pdict.update({prefix + k: [p.__dict__[prefix + k] for p in pClass]})
+            pdict.update({prefix + k: [p.__dict__[prefix + k].encode("utf8") if isinstance(p.__dict__[prefix + k], str) else p.__dict__[prefix + k] for p in pClass]})
 
     else:
         params = [
@@ -31,7 +31,10 @@ def updateParamDict(pdict, pClass, prefix):
         ]
 
         for k in params:
-            pdict.update({prefix + k: pClass.__dict__[prefix + k]})
+            if isinstance(pClass.__dict__[prefix + k], str):
+                pdict.update({prefix + k: pClass.__dict__[prefix + k].encode("utf8")})
+            else:
+                pdict.update({prefix + k: pClass.__dict__[prefix + k]})
 
 
 def params_dictionary(config):
@@ -43,7 +46,7 @@ def params_dictionary(config):
     :return param_dict: (dictionary) : dictionary of parameters
     """
 
-    commit = check_output(["git", "rev-parse", "--short", "HEAD"])
+    commit = check_output(["git", "rev-parse", "--short", "HEAD"]).strip()
 
     param_dict = {"simul_name": config.simul_name.encode('utf8'), "commit": commit}
 
@@ -89,7 +92,6 @@ def create_file_attributes(filename, param_dict):
     f = h5py.File(filename, "w")
 
     for i in list(param_dict.keys()):
-        print(param_dict[i])
         if (isinstance(param_dict[i], str)):
             attr = param_dict[i].encode("utf-8")
         elif (isinstance(param_dict[i], list)):
@@ -107,7 +109,7 @@ def create_file_attributes(filename, param_dict):
 def init_hdf5_files(savepath, param_dict, matricesToLoad):
     """ TODO: docstring
     """
-    commit = check_output(["git", "rev-parse", "--short", "HEAD"]).decode('utf8')
+    commit = check_output(["git", "rev-parse", "--short", "HEAD"]).decode('utf8').strip()
     # if not(matricesToLoad.has_key("A")):
     if "A" not in matricesToLoad:
         df = pandas.read_hdf(savepath + "matricesDataBase.h5", "A")
@@ -276,7 +278,7 @@ def checkTurbuParams(savepath, config, pdict, matricesToLoad):
 
     for i in dataBase.index:
         cc = 0
-        commit = check_output(["git", "rev-parse", "--short", "HEAD"])
+        commit = check_output(["git", "rev-parse", "--short", "HEAD"]).strip()
         if (dataBase.loc[i, "validity"] and (dataBase.loc[i, "commit"] == commit)):
             cond = True
             while (cond):
@@ -348,7 +350,7 @@ def checkControlParams(savepath, config, pdict, matricesToLoad):
 
     for i in dataBase.index:
         cc = 0
-        commit = check_output(["git", "rev-parse", "--short", "HEAD"])
+        commit = check_output(["git", "rev-parse", "--short", "HEAD"]).strip()
         if (dataBase.loc[i, "validity"] and (dataBase.loc[i, "commit"] == commit)):
             cond = True
             while (cond):
@@ -361,9 +363,9 @@ def checkControlParams(savepath, config, pdict, matricesToLoad):
                     cc += 1
             # For debug
             #############################
-            # if not cond:
-            #    cc -= 1
-            #    print(param2test[cc]+" has changed from ",dataBase.loc[i,param2test[cc]], " to ",pdict[param2test[cc]])
+            if not cond:
+               cc -= 1
+               print(param2test[cc]+" has changed from ",dataBase.loc[i,param2test[cc]], " to ",pdict[param2test[cc]])
             ###############################
         else:
             cond = False
@@ -406,7 +408,7 @@ def checkDmsParams(savepath, config, pdict, matricesToLoad):
 
     for i in dataBase.index:
         cc = 0
-        commit = check_output(["git", "rev-parse", "--short", "HEAD"])
+        commit = check_output(["git", "rev-parse", "--short", "HEAD"]).strip()
         if (dataBase.loc[i, "validity"] and (dataBase.loc[i, "commit"] == commit)):
             cond = True
             while (cond):
@@ -419,9 +421,9 @@ def checkDmsParams(savepath, config, pdict, matricesToLoad):
                     cc += 1
             # For debug
             #############################
-            # if not cond:
-            #    cc -= 1
-            #    print((param2test[cc]+" has changed from ",dataBase.loc[i,param2test[cc]], " to ",pdict[param2test[cc]]))
+            if not cond:
+               cc -= 1
+               print((param2test[cc]+" has changed from ",dataBase.loc[i,param2test[cc]], " to ",pdict[param2test[cc]]))
             ###############################
         else:
             cond = False
@@ -669,7 +671,7 @@ def save_AB_in_database(k, A, B, istx, isty):
 
         isty:
     """
-    commit = check_output(["git", "rev-parse", "--short", "HEAD"]).decode('utf8')
+    commit = check_output(["git", "rev-parse", "--short", "HEAD"]).decode('utf8').strip()
     print("writing files and updating database")
     df = pandas.read_hdf(
             os.getenv('SHESHA_ROOT') + "/data/dataBase/matricesDataBase.h5", "A")
@@ -721,7 +723,7 @@ def save_dm_geom_in_dataBase(ndm, influpos, ninflu, influstart, i1, j1, ok):
 
         j1:
     """
-    commit = check_output(["git", "rev-parse", "--short", "HEAD"]).decode('utf8')
+    commit = check_output(["git", "rev-parse", "--short", "HEAD"]).decode('utf8').strip()
     print("writing files and updating database")
     df = pandas.read_hdf(
             os.getenv('SHESHA_ROOT') + "/data/dataBase/matricesDataBase.h5", "dm")
@@ -758,7 +760,7 @@ def save_imat_in_dataBase(imat):
 
         imat: (np.ndarray): imat to save
     """
-    commit = check_output(["git", "rev-parse", "--short", "HEAD"]).decode('utf8')
+    commit = check_output(["git", "rev-parse", "--short", "HEAD"]).decode('utf8').strip()
     print("writing files and updating database")
     df = pandas.read_hdf(
             os.getenv('SHESHA_ROOT') + "/data/dataBase/matricesDataBase.h5", "imat")
