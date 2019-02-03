@@ -92,6 +92,13 @@ class Param_dm:
         """ Influence functions"""
         self.__influstart = None  # np.ndarray - Influence function handling
 
+    def get_ap(self):
+        """ Get ap TODO!!!
+
+        :return: (float) : TODO
+        """
+        return self.__ap
+
     def set_ap(self, ap):
         """ Set ap TODO!!!
 
@@ -100,7 +107,14 @@ class Param_dm:
         self.__ap = csu.enforce_arrayMultiDim(ap, (ap.shape[0], ap.shape[1]),
                                               dtype=np.float32)
 
-    ap = property(lambda x: x.__ap, set_ap)
+    ap = property(get_ap, set_ap)
+
+    def get_nfunc(self):
+        """ Get nfunc TODO !!!
+
+        :return: (int) : TODO
+        """
+        return self.__nfunc
 
     def set_nfunc(self, nfunc):
         """ Set nfunc TODO !!!
@@ -109,7 +123,14 @@ class Param_dm:
         """
         self.__nfunc = csu.enforce_int(nfunc)
 
-    nfunc = property(lambda x: x.__nfunc, set_nfunc)
+    nfunc = property(get_nfunc, set_nfunc)
+
+    def get_pzt_extent(self):
+        """ Get extent of pzt dm in pich unit default = 5
+
+        :return: (int) : extent pzt dm
+        """
+        return self.__pzt_extent
 
     def set_pzt_extent(self, p):
         """ Set extent of pzt dm in pich unit default = 5
@@ -118,7 +139,14 @@ class Param_dm:
         """
         self.__pzt_extent = csu.enforce_int(p)
 
-    pzt_extent = property(lambda x: x.__pzt_extent, set_pzt_extent)
+    pzt_extent = property(get_pzt_extent, set_pzt_extent)
+
+    def get_influType(self):
+        """ Get the influence function type for pzt DM
+
+        :return: (str) : centroider type
+        """
+        return self.__influType
 
     def set_influType(self, t):
         """ Set the influence function type for pzt DM
@@ -127,7 +155,14 @@ class Param_dm:
         """
         self.__influType = scons.check_enum(scons.InfluType, t)
 
-    influType = property(lambda x: x.__influType, set_influType)
+    influType = property(get_influType, set_influType)
+
+    def get_influpos(self):
+        """ Get the influence functions pixels that contributes to each DM pixel
+
+        :return: (np.ndarray[ndim=1, drype=np.int32]) : influpos
+        """
+        return self.__influpos
 
     def set_influpos(self, ip):
         """ Set the influence functions pixels that contributes to each DM pixel
@@ -136,7 +171,15 @@ class Param_dm:
         """
         self.__influpos = csu.enforce_array(ip, ip.size, dtype=np.int32)
 
-    _influpos = property(lambda x: x.__influpos, set_influpos)
+    _influpos = property(get_influpos, set_influpos)
+
+    def get_ninflu(self):
+        """ Get the number of influence functions pixels that contributes
+        to each DM pixel
+
+        :return: (np.ndarray[ndim=1, drype=np.int32]) : ninflu
+        """
+        return self.__ninflu
 
     def set_ninflu(self, n):
         """ Set the number of influence functions pixels that contributes
@@ -146,7 +189,15 @@ class Param_dm:
         """
         self.__ninflu = csu.enforce_array(n, n.size, dtype=np.int32)
 
-    _ninflu = property(lambda x: x.__ninflu, set_ninflu)
+    _ninflu = property(get_ninflu, set_ninflu)
+
+    def get_influstart(self):
+        """ Get the index where to start a new DM pixel shape in the array influpos
+        to each DM pixel
+
+        :return: (np.ndarray[ndim=1, drype=np.int32]) : influstart
+        """
+        return self.__influstart
 
     def set_influstart(self, n):
         """ Set the index where to start a new DM pixel shape in the array influpos
@@ -156,7 +207,14 @@ class Param_dm:
         """
         self.__influstart = csu.enforce_array(n, n.size, dtype=np.int32)
 
-    _influstart = property(lambda x: x.__influstart, set_influstart)
+    _influstart = property(get_influstart, set_influstart)
+
+    def get_gain(self):
+        """ Get the gain to apply to the actuators of the dm
+
+        :return: (float) : gain
+        """
+        return self.__gain
 
     def set_gain(self, g):
         """ Set the gain to apply to the actuators of the dm
@@ -165,7 +223,14 @@ class Param_dm:
         """
         self.__gain = csu.enforce_float(g)
 
-    gain = property(lambda x: x.__gain, set_gain)
+    gain = property(get_gain, set_gain)
+
+    def get_nkl(self):
+        """ Get the number of KL modes used for computation of covmat in case of minimum variance controller
+
+        :return: (long) : number of KL modes
+        """
+        return self.__nkl
 
     def set_nkl(self, n):
         """ Set the number of KL modes used for computation of covmat in case of minimum variance controller
@@ -174,7 +239,14 @@ class Param_dm:
         """
         self.__nkl = csu.enforce_int(n)
 
-    nkl = property(lambda x: x.__nkl, set_nkl)
+    nkl = property(get_nkl, set_nkl)
+
+    def get_type_kl(self):
+        """ Get the type of KL used for computation
+
+        :return: (string) : KL types : kolmo or karman
+        """
+        return self.__type_kl
 
     def set_type_kl(self, t):
         """ Set the type of KL used for computation
@@ -183,7 +255,14 @@ class Param_dm:
         """
         self.__type_kl = scons.check_enum(scons.KLType, t)
 
-    type_kl = property(lambda x: x.__type_kl, set_type_kl)
+    type_kl = property(get_type_kl, set_type_kl)
+
+    def get_type(self):
+        """ Get the dm type
+
+        :return: (str) : type of dm
+        """
+        return self.__type
 
     def set_type(self, t):
         """ set the dm type
@@ -192,7 +271,14 @@ class Param_dm:
         """
         self.__type = scons.check_enum(scons.DmType, t)
 
-    type = property(lambda x: x.__type, set_type)
+    type = property(get_type, set_type)
+
+    def get_type_pattern(self):
+        """ Get the pattern type
+
+        :return: (str) : type of pattern
+        """
+        return self.__type_pattern
 
     def set_type_pattern(self, t):
         """ set the pattern type
@@ -201,7 +287,14 @@ class Param_dm:
         """
         self.__type_pattern = scons.check_enum(scons.PatternType, t)
 
-    type_pattern = property(lambda x: x.__type_pattern, set_type_pattern)
+    type_pattern = property(get_type_pattern, set_type_pattern)
+
+    def get_file_influ_hdf5(self):
+        """ Get the name of hdf5 influence file
+
+        :return: (str) : Hdf5 file influence name
+        """
+        return self.__file_influ_hdf5
 
     def set_file_influ_hdf5(self, f):
         """ set the name of hdf5 influence file
@@ -210,7 +303,14 @@ class Param_dm:
         """
         self.__file_influ_hdf5 = f
 
-    file_influ_hdf5 = property(lambda x: x.__file_influ_hdf5, set_file_influ_hdf5)
+    file_influ_hdf5 = property(get_file_influ_hdf5, set_file_influ_hdf5)
+
+    def get_center_name(self):
+        """ Get the name of hdf5 influence file
+
+        :return: (str) : Hdf5 file influence name
+        """
+        return self.__center_name
 
     def set_center_name(self, f):
         """ set the name of hdf5 influence file
@@ -219,7 +319,14 @@ class Param_dm:
         """
         self.__center_name = f
 
-    center_name = property(lambda x: x.__center_name, set_center_name)
+    center_name = property(get_center_name, set_center_name)
+
+    def get_cube_name(self):
+        """ Get the name of influence cube in hdf5
+
+        :return: (str) : name of influence cube
+        """
+        return self.__cube_name
 
     def set_cube_name(self, cubename):
         """ set the name of influence cube in hdf5
@@ -228,7 +335,14 @@ class Param_dm:
         """
         self.__cube_name = cubename
 
-    cube_name = property(lambda x: x.__cube_name, set_cube_name)
+    cube_name = property(get_cube_name, set_cube_name)
+
+    def get_x_name(self):
+        """ Get the name of x coord of influence fonction in file
+
+        :return: (str) : name of x coord of influence
+        """
+        return self.__x_name
 
     def set_x_name(self, xname):
         """ set the name of x coord of influence fonction in file
@@ -237,7 +351,14 @@ class Param_dm:
         """
         self.__x_name = xname
 
-    x_name = property(lambda x: x.__x_name, set_x_name)
+    x_name = property(get_x_name, set_x_name)
+
+    def get_y_name(self):
+        """ Get the name of y coord of influence fonction in file
+
+        :return: (str) : name of y coord of influence
+        """
+        return self.__y_name
 
     def set_y_name(self, yname):
         """ set the name of y coord of influence fonction in file
@@ -246,7 +367,14 @@ class Param_dm:
         """
         self.__y_name = yname
 
-    y_name = property(lambda x: x.__y_name, set_y_name)
+    y_name = property(get_y_name, set_y_name)
+
+    def get_influ_res(self):
+        """ Get the name of influence fonction resolution in file
+
+        :return: (str) : name of resoltion (meter/pixel) of influence
+        """
+        return self.__influ_res
 
     def set_influ_res(self, res):
         """ set the name of influence fonction resolution in file
@@ -255,7 +383,14 @@ class Param_dm:
         """
         self.__influ_res = res
 
-    influ_res = property(lambda x: x.__influ_res, set_influ_res)
+    influ_res = property(get_influ_res, set_influ_res)
+
+    def get_diam_dm(self):
+        """ Get the name of dm diameter in file
+
+        :return: (str) : name of diameter (meter) dm
+        """
+        return self.__diam_dm
 
     def set_diam_dm(self, di):
         """ set the name of dm diameter in file
@@ -264,7 +399,14 @@ class Param_dm:
         """
         self.__diam_dm = di
 
-    diam_dm = property(lambda x: x.__diam_dm, set_diam_dm)
+    diam_dm = property(get_diam_dm, set_diam_dm)
+
+    def get_diam_dm_proj(self):
+        """ Get the name of dm diameter projet on puille in file
+
+        :return: (str) : name of diameter (meter in pupil plan) dm
+        """
+        return self.__diam_dm_proj
 
     def set_diam_dm_proj(self, dp):
         """ set the name of dm diameter projet on puille in file
@@ -273,7 +415,14 @@ class Param_dm:
         """
         self.__diam_dm_proj = dp
 
-    diam_dm_proj = property(lambda x: x.__diam_dm_proj, set_diam_dm_proj)
+    diam_dm_proj = property(get_diam_dm_proj, set_diam_dm_proj)
+
+    def get_nact(self):
+        """ Get the number of actuator
+
+        :return: (long) : number of actuators in the dm
+        """
+        return self.__nact
 
     def set_nact(self, n):
         """ set the number of actuator
@@ -282,7 +431,14 @@ class Param_dm:
         """
         self.__nact = csu.enforce_int(n)
 
-    nact = property(lambda x: x.__nact, set_nact)
+    nact = property(get_nact, set_nact)
+
+    def get_margin_out(self):
+        """ Get the margin for outside actuator select
+
+        :return: (float) : unit is actuator pitch (+) for extra (-) for intra
+        """
+        return self.__margin_out
 
     def set_margin_out(self, n):
         """ set the margin for outside actuator select
@@ -291,7 +447,14 @@ class Param_dm:
         """
         self.__margin_out = csu.enforce_float(n)
 
-    margin_out = property(lambda x: x.__margin_out, set_margin_out)
+    margin_out = property(get_margin_out, set_margin_out)
+
+    def get_margin_in(self):
+        """ Get the margin for inside actuator select (central obstruction)
+
+        :return: (float) : unit is actuator pitch (+) for extra (-) for intra
+        """
+        return self.__margin_in
 
     def set_margin_in(self, n):
         """ set the margin for inside actuator select (central obstruction)
@@ -300,7 +463,14 @@ class Param_dm:
         """
         self.__margin_in = csu.enforce_float(n)
 
-    margin_in = property(lambda x: x.__margin_in, set_margin_in)
+    margin_in = property(get_margin_in, set_margin_in)
+
+    def get_alt(self):
+        """ Get the conjugaison altitude
+
+        :return: (float) : conjugaison altitude (im m)
+        """
+        return self.__alt
 
     def set_alt(self, a):
         """ set the conjugaison altitude
@@ -309,7 +479,14 @@ class Param_dm:
         """
         self.__alt = csu.enforce_float(a)
 
-    alt = property(lambda x: x.__alt, set_alt)
+    alt = property(get_alt, set_alt)
+
+    def get_thresh(self):
+        """ Get the threshold on response for selection
+
+        :return: (float) : threshold on response for selection (<1)
+        """
+        return self.__thresh
 
     def set_thresh(self, t):
         """ set the threshold on response for selection
@@ -318,7 +495,14 @@ class Param_dm:
         """
         self.__thresh = csu.enforce_float(t)
 
-    thresh = property(lambda x: x.__thresh, set_thresh)
+    thresh = property(get_thresh, set_thresh)
+
+    def get_coupling(self):
+        """ Get the actuators coupling
+
+        :return: (float) : actuators coupling (<0.3)
+        """
+        return self.__coupling
 
     def set_coupling(self, c):
         """ set the actuators coupling
@@ -327,7 +511,14 @@ class Param_dm:
         """
         self.__coupling = csu.enforce_float(c)
 
-    coupling = property(lambda x: x.__coupling, set_coupling)
+    coupling = property(get_coupling, set_coupling)
+
+    def get_unitpervolt(self):
+        """ Get the Influence function sensitivity
+
+        :return: (float) : Influence function sensitivity in unit/volt
+        """
+        return self.__unitpervolt
 
     def set_unitpervolt(self, u):
         """ set the Influence function sensitivity
@@ -336,7 +527,14 @@ class Param_dm:
         """
         self.__unitpervolt = csu.enforce_float(u)
 
-    unitpervolt = property(lambda x: x.__unitpervolt, set_unitpervolt)
+    unitpervolt = property(get_unitpervolt, set_unitpervolt)
+
+    def get_push4imat(self):
+        """ Get the nominal voltage for imat
+
+        :return: (float) : nominal voltage for imat
+        """
+        return self.__push4imat
 
     def set_push4imat(self, p):
         """ set the nominal voltage for imat
@@ -345,7 +543,14 @@ class Param_dm:
         """
         self.__push4imat = csu.enforce_float(p)
 
-    push4imat = property(lambda x: x.__push4imat, set_push4imat)
+    push4imat = property(get_push4imat, set_push4imat)
+
+    def get_ntotact(self):
+        """ Get the total number of actuators
+
+        :return: (long) : total number of actuators
+        """
+        return self.__ntotact
 
     def set_ntotact(self, n):
         """ set the total number of actuators
@@ -354,7 +559,14 @@ class Param_dm:
         """
         self.__ntotact = csu.enforce_int(n)
 
-    _ntotact = property(lambda x: x.__ntotact, set_ntotact)
+    _ntotact = property(get_ntotact, set_ntotact)
+
+    def get_pitch(self):
+        """ Get the actuators pitch [pixels]
+
+        :return: (float) : actuators pitch [pixels]
+        """
+        return self.__pitch
 
     def set_pitch(self, p):
         """ set the actuators pitch [pixels]
@@ -363,7 +575,14 @@ class Param_dm:
         """
         self.__pitch = csu.enforce_float(p)
 
-    _pitch = property(lambda x: x.__pitch, set_pitch)
+    _pitch = property(get_pitch, set_pitch)
+
+    def get_influsize(self):
+        """ Get the actuators influsize [pixels]
+
+        :return: (int) : actuators influsize [pixels]
+        """
+        return self.__influsize
 
     def set_influsize(self, s):
         """ set the actuators influsize [pixels]
@@ -372,7 +591,14 @@ class Param_dm:
         """
         self.__influsize = csu.enforce_int(s)
 
-    _influsize = property(lambda x: x.__influsize, set_influsize)
+    _influsize = property(get_influsize, set_influsize)
+
+    def get_n1(self):
+        """ Get the position of bottom left pixel in the largest support
+
+        :return: (int) : actuators n1 [pixels]
+        """
+        return self.__n1
 
     def set_n1(self, n):
         """ set the position of bottom left pixel in the largest support
@@ -381,7 +607,14 @@ class Param_dm:
         """
         self.__n1 = csu.enforce_int(n)
 
-    _n1 = property(lambda x: x.__n1, set_n1)
+    _n1 = property(get_n1, set_n1)
+
+    def get_n2(self):
+        """ Get the position of bottom right pixel in the largest support
+
+        :return: (int) : actuators n2 [pixels]
+        """
+        return self.__n2
 
     def set_n2(self, n):
         """ set the position of bottom right pixel in the largest support
@@ -390,7 +623,14 @@ class Param_dm:
         """
         self.__n2 = csu.enforce_int(n)
 
-    _n2 = property(lambda x: x.__n2, set_n2)
+    _n2 = property(get_n2, set_n2)
+
+    def get_xpos(self):
+        """ Get the x positions of influ functions (lower left corner)
+
+        :return: (np.ndarray[ndim=1,dtype=np.float32_t]) : x positions of influ functions
+        """
+        return self.__xpos
 
     def set_xpos(self, xpos):
         """ Set the x positions of influ functions (lower left corner)
@@ -399,7 +639,14 @@ class Param_dm:
         """
         self.__xpos = csu.enforce_array(xpos, self.__ntotact, dtype=np.float32)
 
-    _xpos = property(lambda x: x.__xpos, set_xpos)
+    _xpos = property(get_xpos, set_xpos)
+
+    def get_ypos(self):
+        """ Get the y positions of influ functions (lower left corner)
+
+        :return: (np.ndarray[ndim=1,dtype=np.float32_t]) : y positions of influ functions
+        """
+        return self.__ypos
 
     def set_ypos(self, ypos):
         """ Set the y positions of influ functions (lower left corner)
@@ -408,7 +655,14 @@ class Param_dm:
         """
         self.__ypos = csu.enforce_array(ypos, self.__ntotact, dtype=np.float32)
 
-    _ypos = property(lambda x: x.__ypos, set_ypos)
+    _ypos = property(get_ypos, set_ypos)
+
+    def get_i1(self):
+        """ Get the X-position of the bottom left corner of each influence function
+
+        :return: (np.ndarray[ndim=1,dtype=np.int32_t]) :
+        """
+        return self.__i1
 
     def set_i1(self, i1):
         """ Set the X-position of the bottom left corner of each influence function
@@ -417,7 +671,14 @@ class Param_dm:
         """
         self.__i1 = csu.enforce_array(i1, self.__ntotact, dtype=np.int32)
 
-    _i1 = property(lambda x: x.__i1, set_i1)
+    _i1 = property(get_i1, set_i1)
+
+    def get_j1(self):
+        """ Get the Y-position of the bottom left corner of each influence function
+
+        :return: (np.ndarray[ndim=1,dtype=np.int32_t]) :
+        """
+        return self.__j1
 
     def set_j1(self, j1):
         """ Set the Y-position of the bottom left corner of each influence function
@@ -426,7 +687,14 @@ class Param_dm:
         """
         self.__j1 = csu.enforce_array(j1, self.__ntotact, dtype=np.int32)
 
-    _j1 = property(lambda x: x.__j1, set_j1)
+    _j1 = property(get_j1, set_j1)
+
+    def get_influ(self):
+        """ Get the influence function
+
+        :return: (np.ndarray[ndim=3,dtype=np.float32_t]) : influence function
+        """
+        return self.__influ
 
     def set_influ(self, influ):
         """ Set the influence function
@@ -437,7 +705,14 @@ class Param_dm:
                                                  (self.__influsize, self.__influsize,
                                                   self._ntotact), dtype=np.float32)
 
-    _influ = property(lambda x: x.__influ, set_influ)
+    _influ = property(get_influ, set_influ)
+
+    def get_pupoffset(self):
+        """ Get the pupil offset in meters
+
+        :return: (np.ndarray[ndim=1,dtype=np.float32_t]) : offsets [m]
+        """
+        return self.__pupoffset
 
     def set_pupoffset(self, off):
         """ Set the pupil offset in meters
@@ -446,7 +721,14 @@ class Param_dm:
         """
         self.__pupoffset = csu.enforce_array(off, 2, dtype=np.float32)
 
-    pupoffset = property(lambda x: x.__pupoffset, set_pupoffset)
+    pupoffset = property(get_pupoffset, set_pupoffset)
+
+    def get_puppixoffset(self):
+        """ Get the pupil offset in pixels
+
+        :return: (np.ndarray[ndim=1,dtype=np.float32_t]) : offsets [pixels]
+        """
+        return self.__puppixoffset
 
     def set_puppixoffset(self, off):
         """ Set the pupil offset in pixels
@@ -455,7 +737,14 @@ class Param_dm:
         """
         self.__puppixoffset = csu.enforce_array(off, 2, dtype=np.float32)
 
-    _puppixoffset = property(lambda x: x.__puppixoffset, set_puppixoffset)
+    _puppixoffset = property(get_puppixoffset, set_puppixoffset)
+
+    def get_outscl(self):
+        """ Get the outer scale for KL with Von Karman spectrum
+
+        :return: (float) : outer scale [m]
+        """
+        return self.__outscl
 
     def set_outscl(self, L0):
         """ Set the outer scale for KL with Von Karman spectrum
@@ -464,7 +753,14 @@ class Param_dm:
         """
         self.__outscl = csu.enforce_float(L0)
 
-    outscl = property(lambda x: x.__outscl, set_outscl)
+    outscl = property(get_outscl, set_outscl)
+
+    def get_nr(self):
+        """ Get the number of radial points for KL
+
+        :return: (int) : number of radial points
+        """
+        return self.__nr
 
     def set_nr(self, n):
         """ Set the number of radial points for KL
@@ -473,7 +769,14 @@ class Param_dm:
         """
         self.__nr = csu.enforce_int(n)
 
-    _nr = property(lambda x: x.__nr, set_nr)
+    _nr = property(get_nr, set_nr)
+
+    def get_npp(self):
+        """ Get the number of elements (?) for KL
+
+        :return: (int) : number of elements
+        """
+        return self.__npp
 
     def set_npp(self, n):
         """ Set the number of elements (?) for KL
@@ -482,7 +785,14 @@ class Param_dm:
         """
         self.__npp = csu.enforce_int(n)
 
-    _npp = property(lambda x: x.__npp, set_npp)
+    _npp = property(get_npp, set_npp)
+
+    def get_ncp(self):
+        """ Get the dimension of grid (?)
+
+        :return: (int) : dimension
+        """
+        return self.__ncp
 
     def set_ncp(self, n):
         """ Set the dimension of grid (?)
@@ -491,7 +801,14 @@ class Param_dm:
         """
         self.__ncp = csu.enforce_int(n)
 
-    _ncp = property(lambda x: x.__ncp, set_ncp)
+    _ncp = property(get_ncp, set_ncp)
+
+    def get_ord(self):
+        """ Get the radial orders of the basis
+
+        :return: (int) : radial order of the basis
+        """
+        return self.__ord
 
     def set_ord(self, n):
         """ Set the radial orders of the basis
@@ -500,7 +817,14 @@ class Param_dm:
         """
         self.__ord = csu.enforce_array(n, n.size, dtype=np.int32)
 
-    _ord = property(lambda x: x.__ord, set_ord)
+    _ord = property(get_ord, set_ord)
+
+    def get_rabas(self):
+        """ Get the radial array of the KL basis
+
+        :return: (np.ndarray[ndim=1,dtype=np.float32_t]) : radial array
+        """
+        return self.__rabas
 
     def set_rabas(self, r):
         """ Set the radial array of the KL basis
@@ -509,7 +833,14 @@ class Param_dm:
         """
         self.__rabas = csu.enforce_arrayMultiDim(r, r.shape, dtype=np.float32)
 
-    _rabas = property(lambda x: x.__rabas, set_rabas)
+    _rabas = property(get_rabas, set_rabas)
+
+    def get_azbas(self):
+        """ Get the azimuthal array of the KL basis
+
+        :return: (np.ndarray[ndim=1,dtype=np.float32_t]) : azimuthal array
+        """
+        return self.__azbas
 
     def set_azbas(self, r):
         """ Set the azimuthal array of the KL basis
@@ -518,7 +849,14 @@ class Param_dm:
         """
         self.__azbas = csu.enforce_arrayMultiDim(r, r.shape, dtype=np.float32)
 
-    _azbas = property(lambda x: x.__azbas, set_azbas)
+    _azbas = property(get_azbas, set_azbas)
+
+    def get_cr(self):
+        """ Get the radial coordinates in carthesian grid
+
+        :return: (np.ndarray[ndim=1,dtype=np.float32_t]) : radial coordinates in carthesian grid
+        """
+        return self.__cr
 
     def set_cr(self, r):
         """ Set the radial coordinates in carthesian grid
@@ -527,7 +865,14 @@ class Param_dm:
         """
         self.__cr = csu.enforce_arrayMultiDim(r, r.shape, dtype=np.float32)
 
-    _cr = property(lambda x: x.__cr, set_cr)
+    _cr = property(get_cr, set_cr)
+
+    def get_cp(self):
+        """ Get the phi coordinates in carthesian grid
+
+        :return: (np.ndarray[ndim=1,dtype=np.float32_t]) : phi coordinates in carthesian grid
+        """
+        return self.__cp
 
     def set_cp(self, r):
         """ Set the phi coordinates in carthesian grid
@@ -536,4 +881,4 @@ class Param_dm:
         """
         self.__cp = csu.enforce_arrayMultiDim(r, r.shape, dtype=np.float32)
 
-    _cp = property(lambda x: x.__cp, set_cp)
+    _cp = property(get_cp, set_cp)

@@ -12,8 +12,9 @@ def smart_import(mod, cls, verbose=False, silent=False):
     except ImportError as err:
         if not silent:
             import warnings
-            warnings.warn("Error importing %s, it will be simulated due to: %s" %
-                          (cls, err.msg), Warning)
+            warnings.warn(
+                    "Error importing %s, it will be simulated due to: %s" %
+                    (cls, err.msg), Warning)
 
         class tmp_cls:
 
@@ -25,8 +26,9 @@ def smart_import(mod, cls, verbose=False, silent=False):
     except AttributeError as err:
         if not silent:
             import warnings
-            warnings.warn("Error importing %s, it will be simulated due to: %s" %
-                          (cls, err.args), Warning)
+            warnings.warn(
+                    "Error importing %s, it will be simulated due to: %s" %
+                    (cls, err.args), Warning)
 
         class tmp_cls:
 
@@ -36,15 +38,15 @@ def smart_import(mod, cls, verbose=False, silent=False):
         return tmp_cls
 
 
-Dms = smart_import("shesha_bind", "Dms")
-Rtc = smart_import("shesha_bind", "Rtc")
-Rtc_brahma = smart_import("shesha_bind", "Rtc_brahma", silent=True)
-Sensors = smart_import("shesha_bind", "Sensors")
-Atmos = smart_import("shesha_bind", "Atmos")
-Telescope = smart_import("shesha_bind", "Telescope")
-Target = smart_import("shesha_bind", "Target")
-Target_brahma = smart_import("shesha_bind", "Target_brahma", silent=True)
-Gamora = smart_import("shesha_bind", "Gamora")
-Groot = smart_import("shesha_bind", "Groot")
+Dms = smart_import("sutraWrap", "Dms")
+Rtc = smart_import("sutraWrap", "Rtc")
+Rtc_brahma = smart_import("sutraWrap", "Rtc_brahma", silent=True)
+Sensors = smart_import("sutraWrap", "Sensors")
+Atmos = smart_import("sutraWrap", "Atmos")
+Telescope = smart_import("sutraWrap", "Telescope")
+Target = smart_import("sutraWrap", "Target")
+Target_brahma = smart_import("sutraWrap", "Target_brahma", silent=True)
+Gamora = smart_import("sutraWrap", "Gamora")
+Groot = smart_import("sutraWrap", "Groot")
 
-naga_context = smart_import("naga", "naga_context")
+carmaWrap_context = smart_import("carmaWrap", "context")

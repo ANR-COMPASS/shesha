@@ -4,7 +4,7 @@ Python module for modelization of error covariance matrix
 """
 import numpy as np
 import h5py
-from shesha.sutra_wrap import naga_context, Groot
+from shesha.sutra_wrap import carmaWrap_context, Groot
 import time
 import sys
 import os
@@ -16,7 +16,7 @@ import matplotlib.pyplot as plt
 plt.ion()
 
 gpudevices = np.array([0, 1, 2, 3], dtype=np.int32)
-cxt = naga_context.get_instance_ngpu(gpudevices.size, gpudevices)
+cxt = carmaWrap_context.get_instance_ngpu(gpudevices.size, gpudevices)
 
 
 def compute_Cerr(filename, modal=True, ctype="float", speed=None, H=None, theta=None,
@@ -84,12 +84,9 @@ def compute_Cerr(filename, modal=True, ctype="float", speed=None, H=None, theta=
     if (ctype == "float"):
         groot = Groot(cxt, cxt.activeDevice, Nact.shape[0],
                       int(f.attrs["_Param_atmos__nscreens"]), angleht,
-                      vdt.astype(np.float32),
-                      Htheta.astype(np.float32), L0, theta,
-                      scale.astype(np.float32),
-                      pzt2tt.astype(np.float32),
-                      Tf.astype(np.float32),
-                      Nact.astype(np.float32),
+                      vdt.astype(np.float32), Htheta.astype(np.float32), L0, theta,
+                      scale.astype(np.float32), pzt2tt.astype(np.float32),
+                      Tf.astype(np.float32), Nact.astype(np.float32),
                       xactu.astype(np.float32), yactu.astype(np.float32), fc)
     else:
         raise TypeError("Unknown ctype : must be float")
@@ -163,26 +160,23 @@ def compute_Cerr_cpu(filename, modal=True):
         M = np.linalg.norm([xij, yij], axis=0)
         Mvdt = np.linalg.norm([xij - vdt * np.cos(theta), yij - vdt * np.sin(theta)],
                               axis=0)
-        Mht = np.linalg.norm([
-                xij - Htheta * np.cos(angleht), yij - Htheta * np.sin(angleht)
-        ], axis=0)
+        Mht = np.linalg.norm(
+                [xij - Htheta * np.cos(angleht), yij - Htheta * np.sin(angleht)], axis=0)
         Mhvdt = np.linalg.norm([
                 xij - vdt * np.cos(theta) - Htheta * np.cos(angleht),
                 yij - vdt * np.sin(theta) - Htheta * np.sin(angleht)
         ], axis=0)
 
-        Ccov += 0.5 * (
-                starlord.dphi_lowpass(Mhvdt, fc, L0, tabx, taby) -
-                starlord.dphi_lowpass(Mht, fc, L0, tabx, taby) - starlord.dphi_lowpass(
-                        Mvdt, fc, L0, tabx, taby) + starlord.dphi_lowpass(
-                                M, fc, L0, tabx, taby)) * (1. / r0)**(5. / 3.) * frac
+        Ccov += 0.5 * (starlord.dphi_lowpass(Mhvdt, fc, L0, tabx, taby) -
+                       starlord.dphi_lowpass(Mht, fc, L0, tabx, taby) - starlord.
+                       dphi_lowpass(Mvdt, fc, L0, tabx, taby) + starlord.dphi_lowpass(
+                               M, fc, L0, tabx, taby)) * (1. / r0)**(5. / 3.) * frac
 
         Caniso += 0.5 * (
                 starlord.dphi_lowpass(Mht, fc, L0, tabx, taby) - starlord.dphi_lowpass(
                         M, fc, L0, tabx, taby)) * (1. / r0)**(5. / 3.) * frac
-        Cbp += 0.5 * (
-                starlord.dphi_lowpass(Mvdt, fc, L0, tabx, taby) - starlord.dphi_lowpass(
-                        M, fc, L0, tabx, taby)) * (1. / r0)**(5. / 3.) * frac
+        Cbp += 0.5 * (starlord.dphi_lowpass(Mvdt, fc, L0, tabx, taby) - starlord.
+                      dphi_lowpass(M, fc, L0, tabx, taby)) * (1. / r0)**(5. / 3.) * frac
 
     Sp = (Lambda_tar / (2 * np.pi))**2
     Ctt = (Caniso + Caniso.T) * Sp
@@ -257,7 +251,7 @@ def compare_GPU_vs_CPU(filename):
         filename : (string) : full path to the ROKET file
 
     """
-    timer = ch.naga_timer()
+    timer = ch.carmaWrap_timer()
 
     ch.threadSync()
     timer.start()
@@ -392,12 +386,12 @@ def compute_Cn_cpu(filename, model="data", modal=True):
             sig = (np.pi ** 2 / 2) * (1 / Nph) * \
                 (1. / r0) ** 2  # Photon noise in m^-2
             # Noise variance in arcsec^2
-            sig = sig * ((f.attrs["_Param_wfs__Lambda"] * 1e-6) /
-                         (2 * np.pi))**2 * RASC**2
+            sig = sig * (
+                    (f.attrs["_Param_wfs__Lambda"] * 1e-6) / (2 * np.pi))**2 * RASC**2
 
             Ns = f.attrs["_Param_wfs__npix"]  # Number of pixel
-            Nd = (f.attrs["_Param_wfs__Lambda"] * 1e-6
-                  ) * RASC / f.attrs["_Param_wfs__pixsize"]
+            Nd = (f.attrs["_Param_wfs__Lambda"] *
+                  1e-6) * RASC / f.attrs["_Param_wfs__pixsize"]
             sigphi = (np.pi ** 2 / 3.0) * (1 / Nph ** 2) * (f.attrs["_Param_wfs__noise"]) ** 2 * \
                 Ns ** 2 * (Ns / Nd) ** 2  # Phase variance in m^-2
             # Noise variance in arcsec^2
@@ -445,9 +439,9 @@ def compute_OTF_fitting(filename, otftel):
     r = np.sqrt(x[:, None] * x[:, None] + x[None, :] * x[None, :])
     tabx, taby = starlord.tabulateIj0()
     dphi = np.fft.fftshift(
-            starlord.dphi_highpass(r, f.attrs["_Param_tel__diam"] /
-                                   (f.attrs["_Param_dm__nact"][0] - 1), tabx, taby) *
-            (1 / r0)**(5 / 3.))  # * den * ratio_lambda**2 * mask
+            starlord.dphi_highpass(
+                    r, f.attrs["_Param_tel__diam"] / (f.attrs["_Param_dm__nact"][0] - 1),
+                    tabx, taby) * (1 / r0)**(5 / 3.))  # * den * ratio_lambda**2 * mask
     otf_fit = np.exp(-0.5 * dphi) * mask
     otf_fit = otf_fit / otf_fit.max()
 
@@ -516,8 +510,8 @@ def compute_Calias_gpu(filename, slopes_space=False, modal=True, npts=3):
     weights = np.zeros(npts)
     for k in range(npts):
         weights[k] = (coeff[k:] * coeff[:npts - k]).sum()
-    groot = Groot(cxt, cxt.activeDevice, nsub,
-                  weights.astype(np.float32), scale, x, y, fc, d, npts)
+    groot = Groot(cxt, cxt.activeDevice, nsub, weights.astype(np.float32), scale, x, y,
+                  fc, d, npts)
     groot.compute_Calias()
     CaXX = np.array(groot.d_CaXX)
     Ca = np.zeros((2 * CaXX.shape[0], 2 * CaXX.shape[0]))
@@ -597,10 +591,10 @@ def compute_Calias(filename, slopes_space=False, modal=True, npts=3):
         h = 1
     for k in tqdm(range(npts)):
         for p in tqdm(range(npts)):
-            Ca += (compute_Calias_element_XX(xx, yy, fc, d, nsub, tabx, taby, yoff=(
-                    k - p) * h) * coeff[k] * coeff[p])
-            Ca += (compute_Calias_element_YY(xx, yy, fc, d, nsub, tabx, taby, xoff=(
-                    k - p) * h) * coeff[k] * coeff[p])
+            Ca += (compute_Calias_element_XX(xx, yy, fc, d, nsub, tabx, taby,
+                                             yoff=(k - p) * h) * coeff[k] * coeff[p])
+            Ca += (compute_Calias_element_YY(xx, yy, fc, d, nsub, tabx, taby,
+                                             xoff=(k - p) * h) * coeff[k] * coeff[p])
 
     if not slopes_space:
         R = f["R"][:]

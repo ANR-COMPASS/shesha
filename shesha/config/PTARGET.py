@@ -30,6 +30,13 @@ class Param_target:
         self.__dms_seen = None
         """ index of dms seen by the target"""
 
+    def get_apod(self):
+        """ Get apodizer flag
+
+        :return: (bool) : apod
+        """
+        return self.__apod
+
     def set_apod(self, l):
         """ Set apodizer flag
 
@@ -37,7 +44,14 @@ class Param_target:
         """
         self.__apod = csu.enforce_or_cast_bool(l)
 
-    apod = property(lambda x: x.__apod, set_apod)
+    apod = property(get_apod, set_apod)
+
+    def get_Lambda(self):
+        """ Get the wavelength of targets
+
+        :return: (np.ndarray[ndim=2, dtype=np.float32]) : wavelength of targets
+        """
+        return self.__Lambda
 
     def set_Lambda(self, n):
         """ Set the wavelength of targets
@@ -46,7 +60,14 @@ class Param_target:
         """
         self.__Lambda = csu.enforce_float(n)
 
-    Lambda = property(lambda x: x.__Lambda, set_Lambda)
+    Lambda = property(get_Lambda, set_Lambda)
+
+    def get_xpos(self):
+        """ Get the X-position of targets in the field [arcsec]
+
+        :return: (np.ndarray[ndim=2, dtype=np.float32]) : X position of targets [arcsec]
+        """
+        return self.__xpos
 
     def set_xpos(self, n):
         """ Set the X-position of targets in the field [arcsec]
@@ -55,7 +76,14 @@ class Param_target:
         """
         self.__xpos = csu.enforce_float(n)
 
-    xpos = property(lambda x: x.__xpos, set_xpos)
+    xpos = property(get_xpos, set_xpos)
+
+    def get_ypos(self):
+        """ Get the Y-position of targets in the field [arcsec]
+
+        :return: (np.ndarray[ndim=2, dtype=np.float32]): Y position of targets [arcsec]
+        """
+        return self.__ypos
 
     def set_ypos(self, n):
         """ Set the Y-position of targets in the field [arcsec]
@@ -64,7 +92,14 @@ class Param_target:
         """
         self.__ypos = csu.enforce_float(n)
 
-    ypos = property(lambda x: x.__ypos, set_ypos)
+    ypos = property(get_ypos, set_ypos)
+
+    def get_mag(self):
+        """ Get the magnitudes of targets
+
+        :return: (np.ndarray[ndim=2, dtype=np.float32]) : magnitudes
+        """
+        return self.__mag
 
     def set_mag(self, n):
         """ Set the magnitudes of targets
@@ -73,7 +108,14 @@ class Param_target:
         """
         self.__mag = csu.enforce_float(n)
 
-    mag = property(lambda x: x.__mag, set_mag)
+    mag = property(get_mag, set_mag)
+
+    def get_zerop(self):
+        """ Get the zero point of targets
+
+        :return: (float) : zero point of targets
+        """
+        return self.__zerop
 
     def set_zerop(self, n):
         """ Set the zero point of targets
@@ -82,7 +124,14 @@ class Param_target:
         """
         self.__zerop = csu.enforce_float(n)
 
-    zerop = property(lambda x: x.__zerop, set_zerop)
+    zerop = property(get_zerop, set_zerop)
+
+    def get_dms_seen(self):
+        """ Get the dms_seen by the targets
+
+        :return: (np.ndarray[ndim=2, dtype=np.int32]) : index of dms seen
+        """
+        return self.__dms_seen
 
     def set_dms_seen(self, n):
         """ Set the dms_seen by the targets
@@ -94,4 +143,4 @@ class Param_target:
         self.__dms_seen = csu.enforce_array(n, size=n.size, dtype=np.int32,
                                             scalar_expand=True)
 
-    dms_seen = property(lambda x: x.__dms_seen, set_dms_seen)
+    dms_seen = property(get_dms_seen, set_dms_seen)

@@ -45,6 +45,10 @@ class AbstractSupervisor(ABC):
                    getResidual: bool=False) -> None:
         ...
 
+    def next(self, nbiters, see_atmos=True):
+        for _ in trange(nbiters):
+            self.singleNext(showAtmos=see_atmos)
+
     ''' Move atmos -> getSlope -> applyControl ; One integrator step '''
 
     @abstractmethod
@@ -110,3 +114,7 @@ class AbstractSupervisor(ABC):
     Returns a sequence of data at continuous loop steps.
     Requires loop to be asynchronously running
     '''
+
+    @abstractmethod
+    def getFrameCounter(self):
+        ...

@@ -37,6 +37,13 @@ class Param_tel:
         """ Vector for define segments numbers need. """
         self.__vect_seg = None
 
+    def get_diam(self):
+        """ Get the telescope diameter
+
+        :return: (float) : telescope diameter (in meters)
+        """
+        return self.__diam
+
     def set_diam(self, d):
         """ Set the telescope diameter
 
@@ -44,7 +51,14 @@ class Param_tel:
         """
         self.__diam = csu.enforce_float(d)
 
-    diam = property(lambda x: x.__diam, set_diam)
+    diam = property(get_diam, set_diam)
+
+    def get_cobs(self):
+        """ Get the central obstruction ratio
+
+        :return: (float) : central obstruction ratio
+        """
+        return self.__cobs
 
     def set_cobs(self, c):
         """ Set the central obstruction ratio
@@ -53,7 +67,14 @@ class Param_tel:
         """
         self.__cobs = csu.enforce_float(c)
 
-    cobs = property(lambda x: x.__cobs, set_cobs)
+    cobs = property(get_cobs, set_cobs)
+
+    def get_type_ap(self):
+        """ Get the EELT aperture type
+
+        :return: (str) : EELT aperture type
+        """
+        return self.__type_ap
 
     def set_type_ap(self, t):
         """ Set the EELT aperture type
@@ -62,7 +83,14 @@ class Param_tel:
         """
         self.__type_ap = const.check_enum(const.ApertureType, t)
 
-    type_ap = property(lambda x: x.__type_ap, set_type_ap)
+    type_ap = property(get_type_ap, set_type_ap)
+
+    def get_t_spiders(self):
+        """ Get the secondary supports ratio
+
+        :return: (float) : secondary supports ratio
+        """
+        return self.__t_spiders
 
     def set_t_spiders(self, spider):
         """ Set the secondary supports ratio
@@ -71,7 +99,14 @@ class Param_tel:
         """
         self.__t_spiders = csu.enforce_float(spider)
 
-    t_spiders = property(lambda x: x.__t_spiders, set_t_spiders)
+    t_spiders = property(get_t_spiders, set_t_spiders)
+
+    def get_spiders_type(self):
+        """ Get the secondary supports type
+
+        :return: (str) : secondary supports type
+        """
+        return self.__spiders_type
 
     def set_spiders_type(self, spider):
         """ Set the secondary supports type
@@ -80,7 +115,14 @@ class Param_tel:
         """
         self.__spiders_type = const.check_enum(const.SpiderType, spider)
 
-    spiders_type = property(lambda x: x.__spiders_type, set_spiders_type)
+    spiders_type = property(get_spiders_type, set_spiders_type)
+
+    def get_pupangle(self):
+        """ Get the rotation angle of pupil
+
+        :return: (float) : rotation angle of pupil
+        """
+        return self.__pupangle
 
     def set_pupangle(self, p):
         """ Set the rotation angle of pupil
@@ -89,7 +131,14 @@ class Param_tel:
         """
         self.__pupangle = csu.enforce_float(p)
 
-    pupangle = property(lambda x: x.__pupangle, set_pupangle)
+    pupangle = property(get_pupangle, set_pupangle)
+
+    def get_nbrmissing(self):
+        """ Get the number of missing segments for EELT pupil
+
+        :return: (long) : number of missing segments for EELT pupil (max is 20)
+        """
+        return self.__nbrmissing
 
     def set_nbrmissing(self, nb):
         """ Set the number of missing segments for EELT pupil
@@ -98,7 +147,14 @@ class Param_tel:
         """
         self.__nbrmissing = csu.enforce_int(nb)
 
-    nbrmissing = property(lambda x: x.__nbrmissing, set_nbrmissing)
+    nbrmissing = property(get_nbrmissing, set_nbrmissing)
+
+    def get_referr(self):
+        """ Get the std of reflectivity errors for EELT segments
+
+        :return: (float) : std of reflectivity errors for EELT segments (fraction)
+        """
+        return self.__referr
 
     def set_referr(self, ref):
         """ Set the std of reflectivity errors for EELT segments
@@ -107,7 +163,14 @@ class Param_tel:
         """
         self.__referr = csu.enforce_float(ref)
 
-    referr = property(lambda x: x.__referr, set_referr)
+    referr = property(get_referr, set_referr)
+
+    def get_std_piston(self):
+        """ Get the std of piston errors for EELT segments
+
+        :return: (float) : std of piston errors for EELT segments
+        """
+        return self.__std_piston
 
     def set_std_piston(self, piston):
         """ Set the std of piston errors for EELT segments
@@ -116,7 +179,14 @@ class Param_tel:
         """
         self.__std_piston = csu.enforce_float(piston)
 
-    std_piston = property(lambda x: x.__std_piston, set_std_piston)
+    std_piston = property(get_std_piston, set_std_piston)
+
+    def get_std_tt(self):
+        """ Get the std of tip-tilt errors for EELT segments
+
+        :return: (float) : std of tip-tilt errors for EELT segments
+        """
+        return self.__std_tt
 
     def set_std_tt(self, tt):
         """ Set the std of tip-tilt errors for EELT segments
@@ -125,15 +195,21 @@ class Param_tel:
         """
         self.__std_tt = csu.enforce_float(tt)
 
-    std_tt = property(lambda x: x.__std_tt, set_std_tt)
+    std_tt = property(get_std_tt, set_std_tt)
+
+    def get_vect_seg(self):
+        """ Get the segment number for construct ELT pupil"
+
+        :return: (list of int32) : segment numbers
+        """
+        return self.__vect_seg
 
     def set_vect_seg(self, vect):
         """ Set the segment number for construct ELT pupil"
 
         :param vect: (list of int32) : segment numbers
         """
-        self.__vect_seg = csu.enforce_array(vect,
-                                            len(vect), dtype=np.int32,
+        self.__vect_seg = csu.enforce_array(vect, len(vect), dtype=np.int32,
                                             scalar_expand=False)
 
-    vect_seg = property(lambda x: x.__vect_seg, set_vect_seg)
+    vect_seg = property(get_vect_seg, set_vect_seg)

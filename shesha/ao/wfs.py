@@ -12,7 +12,7 @@ from shesha.sutra_wrap import Sensors, Rtc
 
 
 def comp_new_pyr_ampl(nwfs: int, ampli: float, wfs: Sensors, rtc: Rtc, p_wfss: list,
-                      p_tel: conf.Param_tel, npts_force: int=None):
+                      p_tel: conf.Param_tel, npts_force: int = None):
     """ Set the pyramid modulation amplitude
 
     :parameters:
@@ -85,12 +85,8 @@ def noise_cov(nw: int, p_wfs: conf.Param_wfs, p_atmos: conf.Param_atmos,
     """
     cov = np.zeros(2 * p_wfs._nvalid)
     if (p_wfs.noise >= 0):
-        m = p_wfs._validsubsy
-        n = p_wfs._validsubsx
-        ind = m * p_wfs.nxsub + n
-        flux = np.copy(p_wfs._fluxPerSub)
-        flux = flux.reshape(flux.size, order='F')
-        flux = flux[ind]
+        ind = np.where(p_wfs._isvalid.T)
+        flux = p_wfs._fluxPerSub[ind[1], ind[0]]
         Nph = flux * p_wfs._nphotons
 
         r0 = (p_wfs.Lambda / 0.5)**(6.0 / 5.0) * p_atmos.r0

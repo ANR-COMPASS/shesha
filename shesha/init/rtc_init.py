@@ -13,18 +13,18 @@ from shesha.init import dm_init
 from typing import List
 
 import numpy as np
-from shesha.sutra_wrap import naga_context, Sensors, Dms, Target, Rtc, Rtc_brahma, Atmos, Telescope
+from shesha.sutra_wrap import carmaWrap_context, Sensors, Dms, Target, Rtc, Rtc_brahma, Atmos, Telescope
 
 
-def rtc_init(context: naga_context, tel: Telescope, wfs: Sensors, dms: Dms, atmos: Atmos,
-             p_wfss: list, p_tel: conf.Param_tel, p_geom: conf.Param_geom,
+def rtc_init(context: carmaWrap_context, tel: Telescope, wfs: Sensors, dms: Dms,
+             atmos: Atmos, p_wfss: list, p_tel: conf.Param_tel, p_geom: conf.Param_geom,
              p_atmos: conf.Param_atmos, ittime: float, p_centroiders=None,
              p_controllers=None, p_dms=None, do_refslp=False, brahma=False, tar=None,
              dataBase={}, use_DB=False):
     """Initialize all the sutra_rtc objects : centroiders and controllers
 
     :parameters:
-        context: (naga_context): context
+        context: (carmaWrap_context): context
         tel: (Telescope) : Telescope object
         wfs: (Sensors) : Sensors object
         dms: (Dms) : Dms object
@@ -116,14 +116,14 @@ def rtc_init(context: naga_context, tel: Telescope, wfs: Sensors, dms: Dms, atmo
     return rtc
 
 
-def rtc_standalone(context: naga_context, nwfs: int, nvalid, nactu: int,
+def rtc_standalone(context: carmaWrap_context, nwfs: int, nvalid, nactu: int,
                    centroider_type: bytes, delay: float, offset: float, scale: float,
-                   brahma: bool=False):
+                   brahma: bool = False):
     """
     TODO docstring
     """
     if brahma:
-        rtc = Rtc_brahma(context)
+        rtc = Rtc_brahma(context, None, None, "rtc_brahma")
     else:
         rtc = Rtc()
 
@@ -132,8 +132,7 @@ def rtc_standalone(context: naga_context, nwfs: int, nvalid, nactu: int,
                            centroider_type)
 
     nslopes = sum([c.nslopes for c in rtc.d_centro])
-    rtc.add_controller(context,
-                       sum(nvalid), nslopes, nactu, delay, context.activeDevice,
+    rtc.add_controller(context, sum(nvalid), nslopes, nactu, delay, context.activeDevice,
                        "generic")
 
     return rtc
@@ -145,7 +144,7 @@ def init_centroider(context, nwfs: int, p_wfs: conf.Param_wfs,
     """ Initialize a centroider object in Rtc
 
     :parameters:
-        context: (naga_context): context
+        context: (carmaWrap_context): context
         nwfs : (int) : index of wfs
         p_wfs : (Param_wfs): wfs settings
         p_centroider : (Param_centroider) : centroider settings
@@ -172,6 +171,10 @@ def init_centroider(context, nwfs: int, p_wfs: conf.Param_wfs,
 
     rtc.add_centroider(context, p_wfs._nvalid, s_offset, s_scale, context.activeDevice,
                        p_centroider.type, wfs.d_wfs[nwfs])
+    rtc.d_centro[-1].load_validpos(p_wfs._validsubsx, p_wfs._validsubsy,
+                                   p_wfs._nvalid * p_wfs.nPupils)
+
+    rtc.d_centro[-1].set_npix(p_wfs.npix)
 
     if (p_centroider.type != scons.CentroiderType.MASKEDPIX):
         p_centroider._nslope = 2 * p_wfs._nvalid
@@ -207,7 +210,6 @@ def init_centroider(context, nwfs: int, p_wfs: conf.Param_wfs,
 
                 if (p_centroider.weights is None):
                     raise ValueError("p_centroider.weights is None")
-                rtc.d_centro[nwfs].init_bincube(p_wfs.npix)
                 rtc.d_centro[nwfs].init_corr(p_centroider.sizex, p_centroider.sizey,
                                              p_centroider.interpmat)
                 rtc.d_centro[nwfs].load_corr(p_centroider.weights, corrnorm,
@@ -279,7 +281,7 @@ def init_controller(context, i: int, p_controller: conf.Param_controller, p_wfss
         Initialize the controller part of rtc
 
     :parameters:
-        context: (naga_context): context
+        context: (carmaWrap_context): context
         i : (int) : controller index
         p_controller: (Param_controller) : controller settings
         p_wfss: (list of Param_wfs) : wfs settings
@@ -382,8 +384,8 @@ def init_controller_geo(i: int, rtc: Rtc, dms: Dms, p_geom: conf.Param_geom,
 def init_controller_ls(i: int, p_controller: conf.Param_controller, p_wfss: list,
                        p_geom: conf.Param_geom, p_dms: list, p_atmos: conf.Param_atmos,
                        ittime: float, p_tel: conf.Param_tel, rtc: Rtc, dms: Dms,
-                       wfs: Sensors, tel: Telescope, atmos: Atmos, dataBase: dict={},
-                       use_DB: bool=False):
+                       wfs: Sensors, tel: Telescope, atmos: Atmos, dataBase: dict = {},
+                       use_DB: bool = False):
     """
         Initialize the least square controller
     :parameters:

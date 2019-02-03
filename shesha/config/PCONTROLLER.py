@@ -63,6 +63,13 @@ class Param_controller:
         self.__klgain = None
         """ Gain applied to modes at cMat inversion """
 
+    def get_type(self):
+        """ Get the controller type
+
+        :return: (string) : type
+        """
+        return self.__type
+
     def set_type(self, t):
         """ Set the controller type
 
@@ -70,7 +77,14 @@ class Param_controller:
         """
         self.__type = scons.check_enum(scons.ControllerType, t)
 
-    type = property(lambda x: x.__type, set_type)
+    type = property(get_type, set_type)
+
+    def get_do_kl_imat(self):
+        """Get type imat, for imat on kl set at 1
+
+        :return: (int) : imat kl
+        """
+        return self.__do_kl_imat
 
     def set_do_kl_imat(self, n):
         """Set type imat, for imat on kl set at 1
@@ -79,7 +93,14 @@ class Param_controller:
         """
         self.__do_kl_imat = csu.enforce_or_cast_bool(n)
 
-    do_kl_imat = property(lambda x: x.__do_kl_imat, set_do_kl_imat)
+    do_kl_imat = property(get_do_kl_imat, set_do_kl_imat)
+
+    def get_klpush(self):
+        """ Get klgain for imatkl size = number of kl mode
+
+        :return: (np.ndarray[ndim=1, dtype=np.float32]) : g
+        """
+        return self.__klpush
 
     def set_klpush(self, g):
         """ Set klgain for imatkl size = number of kl mode
@@ -88,7 +109,14 @@ class Param_controller:
         """
         self.__klpush = csu.enforce_array(g, len(g), dtype=np.float32)
 
-    klpush = property(lambda x: x.__klpush, set_klpush)
+    klpush = property(get_klpush, set_klpush)
+
+    def get_klgain(self):
+        """ Get klgain for imatkl size = number of kl mode
+
+        :return: (np.ndarray[ndim=1, dtype=np.float32]) : g
+        """
+        return self.__klgain
 
     def set_klgain(self, g):
         """ Set klgain for imatkl size = number of kl mode
@@ -97,7 +125,14 @@ class Param_controller:
         """
         self.__klgain = csu.enforce_array(g, len(g), dtype=np.float32)
 
-    klgain = property(lambda x: x.__klgain, set_klgain)
+    klgain = property(get_klgain, set_klgain)
+
+    def get_nkl(self):
+        """ Get the number of KL modes used in imat_kl and used for computation of covmat in case of minimum variance controller
+
+        :return: (long) : number of KL modes
+        """
+        return self.__nkl
 
     def set_nkl(self, n):
         """ Set the number of KL modes used in imat_kl and used for computation of covmat in case of minimum variance controller
@@ -106,7 +141,14 @@ class Param_controller:
         """
         self.__nkl = csu.enforce_int(n)
 
-    nkl = property(lambda x: x.__nkl, set_nkl)
+    nkl = property(get_nkl, set_nkl)
+
+    def get_nwfs(self):
+        """ Get the indices of wfs
+
+        :return: (np.ndarray[ndim=1, dtype=np.int32]) : indices of wfs
+        """
+        return self.__nwfs
 
     def set_nwfs(self, l):
         """ Set the indices of wfs
@@ -115,7 +157,14 @@ class Param_controller:
         """
         self.__nwfs = csu.enforce_array(l, len(l), dtype=np.int32, scalar_expand=False)
 
-    nwfs = property(lambda x: x.__nwfs, set_nwfs)
+    nwfs = property(get_nwfs, set_nwfs)
+
+    def get_ndm(self):
+        """ Get the indices of dms
+
+        :return: (np.ndarray[ndim=1, dtype=np.int32]) : indices of dms
+        """
+        return self.__ndm
 
     def set_ndm(self, l):
         """ Set the indices of dms
@@ -124,7 +173,14 @@ class Param_controller:
         """
         self.__ndm = csu.enforce_array(l, len(l), dtype=np.int32, scalar_expand=False)
 
-    ndm = property(lambda x: x.__ndm, set_ndm)
+    ndm = property(get_ndm, set_ndm)
+
+    def get_nactu(self):
+        """ Get the number of actuators
+
+        :return: (int) : number of actus
+        """
+        return self.__nactu
 
     def set_nactu(self, l):
         """ Set the number of actuators
@@ -133,7 +189,14 @@ class Param_controller:
         """
         self.__nactu = csu.enforce_int(l)
 
-    nactu = property(lambda x: x.__nactu, set_nactu)
+    nactu = property(get_nactu, set_nactu)
+
+    def get_nslope(self):
+        """ Get the number of slopes
+
+        :return: (int) : number of slopes
+        """
+        return self.__nslope
 
     def set_nslope(self, l):
         """ Set the number of slopes
@@ -142,7 +205,14 @@ class Param_controller:
         """
         self.__nslope = csu.enforce_int(l)
 
-    nslope = property(lambda x: x.__nslope, set_nslope)
+    nslope = property(get_nslope, set_nslope)
+
+    def get_nvalid(self):
+        """ Get the number of valid subaps
+
+        :return: (list of int) : number of valid subaps
+        """
+        return self.__nvalid
 
     def set_nvalid(self, l):
         """ Set the number of valid subaps
@@ -151,7 +221,14 @@ class Param_controller:
         """
         self.__nvalid = csu.enforce_int(l)
 
-    nvalid = property(lambda x: x.__nvalid, set_nvalid)
+    nvalid = property(get_nvalid, set_nvalid)
+
+    def get_maxcond(self):
+        """ Get the max condition number
+
+        :return: (float) : max condition number
+        """
+        return self.__maxcond
 
     def set_maxcond(self, m):
         """ Set the max condition number
@@ -160,7 +237,14 @@ class Param_controller:
         """
         self.__maxcond = csu.enforce_float(m)
 
-    maxcond = property(lambda x: x.__maxcond, set_maxcond)
+    maxcond = property(get_maxcond, set_maxcond)
+
+    def get_TTcond(self):
+        """ Get the tiptilt condition number for cmat filtering with mv controller
+
+        :return: (float) : tiptilt condition number
+        """
+        return self.__TTcond
 
     def set_TTcond(self, m):
         """ Set the tiptilt condition number for cmat filtering with mv controller
@@ -169,7 +253,14 @@ class Param_controller:
         """
         self.__TTcond = csu.enforce_float(m)
 
-    TTcond = property(lambda x: x.__TTcond, set_TTcond)
+    TTcond = property(get_TTcond, set_TTcond)
+
+    def get_delay(self):
+        """ Get the loop delay expressed in frames
+
+        :return: (float) :delay [frames]
+        """
+        return self.__delay
 
     def set_delay(self, d):
         """ Set the loop delay expressed in frames
@@ -178,7 +269,14 @@ class Param_controller:
         """
         self.__delay = csu.enforce_float(d)
 
-    delay = property(lambda x: x.__delay, set_delay)
+    delay = property(get_delay, set_delay)
+
+    def get_gain(self):
+        """ Get the loop gain
+
+        :return: (float) : loop gain
+        """
+        return self.__gain
 
     def set_gain(self, g):
         """ Set the loop gain
@@ -187,7 +285,14 @@ class Param_controller:
         """
         self.__gain = csu.enforce_float(g)
 
-    gain = property(lambda x: x.__gain, set_gain)
+    gain = property(get_gain, set_gain)
+
+    def get_cured_ndivs(self):
+        """ Get the subdivision levels in cured
+
+        :return: (long) : subdivision levels in cured
+        """
+        return self.__cured_ndivs
 
     def set_cured_ndivs(self, n):
         """ Set the subdivision levels in cured
@@ -196,7 +301,14 @@ class Param_controller:
         """
         self.__cured_ndivs = csu.enforce_int(n)
 
-    cured_ndivs = property(lambda x: x.__cured_ndivs, set_cured_ndivs)
+    cured_ndivs = property(get_cured_ndivs, set_cured_ndivs)
+
+    def get_modopti(self):
+        """ Get the flag for modal optimization
+
+        :return: (int) : flag for modal optimization
+        """
+        return self.__modopti
 
     def set_modopti(self, n):
         """ Set the flag for modal optimization
@@ -205,7 +317,14 @@ class Param_controller:
         """
         self.__modopti = csu.enforce_or_cast_bool(n)
 
-    modopti = property(lambda x: x.__modopti, set_modopti)
+    modopti = property(get_modopti, set_modopti)
+
+    def get_nrec(self):
+        """ Get the number of sample of open loop slopes for modal optimization computation
+
+        :return: (int) : number of sample
+        """
+        return self.__nrec
 
     def set_nrec(self, n):
         """ Set the number of sample of open loop slopes for modal optimization computation
@@ -214,7 +333,14 @@ class Param_controller:
         """
         self.__nrec = csu.enforce_int(n)
 
-    nrec = property(lambda x: x.__nrec, set_nrec)
+    nrec = property(get_nrec, set_nrec)
+
+    def get_nmodes(self):
+        """ Get the number of modes for M2V matrix (modal optimization)
+
+        :return: (int) : number of modes
+        """
+        return self.__nmodes
 
     def set_nmodes(self, n):
         """ Set the number of modes for M2V matrix (modal optimization)
@@ -223,7 +349,14 @@ class Param_controller:
         """
         self.__nmodes = csu.enforce_int(n)
 
-    nmodes = property(lambda x: x.__nmodes, set_nmodes)
+    nmodes = property(get_nmodes, set_nmodes)
+
+    def get_gmin(self):
+        """ Get the minimum gain for modal optimization
+
+        :return: (float) : minimum gain for modal optimization
+        """
+        return self.__gmin
 
     def set_gmin(self, g):
         """ Set the minimum gain for modal optimization
@@ -232,7 +365,14 @@ class Param_controller:
         """
         self.__gmin = csu.enforce_float(g)
 
-    gmin = property(lambda x: x.__gmin, set_gmin)
+    gmin = property(get_gmin, set_gmin)
+
+    def get_gmax(self):
+        """ Get the maximum gain for modal optimization
+
+        :return: (float) : maximum gain for modal optimization
+        """
+        return self.__gmax
 
     def set_gmax(self, g):
         """ Set the maximum gain for modal optimization
@@ -241,7 +381,14 @@ class Param_controller:
         """
         self.__gmax = csu.enforce_float(g)
 
-    gmax = property(lambda x: x.__gmax, set_gmax)
+    gmax = property(get_gmax, set_gmax)
+
+    def get_ngain(self):
+        """ Get the number of tested gains
+
+        :return: (int) : number of tested gains
+        """
+        return self.__ngain
 
     def set_ngain(self, n):
         """ Set the number of tested gains
@@ -250,7 +397,14 @@ class Param_controller:
         """
         self.__ngain = csu.enforce_int(n)
 
-    ngain = property(lambda x: x.__ngain, set_ngain)
+    ngain = property(get_ngain, set_ngain)
+
+    def get_imat(self):
+        """ Get the full interaction matrix
+
+        :return: (np.ndarray[ndim=2,dtype=np.float32_t]) : full interaction matrix
+        """
+        return self.__imat
 
     def set_imat(self, imat):
         """ Set the full interaction matrix
@@ -262,7 +416,14 @@ class Param_controller:
                 (self.nslope, -1),  # Allow nModes or nActu as second dimension
                 dtype=np.float32)
 
-    _imat = property(lambda x: x.__imat, set_imat)
+    _imat = property(get_imat, set_imat)
+
+    def get_cmat(self):
+        """ Get the full control matrix
+
+        :return: (np.ndarray[ndim=2,dtype=np.float32_t]) : full control matrix
+        """
+        return self.__cmat
 
     def set_cmat(self, cmat):
         """ Set the full control matrix
@@ -272,4 +433,4 @@ class Param_controller:
         self.__cmat = csu.enforce_arrayMultiDim(cmat, (self.nactu, self.nslope),
                                                 dtype=np.float32)
 
-    _cmat = property(lambda x: x.__cmat, set_cmat)
+    _cmat = property(get_cmat, set_cmat)

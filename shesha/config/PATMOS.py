@@ -38,6 +38,13 @@ class Param_atmos:
         """ RNG Seeds for each layer."""
         self.__seeds = None
 
+    def get_nscreens(self):
+        """ Set the number of turbulent layers
+
+        :return: (long) number of screens.
+        """
+        return self.__nscreens
+
     def set_nscreens(self, n):
         """ Set the number of turbulent layers
 
@@ -45,7 +52,14 @@ class Param_atmos:
         """
         self.__nscreens = csu.enforce_int(n)
 
-    nscreens = property(lambda x: x.__nscreens, set_nscreens)
+    nscreens = property(get_nscreens, set_nscreens)
+
+    def get_r0(self):
+        """ Get the global r0
+
+        :return: (float) : global r0
+        """
+        return self.__r0
 
     def set_r0(self, r):
         """ Set the global r0
@@ -54,7 +68,14 @@ class Param_atmos:
         """
         self.__r0 = csu.enforce_float(r)
 
-    r0 = property(lambda x: x.__r0, set_r0)
+    r0 = property(get_r0, set_r0)
+
+    def get_pupixsize(self):
+        """ Get the pupil pixel size
+
+        :return: (float) : pupil pixel size
+        """
+        return self.__pupixsize
 
     def set_pupixsize(self, xsize):
         """ Set the pupil pixel size
@@ -63,7 +84,14 @@ class Param_atmos:
         """
         self.__pupixsize = csu.enforce_float(xsize)
 
-    pupixsize = property(lambda x: x.__pupixsize, set_pupixsize)
+    pupixsize = property(get_pupixsize, set_pupixsize)
+
+    def get_L0(self):
+        """ Get the L0 per layers
+
+        :return: (lit of float) : L0 for each layers
+        """
+        return self.__L0
 
     def set_L0(self, l):
         """ Set the L0 per layers
@@ -73,7 +101,14 @@ class Param_atmos:
         self.__L0 = csu.enforce_array(l, size=self.nscreens, dtype=np.float32,
                                       scalar_expand=True)
 
-    L0 = property(lambda x: x.__L0, set_L0)
+    L0 = property(get_L0, set_L0)
+
+    def get_dim_screens(self):
+        """ Get the size of the phase screens
+
+        :return: (lit of float) : phase screens sizes
+        """
+        return self.__dim_screens
 
     def set_dim_screens(self, l):
         """ Set the size of the phase screens
@@ -83,17 +118,31 @@ class Param_atmos:
         self.__dim_screens = csu.enforce_array(l, size=self.nscreens, dtype=np.int64,
                                                scalar_expand=False)
 
-    dim_screens = property(lambda x: x.__dim_screens, set_dim_screens)
+    dim_screens = property(get_dim_screens, set_dim_screens)
 
-    def set_alt(self, l):
+    def get_alt(self):
+        """ Get the altitudes of each layer
+
+        :return: (lit of float) : altitudes
+        """
+        return self.__alt
+
+    def set_alt(self, h):
         """ Set the altitudes of each layer
 
-        :param l: (lit of float) : altitudes
+        :param h: (lit of float) : altitudes
         """
-        self.__alt = csu.enforce_array(l, size=self.nscreens, dtype=np.float32,
+        self.__alt = csu.enforce_array(h, size=self.nscreens, dtype=np.float32,
                                        scalar_expand=False)
 
-    alt = property(lambda x: x.__alt, set_alt)
+    alt = property(get_alt, set_alt)
+
+    def get_winddir(self):
+        """ Get the wind direction for each layer
+
+        :return: (lit of float) : wind directions
+        """
+        return self.__winddir
 
     def set_winddir(self, l):
         """ Set the wind direction for each layer
@@ -103,7 +152,14 @@ class Param_atmos:
         self.__winddir = csu.enforce_array(l, size=self.nscreens, dtype=np.float32,
                                            scalar_expand=True)
 
-    winddir = property(lambda x: x.__winddir, set_winddir)
+    winddir = property(get_winddir, set_winddir)
+
+    def get_windspeed(self):
+        """ Get the the wind speed for each layer
+
+        :return: (list of float) : wind speeds
+        """
+        return self.__windspeed
 
     def set_windspeed(self, l):
         """ Set the the wind speed for each layer
@@ -113,7 +169,14 @@ class Param_atmos:
         self.__windspeed = csu.enforce_array(l, size=self.nscreens, dtype=np.float32,
                                              scalar_expand=True)
 
-    windspeed = property(lambda x: x.__windspeed, set_windspeed)
+    windspeed = property(get_windspeed, set_windspeed)
+
+    def get_frac(self):
+        """ Get the fraction of r0 for each layers
+
+        :return: (lit of float) : fraction of r0
+        """
+        return self.__frac
 
     def set_frac(self, l):
         """ Set the fraction of r0 for each layers
@@ -123,7 +186,14 @@ class Param_atmos:
         self.__frac = csu.enforce_array(l, size=self.nscreens, dtype=np.float32,
                                         scalar_expand=True)
 
-    frac = property(lambda x: x.__frac, set_frac)
+    frac = property(get_frac, set_frac)
+
+    def get_deltax(self):
+        """ Get the translation speed on axis x for each layer
+
+        :return: (lit of float) : translation speed
+        """
+        return self.__deltax
 
     def set_deltax(self, l):
         """ Set the translation speed on axis x for each layer
@@ -133,7 +203,14 @@ class Param_atmos:
         self.__deltax = csu.enforce_array(l, size=self.nscreens, dtype=np.float32,
                                           scalar_expand=True)
 
-    _deltax = property(lambda x: x.__deltax, set_deltax)
+    _deltax = property(get_deltax, set_deltax)
+
+    def get_deltay(self):
+        """ Get the translation speed on axis y for each layer
+
+        :return: (lit of float) : translation speed
+        """
+        return self.__deltay
 
     def set_deltay(self, l):
         """ Set the translation speed on axis y for each layer
@@ -143,7 +220,14 @@ class Param_atmos:
         self.__deltay = csu.enforce_array(l, size=self.nscreens, dtype=np.float32,
                                           scalar_expand=True)
 
-    _deltay = property(lambda x: x.__deltay, set_deltay)
+    _deltay = property(get_deltay, set_deltay)
+
+    def get_seeds(self):
+        """ Get the seed for each layer
+
+        :return: (lit of int) : seed
+        """
+        return self.__seeds
 
     def set_seeds(self, l):
         """ Set the seed for each layer
@@ -153,4 +237,4 @@ class Param_atmos:
         self.__seeds = csu.enforce_array(l, size=self.nscreens, dtype=np.int64,
                                          scalar_expand=True)
 
-    seeds = property(lambda x: x.__seeds, set_seeds)
+    seeds = property(get_seeds, set_seeds)

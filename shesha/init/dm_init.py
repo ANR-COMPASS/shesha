@@ -14,20 +14,20 @@ import numpy as np
 
 import pandas as pd
 from scipy import interpolate
-from shesha.sutra_wrap import naga_context, Dms
+from shesha.sutra_wrap import carmaWrap_context, Dms
 
 from typing import List
 
 from tqdm import tqdm
 
 
-def dm_init(context: naga_context, p_dms: List[conf.Param_dm], p_tel: conf.Param_tel,
-            p_geom: conf.Param_geom, p_wfss: List[conf.Param_wfs]=None,
-            keepAllActu: bool=False) -> Dms:
+def dm_init(context: carmaWrap_context, p_dms: List[conf.Param_dm],
+            p_tel: conf.Param_tel, p_geom: conf.Param_geom,
+            p_wfss: List[conf.Param_wfs] = None, keepAllActu: bool = False) -> Dms:
     """Create and initialize a Dms object on the gpu
 
     :parameters:
-        context: (naga_context): context
+        context: (carmaWrap_context): context
         p_dms: (list of Param_dms) : dms settings
         p_tel: (Param_tel) : telescope settings
         p_geom: (Param_geom) : geom settings
@@ -56,13 +56,13 @@ def dm_init(context: naga_context, p_dms: List[conf.Param_dm], p_tel: conf.Param
     return dms
 
 
-def _dm_init(context: naga_context, dms: Dms, p_dm: conf.Param_dm, xpos_wfs: list,
+def _dm_init(context: carmaWrap_context, dms: Dms, p_dm: conf.Param_dm, xpos_wfs: list,
              ypos_wfs: list, p_geom: conf.Param_geom, diam: float, cobs: float,
-             max_extent: list, keepAllActu: bool=False):
+             max_extent: list, keepAllActu: bool = False):
     """ inits a Dms object on the gpu
 
     :parameters:
-        context: (naga_context): context
+        context: (carmaWrap_context): context
         dms: (Dms) : dm object
 
         p_dm: (Param_dms) : dm settings
@@ -109,9 +109,8 @@ def _dm_init(context: naga_context, dms: Dms, p_dm: conf.Param_dm, xpos_wfs: lis
         dms.add_dm(context, p_dm.type, p_dm.alt, dim, p_dm._ntotact, p_dm._influsize,
                    ninflupos, n_npts, p_dm.push4imat, 0, context.activeDevice)
         #infludata = p_dm._influ.flatten()[p_dm._influpos]
-        dms.d_dms[-1].pzt_loadarrays(p_dm._influ,
-                                     p_dm._influpos.astype(np.int32), p_dm._ninflu,
-                                     p_dm._influstart, p_dm._i1, p_dm._j1)
+        dms.d_dms[-1].pzt_loadarrays(p_dm._influ, p_dm._influpos.astype(np.int32),
+                                     p_dm._ninflu, p_dm._influstart, p_dm._i1, p_dm._j1)
 
     elif (p_dm.type == scons.DmType.TT):
 
@@ -185,7 +184,7 @@ def dm_init_standalone(p_dms: list, p_geom: conf.Param_geom, diam=1., cobs=0.,
 
 
 def make_pzt_dm(p_dm: conf.Param_dm, p_geom: conf.Param_geom, cobs: float,
-                keepAllActu: bool=False):
+                keepAllActu: bool = False):
     """Compute the actuators positions and the influence functions for a pzt DM
 
     :parameters:
@@ -587,12 +586,12 @@ def comp_dmgeom(p_dm: conf.Param_dm, p_geom: conf.Param_geom):
 
 
 def correct_dm(context, dms: Dms, p_dms: list, p_controller: conf.Param_controller,
-               p_geom: conf.Param_geom, imat: np.ndarray=None, dataBase: dict={},
-               use_DB: bool=False):
+               p_geom: conf.Param_geom, imat: np.ndarray = None, dataBase: dict = {},
+               use_DB: bool = False):
     """Correct the geometry of the DMs using the imat (filter unseen actuators)
 
     :parameters:
-        context: (naga_context): context
+        context: (carmaWrap_context): context
         dms: (Dms) : Dms object
         p_dms: (list of Param_dm) : dms settings
         p_controller: (Param_controller) : controller settings
@@ -654,10 +653,9 @@ def correct_dm(context, dms: Dms, p_dms: list, p_controller: conf.Param_controll
             dms.add_dm(context, p_dms[nm].type, p_dms[nm].alt, dim, p_dms[nm]._ntotact,
                        p_dms[nm]._influsize, ninflupos, n_npts, p_dms[nm].push4imat, 0,
                        context.activeDevice)
-            dms.d_dms[-1].pzt_loadarrays(p_dms[nm]._influ,
-                                         p_dms[nm]._influpos.astype(np.int32),
-                                         p_dms[nm]._ninflu, p_dms[nm]._influstart,
-                                         p_dms[nm]._i1, p_dms[nm]._j1)
+            dms.d_dms[-1].pzt_loadarrays(p_dms[nm]._influ, p_dms[nm]._influpos.astype(
+                    np.int32), p_dms[nm]._ninflu, p_dms[nm]._influstart, p_dms[nm]._i1,
+                                         p_dms[nm]._j1)
         elif (p_dms[nm].type == scons.DmType.TT):
             dim = p_dms[nm]._n2 - p_dms[nm]._n1 + 1
             dms.add_dm(context, p_dms[nm].type, p_dms[nm].alt, dim, 2, dim, 1, 1,

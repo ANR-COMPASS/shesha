@@ -51,8 +51,9 @@ from shesha.supervisor.compassSupervisor import CompassSupervisor, scons
 
 class widgetAOWindow(AOClassTemplate, WidgetBase):
 
-    def __init__(self, configFile: Any=None, BRAHMA: bool=False, expert: bool=False,
-                 devices: str=None, hideHistograms: bool=False) -> None:
+    def __init__(self, configFile: Any = None, BRAHMA: bool = False,
+                 expert: bool = False, devices: str = None,
+                 hideHistograms: bool = False) -> None:
         WidgetBase.__init__(self, hideHistograms=hideHistograms)
         AOClassTemplate.__init__(self)
 
@@ -182,7 +183,7 @@ class widgetAOWindow(AOClassTemplate, WidgetBase):
             print("Reset SR on target %d" % tarnum)
             self.supervisor.resetStrehl(tarnum)
 
-    def add_dispDock(self, name: str, parent, type: str="pg_image") -> None:
+    def add_dispDock(self, name: str, parent, type: str = "pg_image") -> None:
         d = WidgetBase.add_dispDock(self, name, parent, type)
         if type == "SR":
             d.addWidget(self.uiAO.wao_Strehl)
@@ -246,7 +247,9 @@ class widgetAOWindow(AOClassTemplate, WidgetBase):
             if self.config.p_wfss[wfs].type == scons.WFSType.SH:
                 name = 'SH_%d' % wfs
                 self.add_dispDock(name, self.wao_imagesgroup_cb)
-            elif self.config.p_wfss[wfs].type == scons.WFSType.PYRHR or self.config.p_wfss[wfs].type == scons.WFSType.PYRLR:
+            elif self.config.p_wfss[
+                    wfs].type == scons.WFSType.PYRHR or self.config.p_wfss[
+                            wfs].type == scons.WFSType.PYRLR:
                 name = 'pyrHR_%d' % wfs
                 self.add_dispDock(name, self.wao_imagesgroup_cb)
                 name = 'pyrLR_%d' % wfs
@@ -331,7 +334,7 @@ class widgetAOWindow(AOClassTemplate, WidgetBase):
         self.supervisor.initConfig()
 
     def initConfigFinished(self) -> None:
-        # Thread naga context reload:
+        # Thread carmaWrap context reload:
         self.supervisor.forceContext()
 
         for i in range(self.natm):
@@ -387,8 +390,7 @@ class widgetAOWindow(AOClassTemplate, WidgetBase):
                         np.array([
                                 data.shape[0] / 2 + 0.5 - Delta,
                                 data.shape[0] / 2 + 0.5 + Delta
-                        ]),
-                        np.array([data.shape[1] / 2 + 0.5, data.shape[1] / 2 + 0.5]),
+                        ]), np.array([data.shape[1] / 2 + 0.5, data.shape[1] / 2 + 0.5]),
                         pen='r')
                 self.SRCrossY[key] = pg.PlotCurveItem(
                         np.array([data.shape[0] / 2 + 0.5, data.shape[0] / 2 + 0.5]),
@@ -507,14 +509,15 @@ class widgetAOWindow(AOClassTemplate, WidgetBase):
                                 ]
                                 first_ind = np.sum(nmes[:index], dtype=np.int32)
                                 if (self.config.p_wfss[index].type == scons.WFSType.PYRHR
-                                            or self.config.p_wfss[index].type ==
-                                            scons.WFSType.PYRLR):
+                                            or self.config.p_wfss[index].type == scons.
+                                            WFSType.PYRLR):
                                     #TODO: DEBUG...
-                                    plpyr(centroids[first_ind:first_ind + nmes[index]],
-                                          np.stack([
-                                                  wao.config.p_wfss[index]._validsubsx,
-                                                  wao.config.p_wfss[index]._validsubsy
-                                          ]))
+                                    plpyr(
+                                            centroids[first_ind:first_ind + nmes[index]],
+                                            np.stack([
+                                                    wao.config.p_wfss[index]._validsubsx,
+                                                    wao.config.p_wfss[index]._validsubsy
+                                            ]))
                                 else:
                                     x, y, vx, vy = plsh(
                                             centroids[first_ind:first_ind + nmes[index]],
@@ -556,8 +559,8 @@ class widgetAOWindow(AOClassTemplate, WidgetBase):
                     for t in range(len(self.config.p_targets)):
                         SR = self.supervisor.getStrehl(t)
                         # TODO: handle that !
-                        if (t == self.uiAO.wao_dispSR_tar.value(
-                        )):  # Plot on the wfs selected
+                        if (t == self.uiAO.wao_dispSR_tar.value()
+                            ):  # Plot on the wfs selected
                             self.updateSRDisplay(SR[1], SR[0],
                                                  self.supervisor.getFrameCounter())
                         signal_se += "%1.2f   " % SR[0]

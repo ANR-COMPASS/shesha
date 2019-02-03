@@ -14,7 +14,7 @@ from shesha.init.rtc_init import rtc_init
 from shesha.init.dm_init import dm_init
 from shesha.init.target_init import target_init
 from shesha.init.wfs_init import wfs_init
-from shesha.util.utilities import load_config_from_file
+from shesha.util.utilities import load_config_from_file, load_config_from_module
 
 import shesha.constants as scons
 import shesha.util.hdf5_utils as h5u
@@ -22,7 +22,7 @@ import shesha.util.hdf5_utils as h5u
 import time
 
 from typing import Iterable, Any, Dict
-from shesha.sutra_wrap import Sensors, Dms, Rtc, Atmos, Telescope, Target, naga_context
+from shesha.sutra_wrap import Sensors, Dms, Rtc, Atmos, Telescope, Target, carmaWrap_context
 
 
 class Simulator:
@@ -31,7 +31,7 @@ class Simulator:
     Initializes and run a COMPASS simulation
     """
 
-    def __init__(self, filepath: str=None, use_DB: bool=False) -> None:
+    def __init__(self, filepath: str = None, use_DB: bool = False) -> None:
         """
         Initializes a Simulator instance
 
@@ -44,7 +44,7 @@ class Simulator:
         self.config = None  # type: Any # types.ModuleType ?
         self.iter = 0  # type: int
 
-        self.c = None  # type: naga_context
+        self.c = None  # type: carmaWrap_context
         self.atm = None  # type: Atmos
         self.tel = None  # type: Telescope
         self.tar = None  # type: Target
@@ -103,6 +103,16 @@ class Simulator:
         """
         load_config_from_file(self, filepath)
 
+    def load_from_module(self, filepath: str) -> None:
+        """
+        Load the parameters from the parameters file
+
+        :parameters:
+            filepath: (str): path to the parameters file
+
+        """
+        load_config_from_module(self, filepath)
+
     def clear_init(self) -> None:
         """
         Delete objects initialized in a previous simulation
@@ -139,12 +149,12 @@ class Simulator:
             self.matricesToLoad = h5u.checkMatricesDataBase(
                     os.environ["SHESHA_ROOT"] + "/data/dataBase/", self.config,
                     param_dict)
-        # self.c = naga_context(devices=self.config.p_loop.devices)
+        # self.c = carmaWrap_context(devices=self.config.p_loop.devices)
         if (self.config.p_loop.devices.size > 1):
-            self.c = naga_context.get_instance_ngpu(self.config.p_loop.devices.size,
-                                                    self.config.p_loop.devices)
+            self.c = carmaWrap_context.get_instance_ngpu(self.config.p_loop.devices.size,
+                                                         self.config.p_loop.devices)
         else:
-            self.c = naga_context.get_instance_1gpu(self.config.p_loop.devices[0])
+            self.c = carmaWrap_context.get_instance_1gpu(self.config.p_loop.devices[0])
         # self.force_context()
 
         if self.config.p_tel is None or self.config.p_geom is None:
@@ -253,9 +263,9 @@ class Simulator:
         else:
             self.rtc = None
 
-    def next(self, *, move_atmos: bool=True, see_atmos: bool=True, nControl: int=0,
-             tar_trace: Iterable[int]=None, wfs_trace: Iterable[int]=None,
-             do_control: bool=True, apply_control: bool=True) -> None:
+    def next(self, *, move_atmos: bool = True, see_atmos: bool = True, nControl: int = 0,
+             tar_trace: Iterable[int] = None, wfs_trace: Iterable[int] = None,
+             do_control: bool = True, apply_control: bool = True) -> None:
         '''
         Iterates the AO loop, with optional parameters
 
@@ -318,8 +328,8 @@ class Simulator:
                 self.applyControl(nControl)
         self.iter += 1
 
-    def print_strehl(self, monitoring_freq: int, t1: float, nCur: int=0, nTot: int=0,
-                     nTar: int=0):
+    def print_strehl(self, monitoring_freq: int, t1: float, nCur: int = 0, nTot: int = 0,
+                     nTar: int = 0):
         framerate = monitoring_freq / t1
         self.compTarImage(nTar)
         self.compStrehl(nTar)
@@ -328,7 +338,7 @@ class Simulator:
         print("%d \t %.3f \t  %.3f\t     %.1f \t %.1f" % (nCur + 1, strehl[0], strehl[1],
                                                           etr, framerate))
 
-    def loop(self, n: int=1, monitoring_freq: int=100, **kwargs):
+    def loop(self, n: int = 1, monitoring_freq: int = 100, **kwargs):
         """
         Perform the AO loop for n iterations
 
@@ -360,6 +370,7 @@ class Simulator:
         print(" loop execution time:", t1 - t0, "  (", n, "iterations), ", (t1 - t0) / n,
               "(mean)  ", n / (t1 - t0), "Hz")
 
+
 #  ██╗    ██╗██████╗  █████╗ ██████╗
 #  ██║    ██║██╔══██╗██╔══██╗██╔══██╗
 #  ██║ █╗ ██║██████╔╝███████║██████╔╝
@@ -374,7 +385,7 @@ class Simulator:
         """
         self.atm.move_atmos()
 
-    def raytraceTar(self, tarNum, layers: list, rst: bool=True):
+    def raytraceTar(self, tarNum, layers: list, rst: bool = True):
         """
         Performs the raytracing operation to obtain the phase seen by the tarNum target
         The phase screen is reset before the operations if rst is not set to False
@@ -395,7 +406,7 @@ class Simulator:
             layers = [layers]
         self._raytrace(target, layers, rst=rst)
 
-    def raytraceWfs(self, wfsNum, layers: list, rst: bool=True):
+    def raytraceWfs(self, wfsNum, layers: list, rst: bool = True):
         """
         Performs the raytracing operation to obtain the phase seen by the wfsNum Wfs
         The phase screen is reset before the operations if rst is not set to False
@@ -416,7 +427,7 @@ class Simulator:
             layers = [layers]
         self._raytrace(gs, layers, rst=rst)
 
-    def _raytrace(self, source, layers: list, rst: bool=True):
+    def _raytrace(self, source, layers: list, rst: bool = True):
         """
         Performs the raytracing operation to obtain the phase screen of the given sutra_source
 
@@ -449,7 +460,7 @@ class Simulator:
                 raise ValueError("Unknown layer type : " + str(s) +
                                  ". See help for accepted layers")
 
-    def compWfsImage(self, wfsNum: int=0, noise: bool=True):
+    def compWfsImage(self, wfsNum: int = 0, noise: bool = True):
         """
         Computes the image produced by the WFS from its phase screen
 
@@ -459,7 +470,7 @@ class Simulator:
         """
         self.wfs.d_wfs[wfsNum].comp_image(noise)
 
-    def compTarImage(self, tarNum: int=0, puponly: int=0, compLE: bool=True):
+    def compTarImage(self, tarNum: int = 0, puponly: int = 0, compLE: bool = True):
         """
         Computes the PSF
 
@@ -471,7 +482,7 @@ class Simulator:
         """
         self.tar.d_targets[tarNum].comp_image(puponly, compLE)
 
-    def compStrehl(self, tarNum: int=0):
+    def compStrehl(self, tarNum: int = 0):
         """
         Computes the Strehl ratio
 
@@ -481,7 +492,7 @@ class Simulator:
         """
         self.tar.d_targets[tarNum].comp_strehl()
 
-    def doControl(self, nControl: int, n: int=0, wfs_direction: bool=False):
+    def doControl(self, nControl: int, n: int = 0, wfs_direction: bool = False):
         '''
         Computes the command from the Wfs slopes
 
@@ -518,15 +529,16 @@ class Simulator:
         '''
         self.rtc.do_centroids_geom(nControl)
 
-    def applyControl(self, nControl: int):
+    def applyControl(self, nControl: int, compVoltage: bool = True):
         """
         Computes the final voltage vector to apply on the DM by taking into account delay and perturbation voltages, and shape the DMs
 
         Parameters
         ------------
         nControl: (int): controller index
+        compVoltage: (bool): If True (default), computes the voltage vector from the command one (delay + perturb). Else, directly applies the current voltage vector
         """
-        self.rtc.apply_control(nControl, self.dms)
+        self.rtc.apply_control(nControl, self.dms, compVoltage)
 
     def doClipping(self, nControl: int, vmin: float, vmax: float):
         '''

@@ -8,18 +8,18 @@ from shesha.constants import CONST
 
 import shesha.util.make_pupil as mkP
 import shesha.util.utilities as util
-from shesha.sutra_wrap import naga_context, Telescope
+from shesha.sutra_wrap import carmaWrap_context, Telescope
 from shesha.constants import ApertureType
 import numpy as np
 
 
-def tel_init(context: naga_context, p_geom: conf.Param_geom, p_tel: conf.Param_tel,
+def tel_init(context: carmaWrap_context, p_geom: conf.Param_geom, p_tel: conf.Param_tel,
              r0=None, ittime=None, p_wfss=None, dm=None):
     """
         Initialize the overall geometry of the AO system, including pupil and WFS
 
     :parameters:
-        context: (naga_context) : context
+        context: (carmaWrap_context) : context
         p_geom: (Param_geom) : geom settings
         p_tel: (Param_tel) : telescope settings
         r0: (float) : atmos r0 @ 0.5 microns
@@ -211,8 +211,8 @@ def init_wfs_size(p_wfs: conf.Param_wfs, r0: float, p_tel: conf.Param_tel, verbo
 
             # since we clipped pdiam we have to be carreful in nfft computation
             Nfft = util.fft_goodsize(
-                    int(pdiam / subapdiam * nrebin / p_wfs.pixsize * CONST.RAD2ARCSEC * (
-                            p_wfs.Lambda * 1.e-6)))
+                    int(pdiam / subapdiam * nrebin / p_wfs.pixsize * CONST.RAD2ARCSEC *
+                        (p_wfs.Lambda * 1.e-6)))
 
         elif (p_wfs.type == scons.WFSType.PYRHR or p_wfs.type == scons.WFSType.PYRLR):
             # while (pdiam % p_wfs.npix != 0) pdiam+=1;
@@ -373,7 +373,7 @@ def compute_nphotons(wfs_type, ittime, optthroughput, diam, cobs=0, nxsub=0, zer
 
 
 def init_pyrhr_geom(p_wfs: conf.Param_wfs, r0: float, p_tel: conf.Param_tel,
-                    p_geom: conf.Param_geom, ittime: float, verbose: bool=True):
+                    p_geom: conf.Param_geom, ittime: float, verbose: bool = True):
     """Compute the geometry of PYRHR WFSs: valid subaps, positions of the subaps,
     flux per subap, etc...
 
@@ -430,12 +430,14 @@ def init_pyrhr_geom(p_wfs: conf.Param_wfs, r0: float, p_tel: conf.Param_tel,
     x = y.T
 
     Pangle = pup_sep * nrebin  # Pyramid angle in HR pixels
-    if not hasattr(p_wfs, 'nPupils'):
+    if p_wfs.nPupils == 0:
         p_wfs.nPupils = 4
     # Centers is a nPupils x 2 array describing the position of the quadrant centers
-    centers = Pangle / np.sin(np.pi / p_wfs.nPupils) * np.c_[
-            np.cos((2 * np.arange(p_wfs.nPupils) + 1) * np.pi / p_wfs.nPupils),
-            np.sin((2 * np.arange(p_wfs.nPupils) + 1) * np.pi / p_wfs.nPupils)]
+    centers = Pangle / np.sin(
+            np.pi / p_wfs.nPupils) * np.c_[np.cos(
+                    (2 * np.arange(p_wfs.nPupils) + 1) * np.pi / p_wfs.nPupils),
+                                           np.sin((2 * np.arange(p_wfs.nPupils) + 1) *
+                                                  np.pi / p_wfs.nPupils)]
     # In case nPupils == 4, we put the centers back in the normal A-B-C-D ordering scheme, for misalignment processing.
     if p_wfs.nPupils == 4:
         centers = np.round(centers[[1, 0, 2, 3], :]).astype(np.int32)
@@ -459,9 +461,8 @@ def init_pyrhr_geom(p_wfs: conf.Param_wfs, r0: float, p_tel: conf.Param_tel,
 
     # Shift the mask to obtain the geometrically valid pixels
     for qIdx in range(p_wfs.nPupils):
-        quadOnCenter = np.roll(pup,
-                               tuple((centers[qIdx] + mis[qIdx]).astype(np.int32)), (0,
-                                                                                     1))
+        quadOnCenter = np.roll(pup, tuple((centers[qIdx] + mis[qIdx]).astype(np.int32)),
+                               (0, 1))
         mskRebin = util.rebin(quadOnCenter.copy(),
                               [pyrsize // nrebin, pyrsize // nrebin])
         if qIdx == 0:
@@ -483,8 +484,8 @@ def init_pyrhr_geom(p_wfs: conf.Param_wfs, r0: float, p_tel: conf.Param_tel,
         # mis = mis[[2, 1, 3, 0], :] # We don't need mis anymore - but if so keep the order of centers
     for qIdx in range(p_wfs.nPupils):
         tmpWh = np.where(
-                np.roll(stackedSubap,
-                        tuple((centers[qIdx] / nrebin).astype(np.int32)), (0, 1)))
+                np.roll(stackedSubap, tuple((centers[qIdx] / nrebin).astype(np.int32)),
+                        (0, 1)))
         validRow += [tmpWh[0].astype(np.int32)]
         validCol += [tmpWh[1].astype(np.int32)]
     nvalid = validRow[0].size
@@ -541,8 +542,8 @@ def init_pyrhr_geom(p_wfs: conf.Param_wfs, r0: float, p_tel: conf.Param_tel,
     #pup = p_geom._mpupil
     a = pyrsize // nrebin
     b = p_geom._n // nrebin
-    pupvalid = stackedSubap[a // 2 - b // 2:a // 2 + b // 2, a // 2 - b // 2:
-                            a // 2 + b // 2]
+    pupvalid = stackedSubap[a // 2 - b // 2:a // 2 + b // 2, a // 2 - b // 2:a // 2 +
+                            b // 2]
     p_wfs._isvalid = pupvalid.T.astype(np.int32)
 
     validsubsx = np.where(pupvalid)[0].astype(np.int32)
@@ -550,8 +551,6 @@ def init_pyrhr_geom(p_wfs: conf.Param_wfs, r0: float, p_tel: conf.Param_tel,
 
     istart = np.arange(p_wfs.nxsub + 2) * p_wfs.npix
     jstart = np.copy(istart)
-    p_wfs._istart = istart.astype(np.int32)
-    p_wfs._jstart = jstart.astype(np.int32)
 
     # sorting out valid subaps
     fluxPerSub = np.zeros((p_wfs.nxsub + 2, p_wfs.nxsub + 2), dtype=np.float32)
@@ -585,7 +584,7 @@ def init_pyrhr_geom(p_wfs: conf.Param_wfs, r0: float, p_tel: conf.Param_tel,
 
 
 def init_sh_geom(p_wfs: conf.Param_wfs, r0: float, p_tel: conf.Param_tel,
-                 p_geom: conf.Param_geom, ittime: float, verbose: bool=True):
+                 p_geom: conf.Param_geom, ittime: float, verbose: bool = True):
     """Compute the geometry of SH WFSs: valid subaps, positions of the subaps,
     flux per subap, etc...
 
@@ -603,14 +602,12 @@ def init_sh_geom(p_wfs: conf.Param_wfs, r0: float, p_tel: conf.Param_tel,
         verbose: (bool) : (optional) display informations if True
 
     """
-
+    p_wfs.nPupils = 1
     # this is the i,j index of lower left pixel of subap in _spupil
     istart = ((np.linspace(0, p_geom.pupdiam, p_wfs.nxsub + 1))[:-1]).astype(np.int64)
     # Translation in _mupil useful for raytracing
     istart += 2
     jstart = np.copy(istart)
-    p_wfs._istart = istart.astype(np.int32)
-    p_wfs._jstart = jstart.astype(np.int32)
 
     # sorting out valid subaps
     fluxPerSub = np.zeros((p_wfs.nxsub, p_wfs.nxsub), dtype=np.float32)
@@ -633,6 +630,8 @@ def init_sh_geom(p_wfs: conf.Param_wfs, r0: float, p_tel: conf.Param_tel,
     validy = np.where(p_wfs._isvalid.T)[0].astype(np.int32)
     p_wfs._validsubsx = validx
     p_wfs._validsubsy = validy
+    p_wfs._validpuppixx = validx * p_wfs._pdiam + 2
+    p_wfs._validpuppixy = validy * p_wfs._pdiam + 2
 
     # this defines how we cut the phase into subaps
     phasemap = np.zeros((p_wfs._pdiam * p_wfs._pdiam, p_wfs._nvalid), dtype=np.int32)
@@ -645,9 +644,11 @@ def init_sh_geom(p_wfs: conf.Param_wfs, r0: float, p_tel: conf.Param_tel,
     for i in range(n):
         indi = istart[p_wfs._validsubsy[i]]  # +2-1 (yorick->python)
         indj = jstart[p_wfs._validsubsx[i]]
-        phasemap[:, i] = tmp[indi:indi + p_wfs._pdiam, indj:
-                             indj + p_wfs._pdiam].flatten()
+        phasemap[:, i] = tmp[indi:indi + p_wfs._pdiam, indj:indj +
+                             p_wfs._pdiam].flatten()
     p_wfs._phasemap = phasemap
+    p_wfs._validsubsx *= p_wfs.npix
+    p_wfs._validsubsy *= p_wfs.npix
 
     # this is a phase shift of 1/2 pix in x and y
     halfxy = np.linspace(0, 2 * np.pi, p_wfs._Nfft + 1)[0:p_wfs._pdiam] / 2.

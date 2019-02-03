@@ -8,7 +8,7 @@ Note: GPU devices used are hardcoded here. Change gpudevices if needed
 import numpy as np
 import matplotlib.pyplot as plt
 import h5py
-from shesha.sutra_wrap import naga_context, Gamora
+from shesha.sutra_wrap import carmaWrap_context, Gamora
 from scipy.sparse import csr_matrix
 from sys import stdout
 import time
@@ -17,7 +17,7 @@ from guardians import drax
 plt.ion()
 
 gpudevices = np.array([0, 1, 2, 3], dtype=np.int32)
-c = naga_context.get_instance_ngpu(gpudevices.size, gpudevices)
+c = carmaWrap_context.get_instance_ngpu(gpudevices.size, gpudevices)
 
 
 def psf_rec_Vii(filename, err=None, fitting=True, covmodes=None, cov=None):
@@ -64,7 +64,8 @@ def psf_rec_Vii(filename, err=None, fitting=True, covmodes=None, cov=None):
     # Init GPU
     gpu = Gamora(c, c.activeDevice, "Vii", Btt.shape[0], covmodes.shape[0],
                  f["noise"][:].shape[1], IF.data, IF.indices, IF.indptr, IF.data.size, T,
-                 spup, spup.shape[0], np.where(spup)[0].size, scale, Btt, covmodes)
+                 spup, spup.shape[0],
+                 np.where(spup)[0].size, scale, Btt, covmodes)
     # Launch computation
     # gamora.set_eigenvals(e)
     # gamora.set_covmodes(V)

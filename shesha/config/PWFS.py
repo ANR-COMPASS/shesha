@@ -108,15 +108,15 @@ class Param_wfs:
         self.__qpixsize = 0
         """ quantum pixel size for the simulation"""
 
-        self.__istart = None
+        self.__validpuppixx = None
         """ (int*) x start indexes for cutting phase screens"""
-        self.__jstart = None
+        self.__validpuppixy = None
         """ (int*) y start indexes for cutting phase screens"""
         # cdef np.ndarray _validsubs    # (i,j) indices of valid subaps
         self.__validsubsx = None
-        """ (int*) indices of valid subaps along axis x"""
+        """ (int*) X-indices of bottom left pixel of each valid subaps [pixels]"""
         self.__validsubsy = None
-        """ (int*) indices of valid subaps along axis y"""
+        """ (int*) Y-indices of bottom left pixel of each valid subaps [pixels]"""
         self.__isvalid = None
         """ (int*) array of 0/1 for valid subaps"""
         self.__phasemap = None
@@ -165,7 +165,7 @@ class Param_wfs:
         """ Type of pyramid, either 0 for "Pyramid" or 1 for "RoofPrism"."""
         self.__pyr_pup_sep = -1
         """ Number of Pyramid facets """
-        self.__nPupils = 4
+        self.__nPupils = 0
         """ Pyramid pupil separation. (default: long(wfs.nxsub))"""
         self.__pyr_misalignments = None
         """ Pyramid quadrant misalignments: by how much pupil subimages
@@ -176,6 +176,13 @@ class Param_wfs:
         self.__pyr_cx = None  # (float*)
         self.__pyr_cy = None  # (float*)
 
+    def get_type(self):
+        """ Get the type of wfs
+
+        :return: (str) : type of wfs ("sh" or "pyr")
+        """
+        return self.__type
+
     def set_type(self, typewfs):
         """ Set the type of wfs
 
@@ -183,7 +190,14 @@ class Param_wfs:
         """
         self.__type = typewfs  #scons.check_enum(scons.WFSType, type)0
 
-    type = property(lambda x: x.__type, set_type)
+    type = property(get_type, set_type)
+
+    def get_nxsub(self):
+        """ Get the linear number of subaps
+
+        :return: (long) : linear number of subaps
+        """
+        return self.__nxsub
 
     def set_nxsub(self, n):
         """ Set the linear number of subaps
@@ -192,7 +206,14 @@ class Param_wfs:
         """
         self.__nxsub = csu.enforce_int(n)
 
-    nxsub = property(lambda x: x.__nxsub, set_nxsub)
+    nxsub = property(get_nxsub, set_nxsub)
+
+    def get_nPupils(self):
+        """ Get the number of pupil images
+
+        :return: (long) : number of pupil images
+        """
+        return self.__nPupils
 
     def set_nPupils(self, n):
         """ Set the number of pupil images
@@ -201,7 +222,14 @@ class Param_wfs:
         """
         self.__nPupils = csu.enforce_int(n)
 
-    nPupils = property(lambda x: x.__nPupils, set_nPupils)
+    nPupils = property(get_nPupils, set_nPupils)
+
+    def get_npix(self):
+        """ Get the number of pixels per subap
+
+        :return: (long) : number of pixels per subap
+        """
+        return self.__npix
 
     def set_npix(self, n):
         """ Set the number of pixels per subap
@@ -210,7 +238,14 @@ class Param_wfs:
         """
         self.__npix = csu.enforce_int(n)
 
-    npix = property(lambda x: x.__npix, set_npix)
+    npix = property(get_npix, set_npix)
+
+    def get_pixsize(self):
+        """ Get the pixel size
+
+        :return: (float) : pixel size (in arcsec) for a subap
+        """
+        return self.__pixsize
 
     def set_pixsize(self, p):
         """ Set the pixel size
@@ -219,7 +254,14 @@ class Param_wfs:
         """
         self.__pixsize = csu.enforce_float(p)
 
-    pixsize = property(lambda x: x.__pixsize, set_pixsize)
+    pixsize = property(get_pixsize, set_pixsize)
+
+    def get_Lambda(self):
+        """ Get the observation wavelength
+
+        :return: (float) : observation wavelength (in um) for a subap
+        """
+        return self.__Lambda
 
     def set_Lambda(self, L):
         """ Set the observation wavelength
@@ -228,7 +270,14 @@ class Param_wfs:
         """
         self.__Lambda = L
 
-    Lambda = property(lambda x: x.__Lambda, set_Lambda)
+    Lambda = property(get_Lambda, set_Lambda)
+
+    def get_optthroughput(self):
+        """ Get the wfs global throughput
+
+        :return: (float) : wfs global throughput
+        """
+        return self.__optthroughput
 
     def set_optthroughput(self, o):
         """ Set the wfs global throughput
@@ -237,7 +286,14 @@ class Param_wfs:
         """
         self.__optthroughput = csu.enforce_float(o)
 
-    optthroughput = property(lambda x: x.__optthroughput, set_optthroughput)
+    optthroughput = property(get_optthroughput, set_optthroughput)
+
+    def get_fracsub(self):
+        """ Get the minimal illumination fraction for valid subaps
+
+        :return: (float) : minimal illumination fraction for valid subaps
+        """
+        return self.__fracsub
 
     def set_fracsub(self, f):
         """ Set the minimal illumination fraction for valid subaps
@@ -246,7 +302,14 @@ class Param_wfs:
         """
         self.__fracsub = csu.enforce_float(f)
 
-    fracsub = property(lambda x: x.__fracsub, set_fracsub)
+    fracsub = property(get_fracsub, set_fracsub)
+
+    def get_openloop(self):
+        """ Get the loop state (open or closed)
+
+        :return: (long) : 1 if in "open-loop" mode (i.e. does not see dm)
+        """
+        return self.__openloop
 
     def set_openloop(self, o):
         """ Set the loop state (open or closed)
@@ -255,7 +318,14 @@ class Param_wfs:
         """
         self.__openloop = csu.enforce_or_cast_bool(o)
 
-    openloop = property(lambda x: x.__openloop, set_openloop)
+    openloop = property(get_openloop, set_openloop)
+
+    def get_fssize(self):
+        """ Get the size of field stop
+
+        :return: (float) : size of field stop in arcsec
+        """
+        return self.__fssize
 
     def set_fssize(self, f):
         """ Set the size of field stop
@@ -264,7 +334,14 @@ class Param_wfs:
         """
         self.__fssize = csu.enforce_float(f)
 
-    fssize = property(lambda x: x.__fssize, set_fssize)
+    fssize = property(get_fssize, set_fssize)
+
+    def get_fstop(self):
+        """ Get the size of field stop
+
+        :return: (str) : size of field stop in arcsec
+        """
+        return self.__fstop
 
     def set_fstop(self, f):
         """ Set the size of field stop
@@ -273,7 +350,14 @@ class Param_wfs:
         """
         self.__fstop = scons.check_enum(scons.FieldStopType, f)
 
-    fstop = property(lambda x: x.__fstop, set_fstop)
+    fstop = property(get_fstop, set_fstop)
+
+    def get_atmos_seen(self):
+        """ Gells if the wfs sees the atmosphere layers
+
+        :return: (bool) :True if the WFS sees the atmosphere layers
+        """
+        return self.__atmos_seen
 
     def set_atmos_seen(self, i):
         """ Tells if the wfs sees the atmosphere layers
@@ -282,7 +366,14 @@ class Param_wfs:
         """
         self.__atmos_seen = csu.enforce_or_cast_bool(i)
 
-    atmos_seen = property(lambda x: x.__atmos_seen, set_atmos_seen)
+    atmos_seen = property(get_atmos_seen, set_atmos_seen)
+
+    def get_xpos(self):
+        """ Get the guide star x position on sky
+
+        :return: (float) : guide star x position on sky (in arcsec)
+        """
+        return self.__xpos
 
     def set_xpos(self, x):
         """ Set the guide star x position on sky
@@ -291,7 +382,14 @@ class Param_wfs:
         """
         self.__xpos = csu.enforce_float(x)
 
-    xpos = property(lambda x: x.__xpos, set_xpos)
+    xpos = property(get_xpos, set_xpos)
+
+    def get_ypos(self):
+        """ Get the guide star y position on sky
+
+        :return: (float) : guide star y position on sky (in arcsec)
+        """
+        return self.__ypos
 
     def set_ypos(self, y):
         """ Set the guide star y position on sky
@@ -300,7 +398,14 @@ class Param_wfs:
         """
         self.__ypos = csu.enforce_float(y)
 
-    ypos = property(lambda x: x.__ypos, set_ypos)
+    ypos = property(get_ypos, set_ypos)
+
+    def get_G(self):
+        """ Get the magnifying factor
+
+        :return: (float) : magnifying factor
+        """
+        return self.__G
 
     def set_G(self, G):
         """ Set the magnifying factor
@@ -309,7 +414,14 @@ class Param_wfs:
         """
         self.__G = csu.enforce_float(G)
 
-    G = property(lambda x: x.__G, set_G)
+    G = property(get_G, set_G)
+
+    def get_thetaML(self):
+        """ Get the rotation angle in the pupil
+
+        :return: (float) : rotation angle (rad)
+        """
+        return self.__thetaML
 
     def set_thetaML(self, thetaML):
         """ Set the rotation angle in the pupil
@@ -318,7 +430,14 @@ class Param_wfs:
         """
         self.__thetaML = csu.enforce_float(thetaML)
 
-    thetaML = property(lambda x: x.__thetaML, set_thetaML)
+    thetaML = property(get_thetaML, set_thetaML)
+
+    def get_dx(self):
+        """ Get the X axis misalignment
+
+        :return: (float) : dx (pix)
+        """
+        return self.__dx
 
     def set_dx(self, dx):
         """ Set the X axis misalignment
@@ -327,7 +446,14 @@ class Param_wfs:
         """
         self.__dx = csu.enforce_float(dx)
 
-    dx = property(lambda x: x.__dx, set_dx)
+    dx = property(get_dx, set_dx)
+
+    def get_dy(self):
+        """ Get the Y axis misalignment
+
+        :return: (float) : dy (pix)
+        """
+        return self.__dy
 
     def set_dy(self, dy):
         """ Set the Y axis misalignment
@@ -336,7 +462,14 @@ class Param_wfs:
         """
         self.__dy = csu.enforce_float(dy)
 
-    dy = property(lambda x: x.__dy, set_dy)
+    dy = property(get_dy, set_dy)
+
+    def get_gsalt(self):
+        """ Get the altitude of guide star
+
+        :return: (float) : altitude of guide star (in m) 0 if ngs
+        """
+        return self.__gsalt
 
     def set_gsalt(self, g):
         """ Set the altitude of guide star
@@ -345,7 +478,14 @@ class Param_wfs:
         """
         self.__gsalt = csu.enforce_float(g)
 
-    gsalt = property(lambda x: x.__gsalt, set_gsalt)
+    gsalt = property(get_gsalt, set_gsalt)
+
+    def get_gsmag(self):
+        """ Get the magnitude of guide star
+
+        :return: (float) : magnitude of guide star
+        """
+        return self.__gsmag
 
     def set_gsmag(self, g):
         """ Set the magnitude of guide star
@@ -354,7 +494,14 @@ class Param_wfs:
         """
         self.__gsmag = csu.enforce_float(g)
 
-    gsmag = property(lambda x: x.__gsmag, set_gsmag)
+    gsmag = property(get_gsmag, set_gsmag)
+
+    def get_zerop(self):
+        """ Get the detector zero point
+
+        :return: (float) : detector zero point
+        """
+        return self.__zerop
 
     def set_zerop(self, z):
         """ Set the detector zero point
@@ -363,7 +510,14 @@ class Param_wfs:
         """
         self.__zerop = csu.enforce_float(z)
 
-    zerop = property(lambda x: x.__zerop, set_zerop)
+    zerop = property(get_zerop, set_zerop)
+
+    def get_noise(self):
+        """ Get the desired noise
+
+        :return: (float) : desired noise : < 0 = no noise / 0 = photon only / > 0 photon + ron
+        """
+        return self.__noise
 
     def set_noise(self, n):
         """ Set the desired noise
@@ -372,7 +526,14 @@ class Param_wfs:
         """
         self.__noise = csu.enforce_float(n)
 
-    noise = property(lambda x: x.__noise, set_noise)
+    noise = property(get_noise, set_noise)
+
+    def get_nphotons4imat(self):
+        """ Get the desired numner of photons used for doing imat
+
+        :return: (float) : desired number of photons
+        """
+        return self.__nphotons4imat
 
     def set_nphotons4imat(self, nphot):
         """ Set the desired numner of photons used for doing imat
@@ -381,7 +542,14 @@ class Param_wfs:
         """
         self.__nphotons4imat = csu.enforce_float(nphot)
 
-    nphotons4imat = property(lambda x: x.__nphotons4imat, set_nphotons4imat)
+    nphotons4imat = property(get_nphotons4imat, set_nphotons4imat)
+
+    def get_kernel(self):
+        """ Get the attribute kernel
+
+        :return: (float) :
+        """
+        return self.__kernel
 
     def set_kernel(self, k):
         """ Set the attribute kernel
@@ -390,7 +558,14 @@ class Param_wfs:
         """
         self.__kernel = csu.enforce_float(k)
 
-    kernel = property(lambda x: x.__kernel, set_kernel)
+    kernel = property(get_kernel, set_kernel)
+
+    def get_laserpower(self):
+        """ Get the laser power
+
+        :return: (float) : laser power in W
+        """
+        return self.__laserpower
 
     def set_laserpower(self, l):
         """ Set the laser power
@@ -399,7 +574,14 @@ class Param_wfs:
         """
         self.__laserpower = csu.enforce_float(l)
 
-    laserpower = property(lambda x: x.__laserpower, set_laserpower)
+    laserpower = property(get_laserpower, set_laserpower)
+
+    def get_lltx(self):
+        """ Get the x position of llt
+
+        :return: (float) : x position (in meters) of llt
+        """
+        return self.__lltx
 
     def set_lltx(self, l):
         """ Set the x position of llt
@@ -408,7 +590,14 @@ class Param_wfs:
         """
         self.__lltx = csu.enforce_float(l)
 
-    lltx = property(lambda x: x.__lltx, set_lltx)
+    lltx = property(get_lltx, set_lltx)
+
+    def get_llty(self):
+        """ Get the y position of llt
+
+        :return: (float) : y position (in meters) of llt
+        """
+        return self.__llty
 
     def set_llty(self, l):
         """ Set the y position of llt
@@ -417,7 +606,14 @@ class Param_wfs:
         """
         self.__llty = csu.enforce_float(l)
 
-    llty = property(lambda x: x.__llty, set_llty)
+    llty = property(get_llty, set_llty)
+
+    def get_proftype(self):
+        """ Get the type of sodium profile
+
+        :return: (str) : type of sodium profile "gauss", "exp", etc ...
+        """
+        return self.__proftype
 
     def set_proftype(self, p):
         """ Set the type of sodium profile
@@ -426,7 +622,14 @@ class Param_wfs:
         """
         self.__proftype = scons.check_enum(scons.ProfType, p)
 
-    proftype = property(lambda x: x.__proftype, set_proftype)
+    proftype = property(get_proftype, set_proftype)
+
+    def get_beamsize(self):
+        """ Get the laser beam fwhm on-sky
+
+        :return: (float) : laser beam fwhm on-sky (in arcsec)
+        """
+        return self.__beamsize
 
     def set_beamsize(self, b):
         """ Set the laser beam fwhm on-sky
@@ -435,7 +638,14 @@ class Param_wfs:
         """
         self.__beamsize = csu.enforce_float(b)
 
-    beamsize = property(lambda x: x.__beamsize, set_beamsize)
+    beamsize = property(get_beamsize, set_beamsize)
+
+    def get_pyr_ampl(self):
+        """ Get the pyramid wfs modulation amplitude radius
+
+        :return: (float) : pyramid wfs modulation amplitude radius (in arsec)
+        """
+        return self.__pyr_ampl
 
     def set_pyr_ampl(self, p):
         """ Set the pyramid wfs modulation amplitude radius
@@ -444,7 +654,14 @@ class Param_wfs:
         """
         self.__pyr_ampl = csu.enforce_float(p)
 
-    pyr_ampl = property(lambda x: x.__pyr_ampl, set_pyr_ampl)
+    pyr_ampl = property(get_pyr_ampl, set_pyr_ampl)
+
+    def get_pyr_npts(self):
+        """ Get the total number of point along modulation circle
+
+        :return: (long) : total number of point along modulation circle
+        """
+        return self.__pyr_npts
 
     def set_pyr_npts(self, p):
         """ Set the total number of point along modulation circle
@@ -453,7 +670,15 @@ class Param_wfs:
         """
         self.__pyr_npts = csu.enforce_int(p)
 
-    pyr_npts = property(lambda x: x.__pyr_npts, set_pyr_npts)
+    pyr_npts = property(get_pyr_npts, set_pyr_npts)
+
+    def get_pyr_loc(self):
+        """ Get the location of modulation
+
+        :return: (str) : location of modulation, before/after the field stop.
+                          valid value are "before" or "after" (default "after")
+        """
+        return self.__pyr_loc
 
     def set_pyr_loc(self, p):
         """ Set the location of modulation
@@ -463,7 +688,14 @@ class Param_wfs:
         """
         self.__pyr_loc = bytes(p.encode('UTF-8'))
 
-    pyr_loc = property(lambda x: x.__pyr_loc, set_pyr_loc)
+    pyr_loc = property(get_pyr_loc, set_pyr_loc)
+
+    def get_pyrtype(self):
+        """ Get the type of pyramid,
+
+        :return: (str) : type of pyramid, either 0 for "Pyramid" or 1 for "RoofPrism"
+        """
+        return self.__pyrtype
 
     def set_pyrtype(self, p):
         """ Set the type of pyramid,
@@ -472,7 +704,14 @@ class Param_wfs:
         """
         self.__pyrtype = bytes(p.encode('UTF-8'))
 
-    pyrtype = property(lambda x: x.__pyrtype, set_pyrtype)
+    pyrtype = property(get_pyrtype, set_pyrtype)
+
+    def get_pyr_cx(self):
+        """ Get the x position of modulation points for pyramid sensor
+
+        :return: (np.ndarray[ndim=1,dtype=np.floatt32_t) : x positions
+        """
+        return self.__pyr_cx
 
     def set_pyr_cx(self, cx):
         """ Set the x position of modulation points for pyramid sensor
@@ -481,7 +720,14 @@ class Param_wfs:
         """
         self.__pyr_cx = csu.enforce_array(cx.copy(), self.__pyr_npts, dtype=np.float32)
 
-    _pyr_cx = property(lambda x: x.__pyr_cx, set_pyr_cx)
+    _pyr_cx = property(get_pyr_cx, set_pyr_cx)
+
+    def get_pyr_cy(self):
+        """ Get the y position of modulation points for pyramid sensor
+
+        :return: (np.ndarray[ndim=1,dtype=np.floatt32_t) : y positions
+        """
+        return self.__pyr_cy
 
     def set_pyr_cy(self, cy):
         """ Set the y position of modulation points for pyramid sensor
@@ -490,7 +736,14 @@ class Param_wfs:
         """
         self.__pyr_cy = csu.enforce_array(cy.copy(), self.__pyr_npts, dtype=np.float32)
 
-    _pyr_cy = property(lambda x: x.__pyr_cy, set_pyr_cy)
+    _pyr_cy = property(get_pyr_cy, set_pyr_cy)
+
+    def get_dms_seen(self):
+        """ Get the index of dms seen by the WFS
+
+        :return: (np.ndarray[ndim=1,dtype=np.int32_t) : index of dms seen by the WFS
+        """
+        return self.__dms_seen
 
     def set_dms_seen(self, dms_seen):
         """ Set the index of dms seen by the WFS
@@ -500,7 +753,14 @@ class Param_wfs:
         self.__dms_seen = csu.enforce_array(dms_seen.copy(), dms_seen.size,
                                             dtype=np.int32)
 
-    dms_seen = property(lambda x: x.__dms_seen, set_dms_seen)
+    dms_seen = property(get_dms_seen, set_dms_seen)
+
+    def get_lgsreturnperwatt(self):
+        """ Get the return per watt factor
+
+        :return: (float) : return per watt factor (high season : 10 ph/cm2/s/W)
+        """
+        return self.__lgsreturnperwatt
 
     def set_lgsreturnperwatt(self, lpw):
         """ Set the return per watt factor
@@ -509,7 +769,14 @@ class Param_wfs:
         """
         self.__lgsreturnperwatt = csu.enforce_float(lpw)
 
-    lgsreturnperwatt = property(lambda x: x.__lgsreturnperwatt, set_lgsreturnperwatt)
+    lgsreturnperwatt = property(get_lgsreturnperwatt, set_lgsreturnperwatt)
+
+    def get_altna(self):
+        """ Get the corresponding altitude
+
+        :return: (np.ndarray[ndim=1,dtype=np.float32]) : corresponding altitude
+        """
+        return self.__altna
 
     def set_altna(self, a):
         """ Set the corresponding altitude
@@ -518,7 +785,14 @@ class Param_wfs:
         """
         self.__altna = csu.enforce_array(a.copy(), a.size, dtype=np.float32)
 
-    _altna = property(lambda x: x.__altna, set_altna)
+    _altna = property(get_altna, set_altna)
+
+    def get_profna(self):
+        """ Get the sodium profile
+
+        :return: (np.ndarray[ndim=1,dtype=np.float32]) : sodium profile
+        """
+        return self.__profna
 
     def set_profna(self, p):
         """ Set the sodium profile
@@ -527,7 +801,15 @@ class Param_wfs:
         """
         self.__profna = csu.enforce_array(p.copy(), p.size, dtype=np.float32)
 
-    _profna = property(lambda x: x.__profna, set_profna)
+    _profna = property(get_profna, set_profna)
+
+    def get_roket(self):
+        """ Get the error budget flag : if True, enable error budget analysis
+        for this simulation
+
+        :return: (bool) : error budget flag
+        """
+        return self.__roket
 
     def set_roket(self, roket):
         """ Set the error budget flag : if True, enable error budget analysis
@@ -537,7 +819,14 @@ class Param_wfs:
         """
         self.__roket = csu.enforce_or_cast_bool(roket)
 
-    roket = property(lambda x: x.__roket, set_roket)
+    roket = property(get_roket, set_roket)
+
+    def get_is_low_order(self):
+        """ Get the low order flag : if True, WFS arrays will not be mutualised
+
+        :return: (bool) : low order flag
+        """
+        return self.__is_low_order
 
     def set_is_low_order(self, is_low_order):
         """ Set the low order flag : if True, WFS arrays will not be mutualised
@@ -546,7 +835,14 @@ class Param_wfs:
         """
         self.__is_low_order = csu.enforce_or_cast_bool(is_low_order)
 
-    is_low_order = property(lambda x: x.__is_low_order, set_is_low_order)
+    is_low_order = property(get_is_low_order, set_is_low_order)
+
+    def get_pyr_pup_sep(self):
+        """ Get the pyramid pupil separation. (default: long(wfs.nxsub))
+
+        :return: (long) : pyramid pupil separation wanted
+        """
+        return self.__pyr_pup_sep
 
     def set_pyr_pup_sep(self, pyr_pup_sep):
         """ Set the pyramid pupil separation. (default: long(wfs.nxsub))
@@ -555,15 +851,26 @@ class Param_wfs:
         """
         self.__pyr_pup_sep = csu.enforce_int(pyr_pup_sep)
 
-    pyr_pup_sep = property(lambda x: x.__pyr_pup_sep, set_pyr_pup_sep)
+    pyr_pup_sep = property(get_pyr_pup_sep, set_pyr_pup_sep)
+
+    def get_pyr_misalignments(self) -> None:
+
+        return self.__pyr_misalignments
 
     def set_pyr_misalignments(self, misalignments: np.ndarray) -> None:
 
         self.__pyr_misalignments = csu.enforce_arrayMultiDim(misalignments.copy(),
-                                                             (self.nPupils,
-                                                              2), dtype=np.float32)
+                                                             (self.nPupils, 2),
+                                                             dtype=np.float32)
 
-    pyr_misalignments = property(lambda x: x.__pyr_misalignments, set_pyr_misalignments)
+    pyr_misalignments = property(get_pyr_misalignments, set_pyr_misalignments)
+
+    def get_nvalid(self):
+        """ Get the number of valid subapertures
+
+        :return: (long) : number of valid subapertures
+        """
+        return self.__nvalid
 
     def set_nvalid(self, n):
         """ Set the number of valid subapertures
@@ -572,7 +879,14 @@ class Param_wfs:
         """
         self.__nvalid = csu.enforce_int(n)
 
-    _nvalid = property(lambda x: x.__nvalid, set_nvalid)
+    _nvalid = property(get_nvalid, set_nvalid)
+
+    def get_validsubsx(self):
+        """ Get the valid subapertures along X-axis
+
+        :return: (np.array(dim=1, dtype=np.int32)) : validsubsx
+        """
+        return self.__validsubsx
 
     def set_validsubsx(self, vx):
         """ Set the valid subapertures along X-axis
@@ -584,7 +898,14 @@ class Param_wfs:
         else:
             self.__validsubsx = csu.enforce_array(vx, self.__nvalid, dtype=np.int32)
 
-    _validsubsx = property(lambda x: x.__validsubsx, set_validsubsx)
+    _validsubsx = property(get_validsubsx, set_validsubsx)
+
+    def get_validsubsy(self):
+        """ Get the valid subapertures along Y-axis
+
+        :return: (np.array(dim=1, dtype=np.int32)) : validsubsy
+        """
+        return self.__validsubsy
 
     def set_validsubsy(self, vy):
         """ Set the valid subapertures along Y-axis
@@ -596,7 +917,7 @@ class Param_wfs:
         else:
             self.__validsubsy = csu.enforce_array(vy, self.__nvalid, dtype=np.int32)
 
-    _validsubsy = property(lambda x: x.__validsubsy, set_validsubsy)
+    _validsubsy = property(get_validsubsy, set_validsubsy)
 
     def get_validsub(self):
         """ Return both validsubsx and validsubsy
@@ -605,6 +926,13 @@ class Param_wfs:
         """
         return np.stack([self._validsubsx, self._validsubsy])
 
+    def get_Nfft(self):
+        """ Get the size of FFT support for a subap
+
+        :return: (long) : size of FFT support
+        """
+        return self.__Nfft
+
     def set_Nfft(self, n):
         """ Set the size of FFT support for a subap
 
@@ -612,7 +940,14 @@ class Param_wfs:
         """
         self.__Nfft = csu.enforce_int(n)
 
-    _Nfft = property(lambda x: x.__Nfft, set_Nfft)
+    _Nfft = property(get_Nfft, set_Nfft)
+
+    def get_Ntot(self):
+        """ Get the size of hr image for a subap
+
+        :return: (long) : size of hr image for a subap
+        """
+        return self.__Ntot
 
     def set_Ntot(self, n):
         """ Set the size of hr image for a subap
@@ -621,7 +956,14 @@ class Param_wfs:
         """
         self.__Ntot = csu.enforce_int(n)
 
-    _Ntot = property(lambda x: x.__Ntot, set_Ntot)
+    _Ntot = property(get_Ntot, set_Ntot)
+
+    def get_nrebin(self):
+        """ Get the rebin factor from hr to binned image for a subap
+
+        :return: (long) : rebin factor
+        """
+        return self.__nrebin
 
     def set_nrebin(self, n):
         """ Set the rebin factor from hr to binned image for a subap
@@ -630,7 +972,14 @@ class Param_wfs:
         """
         self.__nrebin = csu.enforce_int(n)
 
-    _nrebin = property(lambda x: x.__nrebin, set_nrebin)
+    _nrebin = property(get_nrebin, set_nrebin)
+
+    def get_pdiam(self):
+        """ Get the subap diameter in pixels
+
+        :return: (long) : subap diam in pixels
+        """
+        return self.__pdiam
 
     def set_pdiam(self, n):
         """ Set the subap diameter in pixels
@@ -639,7 +988,14 @@ class Param_wfs:
         """
         self.__pdiam = csu.enforce_int(n)
 
-    _pdiam = property(lambda x: x.__pdiam, set_pdiam)
+    _pdiam = property(get_pdiam, set_pdiam)
+
+    def get_nphotons(self):
+        """ Get number of photons per subap
+
+        :return: (float) : number of photons per subap
+        """
+        return self.__nphotons
 
     def set_nphotons(self, n):
         """ Set number of photons per subap
@@ -648,7 +1004,14 @@ class Param_wfs:
         """
         self.__nphotons = csu.enforce_float(n)
 
-    _nphotons = property(lambda x: x.__nphotons, set_nphotons)
+    _nphotons = property(get_nphotons, set_nphotons)
+
+    def get_qpixsize(self):
+        """ Get the quantum pixel size for the simulation
+
+        :return: (float) : quantum pixel size
+        """
+        return self.__qpixsize
 
     def set_qpixsize(self, n):
         """ Set the quantum pixel size for the simulation
@@ -657,7 +1020,14 @@ class Param_wfs:
         """
         self.__qpixsize = csu.enforce_float(n)
 
-    _qpixsize = property(lambda x: x.__qpixsize, set_qpixsize)
+    _qpixsize = property(get_qpixsize, set_qpixsize)
+
+    def get_subapd(self):
+        """ Get the subap diameter (m)
+
+        :return: (float) : subap diameter (m)
+        """
+        return self.__subapd
 
     def set_subapd(self, n):
         """ Set the subap diameter (m)
@@ -666,7 +1036,14 @@ class Param_wfs:
         """
         self.__subapd = csu.enforce_float(n)
 
-    _subapd = property(lambda x: x.__subapd, set_subapd)
+    _subapd = property(get_subapd, set_subapd)
+
+    def get_fluxPerSub(self):
+        """ Get the subap diameter (m)
+
+        :return: (np.array(ndim=2, dtype=np.float32)) : subap diameter (m)
+        """
+        return self.__fluxPerSub
 
     def set_fluxPerSub(self, data):
         """ Set the subap diameter (m)
@@ -674,16 +1051,19 @@ class Param_wfs:
         :param data: (np.array(ndim=2, dtype=np.float32)) : subap diameter (m)
         """
         if self.__type == scons.WFSType.PYRHR or self.__type == scons.WFSType.PYRLR:
-            self.__fluxPerSub = csu.enforce_arrayMultiDim(data.copy(),
-                                                          (self.__nxsub + 2,
-                                                           self.__nxsub + 2),
-                                                          dtype=np.float32)
+            self.__fluxPerSub = csu.enforce_arrayMultiDim(
+                    data.copy(), (self.__nxsub + 2, self.__nxsub + 2), dtype=np.float32)
         else:
-            self.__fluxPerSub = csu.enforce_arrayMultiDim(data.copy(), (self.__nxsub,
-                                                                        self.__nxsub),
+            self.__fluxPerSub = csu.enforce_arrayMultiDim(data.copy(),
+                                                          (self.__nxsub, self.__nxsub),
                                                           dtype=np.float32)
 
-    _fluxPerSub = property(lambda x: x.__fluxPerSub, set_fluxPerSub)
+    _fluxPerSub = property(get_fluxPerSub, set_fluxPerSub)
+
+    def get_ftkernel(self):
+        """ TODO : docstring
+        """
+        return self.__ftkernel
 
     def set_ftkernel(self, data):
         """ TODO : docstring
@@ -691,7 +1071,12 @@ class Param_wfs:
         self.__ftkernel = csu.enforce_arrayMultiDim(data.copy(), data.shape,
                                                     dtype=np.complex64)
 
-    _ftkernel = property(lambda x: x.__ftkernel, set_ftkernel)
+    _ftkernel = property(get_ftkernel, set_ftkernel)
+
+    def get_sincar(self):
+        """ TODO : docstring
+        """
+        return self.__sincar
 
     def set_sincar(self, data):
         """ TODO : docstring
@@ -699,7 +1084,12 @@ class Param_wfs:
         self.__sincar = csu.enforce_arrayMultiDim(data.copy(), data.shape,
                                                   dtype=np.float32)
 
-    _sincar = property(lambda x: x.__sincar, set_sincar)
+    _sincar = property(get_sincar, set_sincar)
+
+    def get_halfxy(self):
+        """ TODO : docstring
+        """
+        return self.__halfxy
 
     def set_halfxy(self, data):
         """ TODO : docstring
@@ -707,7 +1097,12 @@ class Param_wfs:
         self.__halfxy = csu.enforce_arrayMultiDim(data.copy(), data.shape,
                                                   dtype=np.float32)
 
-    _halfxy = property(lambda x: x.__halfxy, set_halfxy)
+    _halfxy = property(get_halfxy, set_halfxy)
+
+    def get_submask(self):
+        """ TODO : docstring
+        """
+        return self.__submask
 
     def set_submask(self, data):
         """ TODO : docstring
@@ -715,7 +1110,12 @@ class Param_wfs:
         self.__submask = csu.enforce_arrayMultiDim(data.copy(), data.shape,
                                                    dtype=np.float32)
 
-    _submask = property(lambda x: x.__submask, set_submask)
+    _submask = property(get_submask, set_submask)
+
+    def get_lgskern(self):
+        """ TODO : docstring
+        """
+        return self.__lgskern
 
     def set_lgskern(self, data):
         """ TODO : docstring
@@ -723,7 +1123,12 @@ class Param_wfs:
         self.__lgskern = csu.enforce_arrayMultiDim(data.copy(), data.shape,
                                                    dtype=np.float32)
 
-    _lgskern = property(lambda x: x.__lgskern, set_lgskern)
+    _lgskern = property(get_lgskern, set_lgskern)
+
+    def get_azimuth(self):
+        """ TODO : docstring
+        """
+        return self.__azimuth
 
     def set_azimuth(self, data):
         """ TODO : docstring
@@ -731,7 +1136,12 @@ class Param_wfs:
         self.__azimuth = csu.enforce_arrayMultiDim(data.copy(), data.shape,
                                                    dtype=np.float32)
 
-    _azimuth = property(lambda x: x.__azimuth, set_azimuth)
+    _azimuth = property(get_azimuth, set_azimuth)
+
+    def get_prof1d(self):
+        """ TODO : docstring
+        """
+        return self.__prof1d
 
     def set_prof1d(self, data):
         """ TODO : docstring
@@ -739,35 +1149,60 @@ class Param_wfs:
         self.__prof1d = csu.enforce_arrayMultiDim(data.copy(), data.shape,
                                                   dtype=np.float32)
 
-    _prof1d = property(lambda x: x.__prof1d, set_prof1d)
+    _prof1d = property(get_prof1d, set_prof1d)
+
+    def get_profcum(self):
+        """ TODO : docstring
+        """
+        return self.__profcum
 
     def set_profcum(self, data):
         """ TODO : docstring
         """
         self.__profcum = csu.enforce_array(data.copy(), data.size, dtype=np.float32)
 
-    _profcum = property(lambda x: x.__profcum, set_profcum)
+    _profcum = property(get_profcum, set_profcum)
+
+    def get_beam(self):
+        """ TODO : docstring
+        """
+        return self.__beam
 
     def set_beam(self, data):
         """ TODO : docstring
         """
         self.__beam = csu.enforce_array(data.copy(), data.size, dtype=np.float32)
 
-    _beam = property(lambda x: x.__beam, set_beam)
+    _beam = property(get_beam, set_beam)
+
+    def get_ftbeam(self):
+        """ TODO : docstring
+        """
+        return self.__ftbeam
 
     def set_ftbeam(self, data):
         """ TODO : docstring
         """
         self.__ftbeam = csu.enforce_array(data.copy(), data.size, dtype=np.complex64)
 
-    _ftbeam = property(lambda x: x.__ftbeam, set_ftbeam)
+    _ftbeam = property(get_ftbeam, set_ftbeam)
+
+    def get_hrmap(self):
+        """ TODO : docstring
+        """
+        return self.__hrmap
 
     def set_hrmap(self, data):
         """ TODO : docstring
         """
         self.__hrmap = csu.enforce_arrayMultiDim(data.copy(), data.shape, dtype=np.int32)
 
-    _hrmap = property(lambda x: x.__hrmap, set_hrmap)
+    _hrmap = property(get_hrmap, set_hrmap)
+
+    def get_binmap(self):
+        """ TODO : docstring
+        """
+        return self.__binmap
 
     def set_binmap(self, data):
         """ TODO : docstring
@@ -775,7 +1210,12 @@ class Param_wfs:
         self.__binmap = csu.enforce_arrayMultiDim(data.copy(), data.shape,
                                                   dtype=np.int32)
 
-    _binmap = property(lambda x: x.__binmap, set_binmap)
+    _binmap = property(get_binmap, set_binmap)
+
+    def get_phasemap(self):
+        """ TODO : docstring
+        """
+        return self.__phasemap
 
     def set_phasemap(self, data):
         """ TODO : docstring
@@ -783,21 +1223,38 @@ class Param_wfs:
         self.__phasemap = csu.enforce_arrayMultiDim(data.copy(), data.shape,
                                                     dtype=np.int32)
 
-    _phasemap = property(lambda x: x.__phasemap, set_phasemap)
+    _phasemap = property(get_phasemap, set_phasemap)
 
-    def set_istart(self, data):
+    def get_validpuppixx(self):
         """ TODO : docstring
         """
-        self.__istart = csu.enforce_array(data.copy(), data.size, dtype=np.int32)
+        return self.__validpuppixx
 
-    _istart = property(lambda x: x.__istart, set_istart)
-
-    def set_jstart(self, data):
+    def set_validpuppixx(self, data):
         """ TODO : docstring
         """
-        self.__jstart = csu.enforce_array(data.copy(), data.size, dtype=np.int32)
+        self.__validpuppixx = csu.enforce_array(data.copy(), data.size, dtype=np.int32)
 
-    _jstart = property(lambda x: x.__jstart, set_jstart)
+    _validpuppixx = property(get_validpuppixx, set_validpuppixx)
+
+    def get_validpuppixy(self):
+        """ TODO : docstring
+        """
+        return self.__validpuppixy
+
+    def set_validpuppixy(self, data):
+        """ TODO : docstring
+        """
+        self.__validpuppixy = csu.enforce_array(data.copy(), data.size, dtype=np.int32)
+
+    _validpuppixy = property(get_validpuppixy, set_validpuppixy)
+
+    def get_isvalid(self):
+        """ Get the valid subapertures array
+
+        :return: (int*) array of 0/1 for valid subaps
+        """
+        return self.__isvalid
 
     def set_isvalid(self, data):
         """ Set the valid subapertures array
@@ -807,11 +1264,16 @@ class Param_wfs:
         self.__isvalid = csu.enforce_arrayMultiDim(data.copy(), data.shape,
                                                    dtype=np.int32)
 
-    _isvalid = property(lambda x: x.__isvalid, set_isvalid)
+    _isvalid = property(get_isvalid, set_isvalid)
+
+    def get_pyr_pos(self):
+        """ TODO : docstring
+        """
+        return self.__pyr_pos
 
     def set_pyr_pos(self, data):
         """ TODO : docstring
         """
         self.__pyr_pos = csu.enforce_array(data.copy(), data.size, dtype=np.complex64)
 
-    pyr_pos = property(lambda x: x.__pyr_pos, set_pyr_pos)
+    pyr_pos = property(get_pyr_pos, set_pyr_pos)

@@ -13,7 +13,9 @@ Options:
   --bench            For a timed call
   -i, --interactive  keep the script interactive
   -d, --devices devices      Specify the devices
+  --niter niter           Number of iterations
   --DB               Use database to skip init phase
+  --generic          Use generic controller
 """
 
 from docopt import docopt
@@ -33,7 +35,6 @@ if __name__ == "__main__":
         from shesha.supervisor.rtcSupervisor import RTCSupervisor as Supervisor
     else:
         from shesha.supervisor.compassSupervisor import CompassSupervisor as Supervisor
-
     if arguments["--DB"]:
         use_DB = True
 
@@ -43,9 +44,15 @@ if __name__ == "__main__":
         supervisor.config.p_loop.set_devices([
                 int(device) for device in arguments["--devices"].split(",")
         ])
+    if arguments["--generic"]:
+        supervisor.config.p_controllers[0].set_type("generic")
+        print("Using GENERIC controller...")
 
     supervisor.initConfig()
-    supervisor.loop(supervisor.config.p_loop.niter)
+    if arguments["--niter"]:
+        supervisor.loop(int(arguments["--niter"]))
+    else:
+        supervisor.loop(supervisor.config.p_loop.niter)
 
     if arguments["--interactive"]:
         from shesha.util.ipython_embed import embed

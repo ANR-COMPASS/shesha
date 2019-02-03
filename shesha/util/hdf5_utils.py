@@ -21,7 +21,13 @@ def updateParamDict(pdict, pClass, prefix):
                     not i.startswith('get_'))
         ]
         for k in params:
-            pdict.update({prefix + k: [p.__dict__[prefix + k].encode("utf8") if isinstance(p.__dict__[prefix + k], str) else p.__dict__[prefix + k] for p in pClass]})
+            pdict.update({
+                    prefix + k: [
+                            p.__dict__[prefix + k].encode("utf8")
+                            if isinstance(p.__dict__[prefix + k], str) else
+                            p.__dict__[prefix + k] for p in pClass
+                    ]
+            })
 
     else:
         params = [
@@ -364,8 +370,9 @@ def checkControlParams(savepath, config, pdict, matricesToLoad):
             # For debug
             #############################
             if not cond:
-               cc -= 1
-               print(param2test[cc]+" has changed from ",dataBase.loc[i,param2test[cc]], " to ",pdict[param2test[cc]])
+                cc -= 1
+                print(param2test[cc] + " has changed from ",
+                      dataBase.loc[i, param2test[cc]], " to ", pdict[param2test[cc]])
             ###############################
         else:
             cond = False
@@ -422,8 +429,9 @@ def checkDmsParams(savepath, config, pdict, matricesToLoad):
             # For debug
             #############################
             if not cond:
-               cc -= 1
-               print((param2test[cc]+" has changed from ",dataBase.loc[i,param2test[cc]], " to ",pdict[param2test[cc]]))
+                cc -= 1
+                print((param2test[cc] + " has changed from ",
+                       dataBase.loc[i, param2test[cc]], " to ", pdict[param2test[cc]]))
             ###############################
         else:
             cond = False

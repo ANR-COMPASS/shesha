@@ -6,19 +6,19 @@ import shesha.config as conf
 from shesha.constants import CONST
 import shesha.util.iterkolmo as itK
 import shesha.util.hdf5_utils as h5u
-from shesha.sutra_wrap import naga_context, Atmos
+from shesha.sutra_wrap import carmaWrap_context, Atmos
 from tqdm import tqdm
 import numpy as np
 
 
-def atmos_init(context: naga_context, p_atmos: conf.Param_atmos, p_tel: conf.Param_tel,
-               p_geom: conf.Param_geom, ittime=None, p_wfss=None, p_targets=None,
-               dataBase={}, use_DB=False):
+def atmos_init(context: carmaWrap_context, p_atmos: conf.Param_atmos,
+               p_tel: conf.Param_tel, p_geom: conf.Param_geom, ittime=None, p_wfss=None,
+               p_targets=None, dataBase={}, use_DB=False):
     """
     Initializes an Atmos object
 
     :parameters:
-        context: (naga_context): GPU device context
+        context: (carmaWrap_context): GPU device context
         p_atmos: (Param_atmos): Atmosphere parameters
         p_tel: (Param_tel): Telescope parameters
         p_geom: (Param_geom): Geometry parameters
@@ -33,7 +33,7 @@ def atmos_init(context: naga_context, p_atmos: conf.Param_atmos, p_tel: conf.Par
     if not p_geom.is_init:
         raise RuntimeError("Cannot init atmosphere with uninitialized p_geom.")
 
-    # Deleted naga_context : get the singleton
+    # Deleted carmaWrap_context : get the singleton
 
     if p_atmos.r0 is None:
         p_atmos.r0 = 0.
@@ -58,9 +58,8 @@ def atmos_init(context: naga_context, p_atmos: conf.Param_atmos, p_tel: conf.Par
     max_size = max(norms)
 
     # Meta-pupil diameter for all layers depending on altitude
-    patch_diam = (p_geom._n + 2 *
-                  (max_size * CONST.ARCSEC2RAD * p_atmos.alt) / p_atmos.pupixsize +
-                  4).astype(np.int64)
+    patch_diam = (p_geom._n + 2 * (max_size * CONST.ARCSEC2RAD * p_atmos.alt) /
+                  p_atmos.pupixsize + 4).astype(np.int64)
     p_atmos.dim_screens = (patch_diam + patch_diam % 2)
 
     # Phase screen speeds

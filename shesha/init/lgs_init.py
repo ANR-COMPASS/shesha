@@ -58,8 +58,8 @@ def make_lgs_prof1d(p_wfs: conf.Param_wfs, p_tel: conf.Param_tel, prof: np.ndarr
     # cdef float dh=h[1]-h[0] #UNUSED
 
     if (p_wfs.nxsub > 1):
-        dOffAxis = np.sqrt((xsubs[p_wfs._validsubsy] - p_wfs.lltx)**2 +
-                           (ysubs[p_wfs._validsubsx] - p_wfs.llty)**2)
+        dOffAxis = np.sqrt((xsubs[p_wfs._validsubsy // p_wfs.npix] - p_wfs.lltx)**2 +
+                           (ysubs[p_wfs._validsubsx // p_wfs.npix] - p_wfs.llty)**2)
     else:
         dOffAxis = np.sqrt((xsubs - p_wfs.lltx)**2 + (ysubs - p_wfs.llty)**2)
 
@@ -86,8 +86,8 @@ def make_lgs_prof1d(p_wfs: conf.Param_wfs, p_tel: conf.Param_tel, prof: np.ndarr
             avg_x[1:-1] = 0.5 * (x[1:] + x[:-1])
 
             for i in range(inds.size):
-                profi[:, inds[i]] = np.diff(
-                        np.interp(avg_x, avg_zhc, p_wfs._profcum)).astype(np.float32)
+                profi[:, inds[i]] = np.diff(np.interp(avg_x, avg_zhc,
+                                                      p_wfs._profcum)).astype(np.float32)
 
         else:
             for i in range(inds.size):
@@ -133,8 +133,8 @@ def make_lgs_prof1d(p_wfs: conf.Param_wfs, p_tel: conf.Param_tel, prof: np.ndarr
         im[:, i, :] = g[i] * p1d.T
 
     if (ysubs.size > 1):
-        azimuth = np.arctan2(ysubs[p_wfs._validsubsy] - p_wfs.llty,
-                             xsubs[p_wfs._validsubsx] - p_wfs.lltx)
+        azimuth = np.arctan2(ysubs[p_wfs._validsubsy // p_wfs.npix] - p_wfs.llty,
+                             xsubs[p_wfs._validsubsx // p_wfs.npix] - p_wfs.lltx)
     else:
         azimuth = np.arctan2(ysubs - p_wfs.llty, xsubs - p_wfs.lltx)
 
@@ -208,9 +208,8 @@ def prep_lgs_prof(p_wfs: conf.Param_wfs, nsensors: int, p_tel: conf.Param_tel,
     profile_path = shesha_savepath + profilename
     print("reading Na profile from", profile_path)
     prof = np.load(profile_path)
-    make_lgs_prof1d(p_wfs, p_tel,
-                    np.mean(prof[1:, :], axis=0), prof[0, :], p_wfs.beamsize,
-                    center="image")
+    make_lgs_prof1d(p_wfs, p_tel, np.mean(prof[1:, :], axis=0), prof[0, :],
+                    p_wfs.beamsize, center="image")
     p_wfs.set_altna(prof[0, :].astype(np.float32))
     p_wfs.set_profna(np.mean(prof[1:, :], axis=0).astype(np.float32))
 
@@ -236,8 +235,8 @@ def prep_lgs_prof(p_wfs: conf.Param_wfs, nsensors: int, p_tel: conf.Param_tel,
     dh = p_wfs._altna[1] - p_wfs._altna[0]
 
     if (p_wfs.nxsub > 1):
-        dOffAxis = np.sqrt((xsubs[p_wfs._validsubsx] - p_wfs.lltx)**2 +
-                           (ysubs[p_wfs._validsubsy] - p_wfs.llty)**2)
+        dOffAxis = np.sqrt((xsubs[p_wfs._validsubsx // p_wfs.npix] - p_wfs.lltx)**2 +
+                           (ysubs[p_wfs._validsubsy // p_wfs.npix] - p_wfs.llty)**2)
     else:
         dOffAxis = np.sqrt((xsubs - p_wfs.lltx)**2 + (ysubs - p_wfs.llty)**2)
 
@@ -266,8 +265,8 @@ def prep_lgs_prof(p_wfs: conf.Param_wfs, nsensors: int, p_tel: conf.Param_tel,
     # convolved profile in 1D.
 
     if (xsubs.size > 1):
-        azimuth = np.arctan2(ysubs[p_wfs._validsubsy] - p_wfs.llty,
-                             xsubs[p_wfs._validsubsx] - p_wfs.lltx)
+        azimuth = np.arctan2(ysubs[p_wfs._validsubsy // p_wfs.npix] - p_wfs.llty,
+                             xsubs[p_wfs._validsubsx // p_wfs.npix] - p_wfs.lltx)
     else:
         azimuth = np.arctan2(ysubs - p_wfs.llty, xsubs - p_wfs.lltx)
 

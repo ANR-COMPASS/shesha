@@ -56,17 +56,14 @@ def do_tomo_matrices(ncontrol: int, rtc: Rtc, p_wfss: List[conf.Param_wfs], dms:
     Y = np.zeros(nvalid, dtype=np.float64)
 
     for k in p_controller.nwfs:
-        posx = p_wfss[k]._istart + s2ipup
+        posx = p_wfss[k]._validpuppixx + s2ipup
         # X-position of the bottom left corner of each valid subaperture
-        posx = posx * p_wfss[k]._isvalid
-        # Select the valid ones, bring the origin in the center of ipupil and 0-index it
-        posx = posx[np.where(posx > 0)] - ipup.shape[0] / 2 - 1
-        posy = p_wfss[k]._jstart + s2ipup
-        posy = posy * p_wfss[k]._isvalid
-        posy = posy.T[np.where(posy > 0)] - ipup.shape[0] / 2 - 1
-        sspDiam = posx[1] - posx[0]  # Diameter of one ssp in pixels
+        # bring the origin in the center of ipupil and 0-index it
+        posx = posx - ipup.shape[0] / 2 - 1
+        posy = p_wfss[k]._validpuppixy + s2ipup
+        posy = posy.T - ipup.shape[0] / 2 - 1
         p2m = (p_tel.diam / p_wfss[k].nxsub) / \
-            sspDiam  # Size of one pixel in meters
+            p_wfss[k]._pdiam  # Size of one pixel in meters
         posx *= p2m  # Positions in meters
         posy *= p2m
         X[ind:ind + p_wfss[k]._nvalid] = posx
@@ -147,10 +144,10 @@ def do_tomo_matrices(ncontrol: int, rtc: Rtc, p_wfss: List[conf.Param_wfs], dms:
     ind = 0
     for k in range(len(p_controller.ndm)):
         if (p_dms[k].type == "pzt"):
-            Nact[ind:ind + p_dms[k]._ntotact, ind:
-                 ind + p_dms[k]._ntotact] = create_nact_geom(p_dms[k])
-            F[ind:ind + p_dms[k]._ntotact, ind:
-              ind + p_dms[k]._ntotact] = create_piston_filter(p_dms[k])
+            Nact[ind:ind + p_dms[k]._ntotact, ind:ind +
+                 p_dms[k]._ntotact] = create_nact_geom(p_dms[k])
+            F[ind:ind + p_dms[k]._ntotact, ind:ind +
+              p_dms[k]._ntotact] = create_piston_filter(p_dms[k])
             ind += p_dms[k]._ntotact
 
     rtc.d_control[ncontrol].filter_cphim(F, Nact)
