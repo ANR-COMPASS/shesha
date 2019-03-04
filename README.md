@@ -1,4 +1,4 @@
-[![Documentation Status](https://readthedocs.org/projects/shesha/badge/?version=master)](http://shesha.readthedocs.io/en/master/?badge=master) [![Anaconda-Server Badge](https://anaconda.org/compass/compass/badges/installer/conda.svg)](https://conda.anaconda.org/compass)
+[![Documentation Status](https://readthedocs.org/projects/shesha/badge/?version=latest)](http://shesha.readthedocs.io/en/latest/?badge=latest) [![Anaconda-Server Badge](https://anaconda.org/compass/compass/badges/installer/conda.svg)](https://conda.anaconda.org/compass)
 
 Table of Contents
 =================
