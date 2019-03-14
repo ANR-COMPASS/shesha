@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 import numpy as np
+from tqdm import trange
 
 
 class AbstractSupervisor(ABC):
@@ -41,11 +42,12 @@ class AbstractSupervisor(ABC):
     ''' Immediately gets one slope vector for all WFS at the current state of the system '''
 
     @abstractmethod
-    def singleNext(self, moveAtmos: bool=True, showAtmos: bool=True, getPSF: bool=False,
-                   getResidual: bool=False) -> None:
+    def singleNext(self, moveAtmos: bool = True, showAtmos: bool = True,
+                   getPSF: bool = False, getResidual: bool = False) -> None:
         ...
 
     def next(self, nbiters, see_atmos=True):
+        from tqdm import trange
         for _ in trange(nbiters):
             self.singleNext(showAtmos=see_atmos)
 
@@ -94,10 +96,10 @@ class AbstractSupervisor(ABC):
     ''' Get an image from a target '''
 
     @abstractmethod
-    def getRawWFSImage(self, numWFS: int=0) -> np.ndarray:
+    def getWfsImage(self, numWFS: int = 0, calPix: bool = False) -> np.ndarray:
         ...
 
-    ''' Get an image from the WFS '''
+    ''' Get an image from the WFS. If calpix = True returns the calibrated image (background + flat + pixels selection )'''
 
     @abstractmethod
     def getIntensities(self):

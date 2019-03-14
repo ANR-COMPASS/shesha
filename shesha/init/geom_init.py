@@ -512,7 +512,7 @@ def init_pyrhr_geom(p_wfs: conf.Param_wfs, r0: float, p_tel: conf.Param_tel,
         # mod_npts = p_wfs.pyr_npts #UNUSED
     else:
         if (verbose):
-            print("Using user-defined positions for the pyramid modulation")
+            print("Using user-defined positions [arcsec] for the pyramid modulation")
         cx = p_wfs.pyr_pos[:, 0] / p_wfs._qpixsize
         cy = p_wfs.pyr_pos[:, 1] / p_wfs._qpixsize
         # mod_npts=cx.shape[0] #UNUSED
@@ -829,3 +829,56 @@ def geom_init(p_geom: conf.Param_geom, p_tel: conf.Param_tel, padding=2):
     p_geom._apodizer = np.ones(p_geom._spupil.shape, dtype=np.int32)
 
     p_geom.is_init = True
+
+
+def geom_init_generic(p_geom, pupdiam, t_spiders=0.01, spiders_type="six", xc=0, yc=0,
+                      real=0, cobs=0):
+    """Initialize the system geometry
+
+    :parameters:
+        pupdiam: (long) : linear size of total pupil
+
+        t_spiders: (float) : secondary supports ratio.
+
+        spiders_type: (str) :  secondary supports type: "four" or "six".
+
+        xc: (int)
+
+        yc: (int)
+
+        real: (int)
+
+        cobs: (float) : central obstruction ratio.
+    """
+    # Initialize the system pupil
+    # first poxer of 2 greater than pupdiam
+    p_geom.ssize = int(2**np.ceil(np.log2(pupdiam) + 1))
+    # using images centered on 1/2 pixels
+    p_geom.cent = p_geom.ssize / 2 + 0.5
+    # valid pupil geometry
+    pupdiam = int(pupdiam)
+    p_geom._p1 = int(np.ceil(p_geom.cent - pupdiam / 2.))
+    p_geom._p2 = int(np.floor(p_geom.cent + pupdiam / 2.))
+    p_geom.pupdiam = p_geom._p2 - p_geom._p1 + 1
+    p_geom._n = p_geom.pupdiam + 4
+    p_geom._n1 = p_geom._p1 - 2
+    p_geom._n2 = p_geom._p2 + 2
+
+    # useful pupil
+    p_geom._spupil = mkP.make_pupil_generic(pupdiam, pupdiam, t_spiders, spiders_type,
+                                            xc, yc, real, cobs)
+
+    # large pupil (used for image formation)
+    p_geom._ipupil = pad_array(p_geom._spupil, p_geom.ssize).astype(np.float32)
+
+    # useful pupil + 4 pixels
+    p_geom._mpupil = pad_array(p_geom._spupil, p_geom._n).astype(np.float32)
+
+
+def pad_array(A, N):
+    S = A.shape
+    D1 = (N - S[0]) // 2
+    D2 = (N - S[1]) // 2
+    padded = np.zeros((N, N))
+    padded[D1:D1 + S[0], D2:D2 + S[1]] = A
+    return padded

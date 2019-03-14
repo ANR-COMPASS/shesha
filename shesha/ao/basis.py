@@ -3,7 +3,7 @@ Functions for modal basis (DM basis, KL, Btt, etc...)
 """
 import numpy as np
 
-from shesha.sutra_wrap import Dms, Rtc
+from shesha.sutra_wrap import Dms, Rtc_FFF as Rtc
 
 import shesha.config as conf
 import shesha.constants as scons

@@ -51,14 +51,14 @@ def dm_init(context: carmaWrap_context, p_dms: List[conf.Param_dm],
             # max_extent
             #_dm_init(dms, p_dms[i], p_wfss, p_geom, p_tel, & max_extent)
             _dm_init(context, dms, p_dms[i], xpos_wfs, ypos_wfs, p_geom, p_tel.diam,
-                     p_tel.cobs, max_extent, keepAllActu=keepAllActu)
+                     p_tel.cobs, p_tel.pupangle, max_extent, keepAllActu=keepAllActu)
 
     return dms
 
 
 def _dm_init(context: carmaWrap_context, dms: Dms, p_dm: conf.Param_dm, xpos_wfs: list,
              ypos_wfs: list, p_geom: conf.Param_geom, diam: float, cobs: float,
-             max_extent: list, keepAllActu: bool = False):
+             pupAngle: float, max_extent: list, keepAllActu: bool = False):
     """ inits a Dms object on the gpu
 
     :parameters:
@@ -96,7 +96,7 @@ def _dm_init(context: carmaWrap_context, dms: Dms, p_dm: conf.Param_dm, xpos_wfs
                                                         p_geom.ssize)
 
             # calcul defaut influsize
-            make_pzt_dm(p_dm, p_geom, cobs, keepAllActu=keepAllActu)
+            make_pzt_dm(p_dm, p_geom, cobs, pupAngle, keepAllActu=keepAllActu)
         else:
             init_pzt_from_hdf5(p_dm, p_geom, diam)
 
@@ -157,8 +157,8 @@ def _dm_init(context: carmaWrap_context, dms: Dms, p_dm: conf.Param_dm, xpos_wfs
         # res2 = yoga_getkl(g_dm,0.,1);
 
 
-def dm_init_standalone(p_dms: list, p_geom: conf.Param_geom, diam=1., cobs=0.,
-                       wfs_xpos=[0], wfs_ypos=[0]):
+def dm_init_standalone(context: carmaWrap_context, p_dms: list, p_geom: conf.Param_geom, diam=1., cobs=0.,
+                       pupAngle=0., wfs_xpos=[0], wfs_ypos=[0]):
     """Create and initialize a Dms object on the gpu
 
     :parameters:
@@ -170,6 +170,8 @@ def dm_init_standalone(p_dms: list, p_geom: conf.Param_geom, diam=1., cobs=0.,
 
         cobs: (float) : cobs of telescope (default 0.)
 
+        pupAngle: (float) : pupil rotation angle (degrees, default 0.)
+
         wfs_xpos: (array) : guide star x position on sky (in arcsec).
 
         wfs_ypos: (array) : guide star y position on sky (in arcsec).
@@ -179,12 +181,12 @@ def dm_init_standalone(p_dms: list, p_geom: conf.Param_geom, diam=1., cobs=0.,
     if (len(p_dms) != 0):
         dms = Dms()
         for i in range(len(p_dms)):
-            _dm_init(dms, p_dms[i], wfs_xpos, wfs_ypos, p_geom, diam, cobs, max_extent)
+            _dm_init(context, dms, p_dms[i], wfs_xpos, wfs_ypos, p_geom, diam, cobs, pupAngle, max_extent)
     return dms
 
 
 def make_pzt_dm(p_dm: conf.Param_dm, p_geom: conf.Param_geom, cobs: float,
-                keepAllActu: bool = False):
+                pupAngle: float, keepAllActu: bool = False):
     """Compute the actuators positions and the influence functions for a pzt DM
 
     :parameters:
@@ -205,6 +207,11 @@ def make_pzt_dm(p_dm: conf.Param_dm, p_geom: conf.Param_geom, cobs: float,
     # prepare to compute IF on partial (local) support of size <smallsize>
     pitch = p_dm._pitch
     smallsize = 0
+
+    # Petal DM (segmentation of M4)
+    if (p_dm.influType == scons.InfluType.PETAL):
+        makePetalDm(p_dm, p_geom, pupAngle)
+        return
 
     if (p_dm.influType == scons.InfluType.RADIALSCHWARTZ):
         smallsize = influ_util.makeRadialSchwartz(pitch, coupling)
@@ -235,7 +242,14 @@ def make_pzt_dm(p_dm: conf.Param_dm, p_geom: conf.Param_geom, cobs: float,
     elif p_dm.type_pattern == scons.PatternType.HEXAM4:
         print("Pattern type : hexaM4")
         keepAllActu = True
-        cub = dm_util.createDoubleHexaPattern(pitch, p_geom.pupdiam * 1.1)
+        cub = dm_util.createDoubleHexaPattern(pitch, p_geom.pupdiam * 1.1, pupAngle)
+        if p_dm.margin_out is not None:
+            pup_side = p_geom._ipupil.shape[0]
+            cub_off = dm_util.filterActuWithPupil(cub + pup_side // 2 - 0.5,
+                                                  p_geom._ipupil,
+                                                  p_dm.margin_out * p_dm.get_pitch())
+            cub = cub_off - pup_side // 2 + 0.5
+            p_dm.set_ntotact(cub.shape[1])
     elif p_dm.type_pattern == scons.PatternType.SQUARE:
         print("Pattern type : square")
         cub = dm_util.createSquarePattern(pitch, nxact + 4)
@@ -601,13 +615,10 @@ def correct_dm(context, dms: Dms, p_dms: list, p_controller: conf.Param_controll
         use_DB: (bool): dataBase use flag
     """
     print("Filtering unseen actuators... ")
-    ndm = p_controller.ndm.size
-    for i in range(ndm - 1, -1, -1):
-        nm = p_controller.ndm[i]
-        dms.remove_dm(nm)
     if imat is not None:
         resp = np.sqrt(np.sum(imat**2, axis=0))
 
+    ndm = p_controller.ndm.size
     inds = 0
 
     for nmc in range(ndm):
@@ -649,29 +660,159 @@ def correct_dm(context, dms: Dms, p_dms: list, p_controller: conf.Param_controll
             dim = max(p_dms[nm]._n2 - p_dms[nm]._n1 + 1, p_geom._mpupil.shape[0])
             ninflupos = p_dms[nm]._influpos.size
             n_npts = p_dms[nm]._ninflu.size
-
-            dms.add_dm(context, p_dms[nm].type, p_dms[nm].alt, dim, p_dms[nm]._ntotact,
-                       p_dms[nm]._influsize, ninflupos, n_npts, p_dms[nm].push4imat, 0,
-                       context.activeDevice)
-            dms.d_dms[-1].pzt_loadarrays(p_dms[nm]._influ, p_dms[nm]._influpos.astype(
+            dms.remove_dm(nm)
+            dms.insert_dm(context, p_dms[nm].type, p_dms[nm].alt, dim,
+                          p_dms[nm]._ntotact, p_dms[nm]._influsize, ninflupos, n_npts,
+                          p_dms[nm].push4imat, 0, context.activeDevice, nm)
+            dms.d_dms[nm].pzt_loadarrays(p_dms[nm]._influ, p_dms[nm]._influpos.astype(
                     np.int32), p_dms[nm]._ninflu, p_dms[nm]._influstart, p_dms[nm]._i1,
                                          p_dms[nm]._j1)
-        elif (p_dms[nm].type == scons.DmType.TT):
-            dim = p_dms[nm]._n2 - p_dms[nm]._n1 + 1
-            dms.add_dm(context, p_dms[nm].type, p_dms[nm].alt, dim, 2, dim, 1, 1,
-                       p_dms[nm].push4imat, 0, context.activeDevice)
-            dms.d_dms[-1].tt_loadarrays(p_dms[nm]._influ)
-
-        elif (p_dms[nm].type == scons.DmType.KL):
-            dim = int(p_dms[nm]._n2 - p_dms[nm]._n1 + 1)
-
-            dms.add_dm(context, p_dms[nm].type, p_dms[nm].alt, dim, p_dms[nm].nkl,
-                       p_dms[nm]._ncp, p_dms[nm]._nr, p_dms[nm]._npp,
-                       p_dms[nm].push4imat, p_dms[nm]._ord.max(), context.activeDevice)
-            dms.d_dms[-1].kl_loadarrays(p_dms[nm]._rabas, p_dms[nm]._azbas,
-                                        p_dms[nm]._ord, p_dms[nm]._cr, p_dms[nm]._cp)
-        else:
-            raise ValueError("Screwed up.")
 
         inds += nactu_nm
     print("Done")
+
+
+
+
+
+def makePetalDm(p_dm, p_geom, pupAngleDegree):
+    '''
+    makePetalDm(p_dm, p_geom, pupAngleDegree)
+     
+    The function builds a DM, segmented in petals according to the pupil
+    shape. The petals will be adapted to the EELT case only.
+    
+    <p_geom> : compass object p_geom. The function requires the object p_geom
+               in order to know what is the pupil mask, and what is the mpupil.
+    <p_dm>   : compass petal dm object p_dm to be created. The function will
+               transform/modify in place the attributes of the object p_dm.
+    
+    
+    '''
+    p_dm._n1 = p_geom._n1
+    p_dm._n2 = p_geom._n2
+    influ, i1, j1, smallsize, nbSeg = make_petal_dm_core(p_geom._mpupil, pupAngleDegree)
+    p_dm._influsize = smallsize
+    p_dm.set_ntotact(nbSeg)
+    p_dm._i1 = i1
+    p_dm._j1 = j1
+    p_dm._xpos = i1 + smallsize/2 + p_dm._n1
+    p_dm._ypos = j1 + smallsize/2 + p_dm._n1
+    p_dm._influ = influ
+
+    # generates the arrays of indexes for the GPUs
+    comp_dmgeom(p_dm, p_geom)
+
+
+
+
+def make_petal_dm_core(pupImage, pupAngleDegree):
+    """
+    <pupImage> : image of the pupil
+
+    La fonction renvoie des fn d'influence en forme de petale d'apres
+    une image de la pupille, qui est supposee etre segmentee.
+
+
+    influ, i1, j1, smallsize, nbSeg = make_petal_dm_core(pupImage, 0.0)
+    """
+    # Splits the pupil into connex areas.
+    # <segments> is the map of the segments, <nbSeg> in their number.
+    from scipy.ndimage.measurements import label
+    segments, nbSeg = label(pupImage)
+
+    # Faut trouver le plus petit support commun a tous les
+    # petales : on determine <smallsize>
+    smallsize = 0
+    i1t = []   # list of starting indexes of influ functions
+    j1t = []
+    i2t = []   # list of ending indexes of influ functions
+    j2t = []
+    for i in range(nbSeg):
+        petal = segments==(i+1)   # identification (boolean) of a given segment
+        profil = np.sum(petal, axis=1)!=0
+        extent = np.sum(profil).astype(np.int32)
+        i1t.append(np.min(np.where(profil)[0]))
+        i2t.append(np.max(np.where(profil)[0]))
+        if extent>smallsize:
+            smallsize = extent
+
+        profil = np.sum(petal, axis=0)!=0
+        extent = np.sum(profil).astype(np.int32)
+        j1t.append(np.min(np.where(profil)[0]))
+        j2t.append(np.max(np.where(profil)[0]))
+        if extent>smallsize:
+            smallsize = extent
+
+    # Allocate array of influence functions
+    influ = np.zeros((smallsize, smallsize, nbSeg), dtype=np.float32)
+
+    npt = pupImage.shape[0]
+    i0 = j0 = npt/2 - 0.5
+    print('CORRIGER CETTE MERDE !!!!!')
+    petalMap = build_petals(nbSeg, pupAngleDegree, i0, j0, npt)
+    ii1 = np.zeros(nbSeg)
+    jj1 = np.zeros(nbSeg)
+    for i in range(nbSeg):
+        ip = (smallsize - i2t[i] + i1t[i] - 1) // 2
+        jp = (smallsize - j2t[i] + j1t[i] - 1) // 2
+        i1 = np.maximum(i1t[i] - ip, 0)
+        j1 = np.maximum(j1t[i] - jp, 0)
+        if (j1+smallsize)>npt:
+            j1 = npt - smallsize
+        if (i1+smallsize)>npt:
+            i1 = npt - smallsize
+        #petal = segments==(i+1) # determine le segment pupille veritable
+        k = petalMap[i1+smallsize//2, j1+smallsize//2]
+        petal = (petalMap==k)
+        influ[:, :, k] = petal[i1:i1+smallsize, j1:j1+smallsize]
+        ii1[k] = i1
+        jj1[k] = j1
+
+    return influ, ii1, jj1, int(smallsize), nbSeg
+
+
+
+
+def build_petals(nbSeg, pupAngleDegree, i0, j0, npt):
+    """
+    Makes an image npt x npt of <nbSeg> regularly spaced angular segments
+    centred on (i0, j0).
+    Origin of angles is set by <pupAngleDegree>.
+    
+    The segments are oriented as defined in document "Standard Coordinates
+    and Basic Conventions", ESO-193058. 
+    This document states that the X axis lies in the middle of a petal, i.e.
+    that the axis Y is along the spider.
+    The separation angle between segments are [-30, 30, 90, 150, -150, -90]. 
+    For this reason, an <esoOffsetAngle> = -pi/6 is introduced in the code.
+
+    nbSeg = 6
+    pupAngleDegree = 5.0
+    i0 = j0 = 112.3
+    npt = 222
+    p = build_petals(nbSeg, pupAngleDegree, i0, j0, npt)
+    """
+    # conversion to radians
+    rot = pupAngleDegree * np.pi / 180.0
+
+    # building coordinate maps
+    esoOffsetAngle = -np.pi/6  # -30°, ESO definition.
+    x = np.arange(npt)-i0
+    y = np.arange(npt)-j0
+    X, Y = np.meshgrid(x, y, indexing='ij')
+    theta = (np.arctan2(Y, X) - rot + 2*np.pi - esoOffsetAngle) % (2*np.pi)
+
+    # Compute separation angle between segments: start and end.
+    angleStep = 2*np.pi/nbSeg
+    startAngle = np.arange(nbSeg) * angleStep
+    endAngle = np.roll(startAngle, -1)
+    endAngle[-1] = 2*np.pi  # last angle is 0.00 and must be replaced by 2.pi
+    petalMap = np.zeros((npt, npt), dtype=int)
+    for i in range(nbSeg):
+        nn = np.where( np.logical_and(theta>=startAngle[i], theta<endAngle[i]) )
+        petalMap[nn] = i
+    return petalMap
+
+
+

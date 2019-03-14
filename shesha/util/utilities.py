@@ -141,29 +141,30 @@ def makegaussian(size, fwhm, xc=-1, yc=-1, norm=0):
     return tmp
 
 
-def load_config_from_file(sim_class, filepath: str) -> None:
+def load_config_from_file(sim_class, filename_path: str) -> None:
     """
     Load the parameters from the parameters file
 
     :parameters:
-        filepath: (str): path to the parameters file
+        filename_path: (str): path to the parameters file
 
     """
     sim_class.loaded = False
     sim_class.is_init = False
-    filename = filepath.split('/')[-1].split(".py")[0]
-    if (len(filepath.split('.')) > 1 and filepath.split('.')[-1] == "py"):
+    path = os.path.dirname(os.path.abspath(filename_path))
+    filename = os.path.basename(filename_path)
+    name, ext = os.path.splitext(filename)
 
-        pathfile = filepath.split(filename)[0]
-        if (pathfile not in sys.path):
-            sys.path.insert(0, pathfile)
+    if (ext == ".py"):
+        if (path not in sys.path):
+            sys.path.insert(0, path)
 
-        load_config_from_module(sim_class, filename)
+        load_config_from_module(sim_class, name)
 
         # exec("import %s as wao_config" % filename)
-        sys.path.remove(pathfile)
-    elif importlib.util.find_spec(filepath) is not None:
-        load_config_from_module(sim_class, filepath)
+        sys.path.remove(path)
+    elif importlib.util.find_spec(filename_path) is not None:
+        load_config_from_module(sim_class, filename_path)
     else:
         raise ValueError("Config file must be .py or a module")
 

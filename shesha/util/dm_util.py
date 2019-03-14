@@ -96,18 +96,18 @@ def createHexaPattern(pitch: float, supportSize: int):
     The number M is the number of points of this grid, it cannot be
     known before the procedure is called.
     Coordinates are centred around (0,0).
-    The support that limits the grid is a square [-n/2,n/2].
+    The support that limits the grid is a square [-supportSize/2, supportSize/2].
 
     :parameters:
 
         pitch: (float) : distance in pixels between 2 adjacent actus
 
-        n: (float) : size in pixels of the support over which the coordinate list
+        supportSize: (int) : size in pixels of the support over which the coordinate list
              should be returned.
 
     :return:
 
-        xy: (np.ndarray(dims=2,dtype=np.float32)) : xy[M,2] list of coodinates
+        xy: (np.ndarray(dims=2,dtype=np.float32)) : xy[2,M] list of coordinates
     """
     V3 = np.sqrt(3)
     nx = int(np.ceil((supportSize / 2.0) / pitch) + 1)
@@ -124,51 +124,85 @@ def createHexaPattern(pitch: float, supportSize: int):
     return xy
 
 
-def createDoubleHexaPattern(pitch: float, supportSize: int):
+def createDoubleHexaPattern(pitch: float, supportSize: int, pupAngleDegree: float):
     """
     Creates a list of M actuator positions spread over an hexagonal grid.
     The number M is the number of points of this grid, it cannot be
     known before the procedure is called.
     Coordinates are centred around (0,0).
-    The support that limits the grid is a square [-n/2,n/2].
+    The support of the grid is a square [-supportSize/2,vsupportSize/2].
 
     :parameters:
 
         pitch: (float) : distance in pixels between 2 adjacent actus
-
-        n: (float) : size in pixels of the support over which the coordinate list
+        supportSize: (int) : size in pixels of the support over which the coordinate list
              should be returned.
+        pupAngleDegree: (float) : Rotation angle of the DM
 
     :return:
 
-        xy: (np.ndarray(dims=2,dtype=np.float32)) : xy[M,2] list of coodinates
+        xy: (np.ndarray(dims=2,dtype=np.float32)) : xy[2,M] list of coodinates
     """
+    # ici on cree le pattern hexa. Par simplicite on replique le meme code
+    # que dans createHexaPattern(). On a donc un reseau "pointe selon X"
     V3 = np.sqrt(3)
     pi = np.pi
-    nx = int(np.ceil((supportSize / 2.0) / pitch) + 1)
-    x = pitch * (np.arange(2 * nx + 1, dtype=np.float32) - nx)
-    Nx = x.shape[0]
-    ny = int(np.ceil((supportSize / 2.0) / pitch / V3) + 1)
-    y = (V3 * pitch) * (np.arange(2 * ny + 1, dtype=np.float32) - ny) + pitch
-    Ny = y.shape[0]
-    x = np.tile(x, (Ny, 1)).flatten()
-    y = np.tile(y, (Nx, 1)).T.flatten()
-    x = np.append(x, x + pitch / 2.)
-    y = np.append(y, y + pitch * V3 / 2.)
-    xy = np.float32(np.array([x, y]))
+    ny = int(np.ceil((supportSize / 2.0) / pitch) + 1)
+    y = pitch * (np.arange(2 * ny + 1, dtype=np.float32) - ny)
+    nx = int(np.ceil((supportSize / 2.0) / pitch / V3) + 1)
+    x = (V3 * pitch) * (np.arange(2 * nx + 1, dtype=np.float32) - nx)
+    # LA ligne de code qui change tout: on shifte le reseau de 1 pitch en X.
+    x = x + pitch
+    x, y = np.meshgrid(x, y, indexing='ij')
+    x = x.flatten()
+    y = y.flatten()
+    x = np.append(x, x + pitch * V3 / 2.)
+    y = np.append(y, y + pitch / 2.)
 
+    # on selection 1/6ieme du reseau, entre -30 et 30 degres
     th = np.arctan2(y, x)
-    nn = np.where(((th > pi / 3) & (th < 2 * pi / 3)))
+    nn = np.where(((th < pi / 6) & (th > -pi / 6)))
     x = x[nn]
     y = y[nn]
+    
+    # on va maintenant repliquer ce reseau 6 fois, et le rotationnant a chaque
+    # fois de 60°. Note:
     X = np.array([])
     Y = np.array([])
     for k in range(6):
-        xx = np.cos(k * pi / 3) * x + np.sin(k * pi / 3) * y
+        xx =  np.cos(k * pi / 3) * x + np.sin(k * pi / 3) * y
         yy = -np.sin(k * pi / 3) * x + np.cos(k * pi / 3) * y
         X = np.r_[X, xx]
         Y = np.r_[Y, yy]
-    return np.float32(np.array([X, Y]))
+
+    # Rotation matrices pour suivre l'angle pupille
+    rot = pupAngleDegree * np.pi / 180.0
+    mrot = np.array([[np.cos(rot), -np.sin(rot)], [np.sin(rot), np.cos(rot)]])
+    XY = np.dot( mrot, [X,Y] )
+    return np.float32(XY)
+
+
+def filterActuWithPupil(actuPos: np.ndarray, pupil: np.ndarray,
+                        threshold: float) -> np.ndarray:
+    '''
+        Select actuators based on their distance to the nearest pupil pixel
+        The implementation proposed here is easy but limits it precision to
+        an integer roundoff of the threshold
+
+        actuPos: 2 x nActu np.array[float]: actuator position list - pupil pixel units
+        pupil: nPup x nPup np.ndarray[bool]: pupil mask
+        threshold: float: max allowed distance - pupil pixel units
+    '''
+
+    # Gen a dilation mask of expected size
+    from scipy.ndimage.morphology import binary_dilation
+    k = np.ceil(threshold)
+    i, j = np.meshgrid(np.arange(2 * k + 1), np.arange(2 * k + 1), indexing='ij')
+    disk = ((i - k)**2 + (j - k)**2)**.5 <= k
+    dilatedPupil = binary_dilation(pupil, disk)
+    actuIsIn = dilatedPupil[(np.round(actuPos[0]).astype(np.int32),
+                             np.round(actuPos[1]).astype(np.int32))]
+    return actuPos[:, actuIsIn]
 
 
 def select_actuators(xc: np.ndarray, yc: np.ndarray, nxact: int, pitch: int, cobs: float,

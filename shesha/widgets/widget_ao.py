@@ -437,8 +437,8 @@ class widgetAOWindow(AOClassTemplate, WidgetBase):
         self.curveSRLE.setData(self.numiter, self.SRLE)
 
     def updateDisplay(self) -> None:
-        if (self.supervisor is None) or (not self.supervisor.isInit()) or (
-                not self.uiBase.wao_Display.isChecked()):
+        if (self.supervisor is None or not hasattr(self.supervisor, '_sim') or
+                    self.supervisor._sim is None or not self.supervisor.isInit()):
             # print("Widget not fully initialized")
             return
         if not self.loopLock.acquire(False):
@@ -481,9 +481,9 @@ class widgetAOWindow(AOClassTemplate, WidgetBase):
                                 )
 
                         if "SH" in key:
-                            data = self.supervisor.getRawWFSImage(index)
+                            data = self.supervisor.getWfsImage(index)
                         if "pyrLR" in key:
-                            data = self.supervisor.getRawWFSImage(index)
+                            data = self.supervisor.getWfsImage(index)
                         if "pyrHR" in key:
                             data = self.supervisor.getPyrHRImage(index)
 

@@ -7,10 +7,10 @@ try:
 except KeyError as err:
     import warnings
     shesha_db = os.environ['SHESHA_ROOT'] + "/data/"
-    warnings.warn("'SHESHA_DB_ROOT' not defined, using default one: " + shesha_db)
+    # warnings.warn("'SHESHA_DB_ROOT' not defined, using default one: " + shesha_db)
 finally:
     shesha_savepath = shesha_db
-print("shesha_savepath:", shesha_savepath)
+# print("shesha_savepath:", shesha_savepath)
 
 import shesha.config as conf
 import shesha.constants as scons

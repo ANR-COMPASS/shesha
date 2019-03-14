@@ -64,6 +64,7 @@ class InfluType:
     BLACKNUTT = 'blacknutt'
     GAUSSIAN = 'gaussian'
     BESSEL = 'bessel'
+    PETAL = 'petal'
 
 
 class ControllerType:

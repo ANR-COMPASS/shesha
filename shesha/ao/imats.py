@@ -11,12 +11,15 @@ import shesha.constants as scons
 import shesha.init.lgs_init as lgs
 import shesha.util.hdf5_utils as h5u
 
-from shesha.sutra_wrap import Sensors, Dms, Rtc
+from shesha.sutra_wrap import Sensors, Dms, Rtc_FFF as Rtc
+from shesha.constants import CONST
+
+from astropy.io import fits
 
 
 def imat_geom(wfs: Sensors, dms: Dms, p_wfss: List[conf.Param_wfs],
               p_dms: List[conf.Param_dm], p_controller: conf.Param_controller,
-              meth: int=0) -> np.ndarray:
+              meth: int = 0) -> np.ndarray:
     """ Compute the interaction matrix with a geometric method
 
     :parameters:
@@ -39,12 +42,16 @@ def imat_geom(wfs: Sensors, dms: Dms, p_wfss: List[conf.Param_wfs],
     imat_size1 = 0
     imat_size2 = 0
 
+    for dm in dms.d_dms:
+        dm.reset_shape()
+
     for nw in range(nwfs):
         nm = p_controller.nwfs[nw]
-        imat_size1 += p_wfss[nw]._nvalid * 2
+        imat_size1 += p_wfss[nm]._nvalid * 2
 
     for nmc in range(ndm):
-        imat_size2 += p_dms[nmc]._ntotact
+        nm = p_controller.ndm[nmc]
+        imat_size2 += p_dms[nm]._ntotact
 
     imat_cpu = np.zeros((imat_size1, imat_size2), dtype=np.float32)
     ind = 0
@@ -73,7 +80,7 @@ def imat_geom(wfs: Sensors, dms: Dms, p_wfss: List[conf.Param_wfs],
 
 def imat_init(ncontrol: int, rtc: Rtc, dms: Dms, p_dms: list, wfs: Sensors, p_wfss: list,
               p_tel: conf.Param_tel, p_controller: conf.Param_controller, M2V=None,
-              dataBase: dict={}, use_DB: bool=False) -> None:
+              dataBase: dict = {}, use_DB: bool = False) -> None:
     """ Initialize and compute the interaction matrix on the GPU
 
     :parameters:
@@ -130,3 +137,122 @@ def imat_init(ncontrol: int, rtc: Rtc, dms: Dms, p_dms: list, wfs: Sensors, p_wf
         if (p_wfss[i].gsalt > 0):
             p_wfss[i].proftype = save_profile
             lgs.prep_lgs_prof(p_wfss[i], i, p_tel, wfs)
+
+
+#write imat_ts:
+#   loop over ts directions
+#   change WFS offset to direction
+#   do imat geom
+
+
+def imat_geom_ts_multiple_direction(wfs: Sensors, dms: Dms, p_wfss: List[conf.Param_wfs],
+                                    p_dms: List[conf.Param_dm], p_geom: conf.Param_geom,
+                                    ind_TS: int, p_tel: conf.Param_tel, x, y,
+                                    meth: int = 0) -> np.ndarray:
+    """ Compute the interaction matrix with a geometric method for multiple truth sensors (with different direction)
+
+    :parameters:
+
+        wfs: (Sensors) : Sensors object
+
+        dms: (Dms) : Dms object
+
+        p_wfss: (list of Param_wfs) : wfs settings
+
+        ind_TS: (int) : index of the truth sensor in the wfs settings list
+
+        p_dms: (list of Param_dm) : dms settings
+
+        ind_DMs: (list of int) : indices of used DMs
+
+        p_controller: (Param_controller) : controller settings
+
+        meth: (int) : (optional) method type (0 or 1)
+    """
+    p_wfs = p_wfss[ind_TS]
+    imat_size2 = 0
+    print("DMS_SEEN: ", p_wfs.dms_seen)
+    for nm in p_wfs.dms_seen:
+        imat_size2 += p_dms[nm]._ntotact
+    imat_cpu = np.ndarray((0, imat_size2))
+
+    for i in range(x.size):
+        xpos = x[i]
+        ypos = y[i]
+        for j in range(p_wfs.dms_seen.size):
+            k = p_wfs.dms_seen[j]
+            dims = p_dms[k]._n2 - p_dms[k]._n1 + 1
+            dim = p_geom._mpupil.shape[0]
+            if (dim < dims):
+                dim = dims
+            xoff = xpos * CONST.ARCSEC2RAD * \
+                p_dms[k].alt / p_tel.diam * p_geom.pupdiam
+            yoff = ypos * CONST.ARCSEC2RAD * \
+                p_dms[k].alt / p_tel.diam * p_geom.pupdiam
+            xoff = xoff + (dim - p_geom._n) / 2
+            yoff = yoff + (dim - p_geom._n) / 2
+            wfs.d_wfs[ind_TS].d_gs.add_layer("dm", k, xoff, yoff)
+        imat_cpu = np.concatenate(
+                (imat_cpu,
+                 imat_geom_ts(wfs, dms, p_wfss, ind_TS, p_dms, p_wfs.dms_seen, meth)),
+                axis=0)
+    return imat_cpu
+
+
+def imat_geom_ts(wfs: Sensors, dms: Dms, p_wfss: conf.Param_wfs, ind_TS: int,
+                 p_dms: List[conf.Param_dm], ind_DMs: List[int],
+                 meth: int = 0) -> np.ndarray:
+    """ Compute the interaction matrix with a geometric method for a single truth sensor
+
+    :parameters:
+
+        wfs: (Sensors) : Sensors object
+
+        dms: (Dms) : Dms object
+
+        p_wfss: (list of Param_wfs) : wfs settings
+
+        ind_TS: (int) : index of the truth sensor in the wfs settings list
+
+        p_dms: (list of Param_dm) : dms settings
+
+        ind_DMs: (list of int) : indices of used DMs
+
+        p_controller: (Param_controller) : controller settings
+
+        meth: (int) : (optional) method type (0 or 1)
+    """
+
+    #nwfs = 1 #p_controller.nwfs.size # as parameter list of indices for wfs if several ts (only 1 ts for now)
+    ndm = len(ind_DMs)  #p_controller.ndm.size # as parameter list of indices of used dms
+    imat_size1 = p_wfss[ind_TS]._nvalid * 2  # as parameter (nvalid)
+    imat_size2 = 0
+
+    # for nw in range(nwfs):
+    #     nm = p_controller.nwfs[nw]
+    #     imat_size1 += p_wfss[nm]._nvalid * 2
+
+    for dm in dms.d_dms:
+        dm.reset_shape()
+
+    imat_size2 = 0
+    for nm in ind_DMs:
+        imat_size2 += p_dms[nm]._ntotact
+
+    imat_cpu = np.zeros((imat_size1, imat_size2), dtype=np.float64)
+    ind = 0
+    cc = 0
+    print("Doing imat geom...")
+    for nm in ind_DMs:
+        dms.d_dms[nm].reset_shape()
+        for i in tqdm(range(p_dms[nm]._ntotact), desc="DM%d" % nm):
+            dms.d_dms[nm].comp_oneactu(i, p_dms[nm].push4imat)
+            wfs.d_wfs[ind_TS].d_gs.raytrace("dm")
+            wfs.slopes_geom(ind_TS, meth)
+            imat_cpu[:, ind] = np.array(wfs.d_wfs[ind_TS].d_slopes)
+            imat_cpu[:, ind] = imat_cpu[:, ind] / p_dms[nm].push4imat
+            ind = ind + 1
+            cc = cc + 1
+            dms.d_dms[nm].reset_shape()
+
+    return imat_cpu
