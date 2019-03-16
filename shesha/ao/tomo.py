@@ -6,7 +6,7 @@ import numpy as np
 import shesha.config as conf
 import shesha.constants as scons
 from shesha.constants import CONST
-from shesha.sutra_wrap import Sensors, Dms, Rtc, Atmos
+from shesha.sutra_wrap import Sensors, Dms, Rtc_FFF as Rtc, Atmos
 
 import typing
 from typing import List
@@ -180,7 +180,6 @@ def selectDMforLayers(p_atmos: conf.Param_atmos, p_controller: conf.Param_contro
 
     return indlayersDM
 
-
 def create_nact_geom(p_dm: conf.Param_dm):
     """ Compute the DM coupling matrix
 
@@ -196,40 +195,34 @@ def create_nact_geom(p_dm: conf.Param_dm):
     Nact = np.zeros([nactu, nactu], dtype=np.float32)
     coupling = p_dm.coupling
     dim = p_dm._n2 - p_dm._n1 + 1
-
-    tmpx = p_dm._i1
-    tmpy = p_dm._j1
-    offs = ((p_dm._n2 - p_dm._n1 + 1) - (np.max(tmpx) - np.min(tmpx))) / 2 - np.min(tmpx)
-    tmpx = (tmpx + offs + 1).astype(np.int32)
-    tmpy = (tmpy + offs + 1).astype(np.int32)
     mask = np.zeros([dim, dim], dtype=np.float32)
     shape = np.zeros([dim, dim], dtype=np.float32)
-    for i in range(len(tmpx)):
-        mask[tmpy[i]][tmpx[i]] = 1
+
+    for i in range(len(p_dm._i1)):
+        mask[p_dm._i1[i]][p_dm._j1[i]] = 1
 
     mask_act = np.where(mask)
 
-    pitch = mask_act[1][1] - mask_act[1][0]
+    pitch = int(p_dm._pitch)
 
     for i in range(nactu):
         shape *= 0
         # Diagonal
-        shape[tmpx[i]][tmpy[i]] = 1
+        shape[p_dm._i1[i]][p_dm._j1[i]] = 1
         # Left, right, above and under the current actuator
-        shape[tmpx[i]][tmpy[i] - pitch] = coupling
-        shape[tmpx[i] - pitch][tmpy[i]] = coupling
-        shape[tmpx[i]][tmpy[i] + pitch] = coupling
-        shape[tmpx[i] + pitch][tmpy[i]] = coupling
+        shape[p_dm._i1[i]][p_dm._j1[i] - pitch] = coupling
+        shape[p_dm._i1[i] - pitch][p_dm._j1[i]] = coupling
+        shape[p_dm._i1[i]][p_dm._j1[i] + pitch] = coupling
+        shape[p_dm._i1[i] + pitch][p_dm._j1[i]] = coupling
         # Diagonals of the current actuators
-        shape[tmpx[i] - pitch][tmpy[i] - pitch] = coupling**2
-        shape[tmpx[i] - pitch][tmpy[i] + pitch] = coupling**2
-        shape[tmpx[i] + pitch][tmpy[i] + pitch] = coupling**2
-        shape[tmpx[i] + pitch][tmpy[i] - pitch] = coupling**2
+        shape[p_dm._i1[i] - pitch][p_dm._j1[i] - pitch] = coupling**2
+        shape[p_dm._i1[i] - pitch][p_dm._j1[i] + pitch] = coupling**2
+        shape[p_dm._i1[i] + pitch][p_dm._j1[i] + pitch] = coupling**2
+        shape[p_dm._i1[i] + pitch][p_dm._j1[i] - pitch] = coupling**2
 
         Nact[:, i] = shape.T[mask_act]
 
     return Nact
-
 
 def create_piston_filter(p_dm: conf.Param_dm):
     """ Create the piston filter matrix

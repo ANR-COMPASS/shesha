@@ -57,9 +57,9 @@ class CompassSupervisor(AbstractSupervisor):
         Add this offset value to integrator (will be applied at the end of next iteration)
         '''
         if len(command.shape) == 1:
-            self._sim.rtc.d_control[nControl].add_perturb_voltage(name, command, 1)
+            self._sim.rtc.d_control[nControl].set_perturb_voltage(name, command, 1)
         elif len(command.shape) == 2:
-            self._sim.rtc.d_control[nControl].add_perturb_voltage(
+            self._sim.rtc.d_control[nControl].set_perturb_voltage(
                     name, command, command.shape[0])
         else:
             raise AttributeError("command should be a 1D or 2D array")
@@ -67,9 +67,19 @@ class CompassSupervisor(AbstractSupervisor):
     def resetPerturbationVoltage(self, nControl: int) -> None:
         '''
         Reset the perturbation voltage of the nControl controller
+        (i.e. will remove ALL perturbation voltages.)
+	If you want to reset just one, see the function removePerturbationVoltage().
         '''
-        if self._sim.rtc.d_control[nControl].d_perturb is not None:
-            self._sim.rtc.d_control[nControl].d_perturb.reset()
+        self._sim.rtc.d_control[nControl].reset_perturb_voltage()
+
+    def removePerturbationVoltage(self, nControl: int, name: str) -> None:
+        '''
+        Remove the perturbation voltage called <name>, from the
+ 	controller number <nControl>.
+	If you want to remove all of them, see function resetPerturbationVoltage().
+
+        '''
+        self._sim.rtc.d_control[nControl].remove_perturb_voltage(name)
 
     def getSlope(self) -> np.ndarray:
         '''
@@ -187,12 +197,6 @@ class CompassSupervisor(AbstractSupervisor):
         if (r == 0):
             print("GS magnitude is now %f on WFS %d" % (mag, numwfs))
 
-    def getRawWFSImage(self, numWFS: int = 0) -> np.ndarray:
-        '''
-        Get an image from the WFS
-        '''
-        return np.array(self._sim.wfs.d_wfs[numWFS].d_binimg)
-
     def getTarImage(self, tarID, expoType: str = "se") -> np.ndarray:
         '''
         Get an image from a target
@@ -249,7 +253,7 @@ class CompassSupervisor(AbstractSupervisor):
             self.loadConfig(configFile=configFile)
 
     def __repr__(self):
-        return str(self._sim)
+        return object.__repr__(self) + str(self._sim)
 
     def loop(self, n: int = 1, monitoring_freq: int = 100, **kwargs):
         """

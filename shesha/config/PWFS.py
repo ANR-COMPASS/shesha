@@ -85,6 +85,14 @@ class Param_wfs:
         """ X axis misalignment in pixels"""
         self.__dy = 0.0
         """ Y axis misalignment in pixels"""
+
+        # Fakecam mode (uint16)
+        self.__fakecam = False
+        """ uint16 computation flag for WFS image """
+        self.__maxFluxPerPix = 0
+        """ Maximum number of photons allowed before pixel computation (only used if fakecam is True) """
+        self.__maxPixValue = 0
+        """ Maximum number of ADU photons allowed in the uint16 image (only used if fakecam is True) """
         # internal kwrd
         self.__pdiam = 0
         """ pupil diam for a subap (in pixel)"""
@@ -463,6 +471,54 @@ class Param_wfs:
         self.__dy = csu.enforce_float(dy)
 
     dy = property(get_dy, set_dy)
+
+    def get_fakecam(self):
+        """ Get the fakecam flag
+
+        :return: (bool) : fakecam flag
+        """
+        return self.__fakecam
+
+    def set_fakecam(self, fakecam):
+        """ Set the fakecam flag
+
+        :return: (bool) : fakecam flag
+        """
+        self.__fakecam = csu.enforce_or_cast_bool(fakecam)
+
+    fakecam = property(get_fakecam, set_fakecam)
+
+    def get_maxFluxPerPix(self):
+        """ Get the maxFluxPerPix
+
+        :return: (int) : maxFluxPerPix
+        """
+        return self.__maxFluxPerPix
+
+    def set_maxFluxPerPix(self, maxFluxPerPix):
+        """ Set the maxFluxPerPix
+
+        :return: (int) : maxFluxPerPix
+        """
+        self.__maxFluxPerPix = csu.enforce_int(maxFluxPerPix)
+
+    maxFluxPerPix = property(get_maxFluxPerPix, set_maxFluxPerPix)
+
+    def get_maxPixValue(self):
+        """ Get the maxPixValue
+
+        :return: (int) : maxPixValue
+        """
+        return self.__maxPixValue
+
+    def set_maxPixValue(self, maxPixValue):
+        """ Set the maxPixValue
+
+        :return: (int) : maxPixValue
+        """
+        self.__maxPixValue = csu.enforce_int(maxPixValue)
+
+    maxPixValue = property(get_maxPixValue, set_maxPixValue)
 
     def get_gsalt(self):
         """ Get the altitude of guide star

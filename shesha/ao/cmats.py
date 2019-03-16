@@ -7,7 +7,7 @@ import time
 import shesha.config as conf
 import shesha.constants as scons
 
-from shesha.sutra_wrap import Rtc
+from shesha.sutra_wrap import Rtc_FFF as Rtc
 
 from shesha.ao.wfs import noise_cov
 
@@ -15,9 +15,40 @@ import typing
 from typing import List
 
 
+def generic_imat_inversion(
+        M2V: np.ndarray,
+        modalIMat: np.ndarray,
+        modeSelect: np.ndarray = None,
+        modeGains: np.ndarray = None,
+) -> np.ndarray:
+    """ Generic numpy modal interaction matrix inversion function
+
+        :parameters:
+
+            M2V: (nActu x nModes) : modal basis matrix
+
+            modalIMat: (nSlopes x nModes) : modal interaction matrix
+
+            modeSelect: (nModes, dtype=bool): (Optional):
+            mode selection, mode at False is filtered
+
+            modeGains: (nModes, dtype=bool): (Optional):
+            modal gains to apply. These are gain in the reconstruction sens, ie
+            they are applied multiplicatively on the command matrix
+        """
+    if modeSelect is None:
+        modeSelect = np.ones(modalIMat.shape[1], dtype=bool)
+    if modeGains is None:
+        modeGains = np.ones(modalIMat.shape[1], dtype=np.float32)
+
+    return M2V.dot(modeGains[:, None] * np.linalg.inv(modalIMat[:, modeSelect].T.dot(
+            modalIMat[:, modeSelect])).dot(modalIMat[:, modeSelect].T))
+
+
 def cmat_init(ncontrol: int, rtc: Rtc, p_controller: conf.Param_controller,
               p_wfss: List[conf.Param_wfs], p_atmos: conf.Param_atmos,
-              p_tel: conf.Param_tel, p_dms: List[conf.Param_dm], nmodes: int=0) -> None:
+              p_tel: conf.Param_tel, p_dms: List[conf.Param_dm],
+              nmodes: int = 0) -> None:
     """ Compute the command matrix on the GPU
 
     :parameters:

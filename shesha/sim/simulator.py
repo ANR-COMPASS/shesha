@@ -22,7 +22,7 @@ import shesha.util.hdf5_utils as h5u
 import time
 
 from typing import Iterable, Any, Dict
-from shesha.sutra_wrap import Sensors, Dms, Rtc, Atmos, Telescope, Target, carmaWrap_context
+from shesha.sutra_wrap import Sensors, Dms, Rtc_FFF as Rtc, Atmos, Telescope, Target, carmaWrap_context
 
 
 class Simulator:
@@ -322,7 +322,7 @@ class Simulator:
             if do_control and self.rtc is not None:
                 self.doCentroids(nControl)
                 self.doControl(nControl)
-                self.doClipping(nControl, -1e5, 1e5)
+                self.doClipping(nControl)
 
             if apply_control:
                 self.applyControl(nControl)
@@ -538,21 +538,17 @@ class Simulator:
         nControl: (int): controller index
         compVoltage: (bool): If True (default), computes the voltage vector from the command one (delay + perturb). Else, directly applies the current voltage vector
         """
-        self.rtc.apply_control(nControl, self.dms, compVoltage)
+        self.rtc.apply_control(nControl, compVoltage)
 
-    def doClipping(self, nControl: int, vmin: float, vmax: float):
+    def doClipping(self, nControl: int):
         '''
-        Clip the commands between vmin and vmax values
+        Clip the commands between vmin and vmax values set in the RTC
 
         Parameters
         ------------
         nControl: (int): controller index
-        vmin: (float): minimum value
-        vmax: (float): maximum value
         '''
-        if (vmin > vmax):
-            raise ValueError("vmax must be greater than vmin")
-        self.rtc.do_clipping(nControl, vmin, vmax)
+        self.rtc.do_clipping(nControl)
 
     def getStrehl(self, numTar: int):
         '''

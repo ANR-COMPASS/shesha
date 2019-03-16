@@ -102,9 +102,9 @@ def target_init(ctxt: carmaWrap_context, telescope: Telescope, p_targets: list,
                 xoff += pupdiff
                 yoff += pupdiff
 
-                if (dm[k].type == scons.DmType.KL):
-                    xoff += 2
-                    yoff += 2
+                # if (dm[k].type == scons.DmType.KL):
+                #     xoff -= 2
+                #     yoff -= 2
                 target.d_targets[i].add_layer(dm[k].type, k, xoff, yoff)
 
         target.d_targets[i].init_strehlmeter()
