@@ -1,4 +1,4 @@
-[![Documentation Status](https://readthedocs.org/projects/shesha/badge/?version=latest)](http://shesha.readthedocs.io/en/latest/?badge=latest) [![Anaconda-Server Badge](https://anaconda.org/compass/compass/badges/installer/conda.svg)](https://conda.anaconda.org/compass)
+[![Documentation Status](https://readthedocs.org/projects/shesha/badge/?version=latest)](http://shesha.readthedocs.io/en/latest/?badge=latest) [![Anaconda-Server Badge](https://anaconda.org/compass/compass/badges/installer/conda.svg)](https://conda.anaconda.org/compass) [![Gitter](https://badges.gitter.im/ANR-COMPASS/community.svg)](https://gitter.im/ANR-COMPASS/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
 Table of Contents
 =================
