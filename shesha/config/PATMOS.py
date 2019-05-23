@@ -1,7 +1,11 @@
-'''
+''' @package shesha.config.PATMOS
+
 Param_atmos class definition
+
 Parameters for atmosphere
+
 '''
+
 import numpy as np
 from . import config_setter_utils as csu
 

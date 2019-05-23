@@ -1,3 +1,11 @@
+""" @package shesha.supervisor.abstractSupervisor
+
+COMPASS simulation package
+
+Abstract layer for initialization and execution of a COMPASS supervisor
+
+"""
+
 from abc import ABC, abstractmethod
 import numpy as np
 from tqdm import trange

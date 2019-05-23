@@ -1,4 +1,4 @@
-"""
+""" @package shesha.util.rtc_util
 Some utilities functions for RTC
 """
 import numpy as np

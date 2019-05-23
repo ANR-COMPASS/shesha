@@ -1,6 +1,9 @@
-"""
+""" @package shesha.ao.imats
+
 Computation implementations of interaction matrix
+
 """
+
 import numpy as np  # type: ignore
 import time
 from typing import List  # Mypy checker
@@ -9,7 +12,7 @@ from tqdm import tqdm
 import shesha.config as conf
 import shesha.constants as scons
 import shesha.init.lgs_init as lgs
-import shesha.util.hdf5_utils as h5u
+import shesha.util.hdf5_util as h5u
 
 from shesha.sutra_wrap import Sensors, Dms, Rtc_FFF as Rtc
 from shesha.constants import CONST

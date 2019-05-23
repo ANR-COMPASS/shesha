@@ -1,5 +1,7 @@
-"""
+""" @package shesha.init.rtc_init
+
 Initialization of a Rtc object
+
 """
 
 import shesha.config as conf
@@ -21,8 +23,8 @@ from shesha.sutra_wrap import Rtc_FFF as Rtc
 def rtc_init(context: carmaWrap_context, tel: Telescope, wfs: Sensors, dms: Dms,
              atmos: Atmos, p_wfss: list, p_tel: conf.Param_tel, p_geom: conf.Param_geom,
              p_atmos: conf.Param_atmos, ittime: float, p_centroiders=None,
-             p_controllers=None, p_dms=None, do_refslp=False, brahma=False, tar=None,
-             dataBase={}, use_DB=False):
+             p_controllers=None, p_dms=None, do_refslp=False, brahma=False, cacao=False,
+             tar=None, dataBase={}, use_DB=False):
     """Initialize all the sutra_rtc objects : centroiders and controllers
 
     :parameters:
@@ -41,6 +43,7 @@ def rtc_init(context: carmaWrap_context, tel: Telescope, wfs: Sensors, dms: Dms,
         p_dms: (list of Param_dms) : (optional) dms settings
         do_refslp : (bool): (optional) do ref slopes flag, default=False
         brahma: (bool) : (optional) BRAHMA flag
+        cacao: (bool) : (optional) cacao flag
         tar: (Target) : (optional)
         dataBase: (dict): (optional) dict containig paths to files to load
         use_DB: (bool): use dataBase flag
@@ -50,9 +53,9 @@ def rtc_init(context: carmaWrap_context, tel: Telescope, wfs: Sensors, dms: Dms,
     # initialisation var
     # ________________________________________________
     if brahma:
-        print(wfs)
-        print(tar)
         rtc = Rtc_brahma(context, wfs, tar, "rtc_brahma")
+    elif cacao:
+        rtc = Rtc_cacao_FFF("compass_calPix", "compass_loopData")
     else:
         rtc = Rtc()
 
@@ -127,17 +130,21 @@ def rtc_standalone(context: carmaWrap_context, nwfs: int, nvalid: int, nactu: in
     if brahma:
         rtc = Rtc_brahma(context, None, None, "rtc_brahma")
     elif cacao:
-        rtc = Rtc_cacao_FFF("compass_calPix", "compass_loopData")
+        if fp16:
+            from shesha.sutra_wrap import Rtc_cacao_FHF
+            rtc = Rtc_cacao_FHF("compass_calPix", "compass_loopData")
+        else:
+            rtc = Rtc_cacao_FFF("compass_calPix", "compass_loopData")
     else:
         if fp16:
-            from shesha.sutra_wrap import RtcFH
-            rtc = RtcFH()
+            from shesha.sutra_wrap import Rtc_FHF
+            rtc = Rtc_FHF()
         else:
             rtc = Rtc()
 
     for k in range(nwfs):
-        rtc.add_centroider(context, nvalid[k], offset, scale, context.activeDevice,
-                           centroider_type)
+        rtc.add_centroider(context, nvalid[k], offset, scale, False,
+                           context.activeDevice, centroider_type)
 
     nslopes = sum([c.nslopes for c in rtc.d_centro])
     rtc.add_controller(context, sum(nvalid), nslopes, nactu, delay, context.activeDevice,
@@ -177,8 +184,8 @@ def init_centroider(context, nwfs: int, p_wfs: conf.Param_wfs,
         s_scale = (p_wfs.Lambda * 1e-6 / p_tel.diam) * \
             p_wfs.pyr_ampl * CONST.RAD2ARCSEC
 
-    rtc.add_centroider(context, p_wfs._nvalid, s_offset, s_scale, context.activeDevice,
-                       p_centroider.type, wfs.d_wfs[nwfs])
+    rtc.add_centroider(context, p_wfs._nvalid, s_offset, s_scale, p_centroider.filter_TT,
+                       context.activeDevice, p_centroider.type, wfs.d_wfs[nwfs])
     rtc.d_centro[-1].load_validpos(p_wfs._validsubsx, p_wfs._validsubsy,
                                    p_wfs._nvalid * p_wfs.nPupils)
 
@@ -333,7 +340,7 @@ def init_controller(context, i: int, p_controller: conf.Param_controller, p_wfss
                        p_controller.nactu, p_controller.delay, context.activeDevice,
                        p_controller.type, dms, p_controller.ndm, p_controller.ndm.size,
                        Nphi, False)
-
+    print("CONTROLLER ADDED")
     if (p_wfss is not None and do_refslp):
         rtc.do_centroids_ref(i)
 
@@ -527,7 +534,7 @@ def init_controller_generic(i: int, p_controller: conf.Param_controller, p_dms: 
     decayFactor = np.ones(size, dtype=np.float32)
     mgain = np.ones(size, dtype=np.float32) * p_controller.gain
     matE = np.identity(size, dtype=np.float32)
-    cmat = np.zeros((size, p_controller.nvalid * 2), dtype=np.float32)
+    cmat = np.zeros((size, p_controller.nslope), dtype=np.float32)
 
     rtc.d_control[i].set_decayFactor(decayFactor)
     rtc.d_control[i].set_mgain(mgain)

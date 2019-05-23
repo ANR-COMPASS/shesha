@@ -1,6 +1,9 @@
-'''
+''' @package shesha.config.PTEL
+
 Param_tel class definition
+
 Parameters for telescope definition
+
 '''
 
 import numpy as np
@@ -28,6 +31,8 @@ class Param_tel:
         self.__pupangle = 0.0
         """ number of missing segments for EELT pupil (max is 20)."""
         self.__nbrmissing = 0
+        """ Gap between segments [meters]"""
+        self.__gap = 0.0
         """ std of reflectivity errors for EELT segments (fraction)."""
         self.__referr = 0.0
         """ std of piston errors for EELT segments  """
@@ -148,6 +153,22 @@ class Param_tel:
         self.__nbrmissing = csu.enforce_int(nb)
 
     nbrmissing = property(get_nbrmissing, set_nbrmissing)
+
+    def get_gap(self):
+        """ Get the Gap between segments
+
+        :return: (float) : Gap between segments (meters)
+        """
+        return self.__gap
+
+    def set_gap(self, gap):
+        """ Set the Gap between segments
+
+        :param gap: (float) : Gap between segments (meters)
+        """
+        self.__gap = csu.enforce_float(gap)
+
+    gap = property(get_gap, set_gap)
 
     def get_referr(self):
         """ Get the std of reflectivity errors for EELT segments

@@ -1,4 +1,4 @@
-"""
+""" @package shesha.constants
 Numerical constants for shesha
 Config enumerations for safe-typing
 """
@@ -77,9 +77,6 @@ class ControllerType:
     MV = 'mv'
     CURED = 'cured'
     GEO = 'geo'
-    KALMAN_C = 'kalman_CPU'
-    KALMAN_G = 'kalman_GPU'
-    KALMAN_UN = 'kalman_uninitialized'
 
 
 class CentroiderType:
@@ -146,6 +143,7 @@ class ApertureType:
     EELT_BP5 = 'EELT-BP5'
     EELT_CUSTOM = 'EELT-Custom'
     VLT = 'VLT'
+    KECK = 'keck'
 
 
 class SpiderType:

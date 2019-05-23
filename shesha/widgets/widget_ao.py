@@ -1,5 +1,6 @@
 #!/usr/bin/env python
-"""Widget to simulate a closed loop
+""" @package shesha.widgets.widget_ao
+Widget to simulate a closed loop
 
 Usage:
   widget_ao.py [<parameters_filename>] [options]
@@ -8,7 +9,7 @@ with 'parameters_filename' the path to the parameters file
 
 Options:
   -h --help          Show this help message and exit
-  --brahma            Distribute data with BRAHMA
+  --cacao            Distribute data with cacao
   --expert           Display expert panel
   -d, --devices devices      Specify the devices
   -i, --interactive  keep the script interactive
@@ -51,13 +52,12 @@ from shesha.supervisor.compassSupervisor import CompassSupervisor, scons
 
 class widgetAOWindow(AOClassTemplate, WidgetBase):
 
-    def __init__(self, configFile: Any = None, BRAHMA: bool = False,
-                 expert: bool = False, devices: str = None,
-                 hideHistograms: bool = False) -> None:
+    def __init__(self, configFile: Any = None, cacao: bool = False, expert: bool = False,
+                 devices: str = None, hideHistograms: bool = False) -> None:
         WidgetBase.__init__(self, hideHistograms=hideHistograms)
         AOClassTemplate.__init__(self)
 
-        self.BRAHMA = BRAHMA
+        self.cacao = cacao
         self.rollingWindow = 100
         self.SRLE = deque(maxlen=self.rollingWindow)
         self.SRSE = deque(maxlen=self.rollingWindow)
@@ -118,6 +118,8 @@ class widgetAOWindow(AOClassTemplate, WidgetBase):
         self.SRCrossX = {}  # type: Dict[str, pg.ScatterPlotItem]
         self.SRCrossY = {}  # type: Dict[str, pg.ScatterPlotItem]
         self.SRcircles = {}  # type: Dict[str, pg.ScatterPlotItem]
+        self.PyrEdgeX = {}  # type: Dict[str, pg.ScatterPlotItem]
+        self.PyrEdgeY = {}  # type: Dict[str, pg.ScatterPlotItem]
 
         self.natm = 0
         self.nwfs = 0
@@ -206,6 +208,12 @@ class widgetAOWindow(AOClassTemplate, WidgetBase):
         for key, pgpl in self.SRCrossY.items():
             self.viewboxes[key].removeItem(pgpl)
 
+        for key, pgpl in self.PyrEdgeX.items():
+            self.viewboxes[key].removeItem(pgpl)
+
+        for key, pgpl in self.PyrEdgeY.items():
+            self.viewboxes[key].removeItem(pgpl)
+
         if configFile is None:
             configFile = str(self.uiBase.wao_selectConfig.currentText())
             sys.path.insert(0, self.defaultParPath)
@@ -230,6 +238,8 @@ class widgetAOWindow(AOClassTemplate, WidgetBase):
         self.SRcircles.clear()
         self.SRCrossX.clear()
         self.SRCrossY.clear()
+        self.PyrEdgeX.clear()
+        self.PyrEdgeY.clear()
 
         self.natm = len(self.config.p_atmos.alt)
         for atm in range(self.natm):
@@ -250,6 +260,8 @@ class widgetAOWindow(AOClassTemplate, WidgetBase):
             elif self.config.p_wfss[
                     wfs].type == scons.WFSType.PYRHR or self.config.p_wfss[
                             wfs].type == scons.WFSType.PYRLR:
+                name = 'pyrFocalPlane_%d' % wfs
+                self.add_dispDock(name, self.wao_imagesgroup_cb)
                 name = 'pyrHR_%d' % wfs
                 self.add_dispDock(name, self.wao_imagesgroup_cb)
                 name = 'pyrLR_%d' % wfs
@@ -403,6 +415,30 @@ class widgetAOWindow(AOClassTemplate, WidgetBase):
                 # Put image in plot area
                 self.viewboxes[key].addItem(self.SRCrossY[key])
 
+        for i in range(len(self.config.p_wfss)):
+            if (self.config.p_wfss[i].type == scons.WFSType.PYRHR
+                or self.config.p_wfss[i].type == scons.
+                WFSType.PYRLR):
+                key = "pyrFocalPlane_%d" % i
+                data = self.supervisor.getPyrFocalPlane(i)
+                Delta = len(data)/2
+                self.PyrEdgeX[key] = pg.PlotCurveItem(
+                    np.array([
+                        data.shape[0] / 2 + 0.5 - Delta,
+                        data.shape[0] / 2 + 0.5 + Delta
+                    ]), np.array([data.shape[1] / 2 + 0.5, data.shape[1] / 2 + 0.5]),
+                    pen='b')
+                self.PyrEdgeY[key] = pg.PlotCurveItem(
+                    np.array([data.shape[0] / 2 + 0.5, data.shape[0] / 2 + 0.5]),
+                    np.array([
+                        data.shape[1] / 2 + 0.5 - Delta,
+                        data.shape[1] / 2 + 0.5 + Delta
+                    ]), pen='b')
+                # Put image in plot area
+                self.viewboxes[key].addItem(self.PyrEdgeX[key])
+                # Put image in plot area
+                self.viewboxes[key].addItem(self.PyrEdgeY[key])
+
         print(self.supervisor)
 
         if self.expert:
@@ -486,6 +522,8 @@ class widgetAOWindow(AOClassTemplate, WidgetBase):
                             data = self.supervisor.getWfsImage(index)
                         if "pyrHR" in key:
                             data = self.supervisor.getPyrHRImage(index)
+                        if "pyrFocalPlane" in key:
+                            data = self.supervisor.getPyrFocalPlane(index)
 
                         if (data is not None):
                             autoscale = True  # self.uiAO.actionAuto_Scale.isChecked()
@@ -599,9 +637,8 @@ if __name__ == '__main__':
     arguments = docopt(__doc__)
     app = QtWidgets.QApplication(sys.argv)
     app.setStyle('cleanlooks')
-    wao = widgetAOWindow(arguments["<parameters_filename>"],
-                         BRAHMA=arguments["--brahma"], expert=arguments["--expert"],
-                         devices=arguments["--devices"])
+    wao = widgetAOWindow(arguments["<parameters_filename>"], cacao=arguments["--cacao"],
+                         expert=arguments["--expert"], devices=arguments["--devices"])
     wao.show()
     if arguments["--interactive"]:
         from shesha.util.ipython_embed import embed

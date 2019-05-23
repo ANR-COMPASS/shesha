@@ -1,4 +1,4 @@
-'''
+''' @package shesha.util.make_apodizer
 make_apodizer function
 '''
 
@@ -46,12 +46,12 @@ def make_apodizer(dim, pupd, filename, angle):
 
     if (dim != pupd):
         if ((dim - pupd) % 2 != 0):
-            pupf[(dim - pupd + 1) / 2:(dim + pupd + 1) / 2, (dim - pupd + 1) / 2:(
-                    dim + pupd + 1) / 2] = pup
+            pupf[(dim - pupd + 1) / 2:(dim + pupd + 1) / 2, (dim - pupd + 1) /
+                 2:(dim + pupd + 1) / 2] = pup
 
         else:
-            pupf[(dim - pupd) / 2:(dim + pupd) / 2, (dim - pupd) / 2:(dim + pupd
-                                                                      ) / 2] = pup
+            pupf[(dim - pupd) / 2:(dim + pupd) / 2, (dim - pupd) / 2:(dim + pupd) /
+                 2] = pup
 
     else:
         pupf = pup

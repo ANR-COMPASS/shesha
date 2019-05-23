@@ -1,5 +1,7 @@
-'''
+''' @package shesha.init.dm_init
+
 Initialization of a Dms object
+
 '''
 
 import shesha.config as conf
@@ -8,7 +10,7 @@ import shesha.constants as scons
 from shesha.constants import CONST
 
 from shesha.util import dm_util, influ_util, kl_util
-from shesha.util import hdf5_utils as h5u
+from shesha.util import hdf5_util as h5u
 
 import numpy as np
 
@@ -35,7 +37,7 @@ def dm_init(context: carmaWrap_context, p_dms: List[conf.Param_dm],
     :return:
         Dms: (Dms): Dms object
     """
-    max_extent = [0]
+    max_extent = 0
     if (p_wfss is not None):
         xpos_wfs = []
         ypos_wfs = []
@@ -47,18 +49,23 @@ def dm_init(context: carmaWrap_context, p_dms: List[conf.Param_dm],
         ypos_wfs = [0]
     if (len(p_dms) != 0):
         dms = Dms()
+        types_dm = [p_dm.type for p_dm in p_dms]
+        if scons.DmType.TT in types_dm:
+            first_TT = types_dm.index(scons.DmType.TT)
+            if np.any(np.array(types_dm[first_TT:]) != scons.DmType.TT):
+                raise RuntimeError("TT must be defined at the end of the dms parameters")
+
         for i in range(len(p_dms)):
-            # max_extent
-            #_dm_init(dms, p_dms[i], p_wfss, p_geom, p_tel, & max_extent)
-            _dm_init(context, dms, p_dms[i], xpos_wfs, ypos_wfs, p_geom, p_tel.diam,
-                     p_tel.cobs, p_tel.pupangle, max_extent, keepAllActu=keepAllActu)
+            max_extent = _dm_init(context, dms, p_dms[i], xpos_wfs, ypos_wfs, p_geom,
+                                  p_tel.diam, p_tel.cobs, p_tel.pupangle, max_extent,
+                                  keepAllActu=keepAllActu)
 
     return dms
 
 
 def _dm_init(context: carmaWrap_context, dms: Dms, p_dm: conf.Param_dm, xpos_wfs: list,
              ypos_wfs: list, p_geom: conf.Param_geom, diam: float, cobs: float,
-             pupAngle: float, max_extent: list, keepAllActu: bool = False):
+             pupAngle: float, max_extent: int, keepAllActu: bool = False):
     """ inits a Dms object on the gpu
 
     :parameters:
@@ -77,7 +84,10 @@ def _dm_init(context: carmaWrap_context, dms: Dms, p_dm: conf.Param_dm, xpos_wfs
 
         cobs: (float) : cobs of telescope
 
-        max_extent: (list) : maximum dimension of all dms
+        max_extent: (int) : maximum dimension of all dms
+
+    :return:
+        max_extent: (int) : new maximum dimension of all dms
 
     """
 
@@ -101,7 +111,7 @@ def _dm_init(context: carmaWrap_context, dms: Dms, p_dm: conf.Param_dm, xpos_wfs
             init_pzt_from_hdf5(p_dm, p_geom, diam)
 
         # max_extent
-        max_extent[0] = max(max_extent[0], p_dm._n2 - p_dm._n1 + 1)
+        max_extent = max(max_extent, p_dm._n2 - p_dm._n1 + 1)
 
         dim = max(p_dm._n2 - p_dm._n1 + 1, p_geom._mpupil.shape[0])
         ninflupos = p_dm._influpos.size
@@ -114,15 +124,15 @@ def _dm_init(context: carmaWrap_context, dms: Dms, p_dm: conf.Param_dm, xpos_wfs
 
     elif (p_dm.type == scons.DmType.TT):
 
-        if (p_dm.alt == 0):
-            extent = int(max_extent[0] * 1.05)
+        if (p_dm.alt == 0) and (max_extent != 0):
+            extent = int(max_extent * 1.05)
             if (extent % 2 != 0):
                 extent += 1
         else:
             extent = p_geom.pupdiam + 16
         p_dm._n1, p_dm._n2 = dm_util.dim_dm_support(p_geom.cent, extent, p_geom.ssize)
         # max_extent
-        max_extent[0] = max(max_extent[0], p_dm._n2 - p_dm._n1 + 1)
+        max_extent = max(max_extent, p_dm._n2 - p_dm._n1 + 1)
 
         dim = p_dm._n2 - p_dm._n1 + 1
         make_tiptilt_dm(p_dm, patchDiam, p_geom, diam)
@@ -135,7 +145,7 @@ def _dm_init(context: carmaWrap_context, dms: Dms, p_dm: conf.Param_dm, xpos_wfs
         extent = p_geom.pupdiam + 16
         p_dm._n1, p_dm._n2 = dm_util.dim_dm_support(p_geom.cent, extent, p_geom.ssize)
         # max_extent
-        max_extent[0] = max(max_extent[0], p_dm._n2 - p_dm._n1 + 1)
+        max_extent = max(max_extent, p_dm._n2 - p_dm._n1 + 1)
 
         dim = p_dm._n2 - p_dm._n1 + 1
 
@@ -156,9 +166,107 @@ def _dm_init(context: carmaWrap_context, dms: Dms, p_dm: conf.Param_dm, xpos_wfs
         # res1 = pol2car(*y_dm(n)._klbas,gkl_sfi(*y_dm(n)._klbas, 1));
         # res2 = yoga_getkl(g_dm,0.,1);
 
+    return max_extent
 
-def dm_init_standalone(context: carmaWrap_context, p_dms: list, p_geom: conf.Param_geom, diam=1., cobs=0.,
-                       pupAngle=0., wfs_xpos=[0], wfs_ypos=[0]):
+
+def _dm_init_factorized(context: carmaWrap_context, dms: Dms, p_dm: conf.Param_dm,
+                        xpos_wfs: list, ypos_wfs: list, p_geom: conf.Param_geom,
+                        diam: float, cobs: float, pupAngle: float, max_extent: int,
+                        keepAllActu: bool = False):
+    """ inits a Dms object on the gpu
+    NOTE: This is the
+
+    :parameters:
+        context: (carmaWrap_context): context
+        dms: (Dms) : dm object
+
+        p_dm: (Param_dms) : dm settings
+
+        xpos_wfs: (list) : list of wfs xpos
+
+        ypos_wfs: (list) : list of wfs ypos
+
+        p_geom: (Param_geom) : geom settings
+
+        diam: (float) : diameter of telescope
+
+        cobs: (float) : cobs of telescope
+
+        max_extent: (int) : maximum dimension of all dms
+
+    :return:
+        max_extent: (int) : new maximum dimension of all dms
+
+    """
+
+    if (p_dm.pupoffset is not None):
+        p_dm._puppixoffset = p_dm.pupoffset / diam * p_geom.pupdiam
+    # For patchDiam
+    patchDiam = dm_util.dim_dm_patch(p_geom.pupdiam, diam, p_dm.type, p_dm.alt, xpos_wfs,
+                                     ypos_wfs)
+
+    if (p_dm.type == scons.DmType.PZT) and p_dm.file_influ_hdf5 is not None:
+        init_pzt_from_hdf5(p_dm, p_geom, diam)
+    else:
+        if (p_dm.type == scons.DmType.PZT):
+            p_dm._pitch = patchDiam / float(p_dm.nact - 1)
+            # + 2.5 pitch each side
+            extent = p_dm._pitch * (p_dm.nact + p_dm.pzt_extent)
+
+            # calcul defaut influsize
+            make_pzt_dm(p_dm, p_geom, cobs, pupAngle, keepAllActu=keepAllActu)
+
+        elif (p_dm.type == scons.DmType.TT):
+            if (p_dm.alt == 0) and (max_extent != 0):
+                extent = int(max_extent * 1.05)
+                if (extent % 2 != 0):
+                    extent += 1
+            else:
+                extent = p_geom.pupdiam + 16
+
+        elif (p_dm.type == scons.DmType.KL):
+            extent = p_geom.pupdiam + 16
+        else:
+            raise TypeError("This type of DM doesn't exist ")
+
+        # Verif
+        # res1 = pol2car(*y_dm(n)._klbas,gkl_sfi(*y_dm(n)._klbas, 1));
+        # res2 = yoga_getkl(g_dm,0.,1);
+
+        p_dm._n1, p_dm._n2 = dm_util.dim_dm_support(p_geom.cent, extent, p_geom.ssize)
+
+    # max_extent
+    max_extent = max(max_extent, p_dm._n2 - p_dm._n1 + 1)
+
+    dim = max(p_dm._n2 - p_dm._n1 + 1, p_geom._mpupil.shape[0])
+
+    if (p_dm.type == scons.DmType.PZT):
+        ninflupos = p_dm._influpos.size
+        n_npts = p_dm._ninflu.size  #// 2
+        dms.add_dm(context, p_dm.type, p_dm.alt, dim, p_dm._ntotact, p_dm._influsize,
+                   ninflupos, n_npts, p_dm.push4imat, 0, context.activeDevice)
+        #infludata = p_dm._influ.flatten()[p_dm._influpos]
+        dms.d_dms[-1].pzt_loadarrays(p_dm._influ, p_dm._influpos.astype(np.int32),
+                                     p_dm._ninflu, p_dm._influstart, p_dm._i1, p_dm._j1)
+    elif (p_dm.type == scons.DmType.TT):
+        make_tiptilt_dm(p_dm, patchDiam, p_geom, diam)
+        dms.add_dm(context, p_dm.type, p_dm.alt, dim, 2, dim, 1, 1, p_dm.push4imat, 0,
+                   context.activeDevice)
+        dms.d_dms[-1].tt_loadarrays(p_dm._influ)
+    elif (p_dm.type == scons.DmType.KL):
+        make_kl_dm(p_dm, patchDiam, p_geom, cobs)
+        ninflu = p_dm.nkl
+
+        dms.add_dm(context, p_dm.type, p_dm.alt, dim, p_dm.nkl, p_dm._ncp, p_dm._nr,
+                   p_dm._npp, p_dm.push4imat, p_dm._ord.max(), context.activeDevice)
+        dms.d_dms[-1].kl_loadarrays(p_dm._rabas, p_dm._azbas, p_dm._ord, p_dm._cr,
+                                    p_dm._cp)
+
+    return max_extent
+
+
+def dm_init_standalone(context: carmaWrap_context, p_dms: list, p_geom: conf.Param_geom,
+                       diam=1., cobs=0., pupAngle=0., wfs_xpos=[0], wfs_ypos=[0]):
     """Create and initialize a Dms object on the gpu
 
     :parameters:
@@ -181,23 +289,25 @@ def dm_init_standalone(context: carmaWrap_context, p_dms: list, p_geom: conf.Par
     if (len(p_dms) != 0):
         dms = Dms()
         for i in range(len(p_dms)):
-            _dm_init(context, dms, p_dms[i], wfs_xpos, wfs_ypos, p_geom, diam, cobs, pupAngle, max_extent)
+            _dm_init(context, dms, p_dms[i], wfs_xpos, wfs_ypos, p_geom, diam, cobs,
+                     pupAngle, max_extent)
     return dms
 
 
 def make_pzt_dm(p_dm: conf.Param_dm, p_geom: conf.Param_geom, cobs: float,
                 pupAngle: float, keepAllActu: bool = False):
-    """Compute the actuators positions and the influence functions for a pzt DM
+    """Compute the actuators positions and the influence functions for a pzt DM.
+    NOTE: if the DM is in altitude, central obstruction is forced to 0
 
     :parameters:
-        p_dm: (Param_dm) : dm settings
+        p_dm: (Param_dm) : dm parameters
 
-        p_geom: (Param_geom) : geom settings
+        p_geom: (Param_geom) : geometry parameters
 
-        cobs: (float) : tel cobs
+        cobs: (float) : telescope central obstruction
 
     :return:
-        influ: (np.ndarray(dims=3,dtype=np.float64)) : cube of the IF for each actuator
+        influ: (np.ndarray(dims=3, dtype=np.float64)) : cube of the IF for each actuator
 
     """
     # best parameters, as determined by a multi-dimensional fit
@@ -259,6 +369,8 @@ def make_pzt_dm(p_dm: conf.Param_dm, p_geom: conf.Param_geom, cobs: float,
     if keepAllActu:
         inbigcirc = np.arange(cub.shape[1])
     else:
+        if (p_dm.alt > 0):
+            cobs = 0
         inbigcirc = dm_util.select_actuators(cub[0, :], cub[1, :], p_dm.nact,
                                              p_dm._pitch, cobs, p_dm.margin_in,
                                              p_dm.margin_out, p_dm._ntotact)
@@ -672,22 +784,19 @@ def correct_dm(context, dms: Dms, p_dms: list, p_controller: conf.Param_controll
     print("Done")
 
 
-
-
-
 def makePetalDm(p_dm, p_geom, pupAngleDegree):
     '''
     makePetalDm(p_dm, p_geom, pupAngleDegree)
-     
+
     The function builds a DM, segmented in petals according to the pupil
     shape. The petals will be adapted to the EELT case only.
-    
+
     <p_geom> : compass object p_geom. The function requires the object p_geom
                in order to know what is the pupil mask, and what is the mpupil.
     <p_dm>   : compass petal dm object p_dm to be created. The function will
                transform/modify in place the attributes of the object p_dm.
-    
-    
+
+
     '''
     p_dm._n1 = p_geom._n1
     p_dm._n2 = p_geom._n2
@@ -696,14 +805,12 @@ def makePetalDm(p_dm, p_geom, pupAngleDegree):
     p_dm.set_ntotact(nbSeg)
     p_dm._i1 = i1
     p_dm._j1 = j1
-    p_dm._xpos = i1 + smallsize/2 + p_dm._n1
-    p_dm._ypos = j1 + smallsize/2 + p_dm._n1
+    p_dm._xpos = i1 + smallsize / 2 + p_dm._n1
+    p_dm._ypos = j1 + smallsize / 2 + p_dm._n1
     p_dm._influ = influ
 
     # generates the arrays of indexes for the GPUs
     comp_dmgeom(p_dm, p_geom)
-
-
 
 
 def make_petal_dm_core(pupImage, pupAngleDegree):
@@ -718,37 +825,44 @@ def make_petal_dm_core(pupImage, pupAngleDegree):
     """
     # Splits the pupil into connex areas.
     # <segments> is the map of the segments, <nbSeg> in their number.
+    # binary_opening() allows us to suppress individual pixels that could
+    # be identified as relevant connex areas
     from scipy.ndimage.measurements import label
-    segments, nbSeg = label(pupImage)
+    from scipy.ndimage.morphology import binary_opening
+    s = np.ones((2, 2), dtype=np.bool)
+    segments, nbSeg = label(binary_opening(pupImage, s))
 
     # Faut trouver le plus petit support commun a tous les
     # petales : on determine <smallsize>
     smallsize = 0
-    i1t = []   # list of starting indexes of influ functions
+    i1t = []  # list of starting indexes of influ functions
     j1t = []
-    i2t = []   # list of ending indexes of influ functions
+    i2t = []  # list of ending indexes of influ functions
     j2t = []
     for i in range(nbSeg):
-        petal = segments==(i+1)   # identification (boolean) of a given segment
-        profil = np.sum(petal, axis=1)!=0
+        petal = segments == (i + 1)  # identification (boolean) of a given segment
+        profil = np.sum(petal, axis=1) != 0
         extent = np.sum(profil).astype(np.int32)
         i1t.append(np.min(np.where(profil)[0]))
         i2t.append(np.max(np.where(profil)[0]))
-        if extent>smallsize:
+        if extent > smallsize:
             smallsize = extent
 
-        profil = np.sum(petal, axis=0)!=0
+        profil = np.sum(petal, axis=0) != 0
         extent = np.sum(profil).astype(np.int32)
         j1t.append(np.min(np.where(profil)[0]))
         j2t.append(np.max(np.where(profil)[0]))
-        if extent>smallsize:
+        if extent > smallsize:
             smallsize = extent
+
+    # extension de la zone minimale pour avoir un peu de marge
+    smallsize += 2
 
     # Allocate array of influence functions
     influ = np.zeros((smallsize, smallsize, nbSeg), dtype=np.float32)
 
     npt = pupImage.shape[0]
-    i0 = j0 = npt/2 - 0.5
+    i0 = j0 = npt / 2 - 0.5
     print('CORRIGER CETTE MERDE !!!!!')
     petalMap = build_petals(nbSeg, pupAngleDegree, i0, j0, npt)
     ii1 = np.zeros(nbSeg)
@@ -758,20 +872,18 @@ def make_petal_dm_core(pupImage, pupAngleDegree):
         jp = (smallsize - j2t[i] + j1t[i] - 1) // 2
         i1 = np.maximum(i1t[i] - ip, 0)
         j1 = np.maximum(j1t[i] - jp, 0)
-        if (j1+smallsize)>npt:
+        if (j1 + smallsize) > npt:
             j1 = npt - smallsize
-        if (i1+smallsize)>npt:
+        if (i1 + smallsize) > npt:
             i1 = npt - smallsize
         #petal = segments==(i+1) # determine le segment pupille veritable
-        k = petalMap[i1+smallsize//2, j1+smallsize//2]
-        petal = (petalMap==k)
-        influ[:, :, k] = petal[i1:i1+smallsize, j1:j1+smallsize]
+        k = petalMap[i1 + smallsize // 2, j1 + smallsize // 2]
+        petal = (petalMap == k)
+        influ[:, :, k] = petal[i1:i1 + smallsize, j1:j1 + smallsize]
         ii1[k] = i1
         jj1[k] = j1
 
     return influ, ii1, jj1, int(smallsize), nbSeg
-
-
 
 
 def build_petals(nbSeg, pupAngleDegree, i0, j0, npt):
@@ -779,12 +891,12 @@ def build_petals(nbSeg, pupAngleDegree, i0, j0, npt):
     Makes an image npt x npt of <nbSeg> regularly spaced angular segments
     centred on (i0, j0).
     Origin of angles is set by <pupAngleDegree>.
-    
+
     The segments are oriented as defined in document "Standard Coordinates
-    and Basic Conventions", ESO-193058. 
+    and Basic Conventions", ESO-193058.
     This document states that the X axis lies in the middle of a petal, i.e.
     that the axis Y is along the spider.
-    The separation angle between segments are [-30, 30, 90, 150, -150, -90]. 
+    The separation angle between segments are [-30, 30, 90, 150, -150, -90].
     For this reason, an <esoOffsetAngle> = -pi/6 is introduced in the code.
 
     nbSeg = 6
@@ -797,22 +909,19 @@ def build_petals(nbSeg, pupAngleDegree, i0, j0, npt):
     rot = pupAngleDegree * np.pi / 180.0
 
     # building coordinate maps
-    esoOffsetAngle = -np.pi/6  # -30°, ESO definition.
-    x = np.arange(npt)-i0
-    y = np.arange(npt)-j0
+    esoOffsetAngle = -np.pi / 6  # -30°, ESO definition.
+    x = np.arange(npt) - i0
+    y = np.arange(npt) - j0
     X, Y = np.meshgrid(x, y, indexing='ij')
-    theta = (np.arctan2(Y, X) - rot + 2*np.pi - esoOffsetAngle) % (2*np.pi)
+    theta = (np.arctan2(Y, X) - rot + 2 * np.pi - esoOffsetAngle) % (2 * np.pi)
 
     # Compute separation angle between segments: start and end.
-    angleStep = 2*np.pi/nbSeg
+    angleStep = 2 * np.pi / nbSeg
     startAngle = np.arange(nbSeg) * angleStep
     endAngle = np.roll(startAngle, -1)
-    endAngle[-1] = 2*np.pi  # last angle is 0.00 and must be replaced by 2.pi
+    endAngle[-1] = 2 * np.pi  # last angle is 0.00 and must be replaced by 2.pi
     petalMap = np.zeros((npt, npt), dtype=int)
     for i in range(nbSeg):
-        nn = np.where( np.logical_and(theta>=startAngle[i], theta<endAngle[i]) )
+        nn = np.where(np.logical_and(theta >= startAngle[i], theta < endAngle[i]))
         petalMap[nn] = i
     return petalMap
-
-
-

@@ -1,6 +1,9 @@
-'''
+''' @package shesha.config.PLOOP
+
 Param_loop class definition
+
 Parameters for AO loop
+
 '''
 
 import numpy as np

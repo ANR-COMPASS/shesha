@@ -1,13 +1,14 @@
-"""
+""" @package shesha.sim.simulator
+
 Simulator class definition
+
 Must be instantiated for running a COMPASS simulation script easily
+
 """
 import sys
 import os
-'''
-    Binding struct for all initializers - good for subclassing modules
-'''
 
+# Binding struct for all initializers - good for subclassing modules
 from shesha.init.geom_init import tel_init
 from shesha.init.atmos_init import atmos_init
 from shesha.init.rtc_init import rtc_init
@@ -17,7 +18,7 @@ from shesha.init.wfs_init import wfs_init
 from shesha.util.utilities import load_config_from_file, load_config_from_module
 
 import shesha.constants as scons
-import shesha.util.hdf5_utils as h5u
+import shesha.util.hdf5_util as h5u
 
 import time
 
@@ -265,7 +266,8 @@ class Simulator:
 
     def next(self, *, move_atmos: bool = True, see_atmos: bool = True, nControl: int = 0,
              tar_trace: Iterable[int] = None, wfs_trace: Iterable[int] = None,
-             do_control: bool = True, apply_control: bool = True) -> None:
+             do_control: bool = True, apply_control: bool = True,
+             compute_tar_psf: bool = True) -> None:
         '''
         Iterates the AO loop, with optional parameters
 
@@ -320,25 +322,32 @@ class Simulator:
                         self.raytraceWfs(w, "dm", rst=False)
                     self.compWfsImage(w)
             if do_control and self.rtc is not None:
+                if self.rtc.d_centro[0].wfs is None:  # in RTC standalone mode
+                    self.doCalibate_img(nControl)
                 self.doCentroids(nControl)
                 self.doControl(nControl)
                 self.doClipping(nControl)
 
             if apply_control:
                 self.applyControl(nControl)
+
+        if compute_tar_psf:
+            for nTar in tar_trace:
+                self.compTarImage(nTar)
+                self.compStrehl(nTar)
+
         self.iter += 1
 
     def print_strehl(self, monitoring_freq: int, t1: float, nCur: int = 0, nTot: int = 0,
                      nTar: int = 0):
         framerate = monitoring_freq / t1
-        self.compTarImage(nTar)
-        self.compStrehl(nTar)
         strehl = self.getStrehl(nTar)
         etr = (nTot - nCur) / framerate
         print("%d \t %.3f \t  %.3f\t     %.1f \t %.1f" % (nCur + 1, strehl[0], strehl[1],
                                                           etr, framerate))
 
-    def loop(self, n: int = 1, monitoring_freq: int = 100, **kwargs):
+    def loop(self, n: int = 1, monitoring_freq: int = 100, compute_tar_psf: bool = True,
+             **kwargs):
         """
         Perform the AO loop for n iterations
 
@@ -346,6 +355,10 @@ class Simulator:
             n: (int): (optional) Number of iteration that will be done
             monitoring_freq: (int): (optional) Monitoring frequency [frames]
         """
+        if not compute_tar_psf:
+            print("WARNING: Target PSF will be computed (& accumulated) only during monitoring"
+                  )
+
         print("----------------------------------------------------")
         print("iter# | S.E. SR | L.E. SR | ETR (s) | Framerate (Hz)")
         print("----------------------------------------------------")
@@ -355,15 +368,21 @@ class Simulator:
         if n == -1:
             i = 0
             while (True):
-                self.next(**kwargs)
+                self.next(compute_tar_psf=compute_tar_psf, **kwargs)
                 if ((i + 1) % monitoring_freq == 0):
+                    if not compute_tar_psf:
+                        self.compTarImage()
+                        self.compStrehl()
                     self.print_strehl(monitoring_freq, time.time() - t1, i, i)
                     t1 = time.time()
                 i += 1
 
         for i in range(n):
-            self.next(**kwargs)
+            self.next(compute_tar_psf=compute_tar_psf, **kwargs)
             if ((i + 1) % monitoring_freq == 0):
+                if not compute_tar_psf:
+                    self.compTarImage()
+                    self.compStrehl()
                 self.print_strehl(monitoring_freq, time.time() - t1, i, n)
                 t1 = time.time()
         t1 = time.time()
@@ -508,6 +527,16 @@ class Simulator:
             else:
                 self.rtc.d_control[nControl].comp_dphi(self.tar.d_targets[n], False)
         self.rtc.do_control(nControl)
+
+    def doCalibate_img(self, nControl: int):
+        '''
+        Computes the calibrated image from the Wfs image
+
+        Parameters
+        ------------
+        nControl: (int): controller index
+        '''
+        self.rtc.do_calibrate_img(nControl)
 
     def doCentroids(self, nControl: int):
         '''

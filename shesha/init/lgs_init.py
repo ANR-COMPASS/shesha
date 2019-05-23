@@ -1,6 +1,9 @@
-'''
+''' @package shesha.init.lgs_init
+
 Initialization of a LGS in a Wfs object
+
 '''
+
 import os
 try:
     shesha_db = os.environ['SHESHA_DB_ROOT']

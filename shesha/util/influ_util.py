@@ -1,4 +1,4 @@
-'''
+''' @package shesha.util.influ_util
 Computation of the influence functions used by the DM
 '''
 import numpy as np
@@ -30,8 +30,8 @@ def besel_orth(m, n, phi, r):
     elif (m > 0):
         B = sp.jn(m, sp.jn_zeros(m, n)[n - 1] * r) * np.sin(m * phi)
     else:
-        B = sp.jn(np.abs(m), sp.jn_zeros(np.abs(m), n)[n -
-                                                       1] * r) * np.cos(np.abs(m) * phi)
+        B = sp.jn(np.abs(m),
+                  sp.jn_zeros(np.abs(m), n)[n - 1] * r) * np.cos(np.abs(m) * phi)
     return B
 
 
@@ -299,8 +299,8 @@ def makeGaussian(pitch: float, coupling: float, x=None, y=None):
         return gauss
 
 
-def makeBessel(pitch: float, coupling: float, x: np.ndarray=None, y: np.ndarray=None,
-               patternType: bytes=PatternType.SQUARE):
+def makeBessel(pitch: float, coupling: float, x: np.ndarray = None, y: np.ndarray = None,
+               patternType: bytes = PatternType.SQUARE):
     """ Compute Bessel influence function
 
     :parameters:

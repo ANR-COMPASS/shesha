@@ -1,21 +1,28 @@
 import numpy as np
 import naga as ng
 import os
-from shesha.sutra_wrap import Rtc_FFF as Rtc
+from shesha.sutra_wrap import Rtc_UFU as Rtc
 from shesha.supervisor.compassSupervisor import CompassSupervisor as Supervisor
 from scipy.ndimage.measurements import center_of_mass
 
-precision = 1e-5
+precision = 1e-2
 sup = Supervisor(
         os.getenv("COMPASS_ROOT") + "/shesha/data/par/par4bench/scao_sh_16x16_8pix.py")
+sup.config.p_dms[0].unitpervolt = 500
+sup.config.p_dms[0].push4imat = 0.5
+sup.config.p_dms[1].unitpervolt = 500
+sup.config.p_dms[1].push4imat = 0.5
 sup.initConfig()
+sup._sim.wfs.d_wfs[0].set_fakecam(True)
+sup._sim.wfs.d_wfs[0].set_maxFluxPerPix(int(sup.config.p_wfs0._nphotons // 2))
+sup._sim.wfs.d_wfs[0].set_maxPixValue(2**16 - 1)
 sup.singleNext()
 sup.openLoop()
 sup.closeLoop()
 sup._sim.doControl(0)
 rtc = Rtc()
 rtc.add_centroider(sup._sim.c, sup.config.p_wfs0._nvalid,
-                   sup.config.p_wfs0.npix / 2 - 0.5, sup.config.p_wfs0.pixsize, 0, "cog")
+                   sup.config.p_wfs0.npix / 2 - 0.5, sup.config.p_wfs0.pixsize, False, 0, "cog")
 rtc.add_controller(sup._sim.c, sup.config.p_wfs0._nvalid, sup.config.p_wfs0._nvalid * 2,
                    sup.config.p_controller0.nactu, sup.config.p_controller0.delay, 0,
                    "generic")
@@ -28,8 +35,7 @@ rtc.d_centro[0].load_validpos(xvalid, yvalid, xvalid.size)
 cmat = sup.getCmat(0)
 rtc.d_control[0].set_cmat(cmat)
 rtc.d_control[0].set_gain(sup.config.p_controller0.gain)
-frame = sup.getWfsImage()
-frame /= frame.max()
+frame = np.array(sup._sim.wfs.d_wfs[0].d_camimg)
 rtc.d_centro[0].load_img(frame, frame.shape[0])
 rtc.d_centro[0].calibrate_img()
 
@@ -93,7 +99,7 @@ def test_load_validposY():
 
 
 def test_set_cmat():
-    assert (relative_array_error(np.array(control.d_cmat), cmat) < precision)
+    assert (relative_array_error(ng.array(control.d_cmat).toarray(), cmat) < precision)
 
 
 def test_set_gain():
@@ -105,17 +111,17 @@ def test_load_img():
 
 
 def test_set_dark():
-    assert (relative_array_error(np.array(centro.d_dark), dark) < precision)
+    assert (relative_array_error(ng.array(centro.d_dark).toarray(), dark) < precision)
 
 
 def test_set_flat():
-    assert (relative_array_error(np.array(centro.d_flat), flat) < precision)
+    assert (relative_array_error(ng.array(centro.d_flat).toarray(), flat) < precision)
 
 
 def test_calibrate_img():
     centro.calibrate_img()
-    imgCal = (frame - dark) * flat
-    assert (relative_array_error(np.array(centro.d_img), imgCal) < precision)
+    imgCal = (frame.astype(np.float32) - dark) * flat
+    assert (relative_array_error(ng.array(centro.d_img).toarray(), imgCal) < precision)
 
 
 def test_doCentroids_cog():
@@ -127,15 +133,17 @@ def test_doCentroids_cog():
         tmp = center_of_mass(bincube[:, :, k])
         slopes[k] = (tmp[0] - offset) * scale
         slopes[k + sup.config.p_wfs0._nvalid] = (tmp[1] - offset) * scale
-    assert (relative_array_error(np.array(control.d_centroids), slopes) < precision)
+    assert (relative_array_error(ng.array(control.d_centroids).toarray(), slopes) <
+            precision)
 
 
 def test_doControl_generic():
-    slopes = np.array(control.d_centroids)
+    slopes = ng.array(control.d_centroids).toarray()
     gain = control.gain
-    cmat = np.array(control.d_cmat)
+    cmat = ng.array(control.d_cmat).toarray()
     commands = cmat.dot(slopes) * gain * (-1)
-    assert (relative_array_error(np.array(control.d_com), commands) < precision)
+    assert (relative_array_error(ng.array(control.d_com).toarray(), commands) <
+            precision)
 
 
 def test_set_comRange():
@@ -178,9 +186,9 @@ def test_add_perturb():
 
 def test_disable_perturb_voltage():
     control.disable_perturb_voltage("test")
-    com = np.array(control.d_com)
+    com = ng.array(control.d_com).toarray()
     control.add_perturb()
-    assert (relative_array_error(np.array(control.d_com), com) < precision)
+    assert (relative_array_error(ng.array(control.d_com).toarray(), com) < precision)
 
 
 def test_enable_perturb_voltage():
@@ -198,16 +206,18 @@ def test_reset_perturb_voltage():
 
 
 def test_comp_voltage():
-    control.set_comRange(-1, 1)
+    Vmin = -1
+    Vmax = 1
+    control.set_comRange(Vmin, Vmax)
     control.comp_voltage()
     C = np.random.random(sup.config.p_controller0.nactu)
     control.add_perturb_voltage("test", C, 1)
     control.set_com(C, C.size)
-    com1 = np.array(control.d_com1)
+    com1 = ng.array(control.d_com1).toarray()
     control.comp_voltage()
     delay = sup.config.p_controller0.delay
     if control.d_com2 is not None:
-        com2 = np.array(control.d_com2)
+        com2 = ng.array(control.d_com2).toarray()
     else:
         com2 = com1.copy() * 0
     floor = int(delay)
@@ -219,16 +229,18 @@ def test_comp_voltage():
         a = 0
         c = delay - floor
         b = 1 - c
-
     else:
         a = 0
         c = 1
         b = 0
     commands = a * C + b * com1 + c * com2
     comPertu = commands + C
-    comPertu[np.where(comPertu > 1)] = 1
-    comPertu[np.where(comPertu < -1)] = -1
-    assert (relative_array_error(np.array(control.d_voltage), comPertu) < precision)
+    comPertu[np.where(comPertu > Vmax)] = Vmax
+    comPertu[np.where(comPertu < Vmin)] = Vmin
+    valMax = control.valMax
+    commands = np.uint16((comPertu - Vmin) / (Vmax - Vmin) * valMax)
+    assert (relative_array_error(ng.array(control.d_voltage).toarray(), commands) <
+            precision)
 
 
 def test_remove_centroider():
@@ -238,35 +250,38 @@ def test_remove_centroider():
 
 def test_doCentroids_tcog():
     rtc.add_centroider(sup._sim.c, sup.config.p_wfs0._nvalid,
-                       sup.config.p_wfs0.npix / 2 - 0.5, sup.config.p_wfs0.pixsize, 0,
+                       sup.config.p_wfs0.npix / 2 - 0.5, sup.config.p_wfs0.pixsize, False, 0,
                        "tcog")
 
     centro = rtc.d_centro[-1]
-    threshold = 0.1
+    threshold = 500
     centro.set_threshold(threshold)
     centro.set_npix(sup.config.p_wfs0.npix)
     centro.load_validpos(xvalid, yvalid, xvalid.size)
     centro.load_img(frame, frame.shape[0])
     centro.calibrate_img()
     rtc.do_centroids(0)
-    bincube = np.array(sup._sim.wfs.d_wfs[0].d_bincube)
-    bincube /= bincube.max()
     slopes = np.zeros(sup.config.p_wfs0._nvalid * 2)
     offset = centro.offset
     scale = centro.scale
-    bincube = bincube - threshold
-    bincube[np.where(bincube < 0)] = 0
+    vx = sup.config.p_wfs0._validsubsx
+    vy = sup.config.p_wfs0._validsubsy
+    npix = sup.config.p_wfs0.npix
     for k in range(sup.config.p_wfs0._nvalid):
-        tmp = center_of_mass(bincube[:, :, k])
+        imagette = frame[vx[k]:vx[k] + npix, vy[k]:vy[k] + npix].astype(
+                np.float32) - threshold
+        imagette[np.where(imagette < 0)] = 0
+        tmp = center_of_mass(imagette)
         slopes[k] = (tmp[0] - offset) * scale
         slopes[k + sup.config.p_wfs0._nvalid] = (tmp[1] - offset) * scale
-    assert (relative_array_error(np.array(control.d_centroids), slopes) < precision)
+    assert (relative_array_error(ng.array(control.d_centroids).toarray(), slopes) <
+            precision)
 
 
 def test_doCentroids_bpcog():
     rtc.remove_centroider(0)
     rtc.add_centroider(sup._sim.c, sup.config.p_wfs0._nvalid,
-                       sup.config.p_wfs0.npix / 2 - 0.5, sup.config.p_wfs0.pixsize, 0,
+                       sup.config.p_wfs0.npix / 2 - 0.5, sup.config.p_wfs0.pixsize, False, 0,
                        "bpcog")
 
     centro = rtc.d_centro[-1]
@@ -282,12 +297,16 @@ def test_doCentroids_bpcog():
     slopes = np.zeros(sup.config.p_wfs0._nvalid * 2)
     offset = centro.offset
     scale = centro.scale
+    vx = sup.config.p_wfs0._validsubsx
+    vy = sup.config.p_wfs0._validsubsy
+    npix = sup.config.p_wfs0.npix
     for k in range(sup.config.p_wfs0._nvalid):
-        imagette = bincube[:, :, k]
+        imagette = frame[vx[k]:vx[k] + npix, vy[k]:vy[k] + npix].astype(np.float32)
         threshold = np.sort(imagette, axis=None)[-(bpix + 1)]
         imagette -= threshold
         imagette[np.where(imagette < 0)] = 0
         tmp = center_of_mass(imagette)
         slopes[k] = (tmp[0] - offset) * scale
         slopes[k + sup.config.p_wfs0._nvalid] = (tmp[1] - offset) * scale
-    assert (relative_array_error(np.array(control.d_centroids), slopes) < precision)
+    assert (relative_array_error(ng.array(control.d_centroids).toarray(), slopes) <
+            precision)

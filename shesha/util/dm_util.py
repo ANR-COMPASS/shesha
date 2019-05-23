@@ -1,4 +1,5 @@
-'''
+''' @package shesha.util.dm_util
+
 Utilities function for DM geometry initialization
 '''
 import numpy as np
@@ -164,13 +165,13 @@ def createDoubleHexaPattern(pitch: float, supportSize: int, pupAngleDegree: floa
     nn = np.where(((th < pi / 6) & (th > -pi / 6)))
     x = x[nn]
     y = y[nn]
-    
+
     # on va maintenant repliquer ce reseau 6 fois, et le rotationnant a chaque
     # fois de 60°. Note:
     X = np.array([])
     Y = np.array([])
     for k in range(6):
-        xx =  np.cos(k * pi / 3) * x + np.sin(k * pi / 3) * y
+        xx = np.cos(k * pi / 3) * x + np.sin(k * pi / 3) * y
         yy = -np.sin(k * pi / 3) * x + np.cos(k * pi / 3) * y
         X = np.r_[X, xx]
         Y = np.r_[Y, yy]
@@ -178,7 +179,7 @@ def createDoubleHexaPattern(pitch: float, supportSize: int, pupAngleDegree: floa
     # Rotation matrices pour suivre l'angle pupille
     rot = pupAngleDegree * np.pi / 180.0
     mrot = np.array([[np.cos(rot), -np.sin(rot)], [np.sin(rot), np.cos(rot)]])
-    XY = np.dot( mrot, [X,Y] )
+    XY = np.dot(mrot, [X, Y])
     return np.float32(XY)
 
 

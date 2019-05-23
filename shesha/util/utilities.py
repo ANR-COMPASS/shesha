@@ -1,29 +1,10 @@
-'''
+''' @package shesha.util.utilities
 Basic utilities function
 '''
 import importlib
 import sys, os
 
 import numpy as np
-
-
-def complextofloat2(A):
-    B = np.zeros(A.shape, dtype=[('x', '<f4'), ('y', '<f4')])
-    for i in range(A.shape[0]):
-        for j in range(A.shape[1]):
-            B[i, j][0] = A[i, j].real
-            B[i, j][1] = A[i, j].imag
-
-    return B
-
-
-def float2tocomplex(A):
-    B = np.zeros(A.shape, dtype=np.complex64).flatten()
-    A_F = A.flatten()
-    for i in range(A_F.size):
-        B[i] = A_F[i][0] + 1j * A_F[i][1]
-
-    return np.reshape(B, A.shape)
 
 
 def rebin(a, shape):

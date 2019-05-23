@@ -1,4 +1,4 @@
-"""
+""" @package shesha.util.kl_util
 Functions for DM KL initialization
 """
 
@@ -25,7 +25,7 @@ def make_radii(cobs: float, nr: int) -> float:
 
 
 def make_kernels(cobs: float, nr: int, radp: np.ndarray, kl_type: bytes,
-                 outscl: float=3.) -> np.ndarray:
+                 outscl: float = 3.) -> np.ndarray:
     """
     This routine generates the kernel used to find the KL modes.
     The  kernel constructed here should be simply a discretization
@@ -590,12 +590,12 @@ def pol2car(pol, p_dm, mask=0):
     newy = np.linspace(-1, 1, ncp)
     tx, ty = np.meshgrid(newx, newy)
 
-    cd = interpolate.griddata((tab_r.flatten(), tab_phi.flatten()),
-                              pol.flatten(), (cr, cp), method='cubic')
+    cd = interpolate.griddata((tab_r.flatten(), tab_phi.flatten()), pol.flatten(),
+                              (cr, cp), method='cubic')
     cdf = interpolate.griddata((tab_r.flatten("F"), tab_phi.flatten("F")),
                                pol.flatten("F"), (cr, cp), method='cubic')
-    cdxy = interpolate.griddata((tab_y.flatten(), tab_x.flatten()),
-                                pol.flatten(), (tx, ty), method='cubic')
+    cdxy = interpolate.griddata((tab_y.flatten(), tab_x.flatten()), pol.flatten(),
+                                (tx, ty), method='cubic')
 
     if (mask == 1):
         ap = p_dm.ap

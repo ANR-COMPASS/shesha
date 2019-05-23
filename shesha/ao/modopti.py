@@ -1,6 +1,9 @@
-"""
+""" @package shesha.ao.modopti
+
 Functions used for modal optimization control
+
 """
+
 import numpy as np
 from shesha.sutra_wrap import Sensors, Telescope, Rtc_FFF as Rtc, Atmos
 

@@ -1,3 +1,8 @@
+''' @package shesha.script.dm_standalone
+
+Python dm standalone script
+
+'''
 # import cProfile
 # import pstats as ps
 

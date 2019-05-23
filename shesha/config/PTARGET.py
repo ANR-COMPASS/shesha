@@ -1,8 +1,10 @@
-'''
+''' @package shesha.config.PTARGET
+
 Param_target class definition
+
 Parameters for target
+
 '''
-''
 
 import numpy as np
 from . import config_setter_utils as csu

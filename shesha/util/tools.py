@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""
+""" @package shesha.util.tools
 Created on Sat Jul 12 21:00:56 2014
 
 @author: canary
@@ -116,7 +116,8 @@ def plg(
         win=1,
         xlog=0,
         ylog=0,
-        color="black", ):
+        color="black",
+):
     """
 
 

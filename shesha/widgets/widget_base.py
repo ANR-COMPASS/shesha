@@ -1,5 +1,5 @@
-"""Widget base
-
+""" @package shesha.widgets.widget_base
+Widget base
 """
 
 import os

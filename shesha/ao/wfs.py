@@ -1,6 +1,9 @@
-'''
+''' @package shesha.ao.wfs
+
 On the fly modification of the WFS
+
 '''
+
 import shesha.config as conf
 import shesha.constants as scons
 from shesha.constants import CONST

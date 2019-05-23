@@ -1,11 +1,11 @@
-"""
+""" @package shesha.util.make_pupil
 Pupil creation functions
 """
 import numpy as np
 import os
 import scipy.ndimage.interpolation as interp
 
-from . import hdf5_utils as h5u
+from . import hdf5_util as h5u
 from . import utilities as util
 
 from shesha.constants import ApertureType, SpiderType
@@ -13,7 +13,7 @@ from shesha.constants import ApertureType, SpiderType
 EELT_data = os.environ.get('SHESHA_ROOT') + "/data/apertures/"
 
 
-def make_pupil(dim, pupd, tel, xc=-1, yc=-1, real=0, halfSpider=0):
+def make_pupil(dim, pupd, tel, xc=-1, yc=-1, real=0, halfSpider=False):
     """Initialize the system pupil
 
     :parameters:
@@ -30,8 +30,6 @@ def make_pupil(dim, pupd, tel, xc=-1, yc=-1, real=0, halfSpider=0):
 
         real: (int)
 
-        cobs: (float) : central obstruction ratio.
-
     TODO: complete
     """
 
@@ -39,8 +37,25 @@ def make_pupil(dim, pupd, tel, xc=-1, yc=-1, real=0, halfSpider=0):
         N_seg = 798
         return make_EELT(dim, pupd, tel, N_seg)
     elif (tel.type_ap == ApertureType.EELT):
-        return generateEeltPupilMask(dim, tel.t_spiders, xc, yc, tel.diam / dim,
-                                     0.0, tel.pupangle, D=tel.diam, halfSpider=halfSpider)
+        return generateEeltPupilMask(dim, tel.t_spiders, xc, yc, tel.diam / dim, tel.gap,
+                                     tel.pupangle, D=tel.diam, halfSpider=halfSpider,
+                                     pitch=1.244683637214, nseg=33, inner_rad=4.1,
+                                     outer_rad=15.4, R=95.7853, nominalD=40,
+                                     half_seg=0.75, refl=tel.referr)
+    elif (tel.type_ap == ApertureType.KECK):
+        seg_corner = 1.8
+        kpitch = seg_corner / 2 * np.sqrt(3)
+        knseg = 7
+        kinner_rad = 0.9
+        kouter_rad = 3.4
+        kR = 85
+        knominalD = 10.96
+        khalf_seg = 0.9
+        return generateEeltPupilMask(dim, tel.t_spiders, xc, yc, tel.diam / dim, tel.gap,
+                                     tel.pupangle, D=tel.diam, halfSpider=halfSpider,
+                                     pitch=kpitch, nseg=knseg, inner_rad=0.9,
+                                     outer_rad=3.4, R=kR, nominalD=knominalD,
+                                     half_seg=0.9, refl=tel.referr)
     elif tel.type_ap == ApertureType.EELT_BP1:
         print("ELT_pup_cobs = %5.3f" % 0.339)
         N_seg = 768
@@ -213,9 +228,9 @@ def make_EELT(dim, pupd, tel, N_seg=-1):
     if (N_seg == -1):
         EELT_file = EELT_data + "EELT-Custom_N" + str(dim) + "_COBS" + str(
                 100 * tel.cobs) + "_CLOCKED" + str(tel.pupangle) + "_TSPIDERS" + str(
-                        100 *
-                        tel.t_spiders) + "_MS" + str(tel.nbrmissing) + "_REFERR" + str(
-                                100 * tel.referr) + ".h5"
+                        100 * tel.t_spiders) + "_MS" + str(
+                                tel.nbrmissing) + "_REFERR" + str(
+                                        100 * tel.referr) + ".h5"
     else:
         EELT_file = EELT_data + tel.type_ap.decode('UTF-8') + "_N" + str(
                 dim) + "_COBS" + str(100 * tel.cobs) + "_CLOCKED" + str(
@@ -295,10 +310,14 @@ def make_EELT(dim, pupd, tel, N_seg=-1):
             t_6 = np.tan(np.pi / 6)
 
             spiders_map = np.abs(X) > t_spiders / 2
-            spiders_map *= ((X.T > (X + t_spiders / s2_6) * t_6) +
-                            (X.T < (X - t_spiders / s2_6) * t_6))
-            spiders_map *= ((X.T > (-X + t_spiders / s2_6) * t_6) +
-                            (X.T < (-X - t_spiders / s2_6) * t_6))
+            spiders_map *= (
+                    (X.T >
+                     (X + t_spiders / s2_6) * t_6) + (X.T <
+                                                      (X - t_spiders / s2_6) * t_6))
+            spiders_map *= (
+                    (X.T >
+                     (-X + t_spiders / s2_6) * t_6) + (X.T <
+                                                       (-X - t_spiders / s2_6) * t_6))
 
             pup = pup * spiders_map
 
@@ -312,7 +331,7 @@ def make_EELT(dim, pupd, tel, N_seg=-1):
     return pup
 
 
-def make_phase_ab(dim, pupd, tel, pup):
+def make_phase_ab(dim, pupd, tel, pup=None, xc=-1, yc=-1, real=0, halfSpider=False):
     """Compute the EELT M1 phase aberration
 
     :parameters:
@@ -328,95 +347,116 @@ def make_phase_ab(dim, pupd, tel, pup):
     TODO: complete
     """
 
-    if ((tel.type_ap == ApertureType.GENERIC) or (tel.type_ap == ApertureType.VLT) or
-        (tel.type_ap == ApertureType.EELT)):
+    if ((tel.type_ap == ApertureType.GENERIC) or (tel.type_ap == ApertureType.VLT)):
         return np.zeros((dim, dim)).astype(np.float32)
 
-    ab_file = EELT_data + "aberration_" + tel.type_ap.decode('UTF-8') + \
-            "_N" + str(dim) + "_NPUP" + str(np.where(pup)[0].size) + "_CLOCKED" + str(
-            tel.pupangle) + "_TSPIDERS" + str(
-                    100 * tel.t_spiders) + "_MS" + str(tel.nbrmissing) + "_REFERR" + str(
-                            100 * tel.referr) + "_PIS" + str(
-                                    tel.std_piston) + "_TT" + str(tel.std_tt) + ".h5"
-    if (os.path.isfile(ab_file)):
-        print("reading aberration phase from file ", ab_file)
-        phase_error = h5u.readHdf5SingleDataset(ab_file)
+    elif tel.type_ap == ApertureType.EELT:
+
+        return generateEeltPupilMask(
+                dim, 0, xc, yc, tel.diam / dim, tel.gap, tel.pupangle, D=tel.diam,
+                halfSpider=halfSpider, pitch=1.244683637214, nseg=33, inner_rad=4.1,
+                outer_rad=15.4, R=95.7853, nominalD=40, half_seg=0.75,
+                refl=[tel.std_piston, tel.std_tt, tel.std_tt])
+    elif (tel.type_ap == ApertureType.KECK):
+        seg_corner = 1.8
+        kpitch = seg_corner / 2 * np.sqrt(3)
+        knseg = 7
+        kinner_rad = 0.9
+        kouter_rad = 3.4
+        kR = 85
+        knominalD = 10.96
+        khalf_seg = 0.9
+        return generateEeltPupilMask(
+                dim, 0, xc, yc, tel.diam / dim, tel.gap, tel.pupangle, D=tel.diam,
+                halfSpider=halfSpider, pitch=kpitch, nseg=knseg, inner_rad=0.9,
+                outer_rad=3.4, R=kR, nominalD=knominalD, half_seg=0.9,
+                refl=[tel.std_piston, tel.std_tt, tel.std_tt])
     else:
-        print("computing M1 phase aberration...")
+        ab_file = EELT_data + "aberration_" + tel.type_ap.decode('UTF-8') + \
+                "_N" + str(dim) + "_NPUP" + str(np.where(pup)[0].size) + "_CLOCKED" + str(
+                tel.pupangle) + "_TSPIDERS" + str(
+                        100 * tel.t_spiders) + "_MS" + str(tel.nbrmissing) + "_REFERR" + str(
+                                100 * tel.referr) + "_PIS" + str(
+                                        tel.std_piston) + "_TT" + str(tel.std_tt) + ".h5"
+        if (os.path.isfile(ab_file)):
+            print("reading aberration phase from file ", ab_file)
+            phase_error = h5u.readHdf5SingleDataset(ab_file)
+        else:
+            print("computing M1 phase aberration...")
 
-        std_piston = tel.std_piston
-        std_tt = tel.std_tt
+            std_piston = tel.std_piston
+            std_tt = tel.std_tt
 
-        W = 1.45 * np.cos(np.pi / 6)
+            W = 1.45 * np.cos(np.pi / 6)
 
-        file = EELT_data + "EELT_Piston_" + tel.type_ap.decode('UTF-8') + ".dat"
-        p_seg = np.fromfile(file, sep="\n")
-        #mean_pis=np.mean(p_seg)
-        std_pis = np.std(p_seg)
-        p_seg = p_seg * std_piston / std_pis
-        N_seg = p_seg.size
+            file = EELT_data + "EELT_Piston_" + tel.type_ap.decode('UTF-8') + ".dat"
+            p_seg = np.fromfile(file, sep="\n")
+            #mean_pis=np.mean(p_seg)
+            std_pis = np.std(p_seg)
+            p_seg = p_seg * std_piston / std_pis
+            N_seg = p_seg.size
 
-        file = EELT_data + "EELT_TT_" + tel.type_ap.decode('UTF-8') + ".dat"
-        tt_seg = np.fromfile(file, sep="\n")
+            file = EELT_data + "EELT_TT_" + tel.type_ap.decode('UTF-8') + ".dat"
+            tt_seg = np.fromfile(file, sep="\n")
 
-        file = EELT_data + "EELT_TT_DIRECTION_" + tel.type_ap.decode('UTF-8') + ".dat"
-        tt_phi_seg = np.fromfile(file, sep="\n")
+            file = EELT_data + "EELT_TT_DIRECTION_" + tel.type_ap.decode('UTF-8') + ".dat"
+            tt_phi_seg = np.fromfile(file, sep="\n")
 
-        phase_error = np.zeros((dim, dim))
-        phase_tt = np.zeros((dim, dim))
-        phase_defoc = np.zeros((dim, dim))
+            phase_error = np.zeros((dim, dim))
+            phase_tt = np.zeros((dim, dim))
+            phase_defoc = np.zeros((dim, dim))
 
-        file = EELT_data + "Coord_" + tel.type_ap.decode('UTF-8') + ".dat"
-        data = np.fromfile(file, sep="\n")
-        data = np.reshape(data, (data.size // 2, 2))
-        x_seg = data[:, 0]
-        y_seg = data[:, 1]
+            file = EELT_data + "Coord_" + tel.type_ap.decode('UTF-8') + ".dat"
+            data = np.fromfile(file, sep="\n")
+            data = np.reshape(data, (data.size // 2, 2))
+            x_seg = data[:, 0]
+            y_seg = data[:, 1]
 
-        Range = (0.5 * (tel.diam * dim / pupd) - 0.25 / dim)
+            Range = (0.5 * (tel.diam * dim / pupd) - 0.25 / dim)
 
-        X = np.tile(np.linspace(-Range, Range, dim, dtype=np.float32), (dim, 1))
-        t_3 = np.tan(np.pi / 3.)
+            X = np.tile(np.linspace(-Range, Range, dim, dtype=np.float32), (dim, 1))
+            t_3 = np.tan(np.pi / 3.)
 
-        for i in range(N_seg):
-            Xt = X + x_seg[i]
-            Yt = X.T + y_seg[i]
-            SEG=(Yt<0.5*W)*(Yt>=-0.5*W)*(0.5*(Yt+t_3*Xt)<0.5*W) \
-                               *(0.5*(Yt+t_3*Xt)>=-0.5*W)*(0.5*(Yt-t_3*Xt)<0.5*W) \
-                               *(0.5*(Yt-t_3*Xt)>=-0.5*W)
+            for i in range(N_seg):
+                Xt = X + x_seg[i]
+                Yt = X.T + y_seg[i]
+                SEG=(Yt<0.5*W)*(Yt>=-0.5*W)*(0.5*(Yt+t_3*Xt)<0.5*W) \
+                                *(0.5*(Yt+t_3*Xt)>=-0.5*W)*(0.5*(Yt-t_3*Xt)<0.5*W) \
+                                *(0.5*(Yt-t_3*Xt)>=-0.5*W)
 
-            if (i == 0):
-                N_in_seg = np.sum(SEG)
-                Hex_diam = 2 * np.max(
-                        np.sqrt(Xt[np.where(SEG)]**2 + Yt[np.where(SEG)]**2))
+                if (i == 0):
+                    N_in_seg = np.sum(SEG)
+                    Hex_diam = 2 * np.max(
+                            np.sqrt(Xt[np.where(SEG)]**2 + Yt[np.where(SEG)]**2))
 
-            if (tt_seg[i] != 0):
-                TT = tt_seg[i] * (
-                        np.cos(tt_phi_seg[i]) * Xt + np.sin(tt_phi_seg[i]) * Yt)
-                mean_tt = np.sum(TT[np.where(SEG == 1)]) / N_in_seg
-                phase_tt += SEG * (TT - mean_tt)
+                if (tt_seg[i] != 0):
+                    TT = tt_seg[i] * (
+                            np.cos(tt_phi_seg[i]) * Xt + np.sin(tt_phi_seg[i]) * Yt)
+                    mean_tt = np.sum(TT[np.where(SEG == 1)]) / N_in_seg
+                    phase_tt += SEG * (TT - mean_tt)
+
+                #TODO defocus
+
+                phase_error += SEG * p_seg[i]
+
+            N_EELT = np.where(pup)[0].size
+            if (np.sum(phase_tt) != 0):
+                phase_tt *= std_tt / np.sqrt(
+                        1. / N_EELT * np.sum(phase_tt[np.where(pup)]**2))
 
             #TODO defocus
 
-            phase_error += SEG * p_seg[i]
+            phase_error += phase_tt + phase_defoc
 
-        N_EELT = np.where(pup)[0].size
-        if (np.sum(phase_tt) != 0):
-            phase_tt *= std_tt / np.sqrt(
-                    1. / N_EELT * np.sum(phase_tt[np.where(pup)]**2))
+            if (tel.pupangle != 0):
+                phase_error = interp.rotate(phase_error, tel.pupangle, reshape=False,
+                                            order=2)
 
-        #TODO defocus
+            print("phase aberration created")
+            print("writing aberration filel to file ", ab_file)
+            h5u.writeHdf5SingleDataset(ab_file, phase_error)
 
-        phase_error += phase_tt + phase_defoc
-
-        if (tel.pupangle != 0):
-            phase_error = interp.rotate(phase_error, tel.pupangle, reshape=False,
-                                        order=2)
-
-        print("phase aberration created")
-        print("writing aberration filel to file ", ab_file)
-        h5u.writeHdf5SingleDataset(ab_file, phase_error)
-
-    return phase_error
+        return phase_error
 
 
 """
@@ -430,8 +470,11 @@ def make_phase_ab(dim, pupd, tel, pup):
 
 """
 
+
 def generateEeltPupilMask(npt, dspider, i0, j0, pixscale, gap, rotdegree, D=40.0,
-                          centerMark=0, halfSpider=0):
+                          centerMark=0, halfSpider=False, pitch=1.244683637214, nseg=33,
+                          inner_rad=4.1, outer_rad=15.4, R=95.7853, nominalD=40,
+                          half_seg=0.75, refl=None):
     """
     Generates a boolean pupil mask of the binary EELT pupil
     on a map of size (npt, npt).
@@ -451,7 +494,15 @@ def generateEeltPupilMask(npt, dspider, i0, j0, pixscale, gap, rotdegree, D=40.0
         symmetry of the pupil in order to debug things using compass.
         centerMark==1 draws a point
         centerMark==2 draws 2 lines
-    :param int halfSpider: created by F Vidal.
+    :param bool halfSpider: half Spider computation flag
+    :param float pitch: segment pitch
+    :param int nseg: number of segments across the diameter
+    :param float inner_rad: Inner radius [meters]
+    :param float outter_rad: outter radius [meters]
+    :param float R: M1 curvature radius
+    :param float nominalD: diameter needed to get nominal aperture after projection
+    :param float half_seg: segment half size
+    :param float refl: std of the reflectivity of each segment
 
     :Example:
     npt = p_geom.pupdiam
@@ -464,32 +515,54 @@ def generateEeltPupilMask(npt, dspider, i0, j0, pixscale, gap, rotdegree, D=40.0
     gap = 0.0
     pup = generateEeltPupilMask(npt, dspider, i0, j0, pixscale, gap, rotdegree)
 
-    """    
+    """
     rot = rotdegree * np.pi / 180
 
-    # Generation of segments coordinates. 
+    # Generation of segments coordinates.
     # hx and hy have a shape [6,798] describing the 6 vertex of the 798
     # hexagonal mirrors
-    hx, hy = generateCoordSegments(D, rot)
-
+    #hx, hy = generateCoordSegments( D, rot)
+    hx, hy = generateCoordSegments(D, rot, pitch=pitch, nseg=nseg, inner_rad=inner_rad,
+                                   outer_rad=outer_rad, R=R, nominalD=nominalD)
     # From the data of hex mirrors, we build the pupil image using
     # boolean
-    pup = generateSegmentProperties(True, hx, hy, i0, j0, pixscale, gap, npt, D)
-    
+    #pup = generateSegmentProperties(True, hx, hy, i0, j0, pixscale, gap, npt, D)
+    if (refl == 0):
+        refl = True
+    elif np.isscalar(refl):
+        referr = np.random.random(hx.size)
+        referr = referr * refl / np.std(referr)
+        refl = np.ones(hx.size) - referr
+    elif type(refl) == list:
+        if len(refl) == 3:
+            refpist = np.random.random(hx.size)
+            refpist = refpist * refl[0] / np.std(refpist)
+            reftip = np.random.random(hx.size)
+            reftip = reftip * refl[1] / np.std(reftip)
+            reftilt = np.random.random(hx.size)
+            reftilt = reftilt * refl[2] / np.std(reftilt)
+            refl = np.array([refpist, reftip, reftilt])
+    else:
+        raise ValueError(
+                "refl param must be None, scalar (reflectivity std error) or list of 3 elements (piston, tip and tilt std errors)"
+        )
+
+    pup = generateSegmentProperties(refl, hx, hy, i0, j0, pixscale, gap, npt, D,
+                                    nominalD=nominalD, pitch=pitch, half_seg=half_seg)
     # SPIDERS ............................................
     nspider = 3  # for the day where we have more/less spiders ;-)
     if (dspider > 0 and nspider > 0):
-        if (halfSpider != 0):
-            pup = pup & fillHalfSpider(npt, nspider, dspider, i0, j0, pixscale, rot)
+        if (halfSpider is True):
+            pup = pup * fillHalfSpider(npt, nspider, dspider, i0, j0, pixscale, rot)
         else:
-            pup = pup & fillSpider(npt, nspider, dspider, i0, j0, pixscale, rot)
+            pup = pup * fillSpider(npt, nspider, dspider, i0, j0, pixscale, rot)
+
     # Rajout d'un pixel au centre (pour marquer le centre) ou d'une croix,
     # selon la valeur de centerMark
     if centerMark:
-        pup = np.logical_xor(pup , centrePourVidal(npt, i0, j0, centerMark))
+        pup = np.logical_xor(pup, centrePourVidal(npt, i0, j0, centerMark))
 
     return pup
-
 
 
 def fillPolygon(x, y, i0, j0, scale, gap, N, index=0):
@@ -518,12 +591,12 @@ def fillPolygon(x, y, i0, j0, scale, gap, N, index=0):
     gap = 0.
     scale = 0.03
     pol = fillPolygon(x, y, i0, j0, scale, gap, N, index=2)
-    
+
     """
     # define coordinates map centred on (i0,j0) with same units as x,y.
     X = (np.arange(N) - i0) * scale
     Y = (np.arange(N) - j0) * scale
-    X,Y = np.meshgrid(X,Y,indexing='ij') # indexage [x,y]
+    X, Y = np.meshgrid(X, Y, indexing='ij')  # indexage [x,y]
 
     # define centre x0, y0 of the polygon
     x0 = np.mean(x)
@@ -558,7 +631,7 @@ def fillPolygon(x, y, i0, j0, scale, gap, N, index=0):
     # with theta=0=2pi
     n = x.shape[0]  # number of corners of polygon
     indx, indy = (np.array([], dtype=np.int), np.array([], dtype=np.int))
-    distedge = np.array([],dtype=np.float)
+    distedge = np.array([], dtype=np.float)
     for i in range(n):
         j = i + 1  # j=element next i except when i==n : then j=0 (cycling)
         if j == n:
@@ -566,18 +639,18 @@ def fillPolygon(x, y, i0, j0, scale, gap, N, index=0):
             sub = np.where((T >= t[-1]) | (T <= (t[0])))
         else:
             sub = np.where((T >= t[i]) & (T <= t[j]))
-        # compute unitary vector des 2 sommets 
+        # compute unitary vector des 2 sommets
         dy = y[j] - y[i]
         dx = x[j] - x[i]
         vnorm = np.sqrt(dx**2 + dy**2)
         dx /= vnorm
         dy /= vnorm
         # calcul du produit vectoriel
-        crossprod = dx*(Y[sub]-y[i]) - dy*(X[sub]-x[i])
+        crossprod = dx * (Y[sub] - y[i]) - dy * (X[sub] - x[i])
         tmp = crossprod > gap
         indx = np.append(indx, sub[0][tmp])
         indy = np.append(indy, sub[1][tmp])
-        distedge = np.append(distedge, crossprod[tmp] )
+        distedge = np.append(distedge, crossprod[tmp])
 
     # choice of what is returned : either only the indexes, or the
     # boolean map
@@ -589,7 +662,7 @@ def fillPolygon(x, y, i0, j0, scale, gap, N, index=0):
         return a
     else:
         a = np.zeros((N, N), dtype=np.bool)
-        a[indx, indy] = True        # convention [x,y]
+        a[indx, indy] = True  # convention [x,y]
 
     return a
 
@@ -683,10 +756,10 @@ def fillHalfSpider(N, nspider, dspider, i0, j0, scale, rot):
     X, Y = np.meshgrid(X, Y, indexing='ij')  # convention d'appel [x,y]
     w = 2 * np.pi / nspider
     for i in range(nspider):
-        right = (X * np.cos(i * w - rot) + Y * np.sin(i * w - rot) < dspider / 2) * (
-                X * np.cos(i * w - rot) + Y * np.sin(i * w - rot) > 0.)
-        left = (X * np.cos(i * w - rot) + Y * np.sin(i * w - rot) > -dspider / 2) * (
-                X * np.cos(i * w - rot) + Y * np.sin(i * w - rot) < 0.)
+        right = (X * np.cos(i * w - rot) + Y * np.sin(i * w - rot) <
+                 dspider / 2) * (X * np.cos(i * w - rot) + Y * np.sin(i * w - rot) > 0.)
+        left = (X * np.cos(i * w - rot) + Y * np.sin(i * w - rot) >
+                -dspider / 2) * (X * np.cos(i * w - rot) + Y * np.sin(i * w - rot) < 0.)
         a[right] = False
         b[left] = False
     return a, b
@@ -713,45 +786,51 @@ def createHexaPattern(pitch, supportSize):
     x, y = np.meshgrid(x, y, indexing='ij')
     x = x.flatten()
     y = y.flatten()
-    peak_axis = np.append(x, x + pitch/2.)    # axe dirige selon sommet
-    flat_axis = np.append(y, y + pitch*V3/2.) # axe dirige selon plat
+    peak_axis = np.append(x, x + pitch / 2.)  # axe dirige selon sommet
+    flat_axis = np.append(y, y + pitch * V3 / 2.)  # axe dirige selon plat
     return flat_axis, peak_axis
 
 
-
-
-def generateCoordSegments(D, rot):
+def generateCoordSegments(D, rot, pitch=1.244683637214, nseg=33, inner_rad=4.1,
+                          outer_rad=15.4, R=95.7853, nominalD=40):
     """
     Computes the coordinates of the corners of all the hexagonal
     segments of M1.
     Result is a tuple of arrays(6, 798).
 
-    :param float D: D is the pupil diameter in meters, it must be set to 40.0 m
-    for the nominal EELT.
-    :param float rot: pupil rotation angle in radians
+    Parameters
+    -----------------------------------------
+    D: (float) : pupil diameter in meters (it must be set to 40.0 m for the ELT)
+    rot: (float) : pupil rotation angle in radians
+    pitch: (float): Segment pitch [meters]
+    nseg: (int) : number of segments across the diameter
+    inner_rad : (float): Inner radius [meters]
+    outer_rad : (float): Outer radius [meters]
+    R : (float): Curvature radius of the M1
+    nominalD: (float): diameter for nominal pupil
 
     """
     V3 = np.sqrt(3)
-    pitch = 1.227314  # pas de correction du bol du primaire de l'eelt
-    pitch = 1.244683637214  # diametre du cerle INSCRIT
+    #pitch = 1.227314    # no correction du bol
+    #pitch = 1.244683637214  # diametre du cerle INSCRIT
     # diamseg = pitch*2/V3  # diametre du cercle contenant TOUT le segment
     # print("segment diameter : %.6f\n" % diamseg)
-    
+
     # Creation d'un pattern hexa avec pointes selon la variable <ly>
-    lx, ly = createHexaPattern(pitch, 35 * pitch)
+    lx, ly = createHexaPattern(pitch, (nseg + 2) * pitch)
     ll = np.sqrt(lx**2 + ly**2)
     # Elimination des segments non valides grace a 2 nombres parfaitement
-    # empiriques ajustes a-la-mano. C'est valable juste pour l'eelt.
-    inner_rad, outer_rad = 4.1, 15.4   # nominal, 798 segments 
-    nn = (ll>inner_rad*pitch) & (ll<outer_rad*pitch);
+    # empiriques ajustes a-la-mano.
+    #inner_rad, outer_rad = 4.1, 15.4   # nominal, 798 segments
+    nn = (ll > inner_rad * pitch) & (ll < outer_rad * pitch)
     lx = lx[nn]
     ly = ly[nn]
     lx, ly = reorganizeSegmentsOrderESO(lx, ly)
     ll = np.sqrt(lx**2 + ly**2)
-    
+
     # n = ll.shape[0]
     # print("Nbre de segments : %d\n" % n)
-    # Creation d'un hexagone-segment avec pointe dirigee vers 
+    # Creation d'un hexagone-segment avec pointe dirigee vers
     # variable <hx> (d'ou le cos() sur hx)
     th = np.linspace(0, 2 * np.pi, 7)[0:6]
     hx = np.cos(th) * pitch / V3
@@ -760,21 +839,16 @@ def generateCoordSegments(D, rot):
     # Le maillage qui permet d'empiler des hexagones avec sommets 3h-9h
     # est un maillage hexagonal avec sommets 12h-6h, donc a 90°.
     # C'est pour ca qu'il a fallu croiser les choses avant.
-    x = (lx[None,:] + hx[:,None])
-    y = (ly[None,:] + hy[:,None])
-    r = np.sqrt(x**2+y**2)
-    R = 95.7853
+    x = (lx[None, :] + hx[:, None])
+    y = (ly[None, :] + hy[:, None])
+    r = np.sqrt(x**2 + y**2)
+    #R = 95.7853
     rrc = R / r * np.arctan(r / R)  # correction factor
     x *= rrc
     y *= rrc
 
-    # This is now the OFFICIAL size of the E-ELT
-    nominalD = 40.00 
+    #nominalD = 40.0   # size of the OFFICIAL E-ELT
     if D != nominalD:
-        gendron()
-        gendron()  # la fonction gendron(), qui fait un truc vraiment
-        gendron()  # mysterieux, est juste dessous.
-        gendron()
         x *= D / nominalD
         y *= D / nominalD
 
@@ -790,79 +864,72 @@ def generateCoordSegments(D, rot):
     return xyrot[0], xyrot[1]
 
 
-
-
 def gendron():
     """
     La fonction est appelee quand l'utilisateur a demande une pupille
     ELT, et renseigne un diametre de telescope different de 40 metres.
 
     Faut vraiment que je commente ou t'as compris ??
-    
+
     """
-    mymsg = ["\n\n\n\n", 
-             "__        ___    ____  _   _ ___ _   _  ___ _",
-             "\ \      / / \  |  _ \| \ | |_ _| \ | |/ ___|",
-             " \ \ /\ / / _ \ | |_) |  \| || ||  \| | |  _ ",
-             "  \ V  V / ___ \|  _ <| |\  || || |\  | |_| |",
-             "   \_/\_/_/   \_\_| \_\_| \_|___|_| \_|\____|",
-             " \n",
-             "Vous utilisez un telescope de type ELT. Ce telescope",
-             "est fait pour etre utilise avec un diametre de 40 m.",
-             " ",
-             "Or, vous utilisez un diametre different. Cela signifie",
-             "que le telescope que vous etes en train de creer a une",
-             "taille differente du veritable E-ELT de l'ESO.",
-             "  ",
-             "  * Soit vous savez exactement ce que vous faites, auquel",
-             "cas bonne route.",
-             " ",
-             "  * Soit vous desirez creer LE vrai E-ELT et il faut changer",
-             "plusieurs choses:",
-             "    1) le diametre telescope de votre fichier de parametres et",
-             "       le renseigner a 40 metres.",
-             "       p_tel.set_diam(40.0) # Nominal size for the real EELT",
-             "    2) le nombre d'actionneurs de M4 a 75",
-             "       p_dm0.set_nact(75) # 75 actu in 40m for pitch=54.05cm",
-             "    3) option: tourner la pupille de 90 degres pour revenir au",
-             "       cas initial de compass",
-             "       p_tel.set_pupangle(90.)  # ELT pup rotation in degrees"
-             "  ",
-             "\n\n"]
+    mymsg = [
+            "\n\n\n\n", "__        ___    ____  _   _ ___ _   _  ___ _",
+            "\ \      / / \  |  _ \| \ | |_ _| \ | |/ ___|",
+            " \ \ /\ / / _ \ | |_) |  \| || ||  \| | |  _ ",
+            "  \ V  V / ___ \|  _ <| |\  || || |\  | |_| |",
+            "   \_/\_/_/   \_\_| \_\_| \_|___|_| \_|\____|", " \n",
+            "Vous utilisez un telescope de type ELT. Ce telescope",
+            "est fait pour etre utilise avec un diametre de 40 m.", " ",
+            "Or, vous utilisez un diametre different. Cela signifie",
+            "que le telescope que vous etes en train de creer a une",
+            "taille differente du veritable E-ELT de l'ESO.", "  ",
+            "  * Soit vous savez exactement ce que vous faites, auquel",
+            "cas bonne route.", " ",
+            "  * Soit vous desirez creer LE vrai E-ELT et il faut changer",
+            "plusieurs choses:",
+            "    1) le diametre telescope de votre fichier de parametres et",
+            "       le renseigner a 40 metres.",
+            "       p_tel.set_diam(40.0) # Nominal size for the real EELT",
+            "    2) le nombre d'actionneurs de M4 a 75",
+            "       p_dm0.set_nact(75) # 75 actu in 40m for pitch=54.05cm",
+            "    3) option: tourner la pupille de 90 degres pour revenir au",
+            "       cas initial de compass",
+            "       p_tel.set_pupangle(90.)  # ELT pup rotation in degrees"
+            "  ", "\n\n"
+    ]
     for ligne in mymsg:
         print(ligne)
-
 
 
 def reorganizeSegmentsOrderESO(x, y):
     """
     Reorganisation des segments facon ESO.
-    Voir 
+    Voir
     ESO-193058 Standard Coordinate System and Basic Conventions
-    
+
     :param float x: tableau des centres X des segments
     :param float y: idem Y
     :return tuple (x,y): meme tuple que les arguments d'entree, mais tries.
-    
+
     """
     # pi/2, pi/6, 2.pi, ...
-    pi_3 = np.pi/3
-    pi_6 = np.pi/6
-    pix2 = 2*np.pi
+    pi_3 = np.pi / 3
+    pi_6 = np.pi / 6
+    pix2 = 2 * np.pi
     # calcul des angles
     t = (np.arctan2(y, x) + pi_6 - 1e-3) % (pix2)
     X = np.array([])
     Y = np.array([])
     A = 100.
     for k in range(6):
-        sector = (t>k*pi_3) & (t<(k+1)*pi_3)
+        sector = (t > k * pi_3) & (t < (k + 1) * pi_3)
         u = k * pi_3
-        distance = (A*np.cos(u)-np.sin(u))*x[sector] + (np.cos(u)+A*np.sin(u))*y[sector]
+        distance = (A * np.cos(u) - np.sin(u)) * x[sector] + (
+                np.cos(u) + A * np.sin(u)) * y[sector]
         indsort = np.argsort(distance)
         X = np.append(X, x[sector][indsort])
         Y = np.append(Y, y[sector][indsort])
     return X, Y
-
 
 
 def getdatatype(truc):
@@ -875,24 +942,25 @@ def getdatatype(truc):
         return type(truc.flatten()[0])
 
 
-def generateSegmentProperties(attribute, hx, hy, i0, j0, scale, gap, N, D, softGap=0):
+def generateSegmentProperties(attribute, hx, hy, i0, j0, scale, gap, N, D, softGap=0,
+                              nominalD=40, pitch=1.244683637214, half_seg=0.75):
     """
     Builds a 2D image of the pupil with some attributes for each of the
     segments. Those segments are described from arguments hx and hy, that
     are produced by the function generateCoordSegments(D, rot).
-    
+
     When attribute is a phase, then it must be a float array of dimension
     [3, 798] with the dimension 3 being piston, tip, and tilt.
     Units of phase is xxx rms, and the output of the procedure will be
     in units of xxx.
-    
+
 
     :returns: pupil image (N, N), with the same type of input argument attribute
 
     :param float/int/bool attribute: scalar value or 1D-array of the reflectivity of
            the segments or 2D array of phase
            If attribute is scalar, the value will be replicated for all segments.
-           If attribute is a 1D array, then it shall contain the reflectivities 
+           If attribute is a 1D array, then it shall contain the reflectivities
            of all segments.
            If attribute is a 2D array then it shall contain the piston, tip
            and tilt of the segments. The array shall be of dimension
@@ -912,6 +980,10 @@ def generateSegmentProperties(attribute, hx, hy, i0, j0, scale, gap, N, D, softG
           depending if the pixel is within the gap or not. If True, the gap
           is a smooth region of a fwhm of 2 pixels with a depth related to the
           gap width.
+    :param float nominalD: diameter needed to get nominal pupil aperture
+    :param float pitch: segment pitch
+    :param float half_seg: segment half size
+
 
 
     attribute = np.ones(798)+np.random.randn(798)/20.
@@ -941,7 +1013,7 @@ def generateSegmentProperties(attribute, hx, hy, i0, j0, scale, gap, N, D, softG
     x0 = x0 / scale + i0
     y0 = y0 / scale + j0
     # size of mini-support
-    hexrad = 0.75 * D / 40. / scale
+    hexrad = half_seg * D / nominalD / scale
     ix0 = np.floor(x0 - hexrad).astype(int) - 1
     iy0 = np.floor(y0 - hexrad).astype(int) - 1
     segdiam = np.ceil(hexrad * 2 + 1).astype(int) + 1
@@ -950,7 +1022,7 @@ def generateSegmentProperties(attribute, hx, hy, i0, j0, scale, gap, N, D, softG
     if n != 3:
         # attribute is a signel value : either reflectivity, or boolean,
         # or just piston.
-        if softGap!=0:
+        if softGap != 0:
             # Soft gaps
             # The impact of gaps are modelled using a simple function: Lorentz, 1/(1+x**2)
             # The fwhm is always equal to 2 pixels because the gap is supposed
@@ -961,31 +1033,38 @@ def generateSegmentProperties(attribute, hx, hy, i0, j0, scale, gap, N, D, softG
             # of 2 pix wide is PI. Integral of a gap of width 'gap' in pixels is 'gap'.
             # So the depth equals to gap/scale/np.pi.
             for i in range(nseg):
-                indx, indy, distedge = fillPolygon(hx[:,i], hy[:,i], i0-ix0[i], j0-iy0[i], scale, gap*0., segdiam, index=1)
-                pupil[indx + ix0[i], indy + iy0[i]] = attribute[i] * (1. - (gap/scale/np.pi) / (1+(distedge/scale)**2))
+                indx, indy, distedge = fillPolygon(hx[:, i], hy[:, i], i0 - ix0[i],
+                                                   j0 - iy0[i], scale, gap * 0., segdiam,
+                                                   index=1)
+                pupil[indx + ix0[i], indy + iy0[i]] = attribute[i] * (
+                        1. - (gap / scale / np.pi) / (1 + (distedge / scale)**2))
         else:
             # Hard gaps
             for i in range(nseg):
-                indx, indy, distedge = fillPolygon(hx[:,i], hy[:,i], i0-ix0[i], j0-iy0[i], scale, gap, segdiam, index=1)
+                indx, indy, distedge = fillPolygon(hx[:, i], hy[:, i], i0 - ix0[i],
+                                                   j0 - iy0[i], scale, gap, segdiam,
+                                                   index=1)
                 pupil[indx + ix0[i], indy + iy0[i]] = attribute[i]
     else:
         # attribute is [piston, tip, tilt]
         minimap = np.zeros((segdiam, segdiam))
-        xmap = np.arange(segdiam) - segdiam/2
-        xmap, ymap = np.meshgrid(xmap,xmap,indexing='ij')     # [x,y] convention
-        pitch = 1.244683637214        # diameter of inscribed circle
-        diamseg = pitch*2/np.sqrt(3)  # diameter of circumscribed circle 
-        diamfrizou = (pitch + diamseg)/2 * D/40.  # average diameter of the 2
+        xmap = np.arange(segdiam) - segdiam / 2
+        xmap, ymap = np.meshgrid(xmap, xmap, indexing='ij')  # [x,y] convention
+        #pitch = 1.244683637214        # diameter of inscribed circle
+        diamseg = pitch * 2 / np.sqrt(3)  # diameter of circumscribed circle
+        diamfrizou = (pitch + diamseg) / 2 * D / nominalD  # average diameter of the 2
         # Calcul du facteur de mise a l'echelle pour l'unite des tilts.
         # xmap et ymap sont calculees avec un increment de +1 pour deux pixels
         # voisins, donc le facteur a appliquer est tel que l'angle se conserve
         # donc factunit*1 / scale = 4*factunit
-        factunit = 4*scale/diamfrizou
-        for i in range(nseg):     
-            indx, indy, _ = fillPolygon(hx[:,i], hy[:,i], i0-ix0[i], j0-iy0[i], scale, 0., segdiam, index=1)
-            minimap = attribute[0,i] + (factunit*attribute[1,i])*xmap + (factunit*attribute[2,i])*ymap
-            pupil[indx + ix0[i], indy + iy0[i]] = minimap[indx, indy] 
-            
+        factunit = 4 * scale / diamfrizou
+        for i in range(nseg):
+            indx, indy, _ = fillPolygon(hx[:, i], hy[:, i], i0 - ix0[i], j0 - iy0[i],
+                                        scale, 0., segdiam, index=1)
+            minimap = attribute[0, i] + (factunit * attribute[1, i]) * xmap + (
+                    factunit * attribute[2, i]) * ymap
+            pupil[indx + ix0[i], indy + iy0[i]] = minimap[indx, indy]
+
     return pupil
 
 
@@ -999,13 +1078,11 @@ def centrePourVidal(N, i0, j0, centerMark):
     """
     scale = 1.0
     res = 0
-    X = (np.arange(N) - i0)*scale
-    Y = (np.arange(N) - j0)*scale
-    X,Y = np.meshgrid(X,Y,indexing='ij')  # convention d'appel [x,y]
-    if centerMark==1:
-        res = (X**2+Y**2)<1
-    if centerMark==2:
-        res = (np.abs(X)<0.9) | (np.abs(Y)<0.9)
+    X = (np.arange(N) - i0) * scale
+    Y = (np.arange(N) - j0) * scale
+    X, Y = np.meshgrid(X, Y, indexing='ij')  # convention d'appel [x,y]
+    if centerMark == 1:
+        res = (X**2 + Y**2) < 1
+    if centerMark == 2:
+        res = (np.abs(X) < 0.9) | (np.abs(Y) < 0.9)
     return res
-
-

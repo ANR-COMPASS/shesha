@@ -1,6 +1,9 @@
-"""
+""" @package shesha.ao.tomo
+
 Computation of tomographic reconstructor
+
 """
+
 import numpy as np
 
 import shesha.config as conf
@@ -180,6 +183,7 @@ def selectDMforLayers(p_atmos: conf.Param_atmos, p_controller: conf.Param_contro
 
     return indlayersDM
 
+
 def create_nact_geom(p_dm: conf.Param_dm):
     """ Compute the DM coupling matrix
 
@@ -223,6 +227,7 @@ def create_nact_geom(p_dm: conf.Param_dm):
         Nact[:, i] = shape.T[mask_act]
 
     return Nact
+
 
 def create_piston_filter(p_dm: conf.Param_dm):
     """ Create the piston filter matrix

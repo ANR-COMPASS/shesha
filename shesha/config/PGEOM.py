@@ -1,6 +1,9 @@
-'''
+''' @package shesha.config.PGEOM
+
 Param_geom class definition
+
 Parameters for system geometry
+
 '''
 
 from . import config_setter_utils as csu

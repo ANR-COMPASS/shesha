@@ -1,6 +1,9 @@
-'''
+''' @package shesha.config
+
 Parameter classes for COMPASS
+
 Safe typing
+
 '''
 
 __all__ = [

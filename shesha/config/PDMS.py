@@ -1,6 +1,9 @@
-'''
+''' @package shesha.config.PDMS
+
 Param_dm class definition
+
 Parameters for DM
+
 '''
 
 import numpy as np

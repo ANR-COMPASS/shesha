@@ -1,5 +1,8 @@
+#! /bin/bash
+
 # script="$SHESHA_ROOT/shesha/tests/check.py"
-script="shesha.tests.check"
+rm -f check.h5
+script="tests.check"
 conf_path="$SHESHA_ROOT/data/par/par4tests"
 nb_test=$(ls -1 $conf_path/*.py | wc -l)
 current_test=1
@@ -11,5 +14,5 @@ do
     $CMD &> /dev/null
     let "current_test++"
 done
-CMD="python -m $script osef --displayResult"
+CMD="python -m $script osef --displayResult --repportResult=report_E2E.md"
 $CMD

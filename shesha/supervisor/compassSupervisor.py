@@ -1,3 +1,14 @@
+""" @package shesha.supervisor.compassSupervisor
+Widget to simulate a closed loop
+
+Usage:
+  compassSupervisor.py [<parameters_filename>]
+
+with 'parameters_filename' the path to the parameters file
+
+Options:
+  -h --help          Show this help message and exit
+"""
 from .abstractSupervisor import AbstractSupervisor
 import numpy as np
 
@@ -232,7 +243,7 @@ class CompassSupervisor(AbstractSupervisor):
     # |____/| .__/ \___|\___|_|\__|_|\___| |_|  |_|\___|\__|_| |_|\___/ \__,_|___/
     #       |_|
 
-    def __init__(self, configFile: str = None, BRAHMA: bool = False,
+    def __init__(self, configFile: str = None, cacao: bool = False,
                  use_DB: bool = False):
         '''
         Init the COMPASS supervisor
@@ -240,13 +251,13 @@ class CompassSupervisor(AbstractSupervisor):
         Parameters
         ------------
         configFile: (str): (optionnal) Path to the parameter file
-        BRAHMA: (bool): (optionnal) Flag to enable BRAHMA
+        cacao: (bool): (optionnal) Flag to enable cacao
         use_DB: (bool): (optionnal) Flag to enable database
         '''
         self._sim = None
         self._seeAtmos = False
         self.config = None
-        self.BRAHMA = BRAHMA
+        self.cacao = cacao
         self.use_DB = use_DB
 
         if configFile is not None:
@@ -263,7 +274,7 @@ class CompassSupervisor(AbstractSupervisor):
             n: (int): (optional) Number of iteration that will be done
             monitoring_freq: (int): (optional) Monitoring frequency [frames]
         """
-        self._sim.loop(n, monitoring_freq=monitoring_freq)
+        self._sim.loop(n, monitoring_freq=monitoring_freq, **kwargs)
 
     def forceContext(self) -> None:
         '''
@@ -330,8 +341,8 @@ class CompassSupervisor(AbstractSupervisor):
         '''
         if self._sim is None:
             if sim is None:
-                if self.BRAHMA:
-                    from shesha.sim.simulatorBrahma import SimulatorBrahma as Simulator
+                if self.cacao:
+                    from shesha.sim.simulatorCacao import SimulatorCacao as Simulator
                 else:
                     from shesha.sim.simulator import Simulator
                 self._sim = Simulator(filepath=configFile, use_DB=self.use_DB)
@@ -480,7 +491,7 @@ class CompassSupervisor(AbstractSupervisor):
         print("refslopes done")
 
     def resetRefslopes(self):
-        for centro in self.rtc.d_centro:
+        for centro in self._sim.rtc.d_centro:
             centro.d_centroids_ref.reset()
 
     def setNcpaWfs(self, ncpa, wfsnum):
@@ -490,7 +501,7 @@ class CompassSupervisor(AbstractSupervisor):
         self._sim.tar.d_targets[tarnum].set_ncpa(ncpa)
 
     def setWfsPhase(self, numwfs, phase):
-        self._sim.wfs.d_wfs[numwfs].d_gs.set_phase(pph)
+        self._sim.wfs.d_wfs[numwfs].d_gs.set_phase(phase)
 
     def setMpupil(self, mpupil, numwfs=0):
         oldmpup = self.getMpupil()
@@ -543,3 +554,10 @@ class CompassSupervisor(AbstractSupervisor):
         thresh: (float): new threshold value
         """
         self._sim.rtc.d_centro[nCentro].set_threshold(thresh)
+
+    def getPyrFocalPlane(self, nwfs: int=0):
+        """
+        No arguments
+        Returns the psf in the focal plane of the pyramid.
+        """
+        return np.fft.fftshift(np.array(self._sim.wfs.d_wfs[nwfs].d_pyrfocalplane))

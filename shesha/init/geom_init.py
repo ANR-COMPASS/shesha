@@ -1,5 +1,7 @@
-'''
+''' @package shesha.init.geom_init
+
 Initialization of the system geometry and of the Telescope object
+
 '''
 
 import shesha.config as conf
@@ -803,11 +805,6 @@ def geom_init(p_geom: conf.Param_geom, p_tel: conf.Param_tel, padding=2):
     # Useful pupil
     p_geom._spupil = mkP.make_pupil(p_geom.pupdiam, p_geom.pupdiam, p_tel, cent,
                                     cent).astype(np.float32)
-    if (p_tel.std_piston and p_tel.std_tt):
-        p_geom._phase_ab_M1 = mkP.make_phase_ab(p_geom.pupdiam, p_geom.pupdiam, p_tel,
-                                                p_geom._spupil).astype(np.float32)
-        p_geom._phase_ab_M1_m = util.pad_array(p_geom._phase_ab_M1,
-                                               p_geom._n).astype(np.float32)
 
     # large pupil (used for image formation)
     p_geom._ipupil = util.pad_array(p_geom._spupil, p_geom.ssize).astype(np.float32)
@@ -815,6 +812,12 @@ def geom_init(p_geom: conf.Param_geom, p_tel: conf.Param_tel, padding=2):
     # useful pupil + 4 pixels
     p_geom._mpupil = util.pad_array(p_geom._spupil, p_geom._n).astype(np.float32)
 
+    if (p_tel.std_piston and p_tel.std_tt):
+        p_geom._phase_ab_M1 = mkP.make_phase_ab(p_geom.pupdiam, p_geom.pupdiam, p_tel,
+                                                p_geom._spupil, cent,
+                                                cent).astype(np.float32)
+        p_geom._phase_ab_M1_m = util.pad_array(p_geom._phase_ab_M1,
+                                               p_geom._n).astype(np.float32)
     #TODO: apodizer
     """
     if p_geom.apod:

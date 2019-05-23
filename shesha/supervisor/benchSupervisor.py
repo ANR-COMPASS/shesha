@@ -1,3 +1,11 @@
+""" @package shesha.supervisor.benchSupervisor
+
+COMPASS simulation package
+
+Initialization and execution of a Bench supervisor
+
+"""
+
 import numpy as np
 
 from shesha.constants import CentroiderType, WFSType
@@ -47,9 +55,9 @@ class BenchSupervisor(AbstractSupervisor):
         Add this offset value to integrator (will be applied at the end of next iteration)
         '''
         if len(command.shape) == 1:
-            self.rtc.d_control[nControl].add_perturb_voltage(name, command, 1)
+            self.rtc.d_control[nControl].set_perturb_voltage(name, command, 1)
         elif len(command.shape) == 2:
-            self.rtc.d_control[nControl].add_perturb_voltage(name, command,
+            self.rtc.d_control[nControl].set_perturb_voltage(name, command,
                                                              command.shape[0])
         else:
             raise AttributeError("command should be a 1D or 2D array")
@@ -84,7 +92,7 @@ class BenchSupervisor(AbstractSupervisor):
         # Do stuff
         self.dmSetCallback(command)
         # Btw, update the RTC state with the information
-        self.rtc.d_control[nctrl].set_com(command, command.size)
+        # self.rtc.d_control[nctrl].set_com(command, command.size)
 
     def getCentroids(self, nControl: int = 0):
         '''
@@ -106,7 +114,8 @@ class BenchSupervisor(AbstractSupervisor):
         # Do something
         command = self.dmGetCallback()
         # Btw, update the RTC state with the information
-        self.rtc.d_control[nControl].set_com(command, command.size)
+        # self.rtc.d_control[nControl].set_com(command, command.size)
+
         return command
 
     def getErr(self, nControl: int = 0) -> np.ndarray:
@@ -172,7 +181,7 @@ class BenchSupervisor(AbstractSupervisor):
         Move atmos -> getSlope -> applyControl ; One integrator step
         '''
         self.loadNewWfsFrame()
-        self.rtc.do_control(0)
+        #self.rtc.do_control(0)
         self.rtc.do_clipping(0)
         self.rtc.comp_voltage(0)
         self.setCommand(0, np.array(self.rtc.d_control[0].d_voltage))
@@ -267,15 +276,12 @@ class BenchSupervisor(AbstractSupervisor):
         '''
         Init the COMPASS wih the configFile
         '''
-        # By default, do nothing...
-        # TODO: remove it !
-        self.dmSetCallback = lambda x: None
-        self.dmGetCallback = lambda: 0
 
         self.rtc = None
         self.frame = None
         self.BRAHMA = BRAHMA
         self.CACAO = CACAO
+        self.dm = None
 
         if configFile is not None:
             self.loadConfig(configFile=configFile)
@@ -293,7 +299,8 @@ class BenchSupervisor(AbstractSupervisor):
         '''
         Reset the DM number nDM
         '''
-        raise NotImplementedError("Not implemented")
+        if self.dm is not None:
+            self.dm.reset_dm()
 
     def resetCommand(self, nctrl: int = -1) -> None:
         '''
@@ -361,11 +368,14 @@ class BenchSupervisor(AbstractSupervisor):
             self.camCallback = lambda: self._cam.getFrame(1)
         print("->DM")
         if not hasattr(self, 'dmSetCallback') or self.dmSetCallback is None:
-            print('No user provided DM setCommand handle. Creating from config file.')
-            raise NotImplementedError()
-            self._dm = None  # Make some DM access interface from the p_dms available
-            self.dmGetCallback = None  # Provide the appropriate lambdas
-            self.dmSetCallback = None
+            print('No user provided get setCommand handle. Creating from config file.')
+            from hraa.devices.dm.kacou import Kacou
+            self.dm = Kacou(
+                    reset=True,
+                    calibFits="/home/micado/codes/hraa/devices/dm/kacouCalib.fits")
+            self.dmSetCallback = lambda cmd_dm: self.dm.set_command(
+                    cmd_dm, useChecksum=True)
+            self.dmGetCallback = lambda: self.dm.get_command()
 
         print("->RTC")
         wfsNb = len(self.config.p_wfss)

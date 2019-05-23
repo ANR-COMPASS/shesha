@@ -1,6 +1,9 @@
-'''
+''' @package shesha.config.PCONTROLLER
+
 Param_controller class definition
+
 Parameters for controller
+
 '''
 
 import numpy as np

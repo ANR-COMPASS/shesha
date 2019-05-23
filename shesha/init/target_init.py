@@ -1,5 +1,7 @@
-"""
+""" @package shesha.init.target_init
+
 Initialization of a Target object
+
 """
 
 import shesha.config as conf

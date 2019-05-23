@@ -1,6 +1,11 @@
-"""
+''' @package shesha.ao.basis
+
 Functions for modal basis (DM basis, KL, Btt, etc...)
-"""
+
+More details.
+
+'''
+
 import numpy as np
 
 from shesha.sutra_wrap import Dms, Rtc_FFF as Rtc

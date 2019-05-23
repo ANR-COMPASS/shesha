@@ -1,4 +1,5 @@
-"""
+""" @package shesha.util.hdf5_util
+
 Functions for handling the database system
 Wrapping of some h5py function for quick HDF5 save
 """
@@ -23,8 +24,8 @@ def updateParamDict(pdict, pClass, prefix):
         for k in params:
             pdict.update({
                     prefix + k: [
-                            p.__dict__[prefix + k].encode("utf8")
-                            if isinstance(p.__dict__[prefix + k], str) else
+                            p.__dict__[prefix + k].encode("utf8") if isinstance(
+                                    p.__dict__[prefix + k], str) else
                             p.__dict__[prefix + k] for p in pClass
                     ]
             })

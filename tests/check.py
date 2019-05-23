@@ -2,14 +2,15 @@
 """script test to simulate a closed loop
 
 Usage:
-  closed_loop.py <parameters_filename> [options]
+  check.py <parameters_filename> [options]
 
-with 'parameters_filename' the path to the parameters file
+where parameters_filename is the path to the parameters file
 
 Options:
-  -h --help          Show this help message and exit
-  -d, --devices devices      Specify the devices
-  --displayResult    Just print the results of the check process
+  -h --help                    Show this help message and exit
+  -d, --devices devices        Specify the devices
+  --displayResult              Just print the results of the check process
+  --repportResult=<repport.md> Save the results of the check process into a md_file
 """
 
 from docopt import docopt
@@ -19,15 +20,29 @@ if __name__ == "__main__":
     from shesha.supervisor.compassSupervisor import CompassSupervisor
 
     arguments = docopt(__doc__)
-    param_file = arguments["<parameters_filename>"]
 
     if arguments["--displayResult"]:
-        import os
+        from os import remove
+        from tabulate import tabulate
+        from datetime import datetime
         df = pandas.read_hdf("check.h5")
-        print(df)
-        os.remove("check.h5")
+        print(tabulate(df, tablefmt="pipe", headers="keys"))
+        if arguments["--repportResult"]:
+            with open(arguments["--repportResult"], 'w') as the_file:
+                the_file.write('# E2E Test Report\n')
+                the_file.write('\n')
+                the_file.write(datetime.now().strftime(
+                        '*Report generated on %d-%b-%Y %H:%M:%S by checkCompass.sh*\n'))
+                the_file.write('\n')
+                the_file.write('[Unit Tests report](report_unit_test.html)\n')
+                the_file.write('\n')
+                the_file.write('## Summary\n')
+                the_file.write('\n')
+                the_file.write(str(tabulate(df, tablefmt="pipe", headers="keys")))
+        remove("check.h5")
     else:
         # Get parameters from file
+        param_file = arguments["<parameters_filename>"]
         supervisor = CompassSupervisor(param_file)
 
         if arguments["--devices"]:

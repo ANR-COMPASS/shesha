@@ -1,6 +1,9 @@
-'''
+''' @package shesha.config.PCENTROIDER
+
 Param_centroider class definition
+
 Parameters for centroider
+
 '''
 
 import numpy as np
@@ -46,6 +49,7 @@ class Param_centroider:
         self.__pyrscale = 0
         """ pyrscale = (p_wfs.Lambda * 1e-6 / sim.config.p_tel.diam) * p_wfs.pyr_ampl * CONST.RAD2ARCSEC
         """
+        self.__filter_TT = False
 
     def get_nwfs(self):
         """ Get the index of the WFS handled by the centroider
@@ -264,3 +268,19 @@ class Param_centroider:
         self.__pyrscale = csu.enforce_float(t)
 
     pyrscale = property(get_pyrscale, set_pyrscale)
+
+    def get_filter_TT(self):
+        """ Get the filter_TT flag used to filter out TT from the slopes (LGS mode)
+
+        :return: (bool) : filter_TT
+        """
+        return self.__filter_TT
+
+    def set_filter_TT(self, t):
+        """ Set the filter_TT flag used to filter out TT from the slopes (LGS mode)
+
+        :param t: (bool) : filter_TT
+        """
+        self.__filter_TT = csu.enforce_or_cast_bool(t)
+
+    filter_TT = property(get_filter_TT, set_filter_TT)

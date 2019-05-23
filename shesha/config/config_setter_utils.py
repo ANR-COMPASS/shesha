@@ -1,5 +1,7 @@
 '''
+
 Utility functions for enforcing types in a property setter
+
 '''
 
 import numpy as np

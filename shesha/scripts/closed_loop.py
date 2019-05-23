@@ -1,5 +1,6 @@
 #!/usr/bin/env python
-"""script test to simulate a closed loop
+""" @package shesha.script.closed_loop
+script test to simulate a closed loop
 
 Usage:
   closed_loop.py <parameters_filename> [options]
@@ -12,9 +13,10 @@ Options:
   --bench            For a timed call
   -i, --interactive  keep the script interactive
   -d, --devices devices      Specify the devices
-  --niter niter           Number of iterations
+  -n, --niter niter  Number of iterations
   --DB               Use database to skip init phase
-  --generic          Use generic controller
+  -g, --generic      Use generic controller
+  -f, --fast         Compute PSF only during monitoring
 """
 
 from docopt import docopt
@@ -23,15 +25,16 @@ if __name__ == "__main__":
     arguments = docopt(__doc__)
     param_file = arguments["<parameters_filename>"]
     use_DB = False
+    compute_tar_psf = not arguments["--fast"]
 
     # Get parameters from file
     if arguments["--bench"]:
         from shesha.supervisor.benchSupervisor import BenchSupervisor as Supervisor
-
     elif arguments["--brahma"]:
         from shesha.supervisor.canapassSupervisor import CanapassSupervisor as Supervisor
     else:
         from shesha.supervisor.compassSupervisor import CompassSupervisor as Supervisor
+
     if arguments["--DB"]:
         use_DB = True
 
@@ -47,9 +50,9 @@ if __name__ == "__main__":
 
     supervisor.initConfig()
     if arguments["--niter"]:
-        supervisor.loop(int(arguments["--niter"]))
+        supervisor.loop(int(arguments["--niter"]), compute_tar_psf=compute_tar_psf)
     else:
-        supervisor.loop(supervisor.config.p_loop.niter)
+        supervisor.loop(supervisor.config.p_loop.niter, compute_tar_psf=compute_tar_psf)
 
     if arguments["--interactive"]:
         from shesha.util.ipython_embed import embed
