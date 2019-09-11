@@ -1,8 +1,40 @@
-""" @package shesha.init.rtc_init
+## @package   shesha.init.rtc_init
+## @brief     Initialization of a Rtc object
+## @author    COMPASS Team <https://github.com/ANR-COMPASS>
+## @version   4.3.0
+## @date      2011/01/28
+## @copyright GNU Lesser General Public License
+#
+#  This file is part of COMPASS <https://anr-compass.github.io/compass/>
+#
+#  Copyright (C) 2011-2019 COMPASS Team <https://github.com/ANR-COMPASS>
+#  All rights reserved.
+#  Distributed under GNU - LGPL
+#
+#  COMPASS is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser 
+#  General Public License as published by the Free Software Foundation, either version 3 of the License, 
+#  or any later version.
+#
+#  COMPASS: End-to-end AO simulation tool using GPU acceleration 
+#  The COMPASS platform was designed to meet the need of high-performance for the simulation of AO systems. 
+#  
+#  The final product includes a software package for simulating all the critical subcomponents of AO, 
+#  particularly in the context of the ELT and a real-time core based on several control approaches, 
+#  with performances consistent with its integration into an instrument. Taking advantage of the specific 
+#  hardware architecture of the GPU, the COMPASS tool allows to achieve adequate execution speeds to
+#  conduct large simulation campaigns called to the ELT. 
+#  
+#  The COMPASS platform can be used to carry a wide variety of simulations to both testspecific components 
+#  of AO of the E-ELT (such as wavefront analysis device with a pyramid or elongated Laser star), and 
+#  various systems configurations such as multi-conjugate AO.
+#
+#  COMPASS is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the 
+#  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+#  See the GNU Lesser General Public License for more details.
+#
+#  You should have received a copy of the GNU Lesser General Public License along with COMPASS. 
+#  If not, see <https://www.gnu.org/licenses/lgpl-3.0.txt>.
 
-Initialization of a Rtc object
-
-"""
 
 import shesha.config as conf
 import shesha.constants as scons
@@ -108,7 +140,7 @@ def rtc_init(context: carmaWrap_context, tel: Telescope, wfs: Sensors, dms: Dms,
                 rtc.add_controller(context, p_controller.nvalid, p_controller.nslope,
                                    p_controller.nactu, p_controller.delay,
                                    context.activeDevice, scons.ControllerType.GEO, dms,
-                                   p_controller.ndm, p_controller.ndm.size, Nphi, True)
+                                   p_controller.ndm, p_controller.ndm.size, p_controller.nwfs, p_controller.nwfs.size, Nphi, True)
 
                 # rtc.add_controller_geo(context, nactu, Nphi, p_controller.delay,
                 #                        context.activeDevice, p_controller.type, dms,
@@ -319,6 +351,16 @@ def init_controller(context, i: int, p_controller: conf.Param_controller, p_wfss
             # TODO fixing a bug ... still not understood
         nvalid = sum([p_wfss[k]._nvalid for k in nwfs])
         p_controller.set_nvalid(int(np.sum([p_wfss[k]._nvalid for k in nwfs])))
+        tmp = 0
+        for c in p_centroiders:
+            if (c.nwfs in nwfs):
+                tmp = tmp + c._nslope
+        p_controller.set_nslope(int(tmp))
+    else:
+        nslope = np.sum([c._nslope for c in p_centroiders])
+        p_controller.set_nslope(int(nslope))
+        
+
     # parameter for add_controller(_geo)
     ndms = p_controller.ndm.tolist()
     nactu = np.sum([p_dms[j]._ntotact for j in ndms])
@@ -332,14 +374,14 @@ def init_controller(context, i: int, p_controller: conf.Param_controller, p_wfss
     else:
         Nphi = -1
 
-    nslope = np.sum([c._nslope for c in p_centroiders])
-    p_controller.set_nslope(int(nslope))
+    #nslope = np.sum([c._nslope for c in p_centroiders])
+    #p_controller.set_nslope(int(nslope))
 
     #TODO : find a proper way to set the number of slope (other than 2 times nvalid)
     rtc.add_controller(context, p_controller.nvalid, p_controller.nslope,
                        p_controller.nactu, p_controller.delay, context.activeDevice,
                        p_controller.type, dms, p_controller.ndm, p_controller.ndm.size,
-                       Nphi, False)
+                       p_controller.nwfs, p_controller.nwfs.size, Nphi, False)
     print("CONTROLLER ADDED")
     if (p_wfss is not None and do_refslp):
         rtc.do_centroids_ref(i)

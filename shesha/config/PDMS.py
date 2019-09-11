@@ -1,10 +1,40 @@
-''' @package shesha.config.PDMS
+## @package   shesha.config.PDMS
+## @brief     Param_dm class definition
+## @author    COMPASS Team <https://github.com/ANR-COMPASS>
+## @version   4.3.0
+## @date      2011/01/28
+## @copyright GNU Lesser General Public License
+#
+#  This file is part of COMPASS <https://anr-compass.github.io/compass/>
+#
+#  Copyright (C) 2011-2019 COMPASS Team <https://github.com/ANR-COMPASS>
+#  All rights reserved.
+#  Distributed under GNU - LGPL
+#
+#  COMPASS is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser 
+#  General Public License as published by the Free Software Foundation, either version 3 of the License, 
+#  or any later version.
+#
+#  COMPASS: End-to-end AO simulation tool using GPU acceleration 
+#  The COMPASS platform was designed to meet the need of high-performance for the simulation of AO systems. 
+#  
+#  The final product includes a software package for simulating all the critical subcomponents of AO, 
+#  particularly in the context of the ELT and a real-time core based on several control approaches, 
+#  with performances consistent with its integration into an instrument. Taking advantage of the specific 
+#  hardware architecture of the GPU, the COMPASS tool allows to achieve adequate execution speeds to
+#  conduct large simulation campaigns called to the ELT. 
+#  
+#  The COMPASS platform can be used to carry a wide variety of simulations to both testspecific components 
+#  of AO of the E-ELT (such as wavefront analysis device with a pyramid or elongated Laser star), and 
+#  various systems configurations such as multi-conjugate AO.
+#
+#  COMPASS is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the 
+#  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+#  See the GNU Lesser General Public License for more details.
+#
+#  You should have received a copy of the GNU Lesser General Public License along with COMPASS. 
+#  If not, see <https://www.gnu.org/licenses/lgpl-3.0.txt>.
 
-Param_dm class definition
-
-Parameters for DM
-
-'''
 
 import numpy as np
 import shesha.constants as scons
@@ -37,6 +67,7 @@ class Param_dm:
         # inner margin (pitches) from central obstruction
         self.__margin_in = 0.
         self.__pzt_extent = 5.  # Extent of pzt DM (pitches)
+        self.__segmented_mirror = False  # Crop influence functions where spiders are.
 
         # KL DM
         self.__nfunc = 0
@@ -95,6 +126,16 @@ class Param_dm:
         """ Influence functions"""
         self.__influstart = None  # np.ndarray - Influence function handling
 
+        # Registration
+        self.__G = 1.0
+        """ Magnifying factor"""
+        self.__theta = 0.0
+        """ WFS rotation angle in the pupil"""
+        self.__dx = 0.0
+        """ X axis misalignment in meters"""
+        self.__dy = 0.0
+        """ Y axis misalignment in meters"""
+
     def get_ap(self):
         """ Get ap TODO!!!
 
@@ -143,6 +184,19 @@ class Param_dm:
         self.__pzt_extent = csu.enforce_int(p)
 
     pzt_extent = property(get_pzt_extent, set_pzt_extent)
+
+    def get_segmented_mirror(self):
+        return self.__segmented_mirror
+
+    def set_segmented_mirror(self, b):
+        """ Define mirror influence functions to be cropped by the spiders
+        (more generally, pupil edges)
+
+        :param p: (bool) : segment the mirror
+        """
+        self.__segmented_mirror = csu.enforce_or_cast_bool(b)
+
+    segmented_mirror = property(get_segmented_mirror, set_segmented_mirror)
 
     def get_influType(self):
         """ Get the influence function type for pzt DM
@@ -885,3 +939,67 @@ class Param_dm:
         self.__cp = csu.enforce_arrayMultiDim(r, r.shape, dtype=np.float32)
 
     _cp = property(get_cp, set_cp)
+
+    def get_G(self):
+        """ Get the magnifying factor
+
+        :return: (float) : magnifying factor
+        """
+        return self.__G
+
+    def set_G(self, G):
+        """ Set the magnifying factor
+
+        :param G: (float) : magnifying factor
+        """
+        self.__G = csu.enforce_float(G)
+
+    G = property(get_G, set_G)
+
+    def get_theta(self):
+        """ Get the rotation angle in the pupil
+
+        :return: (float) : rotation angle (rad)
+        """
+        return self.__theta
+
+    def set_theta(self, theta):
+        """ Set the rotation angle in the pupil
+
+        :param theta: (float) : rotation angle (rad)
+        """
+        self.__theta = csu.enforce_float(theta)
+
+    theta = property(get_theta, set_theta)
+
+    def get_dx(self):
+        """ Get the X axis misalignment
+
+        :return: (float) : dx (pix)
+        """
+        return self.__dx
+
+    def set_dx(self, dx):
+        """ Set the X axis misalignment
+
+        :param dx: (float) : dx (pix)
+        """
+        self.__dx = csu.enforce_float(dx)
+
+    dx = property(get_dx, set_dx)
+
+    def get_dy(self):
+        """ Get the Y axis misalignment
+
+        :return: (float) : dy (pix)
+        """
+        return self.__dy
+
+    def set_dy(self, dy):
+        """ Set the Y axis misalignment
+
+        :param dy: (float) : dy (pix)
+        """
+        self.__dy = csu.enforce_float(dy)
+
+    dy = property(get_dy, set_dy)

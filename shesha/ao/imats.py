@@ -1,13 +1,45 @@
-""" @package shesha.ao.imats
+## @package   shesha.ao.imats
+## @brief     Computation implementations of interaction matrix
+## @author    COMPASS Team <https://github.com/ANR-COMPASS>
+## @version   4.3.0
+## @date      2011/01/28
+## @copyright GNU Lesser General Public License
+#
+#  This file is part of COMPASS <https://anr-compass.github.io/compass/>
+#
+#  Copyright (C) 2011-2019 COMPASS Team <https://github.com/ANR-COMPASS>
+#  All rights reserved.
+#  Distributed under GNU - LGPL
+#
+#  COMPASS is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser 
+#  General Public License as published by the Free Software Foundation, either version 3 of the License, 
+#  or any later version.
+#
+#  COMPASS: End-to-end AO simulation tool using GPU acceleration 
+#  The COMPASS platform was designed to meet the need of high-performance for the simulation of AO systems. 
+#  
+#  The final product includes a software package for simulating all the critical subcomponents of AO, 
+#  particularly in the context of the ELT and a real-time core based on several control approaches, 
+#  with performances consistent with its integration into an instrument. Taking advantage of the specific 
+#  hardware architecture of the GPU, the COMPASS tool allows to achieve adequate execution speeds to
+#  conduct large simulation campaigns called to the ELT. 
+#  
+#  The COMPASS platform can be used to carry a wide variety of simulations to both testspecific components 
+#  of AO of the E-ELT (such as wavefront analysis device with a pyramid or elongated Laser star), and 
+#  various systems configurations such as multi-conjugate AO.
+#
+#  COMPASS is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the 
+#  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+#  See the GNU Lesser General Public License for more details.
+#
+#  You should have received a copy of the GNU Lesser General Public License along with COMPASS. 
+#  If not, see <https://www.gnu.org/licenses/lgpl-3.0.txt>.
 
-Computation implementations of interaction matrix
-
-"""
 
 import numpy as np  # type: ignore
 import time
 from typing import List  # Mypy checker
-from tqdm import tqdm
+from tqdm import tqdm, trange
 
 import shesha.config as conf
 import shesha.constants as scons
@@ -150,8 +182,8 @@ def imat_init(ncontrol: int, rtc: Rtc, dms: Dms, p_dms: list, wfs: Sensors, p_wf
 
 def imat_geom_ts_multiple_direction(wfs: Sensors, dms: Dms, p_wfss: List[conf.Param_wfs],
                                     p_dms: List[conf.Param_dm], p_geom: conf.Param_geom,
-                                    ind_TS: int, p_tel: conf.Param_tel, x, y,
-                                    meth: int = 0) -> np.ndarray:
+                                    ind_TS: int, ind_dmseen: List, p_tel: conf.Param_tel,
+                                    x, y, meth: int = 0) -> np.ndarray:
     """ Compute the interaction matrix with a geometric method for multiple truth sensors (with different direction)
 
     :parameters:
@@ -174,31 +206,43 @@ def imat_geom_ts_multiple_direction(wfs: Sensors, dms: Dms, p_wfss: List[conf.Pa
     """
     p_wfs = p_wfss[ind_TS]
     imat_size2 = 0
-    print("DMS_SEEN: ", p_wfs.dms_seen)
-    for nm in p_wfs.dms_seen:
+    print("DMS_SEEN: ", ind_dmseen)
+    for nm in ind_dmseen:
         imat_size2 += p_dms[nm]._ntotact
     imat_cpu = np.ndarray((0, imat_size2))
 
-    for i in range(x.size):
+    for i in trange(x.size, desc="TS pos"):
         xpos = x[i]
         ypos = y[i]
-        for j in range(p_wfs.dms_seen.size):
-            k = p_wfs.dms_seen[j]
+        for k in ind_dmseen:
             dims = p_dms[k]._n2 - p_dms[k]._n1 + 1
             dim = p_geom._mpupil.shape[0]
             if (dim < dims):
                 dim = dims
             xoff = xpos * CONST.ARCSEC2RAD * \
-                p_dms[k].alt / p_tel.diam * p_geom.pupdiam
+                    p_dms[k].alt / p_tel.diam * p_geom.pupdiam
             yoff = ypos * CONST.ARCSEC2RAD * \
                 p_dms[k].alt / p_tel.diam * p_geom.pupdiam
             xoff = xoff + (dim - p_geom._n) / 2
             yoff = yoff + (dim - p_geom._n) / 2
-            wfs.d_wfs[ind_TS].d_gs.add_layer("dm", k, xoff, yoff)
+            wfs.d_wfs[ind_TS].d_gs.add_layer(p_dms[k].type, k, xoff, yoff)
         imat_cpu = np.concatenate(
-                (imat_cpu,
-                 imat_geom_ts(wfs, dms, p_wfss, ind_TS, p_dms, p_wfs.dms_seen, meth)),
-                axis=0)
+                (imat_cpu, imat_geom_ts(wfs, dms, p_wfss, ind_TS, p_dms, ind_dmseen,
+                                        meth)), axis=0)
+
+    for k in ind_dmseen:
+        dims = p_dms[k]._n2 - p_dms[k]._n1 + 1
+        dim = p_geom._mpupil.shape[0]
+        if (dim < dims):
+            dim = dims
+        xoff = p_wfs.xpos * CONST.ARCSEC2RAD * \
+            p_dms[k].alt / p_tel.diam * p_geom.pupdiam
+        yoff = p_wfs.ypos * CONST.ARCSEC2RAD * \
+            p_dms[k].alt / p_tel.diam * p_geom.pupdiam
+        xoff = xoff + (dim - p_geom._n) / 2
+        yoff = yoff + (dim - p_geom._n) / 2
+        wfs.d_wfs[ind_TS].d_gs.add_layer(p_dms[k].type, k, xoff, yoff)
+
     return imat_cpu
 
 
@@ -245,13 +289,12 @@ def imat_geom_ts(wfs: Sensors, dms: Dms, p_wfss: conf.Param_wfs, ind_TS: int,
     imat_cpu = np.zeros((imat_size1, imat_size2), dtype=np.float64)
     ind = 0
     cc = 0
-    print("Doing imat geom...")
-    for nm in ind_DMs:
+    for nm in tqdm(ind_DMs, desc="imat geom DM"):
         dms.d_dms[nm].reset_shape()
-        for i in tqdm(range(p_dms[nm]._ntotact), desc="DM%d" % nm):
+        for i in trange(p_dms[nm]._ntotact, desc="imat geom actu"):
             dms.d_dms[nm].comp_oneactu(i, p_dms[nm].push4imat)
-            wfs.d_wfs[ind_TS].d_gs.raytrace("dm")
-            wfs.slopes_geom(ind_TS, meth)
+            wfs.d_wfs[ind_TS].d_gs.raytrace(dms, rst=1)
+            wfs.d_wfs[ind_TS].slopes_geom(meth)
             imat_cpu[:, ind] = np.array(wfs.d_wfs[ind_TS].d_slopes)
             imat_cpu[:, ind] = imat_cpu[:, ind] / p_dms[nm].push4imat
             ind = ind + 1
@@ -259,3 +302,36 @@ def imat_geom_ts(wfs: Sensors, dms: Dms, p_wfss: conf.Param_wfs, ind_TS: int,
             dms.d_dms[nm].reset_shape()
 
     return imat_cpu
+
+def get_metaD(sup, TS_xpos=None, TS_ypos=None, ind_TS=-1, save_metaD=False, nControl=0):
+    """Create an interaction matrix for the current simulation given TS position
+    :parameters:
+        sim : : current COMPASS simulation
+        TS_xpos : np.ndarray : TS position (x axis)
+        TS_ypos : np.ndarray : TS position (y axis)
+
+    :return:
+        metaD :  np.ndarray :interaction matrix
+    """
+    if (TS_xpos is None):
+        TS_xpos = np.array([t.xpos for t in sup.config.p_wfs_ts])
+    elif(isinstance(TS_xpos,list)):
+        TS_xpos=np.array(TS_xpos)
+    elif(isinstance(TS_xpos,int) or isinstance(TS_xpos,float )):
+        TS_xpos=np.array([TS_xpos]).astype(np.float32)
+    if (TS_xpos.size < 1):
+        TS_xpos = np.zeros((1))
+
+    if (TS_ypos is None):
+        TS_ypos = np.array([t.ypos for t in sup.config.p_wfs_ts])
+    elif(isinstance(TS_ypos,list)):
+        TS_ypos=np.array(TS_ypos)
+    elif(isinstance(TS_ypos,int) or isinstance(TS_ypos,float )):
+        TS_ypos=np.array([TS_ypos]).astype(np.float32)
+    if (TS_ypos.size < 1):
+        TS_ypos = np.zeros((1))
+
+    return imat_geom_ts_multiple_direction(sup._sim.wfs, sup._sim.dms, sup.config.p_wfss,
+                                           sup.config.p_dms, sup.config.p_geom, ind_TS,
+                                           sup.config.p_controllers[nControl].ndm,
+                                           sup.config.p_tel, TS_xpos, TS_ypos)

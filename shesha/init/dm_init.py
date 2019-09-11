@@ -1,8 +1,40 @@
-''' @package shesha.init.dm_init
+## @package   shesha.init.dm_init
+## @brief     Initialization of a Dms object
+## @author    COMPASS Team <https://github.com/ANR-COMPASS>
+## @version   4.3.0
+## @date      2011/01/28
+## @copyright GNU Lesser General Public License
+#
+#  This file is part of COMPASS <https://anr-compass.github.io/compass/>
+#
+#  Copyright (C) 2011-2019 COMPASS Team <https://github.com/ANR-COMPASS>
+#  All rights reserved.
+#  Distributed under GNU - LGPL
+#
+#  COMPASS is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser 
+#  General Public License as published by the Free Software Foundation, either version 3 of the License, 
+#  or any later version.
+#
+#  COMPASS: End-to-end AO simulation tool using GPU acceleration 
+#  The COMPASS platform was designed to meet the need of high-performance for the simulation of AO systems. 
+#  
+#  The final product includes a software package for simulating all the critical subcomponents of AO, 
+#  particularly in the context of the ELT and a real-time core based on several control approaches, 
+#  with performances consistent with its integration into an instrument. Taking advantage of the specific 
+#  hardware architecture of the GPU, the COMPASS tool allows to achieve adequate execution speeds to
+#  conduct large simulation campaigns called to the ELT. 
+#  
+#  The COMPASS platform can be used to carry a wide variety of simulations to both testspecific components 
+#  of AO of the E-ELT (such as wavefront analysis device with a pyramid or elongated Laser star), and 
+#  various systems configurations such as multi-conjugate AO.
+#
+#  COMPASS is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the 
+#  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+#  See the GNU Lesser General Public License for more details.
+#
+#  You should have received a copy of the GNU Lesser General Public License along with COMPASS. 
+#  If not, see <https://www.gnu.org/licenses/lgpl-3.0.txt>.
 
-Initialization of a Dms object
-
-'''
 
 import shesha.config as conf
 import shesha.constants as scons
@@ -354,6 +386,8 @@ def make_pzt_dm(p_dm: conf.Param_dm, p_geom: conf.Param_geom, cobs: float,
         keepAllActu = True
         cub = dm_util.createDoubleHexaPattern(pitch, p_geom.pupdiam * 1.1, pupAngle)
         if p_dm.margin_out is not None:
+            print(f'p_dm.margin_out={p_dm.margin_out} is being '
+                  'used for pupil-based actuator filtering')
             pup_side = p_geom._ipupil.shape[0]
             cub_off = dm_util.filterActuWithPupil(cub + pup_side // 2 - 0.5,
                                                   p_geom._ipupil,
@@ -438,6 +472,31 @@ def make_pzt_dm(p_dm: conf.Param_dm, p_geom: conf.Param_geom, cobs: float,
     if (p_dm._puppixoffset is not None):
         xpos += p_dm._puppixoffset[0]
         ypos += p_dm._puppixoffset[1]
+
+    if p_dm.segmented_mirror:
+        # mpupil to ipupil shift
+        # Good centering assumptions
+        s = (p_geom._ipupil.shape[0] - p_geom._mpupil.shape[0]) // 2
+
+        from skimage.morphology import label
+        k = 0
+        for i in tqdm(range(ntotact)):
+            # Pupil area corresponding to influ data
+            i1, j1 = i1t[i] + s - smallsize // 2, j1t[i] + s - smallsize // 2
+            pupilSnapshot = p_geom._ipupil[i1:i1 + smallsize, j1:j1 + smallsize]
+            if np.all(pupilSnapshot):  # We have at least one non-pupil pixel
+                continue
+            labels, num = label(pupilSnapshot, background=0, return_num=True)
+            if num <= 1:
+                continue
+            k += 1
+            maxPerArea = np.array([
+                    (influ[:, :, i] * (labels == k).astype(np.float32)).max()
+                    for k in range(1, num + 1)
+            ])
+            influ[:, :, i] *= (labels == np.argmax(maxPerArea) + 1).astype(np.float32)
+        print(f'{k} cross-spider influence functions trimmed.')
+
     influ = influ * float(p_dm.unitpervolt / np.max(influ))
 
     p_dm._influ = influ
@@ -775,7 +834,7 @@ def correct_dm(context, dms: Dms, p_dms: list, p_controller: conf.Param_controll
             dms.remove_dm(nm)
             dms.insert_dm(context, p_dms[nm].type, p_dms[nm].alt, dim,
                           p_dms[nm]._ntotact, p_dms[nm]._influsize, ninflupos, n_npts,
-                          p_dms[nm].push4imat, 0, context.activeDevice, nm)
+                          p_dms[nm].push4imat, 0, p_dms[nm].dx / p_geom._pixsize, p_dms[nm].dy / p_geom._pixsize, p_dms[nm].theta, p_dms[nm].G, context.activeDevice, nm)
             dms.d_dms[nm].pzt_loadarrays(p_dms[nm]._influ, p_dms[nm]._influpos.astype(
                     np.int32), p_dms[nm]._ninflu, p_dms[nm]._influstart, p_dms[nm]._i1,
                                          p_dms[nm]._j1)
@@ -863,7 +922,6 @@ def make_petal_dm_core(pupImage, pupAngleDegree):
 
     npt = pupImage.shape[0]
     i0 = j0 = npt / 2 - 0.5
-    print('CORRIGER CETTE MERDE !!!!!')
     petalMap = build_petals(nbSeg, pupAngleDegree, i0, j0, npt)
     ii1 = np.zeros(nbSeg)
     jj1 = np.zeros(nbSeg)

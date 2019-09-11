@@ -1,10 +1,41 @@
-""" @package shesha.sim.simulator
+## @package   shesha.sim.simulator
+## @brief     Simulator class definition must be instantiated for running a COMPASS simulation script easily
+## @author    COMPASS Team <https://github.com/ANR-COMPASS>
+## @version   4.3.0
+## @date      2011/01/28
+## @copyright GNU Lesser General Public License
+#
+#  This file is part of COMPASS <https://anr-compass.github.io/compass/>
+#
+#  Copyright (C) 2011-2019 COMPASS Team <https://github.com/ANR-COMPASS>
+#  All rights reserved.
+#  Distributed under GNU - LGPL
+#
+#  COMPASS is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser 
+#  General Public License as published by the Free Software Foundation, either version 3 of the License, 
+#  or any later version.
+#
+#  COMPASS: End-to-end AO simulation tool using GPU acceleration 
+#  The COMPASS platform was designed to meet the need of high-performance for the simulation of AO systems. 
+#  
+#  The final product includes a software package for simulating all the critical subcomponents of AO, 
+#  particularly in the context of the ELT and a real-time core based on several control approaches, 
+#  with performances consistent with its integration into an instrument. Taking advantage of the specific 
+#  hardware architecture of the GPU, the COMPASS tool allows to achieve adequate execution speeds to
+#  conduct large simulation campaigns called to the ELT. 
+#  
+#  The COMPASS platform can be used to carry a wide variety of simulations to both testspecific components 
+#  of AO of the E-ELT (such as wavefront analysis device with a pyramid or elongated Laser star), and 
+#  various systems configurations such as multi-conjugate AO.
+#
+#  COMPASS is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the 
+#  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+#  See the GNU Lesser General Public License for more details.
+#
+#  You should have received a copy of the GNU Lesser General Public License along with COMPASS. 
+#  If not, see <https://www.gnu.org/licenses/lgpl-3.0.txt>.
 
-Simulator class definition
 
-Must be instantiated for running a COMPASS simulation script easily
-
-"""
 import sys
 import os
 
@@ -322,14 +353,16 @@ class Simulator:
                         self.raytraceWfs(w, "dm", rst=False)
                     self.compWfsImage(w)
             if do_control and self.rtc is not None:
-                if self.rtc.d_centro[0].wfs is None:  # in RTC standalone mode
-                    self.doCalibate_img(nControl)
-                self.doCentroids(nControl)
-                self.doControl(nControl)
-                self.doClipping(nControl)
+                for ncontrol in range(len(self.rtc.d_control)):
+                    if self.rtc.d_control[ncontrol].type != scons.ControllerType.GEO:
+                        if self.rtc.d_control[ncontrol].centro_idx is None: # RTC standalone case
+                            self.doCalibrate_img(ncontrol)
+                        self.doCentroids(ncontrol)
+                        self.doControl(ncontrol)
+                        self.doClipping(ncontrol)
 
-            if apply_control:
-                self.applyControl(nControl)
+                        if apply_control:
+                            self.applyControl(ncontrol)
 
         if compute_tar_psf:
             for nTar in tar_trace:
@@ -501,7 +534,7 @@ class Simulator:
         """
         self.tar.d_targets[tarNum].comp_image(puponly, compLE)
 
-    def compStrehl(self, tarNum: int = 0):
+    def compStrehl(self, tarNum: int = 0, do_fit: bool = True):
         """
         Computes the Strehl ratio
 
@@ -509,7 +542,7 @@ class Simulator:
         ------------
         tarNum: (int): (optionnal) target index (default 0)
         """
-        self.tar.d_targets[tarNum].comp_strehl()
+        self.tar.d_targets[tarNum].comp_strehl(do_fit)
 
     def doControl(self, nControl: int, n: int = 0, wfs_direction: bool = False):
         '''
@@ -528,7 +561,7 @@ class Simulator:
                 self.rtc.d_control[nControl].comp_dphi(self.tar.d_targets[n], False)
         self.rtc.do_control(nControl)
 
-    def doCalibate_img(self, nControl: int):
+    def doCalibrate_img(self, nControl: int):
         '''
         Computes the calibrated image from the Wfs image
 
@@ -579,7 +612,7 @@ class Simulator:
         '''
         self.rtc.do_clipping(nControl)
 
-    def getStrehl(self, numTar: int):
+    def getStrehl(self, numTar: int, do_fit: bool = True):
         '''
         Return the Strehl Ratio of target number numTar as [SR short exp., SR long exp., np.var(phiSE), np.var(phiLE)]
 
@@ -588,7 +621,7 @@ class Simulator:
         numTar: (int): target index
         '''
         src = self.tar.d_targets[numTar]
-        src.comp_strehl()
+        src.comp_strehl(do_fit)
         avgVar = 0
         if (src.phase_var_count > 0):
             avgVar = src.phase_var_avg / src.phase_var_count

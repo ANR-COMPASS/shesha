@@ -5,7 +5,7 @@ simul_name = "scao_sh_40m_80_8pix"
 # loop
 p_loop = conf.Param_loop()
 
-p_loop.set_niter(5000)
+p_loop.set_niter(1000)
 p_loop.set_ittime(0.002)  # =1/500
 
 # geom
@@ -18,6 +18,12 @@ p_tel = conf.Param_tel()
 
 p_tel.set_diam(40.0)
 p_tel.set_cobs(0.12)
+# p_tel.set_t_spiders(0.4)
+# p_tel.set_type_ap("EELT")
+# p_tel.set_referr(0.1)
+# p_tel.set_gap(0.1)
+# p_tel.set_std_piston(0.05)
+# p_tel.set_std_tt(0.1)
 
 # atmos
 p_atmos = conf.Param_atmos()

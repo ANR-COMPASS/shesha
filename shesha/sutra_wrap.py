@@ -33,7 +33,7 @@ def smart_import(mod, cls, verbose=False, silent=False):
         class tmp_cls:
 
             def __init__(self, *args, **kwargs):
-                raise RuntimeError("Can not initilize the simulation with fake objects")
+                raise RuntimeError("Can not initialize the simulation with fake objects")
 
         return tmp_cls
 

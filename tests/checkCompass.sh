@@ -1,4 +1,4 @@
-#! /bin/bash
+#!/bin/bash
 
 # script="$SHESHA_ROOT/shesha/tests/check.py"
 rm -f check.h5
@@ -12,7 +12,8 @@ do
     CMD="python -m $script $file"
     echo "[$current_test/$nb_test] running $name"
     $CMD &> /dev/null
-    let "current_test++"
+    # let "current_test++"
+    current_test=$(expr $current_test + 1)
 done
 CMD="python -m $script osef --displayResult --repportResult=report_E2E.md"
 $CMD

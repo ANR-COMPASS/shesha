@@ -1,6 +1,6 @@
 import shesha.config as conf
 
-# simul_name="bench_scao_pyr40_8pix"
+simul_name = "scao_pyrlr_pyr96"
 
 # loop
 p_loop = conf.Param_loop()
@@ -12,13 +12,12 @@ p_loop.set_devices([0, 1, 2, 3])
 p_geom = conf.Param_geom()
 
 p_geom.set_zenithangle(0.)
-#p_geom.set_pupdiam(288)
 
 # tel
 p_tel = conf.Param_tel()
 
-p_tel.set_diam(8.0)
-p_tel.set_cobs(0.12)
+p_tel.set_diam(40.0)
+p_tel.set_cobs(0.3)
 
 # atmos
 p_atmos = conf.Param_atmos()
@@ -43,10 +42,10 @@ p_target.set_mag(10.)
 p_wfs0 = conf.Param_wfs()
 p_wfss = [p_wfs0]
 
-p_wfs0.set_type("pyrhr")
-p_wfs0.set_nxsub(16)
+p_wfs0.set_type("pyrlr")
+p_wfs0.set_nxsub(96)
 p_wfs0.set_fssize(1.5)
-p_wfs0.set_fracsub(0.8)
+p_wfs0.set_fracsub(1)
 p_wfs0.set_xpos(0.)
 p_wfs0.set_ypos(0.)
 p_wfs0.set_Lambda(0.5)
@@ -55,10 +54,8 @@ p_wfs0.set_optthroughput(0.5)
 p_wfs0.set_zerop(1.e11)
 p_wfs0.set_noise(-1)
 p_wfs0.set_fstop("round")
-p_wfs0.set_pyr_npts(16)
-p_wfs0.set_pyr_ampl(3)
-p_wfs0.set_pyr_pup_sep(p_wfs0.nxsub)
-#p_wfs0.set_pyr_compute_focalplane(True)
+p_wfs0.set_pyr_npts(32)
+p_wfs0.set_pyr_ampl(6)
 p_wfs0.set_atmos_seen(1)
 
 # dm
@@ -92,9 +89,9 @@ p_centroider0.set_type("pyr")
 p_controller0 = conf.Param_controller()
 p_controllers = [p_controller0]
 
-p_controller0.set_type("ls")
+p_controller0.set_type("generic")
 p_controller0.set_nwfs([0])
 p_controller0.set_ndm([0, 1])
-p_controller0.set_maxcond(100.)
+p_controller0.set_maxcond(1000.)
 p_controller0.set_delay(1)
 p_controller0.set_gain(0.4)

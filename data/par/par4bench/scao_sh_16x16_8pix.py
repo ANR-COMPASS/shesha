@@ -18,6 +18,13 @@ p_tel = conf.Param_tel()
 
 p_tel.set_diam(8.0)
 p_tel.set_cobs(0.12)
+# p_tel.set_t_spiders(0.1)
+# p_tel.set_type_ap("keck")
+# p_tel.set_referr(0.1)
+# p_tel.set_gap(0.1)
+# p_tel.set_std_piston(0.05)
+# p_tel.set_std_tt(0.1)
+
 
 # atmos
 p_atmos = conf.Param_atmos()
@@ -41,7 +48,7 @@ p_target.set_Lambda(1.65)
 p_target.set_mag(10.)
 
 # wfs
-p_wfs0 = conf.Param_wfs()
+p_wfs0 = conf.Param_wfs(roket=True)
 p_wfss = [p_wfs0]
 
 p_wfs0.set_type("sh")
