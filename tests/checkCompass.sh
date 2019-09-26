@@ -11,7 +11,7 @@ do
     name=$(basename $file ".py")
     CMD="python -m $script $file"
     echo "[$current_test/$nb_test] running $name"
-    $CMD &> /dev/null
+    $CMD >> /dev/null 2>&1
     # let "current_test++"
     current_test=$(expr $current_test + 1)
 done

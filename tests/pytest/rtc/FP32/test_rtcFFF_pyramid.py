@@ -19,7 +19,7 @@ rtc.add_centroider(sup._sim.c, sup.config.p_wfs0._nvalid, 0, sup.config.p_wfs0.p
                    False, 0, "maskedpix")
 rtc.add_controller(sup._sim.c, sup.config.p_wfs0._nvalid,
                    sup.config.p_controller0.nslope, sup.config.p_controller0.nactu,
-                   sup.config.p_controller0.delay, 0, "generic")
+                   sup.config.p_controller0.delay, 0, "generic", idx_centro=np.zeros(1), ncentro=1)
 centro = rtc.d_centro[0]
 control = rtc.d_control[0]
 rtc.d_centro[0].set_npix(sup.config.p_wfs0.npix)

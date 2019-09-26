@@ -1,7 +1,7 @@
 ## @package   shesha.config.PTARGET
 ## @brief     Param_target class definition
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   4.3.0
+## @version   4.3.1
 ## @date      2011/01/28
 ## @copyright GNU Lesser General Public License
 #
