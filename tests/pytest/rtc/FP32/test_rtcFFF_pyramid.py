@@ -8,7 +8,7 @@ from scipy.ndimage.measurements import center_of_mass
 precision = 1e-5
 sup = Supervisor(
         os.getenv("COMPASS_ROOT") +
-        "/shesha/data/par/par4bench/scao_pyrhr_maskedPix_16x16.py")
+        "/shesha/tests/pytest/par/test_pyrhr.py")
 sup.initConfig()
 sup.singleNext()
 sup.openLoop()
@@ -52,7 +52,7 @@ def relative_array_error(array1, array2):
 def test_doCentroids_maskedPix():
     binimg = np.array(centro.d_img)
     slopes = np.zeros(xvalid.size)
-    psum = binimg[xvalid, yvalid].sum()
+    psum = binimg[xvalid, yvalid].sum() / slopes.size
     for k in range(slopes.size):
         slopes[k] = binimg[xvalid[k], yvalid[k]] / psum
     assert (relative_array_error(ng.array(control.d_centroids).toarray(), slopes) <

@@ -1,7 +1,7 @@
 ## @package   shesha.init.rtc_init
 ## @brief     Initialization of a Rtc object
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   4.3.1
+## @version   4.3.2
 ## @date      2011/01/28
 ## @copyright GNU Lesser General Public License
 #
@@ -153,12 +153,14 @@ def rtc_init(context: carmaWrap_context, tel: Telescope, wfs: Sensors, dms: Dms,
     return rtc
 
 
-def rtc_standalone(context: carmaWrap_context, nwfs: int, nvalid: int, nactu: int,
-                   centroider_type: str, delay: float, offset: float, scale: float,
+# MODBY J
+def rtc_standalone(context: carmaWrap_context, nwfs: int, nvalid: list, nactu: int,
+                   centroider_type: list, delay: list, offset: list, scale: list,
                    brahma: bool = False, fp16: bool = False, cacao: bool = False) -> Rtc:
     """
     TODO docstring
     """
+    print("start rtc_standalone")
     if brahma:
         rtc = Rtc_brahma(context, None, None, "rtc_brahma")
     elif cacao:
@@ -173,15 +175,18 @@ def rtc_standalone(context: carmaWrap_context, nwfs: int, nvalid: int, nactu: in
             rtc = Rtc_FHF()
         else:
             rtc = Rtc()
-
     for k in range(nwfs):
-        rtc.add_centroider(context, nvalid[k], offset, scale, False,
-                           context.activeDevice, centroider_type)
+        # print(context, nvalid[k], offset[k], scale[k], False,
+        #                 context.activeDevice, centroider_type[k])
+        rtc.add_centroider(context, nvalid[k], offset[k], scale[k], False,
+                           context.activeDevice, centroider_type[k])
 
     nslopes = sum([c.nslopes for c in rtc.d_centro])
-    rtc.add_controller(context, sum(nvalid), nslopes, nactu, delay, context.activeDevice,
-                       "generic", idx_centro=np.arange(nwfs), ncentro=nwfs)
+    rtc.add_controller(context, sum(nvalid), nslopes, nactu, delay[k],
+                       context.activeDevice, "generic", idx_centro=np.arange(nwfs),
+                       ncentro=nwfs)
 
+    print("rtc_standalone set")
     return rtc
 
 
@@ -380,7 +385,8 @@ def init_controller(context, i: int, p_controller: conf.Param_controller, p_wfss
     rtc.add_controller(context, p_controller.nvalid, p_controller.nslope,
                        p_controller.nactu, p_controller.delay, context.activeDevice,
                        p_controller.type, dms, p_controller.ndm, p_controller.ndm.size,
-                       p_controller.nwfs, p_controller.nwfs.size, Nphi, False)
+                       p_controller.nwfs, p_controller.nwfs.size, Nphi, False,
+                       p_controller.nstates)
     print("CONTROLLER ADDED")
     if (p_wfss is not None and do_refslp):
         rtc.do_centroids_ref(i)

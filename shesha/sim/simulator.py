@@ -1,7 +1,7 @@
 ## @package   shesha.sim.simulator
 ## @brief     Simulator class definition must be instantiated for running a COMPASS simulation script easily
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   4.3.1
+## @version   4.3.2
 ## @date      2011/01/28
 ## @copyright GNU Lesser General Public License
 #

@@ -1,7 +1,7 @@
 ## @package   shesha.config.PCONTROLLER
 ## @brief     Param_controller class definition
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   4.3.1
+## @version   4.3.2
 ## @date      2011/01/28
 ## @copyright GNU Lesser General Public License
 #
@@ -95,6 +95,8 @@ class Param_controller:
         """ Modal pushes values """
         self.__klgain = None
         """ Gain applied to modes at cMat inversion """
+        self.__nstates = 0
+        """ Number of states"""
 
     def get_type(self):
         """ Get the controller type
@@ -467,3 +469,19 @@ class Param_controller:
                                                 dtype=np.float32)
 
     _cmat = property(get_cmat, set_cmat)
+
+    def get_nstates(self):
+        """ Get the number of states
+
+        :return: (int) : number of states
+        """
+        return self.__nstates
+
+    def set_nstates(self, l):
+        """ Set the number of states
+
+        :param l: (int) : number of states
+        """
+        self.__nstates = csu.enforce_int(l)
+
+    nstates = property(get_nstates, set_nstates)

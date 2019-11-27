@@ -1,7 +1,7 @@
 ## @package   shesha.supervisor.aoSupervisor
 ## @brief     Abstract layer for initialization and execution of a AO supervisor
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   4.3.1
+## @version   4.3.2
 ## @date      2011/01/28
 ## @copyright GNU Lesser General Public License
 #
@@ -59,19 +59,19 @@ class AoSupervisor(AbstractSupervisor):
         ''' Returns the configuration in use, in a supervisor specific format ? '''
         return self.config
 
-    def loadFlat(self, flat: np.ndarray, nctrl: int = 0):
+    def loadFlat(self, flat: np.ndarray, numwfs: int = 0):
         """
-        Load flat field for the given controller
+        Load flat field for the given wfs
 
         """
-        self.rtc.d_centro[nctrl].set_flat(flat, flat.shape[0])
+        self.rtc.d_centro[numwfs].set_flat(flat, flat.shape[0])
 
-    def loadBackground(self, background: np.ndarray, nctrl: int = 0):
+    def loadBackground(self, background: np.ndarray, numwfs: int = 0):
         """
-        Load background for the given controller
+        Load background for the given wfs
 
         """
-        self.rtc.d_centro[nctrl].set_dark(background, background.shape[0])
+        self.rtc.d_centro[numwfs].set_dark(background, background.shape[0])
 
     def computeSlopes(self, nControl: int = 0):
         self.rtc.do_centroids(nControl)
@@ -79,15 +79,22 @@ class AoSupervisor(AbstractSupervisor):
 
     def getWfsImage(self, numWFS: int = 0, calPix=False) -> np.ndarray:
         '''
-        Get an image from the WFS
+        Get an image from the WFS (wfs[0] by default)
         '''
         if (calPix):
             if self.rtc.d_centro[numWFS].d_img is None:
                 return np.array(self._sim.wfs.d_wfs[numWFS].d_binimg)
             if self.rtc.d_centro[numWFS].type == CentroiderType.MASKEDPIX:
+                #     self.rtc.d_centro[numWFS].fill_selected_pix(
+                #             self.rtc.d_control[0].d_centroids)
+                #     return np.array(self.rtc.d_centro[numWFS].d_selected_pix)
+                # else:
                 self.rtc.d_centro[numWFS].fill_selected_pix(
                         self.rtc.d_control[0].d_centroids)
-                return np.array(self.rtc.d_centro[numWFS].d_selected_pix)
+                mask = np.array(self.rtc.d_centro[numWFS].d_selected_pix)
+                mask[np.where(mask)] = np.array(
+                        self.rtc.d_centro[numWFS].d_img)[np.where(mask)]
+                return mask
             return np.array(self.rtc.d_centro[numWFS].d_img)
         else:
             if self.rtc.d_centro[numWFS].d_img is None:
@@ -178,6 +185,12 @@ class AoSupervisor(AbstractSupervisor):
         """
         self.rtc.d_control[nControl].set_commandlaw("integrator")
 
+    def set2MatricesLaw(self, nControl: int = 0):
+        self.rtc.d_control[nControl].set_commandlaw("2matrices")
+
+    def setModalIntegratorLaw(self, nControl: int = 0):
+        self.rtc.d_control[nControl].set_commandlaw("modal_integrator")
+
     def setDecayFactor(self, decay, nControl: int = 0):
         """
         Set the decay factor
@@ -212,20 +225,26 @@ class AoSupervisor(AbstractSupervisor):
         '''
         self.rtc.d_control[0].set_openloop(1, rst)  # openLoop
 
-    def setRefSlopes(self, refSlopes: np.ndarray) -> None:
+    def setRefSlopes(self, refSlopes: np.ndarray, numwfs=None) -> None:
         '''
         Set given ref slopes in controller
         '''
-        self.rtc.set_centroids_ref(refSlopes)
+        if (numwfs is None):
+            self.rtc.set_centroids_ref(refSlopes)
+        else:
+            self.rtc.d_centro[numwfs].set_centroids_ref(refSlopes)
 
-    def getRefSlopes(self) -> np.ndarray:
+    def getRefSlopes(self, numwfs=None) -> np.ndarray:
         '''
         Get the currently used reference slopes
         '''
         refSlopes = np.empty(0)
-        for centro in self.rtc.d_centro:
-            refSlopes = np.append(refSlopes, np.array(centro.d_centroids_ref))
-        return refSlopes
+        if (numwfs is None):
+            for centro in self.rtc.d_centro:
+                refSlopes = np.append(refSlopes, np.array(centro.d_centroids_ref))
+            return refSlopes
+        else:
+            return np.array(self.rtc.d_centro[numwfs].d_centroids_ref)
 
     def getImat(self, nControl: int = 0):
         """
@@ -315,3 +334,15 @@ class AoSupervisor(AbstractSupervisor):
         if not self.is_init:
             print('Warning - requesting frame counter of uninitialized BenchSupervisor.')
         return self.iter
+
+    def getMaskedPix(self, nCentro: int = 0):
+        """
+        Return the mask of valid pixels used by a maskedpix centroider
+
+        Parameters:
+            nCentro : (int): Centroider index. Must be a maskedpix centroider
+        """
+        if (self.rtc.d_centro[nCentro].type != CentroiderType.MASKEDPIX):
+            raise TypeError("Centroider must be a maskedpix one")
+        self.rtc.d_centro[nCentro].fill_mask()
+        return np.array(self.rtc.d_centro[nCentro].d_mask)

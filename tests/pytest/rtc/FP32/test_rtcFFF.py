@@ -7,7 +7,8 @@ from scipy.ndimage.measurements import center_of_mass
 
 precision = 1e-5
 sup = Supervisor(
-        os.getenv("COMPASS_ROOT") + "/shesha/data/par/par4bench/scao_sh_16x16_8pix.py")
+        os.getenv("COMPASS_ROOT") +
+        "/shesha/tests/pytest/par/test_sh.py")
 sup.initConfig()
 sup.singleNext()
 sup.openLoop()
@@ -198,37 +199,25 @@ def test_reset_perturb_voltage():
 
 
 def test_comp_voltage():
-    control.set_comRange(-1, 1)
+    Vmin = -1
+    Vmax = 1
+    control.set_comRange(Vmin, Vmax)
     control.comp_voltage()
     C = np.random.random(sup.config.p_controller0.nactu)
     control.add_perturb_voltage("test", C, 1)
     control.set_com(C, C.size)
-    com1 = np.array(control.d_com1)
+    com0 = ng.array(control.d_circularComs0).toarray()
+    com1 = ng.array(control.d_circularComs1).toarray()
     control.comp_voltage()
     delay = sup.config.p_controller0.delay
-    if control.d_com2 is not None:
-        com2 = np.array(control.d_com2)
-    else:
-        com2 = com1.copy() * 0
-    floor = int(delay)
-    if floor == 0:
-        a = 1 - delay
-        b = delay
-        c = 0
-    elif floor == 1:
-        a = 0
-        c = delay - floor
-        b = 1 - c
-
-    else:
-        a = 0
-        c = 1
-        b = 0
-    commands = a * C + b * com1 + c * com2
+    a = delay - int(delay)
+    b = 1 - a
+    commands = a * com0 + b * com1
     comPertu = commands + C
-    comPertu[np.where(comPertu > 1)] = 1
-    comPertu[np.where(comPertu < -1)] = -1
-    assert (relative_array_error(np.array(control.d_voltage), comPertu) < precision)
+    comPertu[np.where(comPertu > Vmax)] = Vmax
+    comPertu[np.where(comPertu < Vmin)] = Vmin
+    assert (relative_array_error(ng.array(control.d_voltage).toarray(), comPertu) <
+            precision)
 
 
 def test_remove_centroider():
