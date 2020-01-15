@@ -1,7 +1,7 @@
 ## @package   shesha.supervisor.compassSupervisor
 ## @brief     Initialization and execution of a COMPASS supervisor
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   4.3.2
+## @version   4.4.0
 ## @date      2011/01/28
 ## @copyright GNU Lesser General Public License
 #
@@ -140,16 +140,17 @@ class CompassSupervisor(AoSupervisor):
         _, _, _, pyr_npts = comp_new_pyr_ampl(0, pyrMod, self._sim.wfs, self._sim.rtc,
                                               self._sim.config.p_wfss,
                                               self._sim.config.p_tel)
-        if(len(p_wfs._halfxy.shape) == 2):
+        if (len(p_wfs._halfxy.shape) == 2):
             print("PYR modulation set to: %f L/D using %d points" % (pyrMod, pyr_npts))
-        elif(len(p_wfs._halfxy.shape) == 3):
-            newhalfxy = np.tile(p_wfs._halfxy[0,:,:],(pyr_npts, 1, 1))
+        elif (len(p_wfs._halfxy.shape) == 3):
+            newhalfxy = np.tile(p_wfs._halfxy[0, :, :], (pyr_npts, 1, 1))
             print("Loading new modulation arrays")
-            self._sim.wfs.d_wfs[numwfs].set_phalfxy(np.exp(1j*newhalfxy).astype(np.complex64).T) 
-            print("Done. PYR modulation set to: %f L/D using %d points" % (pyrMod, pyr_npts))
+            self._sim.wfs.d_wfs[numwfs].set_phalfxy(
+                    np.exp(1j * newhalfxy).astype(np.complex64).T)
+            print("Done. PYR modulation set to: %f L/D using %d points" % (pyrMod,
+                                                                           pyr_npts))
         else:
             raise ValueError("Error unknown p_wfs._halfxy shape")
-
 
     def setNoise(self, noise, numwfs=0, seed=1234):
         '''
@@ -336,7 +337,7 @@ class CompassSupervisor(AoSupervisor):
         '''
         return np.array(self._sim.wfs.d_wfs[numWFS].d_hrimg)
 
-    def getSlopeGeom(self, numWFS: int, ncontrol : int =0) -> np.ndarray:
+    def getSlopeGeom(self, numWFS: int, ncontrol: int = 0) -> np.ndarray:
         '''
         return the slopes geom of WFS number numWFS
         '''

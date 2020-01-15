@@ -1,7 +1,7 @@
 ## @package   shesha.init.dm_init
 ## @brief     Initialization of a Dms object
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   4.3.2
+## @version   4.4.0
 ## @date      2011/01/28
 ## @copyright GNU Lesser General Public License
 #
@@ -11,30 +11,29 @@
 #  All rights reserved.
 #  Distributed under GNU - LGPL
 #
-#  COMPASS is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser 
-#  General Public License as published by the Free Software Foundation, either version 3 of the License, 
+#  COMPASS is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser
+#  General Public License as published by the Free Software Foundation, either version 3 of the License,
 #  or any later version.
 #
-#  COMPASS: End-to-end AO simulation tool using GPU acceleration 
-#  The COMPASS platform was designed to meet the need of high-performance for the simulation of AO systems. 
-#  
-#  The final product includes a software package for simulating all the critical subcomponents of AO, 
-#  particularly in the context of the ELT and a real-time core based on several control approaches, 
-#  with performances consistent with its integration into an instrument. Taking advantage of the specific 
+#  COMPASS: End-to-end AO simulation tool using GPU acceleration
+#  The COMPASS platform was designed to meet the need of high-performance for the simulation of AO systems.
+#
+#  The final product includes a software package for simulating all the critical subcomponents of AO,
+#  particularly in the context of the ELT and a real-time core based on several control approaches,
+#  with performances consistent with its integration into an instrument. Taking advantage of the specific
 #  hardware architecture of the GPU, the COMPASS tool allows to achieve adequate execution speeds to
-#  conduct large simulation campaigns called to the ELT. 
-#  
-#  The COMPASS platform can be used to carry a wide variety of simulations to both testspecific components 
-#  of AO of the E-ELT (such as wavefront analysis device with a pyramid or elongated Laser star), and 
+#  conduct large simulation campaigns called to the ELT.
+#
+#  The COMPASS platform can be used to carry a wide variety of simulations to both testspecific components
+#  of AO of the E-ELT (such as wavefront analysis device with a pyramid or elongated Laser star), and
 #  various systems configurations such as multi-conjugate AO.
 #
-#  COMPASS is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the 
-#  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+#  COMPASS is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the
+#  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 #  See the GNU Lesser General Public License for more details.
 #
-#  You should have received a copy of the GNU Lesser General Public License along with COMPASS. 
+#  You should have received a copy of the GNU Lesser General Public License along with COMPASS.
 #  If not, see <https://www.gnu.org/licenses/lgpl-3.0.txt>.
-
 
 import shesha.config as conf
 import shesha.constants as scons
@@ -834,7 +833,9 @@ def correct_dm(context, dms: Dms, p_dms: list, p_controller: conf.Param_controll
             dms.remove_dm(nm)
             dms.insert_dm(context, p_dms[nm].type, p_dms[nm].alt, dim,
                           p_dms[nm]._ntotact, p_dms[nm]._influsize, ninflupos, n_npts,
-                          p_dms[nm].push4imat, 0, p_dms[nm].dx / p_geom._pixsize, p_dms[nm].dy / p_geom._pixsize, p_dms[nm].theta, p_dms[nm].G, context.activeDevice, nm)
+                          p_dms[nm].push4imat, 0, p_dms[nm].dx / p_geom._pixsize,
+                          p_dms[nm].dy / p_geom._pixsize, p_dms[nm].theta, p_dms[nm].G,
+                          context.activeDevice, nm)
             dms.d_dms[nm].pzt_loadarrays(p_dms[nm]._influ, p_dms[nm]._influpos.astype(
                     np.int32), p_dms[nm]._ninflu, p_dms[nm]._influstart, p_dms[nm]._i1,
                                          p_dms[nm]._j1)

@@ -4,4 +4,4 @@ Documentation for shesha.
 More details.
 '''
 
-__version__ = "4.3.2"
+__version__ = "4.4.0"

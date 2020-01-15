@@ -1,7 +1,7 @@
 ## @package   shesha.init.rtc_init
 ## @brief     Initialization of a Rtc object
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   4.3.2
+## @version   4.4.0
 ## @date      2011/01/28
 ## @copyright GNU Lesser General Public License
 #
