@@ -1,7 +1,7 @@
 ## @package   shesha.init.wfs_init
 ## @brief     Initialization of a Sensors object
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   4.4.0
+## @version   4.4.1
 ## @date      2011/01/28
 ## @copyright GNU Lesser General Public License
 #
@@ -193,10 +193,12 @@ def wfs_init(context: carmaWrap_context, telescope: Telescope, p_wfss: list,
                 dim = p_geom._mpupil.shape[0]
                 if (dim < dims):
                     dim = dims
-                xoff = p_wfs.xpos * CONST.ARCSEC2RAD * \
-                    p_dms[k].alt / p_tel.diam * p_geom.pupdiam
-                yoff = p_wfs.ypos * CONST.ARCSEC2RAD * \
-                    p_dms[k].alt / p_tel.diam * p_geom.pupdiam
+                xoff = (gsalt * p_dms[k].alt * p_tel.diam / 2. + \
+                        p_wfs.xpos * CONST.ARCSEC2RAD * p_dms[k].alt ) * \
+                        p_geom.pupdiam / p_tel.diam
+                yoff = (gsalt * p_dms[k].alt * p_tel.diam / 2. + \
+                        p_wfs.ypos * CONST.ARCSEC2RAD * p_dms[k].alt ) * \
+                        p_geom.pupdiam / p_tel.diam
                 xoff = xoff + (dim - p_geom._n) / 2
                 yoff = yoff + (dim - p_geom._n) / 2
                 g_wfs.d_wfs[i].d_gs.add_layer(p_dms[k].type, k, xoff, yoff)

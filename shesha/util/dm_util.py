@@ -1,7 +1,7 @@
 ## @package   shesha.util.dm_util
 ## @brief     Utilities function for DM geometry initialization
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   4.4.0
+## @version   4.4.1
 ## @date      2011/01/28
 ## @copyright GNU Lesser General Public License
 #
@@ -192,6 +192,12 @@ def createDoubleHexaPattern(pitch: float, supportSize: int, pupAngleDegree: floa
     y = y.flatten()
     x = np.append(x, x + pitch * V3 / 2.)
     y = np.append(y, y + pitch / 2.)
+
+    # classement dans l'ordre kivabien
+    u = x + 1e-3 * y
+    idx = np.argsort(u)
+    x = x[idx]
+    y = y[idx]
 
     # on selection 1/6ieme du reseau, entre -30 et 30 degres
     th = np.arctan2(y, x)

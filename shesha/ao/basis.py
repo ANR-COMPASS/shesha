@@ -1,7 +1,7 @@
 ## @package   shesha.ao.basis
 ## @brief     Functions for modal basis (DM basis, KL, Btt, etc...)
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   4.4.0
+## @version   4.4.1
 ## @date      2011/01/28
 ## @copyright GNU Lesser General Public License
 #
@@ -206,7 +206,7 @@ def command_on_Btt(rtc: Rtc, dms: Dms, p_dms: list, p_geom: conf.Param_geom, nfi
 
     IFs = compute_IFsparse(dms, p_dms, p_geom).T
     n = IFs.shape[1]
-    IFtt = IFs[:, -2:].copy()
+    IFtt = IFs[:, -2:].copy().toarray()
     IFpzt = IFs[:, :n - 2]
 
     Btt, P = compute_Btt(IFpzt, IFtt)

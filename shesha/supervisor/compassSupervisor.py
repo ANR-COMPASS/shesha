@@ -1,7 +1,7 @@
 ## @package   shesha.supervisor.compassSupervisor
 ## @brief     Initialization and execution of a COMPASS supervisor
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   4.4.0
+## @version   4.4.1
 ## @date      2011/01/28
 ## @copyright GNU Lesser General Public License
 #
@@ -45,7 +45,7 @@ with 'parameters_filename' the path to the parameters file
 Options:
   -h --help          Show this help message and exit
 """
-from .aoSupervisor import AoSupervisor
+from shesha.supervisor.aoSupervisor import AoSupervisor
 import numpy as np
 
 import shesha.constants as scons
@@ -152,6 +152,17 @@ class CompassSupervisor(AoSupervisor):
         else:
             raise ValueError("Error unknown p_wfs._halfxy shape")
 
+    def setFourierMask(self, newmask, wfsnum=0):
+        """
+        Set a mask in the Fourier Plane of the given WFS
+        """
+        if newmask.shape != self.config.p_wfss[wfsnum].get_halfxy().shape:
+            print('Error : mask shape should be {}'.format(
+                    self.config.p_wfss[wfsnum].get_halfxy().shape))
+        else:
+            self._sim.wfs.d_wfs[wfsnum].set_phalfxy(
+                    np.exp(1j * np.fft.fftshift(newmask)).astype(np.complex64).T)
+
     def setNoise(self, noise, numwfs=0, seed=1234):
         '''
         Set noise value of WFS numwfs
@@ -176,6 +187,26 @@ class CompassSupervisor(AoSupervisor):
         Set or unset whether atmos is enabled when running loop (see singleNext)
         '''
         self._seeAtmos = enable
+
+    def setGlobalR0(self, r0, reset_seed=-1):
+        """
+        Change the current global r0 of all layers
+        :param r0 (float): r0 @ 0.5 µm
+        :param reset_seed (int): if -1 keep same seed and same screen
+                                if 0 random seed is applied and refresh screens
+                                if (value) set the given seed and refresh screens
+        """
+
+        self._sim.atm.set_global_r0(r0)
+        if reset_seed != -1:
+            if reset_seed == 0:
+                ilayer = np.random.randint(1e4)
+            else:
+                ilayer = reset_seed
+            for k in range(self._sim.atm.nscreens):
+                self._sim.atm.set_seed(k, 1234 + ilayer)
+                self._sim.atm.refresh_screen(k)
+                ilayer += 1
 
     def setGSmag(self, mag, numwfs=0):
         numwfs = int(numwfs)

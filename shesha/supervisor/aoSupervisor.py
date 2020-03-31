@@ -1,7 +1,7 @@
 ## @package   shesha.supervisor.aoSupervisor
 ## @brief     Abstract layer for initialization and execution of a AO supervisor
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   4.4.0
+## @version   4.4.1
 ## @date      2011/01/28
 ## @copyright GNU Lesser General Public License
 #
@@ -35,7 +35,7 @@
 #  You should have received a copy of the GNU Lesser General Public License along with COMPASS.
 #  If not, see <https://www.gnu.org/licenses/lgpl-3.0.txt>.
 
-from .abstractSupervisor import AbstractSupervisor
+from shesha.supervisor.abstractSupervisor import AbstractSupervisor
 from shesha.constants import CentroiderType
 import numpy as np
 from tqdm import trange
@@ -362,6 +362,7 @@ class AoSupervisor(AbstractSupervisor):
         if (root.config.p_tel is not None):
             aodict.update({"teldiam": root.config.p_tel.diam})
             aodict.update({"telobs": root.config.p_tel.cobs})
+            aodict.update({"pixsize": root.config.p_geom._pixsize})
             # TURBU
             aodict.update({"r0": root.config.p_atmos.r0})
             aodict.update({"Fe": 1 / root.config.p_loop.ittime})
@@ -560,18 +561,24 @@ class AoSupervisor(AbstractSupervisor):
             listTargetsYpos = []
             listTargetsDmsSeen = []
             listTargetsMag = []
+            listTARGETS_pixsize = []
             for k in range(aodict["nbTargets"]):
                 listTargetsLambda.append(root.config.p_targets[k].Lambda)
                 listTargetsXpos.append(root.config.p_targets[k].xpos)
                 listTargetsYpos.append(root.config.p_targets[k].ypos)
                 listTargetsMag.append(root.config.p_targets[k].mag)
                 listTargetsDmsSeen.append(list(root.config.p_targets[k].dms_seen))
+                PSFPixsize = (root.config.p_targets[k].Lambda * 1e-6) / (
+                        root.config.p_geom._pixsize *
+                        root.config.p_geom.get_ipupil().shape[0]) * 206265.
+                listTARGETS_pixsize.append(PSFPixsize)
 
             aodict.update({"listTARGETS_Lambda": listTargetsLambda})
             aodict.update({"listTARGETS_Xpos": listTargetsXpos})
             aodict.update({"listTARGETS_Ypos": listTargetsYpos})
             aodict.update({"listTARGETS_Mag": listTargetsMag})
             aodict.update({"listTARGETS_DmsSeen": listTargetsDmsSeen})
+            aodict.update({"listTARGETS_pixsize": listTARGETS_pixsize})
 
         listDmsType = []
         Nslopes = sum(NslopesList)

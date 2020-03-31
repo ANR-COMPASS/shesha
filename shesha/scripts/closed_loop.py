@@ -3,7 +3,7 @@
 ## @package   shesha.script.closed_loop
 ## @brief     script test to simulate a closed loop
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   4.4.0
+## @version   4.4.1
 ## @date      2011/01/28
 ## @copyright GNU Lesser General Public License
 #

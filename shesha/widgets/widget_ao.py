@@ -2,7 +2,7 @@
 ## @package   shesha.widgets.widget_ao
 ## @brief     Widget to simulate a closed loop
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   4.4.0
+## @version   4.4.1
 ## @date      2011/01/28
 ## @copyright GNU Lesser General Public License
 #
@@ -653,7 +653,8 @@ class widgetAOWindow(AOClassTemplate, WidgetBase):
                                    signal_se, refreshFreq, currentFreq))
 
                     self.refreshTime = start
-            except:
+            except Exception as e:
+                print(e)
                 print("error!!")
             finally:
                 self.loopLock.release()
