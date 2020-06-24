@@ -107,7 +107,7 @@ p_controller0.set_gain(0.4)
 
 p_controller0.set_modopti(1)
 p_controller0.set_nrec(2048)
-p_controller0.set_nmodes(30)
+p_controller0.set_nmodes(59)
 p_controller0.set_gmin(0.001)
 p_controller0.set_gmax(0.9)
 p_controller0.set_ngain(500)

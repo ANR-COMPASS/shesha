@@ -1,7 +1,7 @@
 ## @package   shesha.util.hdf5_util
 ## @brief     Functions for handling the database system
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   4.4.1
+## @version   4.4.2
 ## @date      2011/01/28
 ## @copyright GNU Lesser General Public License
 #

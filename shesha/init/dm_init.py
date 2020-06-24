@@ -1,7 +1,7 @@
 ## @package   shesha.init.dm_init
 ## @brief     Initialization of a Dms object
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   4.4.1
+## @version   4.4.2
 ## @date      2011/01/28
 ## @copyright GNU Lesser General Public License
 #
@@ -129,7 +129,7 @@ def _dm_init(context: carmaWrap_context, dms: Dms, p_dm: conf.Param_dm, xpos_wfs
                                      ypos_wfs)
 
     if (p_dm.type == scons.DmType.PZT):
-        if p_dm.file_influ_hdf5 == None:
+        if p_dm.file_influ_fits == None:
             p_dm._pitch = patchDiam / float(p_dm.nact - 1)
             # + 2.5 pitch each side
             extent = p_dm._pitch * (p_dm.nact + p_dm.pzt_extent)
@@ -236,7 +236,7 @@ def _dm_init_factorized(context: carmaWrap_context, dms: Dms, p_dm: conf.Param_d
     patchDiam = dm_util.dim_dm_patch(p_geom.pupdiam, diam, p_dm.type, p_dm.alt, xpos_wfs,
                                      ypos_wfs)
 
-    if (p_dm.type == scons.DmType.PZT) and p_dm.file_influ_hdf5 is not None:
+    if (p_dm.type == scons.DmType.PZT) and p_dm.file_influ_fits is not None:
         init_custom_dm(p_dm, p_geom, diam)
     else:
         if (p_dm.type == scons.DmType.PZT):
@@ -538,41 +538,65 @@ def init_custom_dm(p_dm: conf.Param_dm, p_geom: conf.Param_geom, diam: float):
     from astropy.io import fits as pfits
 
     # read fits file
-    hdul = pfits.open(p_dm.file_influ_hdf5)
-    print("Read influence function from fits file : ", p_dm.file_influ_hdf5)
+    hdul = pfits.open(p_dm.file_influ_fits)
+    print("Read influence function from fits file : ", p_dm.file_influ_fits)
 
-    xC = hdul[0].header['XCENTER']
-    yC = hdul[0].header['YCENTER']
-    pitchPix = hdul[0].header['PITCHPX']
-    pitchMeters = hdul[0].header['PITCHM']
-    hi_i1, hi_j1 = hdul[1].data
-    influ = hdul[2].data
-    xpos, ypos = hdul[3].data
+    f_xC = hdul[0].header['XCENTER']
+    f_yC = hdul[0].header['YCENTER']
+    f_pixsize = hdul[0].header['PIXSIZE']
+    f_pitchm = hdul[0].header['PITCHM']
+    f_pupm = hdul[0].header['PUPM']
+    fi_i1, fi_j1 = hdul[1].data
+    f_influ = hdul[2].data
+    f_xpos, f_ypos = hdul[3].data
 
-    # facteur de conversion des coordonnees du fichier Fits vers les pixels
-    # de compass
-    # pitchPixCompass = p_dm._pitch   # valeur du pitch entre actus en pixels de compass
-    pitchPixCompass = pitchMeters / p_geom._pixsize
-    scaleToCompass = pitchPixCompass / pitchPix
+    # Projecting the dm in the tel pupil plane with the desired factor
+    cases = [
+            p_dm.diam_dm is not None, p_dm._pitch is not None,
+            p_dm.diam_dm_proj is not None
+    ]
 
-    ##### decalage a rajouter, du fits vers compass
+    if cases == [False, False, False]:
+        scale = diam / f_pupm
+    elif cases == [True, False, False]:
+        scale = diam / p_dm.diam_dm
+    elif cases == [False, True, False]:
+        scale = p_dm._pitch / f_pitchm
+    elif cases == [False, False, True]:
+        scale = p_dm.diam_dm_proj / f_pupm
+    else:
+        err_msg = '''Invalid rescaling parameters
+        To set the scale of the custom dm, MAXIMUM ONE of the following parameters should be set:
+        - p_dm.set_pitch(val) : if the pitch in the tel pupil plane is known
+        - p_dm.set_diam_dm(val) : if the pupil diameter in the dm plane is known
+        - p_dm.set_diam_dm_proj(val) : if the dm pupil diameter projected in the tel pupil plane is known
+        If none of the above is set, the dm will be scaled so that the PUPM parameter in the fits file matches the tel pupil.
+        '''
+        raise RuntimeError(err_msg)
+
+    f_pixsize *= scale
+    print("Custom dm scaling factor to pupil plane :", scale)
+
+    # Scaling factor from fits to compass system
+    scaleToCompass = f_pixsize / p_geom._pixsize
+
+    # shift to add to coordinates from fits to compass
     # Compass = Fits * scaleToCompass + offsetToCompass
-    # on sait que (compass - centreCompass) = (Fits-xC) * scaleToCompass
-    # et donc  offsetToCompass = centreCompass - xC*scaleToCompass
-    offsetXToCompass = p_geom.cent - xC * scaleToCompass
-    offsetYToCompass = p_geom.cent - yC * scaleToCompass
+    # we have (compass - centreCompass) = (Fits-f_xC) * scaleToCompass
+    offsetXToCompass = p_geom.cent - f_xC * scaleToCompass
+    offsetYToCompass = p_geom.cent - f_yC * scaleToCompass
 
-    ##### determination de la taille du support des IF dans compass
-    iSize, jSize, ntotact = influ.shape
+    # computing IF spport size in compass system
+    iSize, jSize, ntotact = f_influ.shape
     if iSize != jSize:
         raise ('Error')
 
-    ess1 = np.ceil((hi_i1+iSize) * scaleToCompass + offsetXToCompass) \
-        - np.floor(hi_i1 * scaleToCompass + offsetXToCompass)
+    ess1 = np.ceil((fi_i1+iSize) * scaleToCompass + offsetXToCompass) \
+        - np.floor(fi_i1 * scaleToCompass + offsetXToCompass)
     ess1 = np.max(ess1)
 
-    ess2 = np.ceil((hi_j1+jSize) * scaleToCompass + offsetYToCompass) \
-        - np.floor(hi_j1 * scaleToCompass + offsetYToCompass)
+    ess2 = np.ceil((fi_j1+jSize) * scaleToCompass + offsetYToCompass) \
+        - np.floor(fi_j1 * scaleToCompass + offsetYToCompass)
     ess2 = np.max(ess2)
     smallsize = np.maximum(ess1, ess2).astype(int)
 
@@ -587,27 +611,26 @@ def init_custom_dm(p_dm: conf.Param_dm, p_geom: conf.Param_geom, diam: float):
 
     # loop on actuators
     for i in range(ntotact):
-        # coordonnes en pixels de la minicarte dans le systeme de depart
-        hi_x = np.arange(iSize) + hi_i1[i]
-        hi_y = np.arange(jSize) + hi_j1[i]
+        # pix coordinate of the minimap in fits system
+        fi_x = np.arange(iSize) + fi_i1[i]
+        fi_y = np.arange(jSize) + fi_j1[i]
 
-        # transfert des coord d'origine vers systeme compass
-        ci_x = hi_x * scaleToCompass + offsetXToCompass
-        ci_y = hi_y * scaleToCompass + offsetYToCompass
+        # transfer to compass scale
+        ci_x = fi_x * scaleToCompass + offsetXToCompass
+        ci_y = fi_y * scaleToCompass + offsetYToCompass
 
-        # Creation des coord de destination dans systeme compass
-        ci_i1 = hi_i1[
-                i] * scaleToCompass + offsetXToCompass  # itruc = truc dans repere ipup
-        ci_j1 = hi_j1[i] * scaleToCompass + offsetYToCompass
+        # Creation of compass coordinates
+        ci_i1 = fi_i1[i] * scaleToCompass + offsetXToCompass
+        ci_j1 = fi_j1[i] * scaleToCompass + offsetYToCompass
         ci_i1 = np.floor(ci_i1).astype(np.int32)
         ci_j1 = np.floor(ci_j1).astype(np.int32)
         ci_xpix = ci_i1 + np.arange(smallsize)
         ci_ypix = ci_j1 + np.arange(smallsize)
-        # WARNING: les xpos et ypos sont approximatifs !! Bon pour debug only ...
+        # WARNING: xpos and ypos are approximate !! For debug only ...
         # p_dm._xpos[i] = ci_i1 + smallsize/2.0
         # p_dm._ypos[i] = ci_j1 + smallsize/2.0
 
-        f = interpolate.interp2d(ci_y, ci_x, influ[:, :, i], kind='cubic')
+        f = interpolate.interp2d(ci_y, ci_x, f_influ[:, :, i], kind='cubic')
         temp = f(ci_ypix, ci_xpix) * p_dm.unitpervolt
         # temp[np.where(temp<1e-6)] = 0.
         p_dm._influ[:, :, i] = temp
@@ -621,8 +644,8 @@ def init_custom_dm(p_dm: conf.Param_dm, p_geom: conf.Param_geom, diam: float):
     tmp = p_geom.ssize - (np.max(p_dm._j1 + smallsize))
     margin_j = np.minimum(tmp, np.min(p_dm._j1))
 
-    p_dm._xpos = xpos * scaleToCompass + offsetXToCompass
-    p_dm._ypos = ypos * scaleToCompass + offsetYToCompass
+    p_dm._xpos = f_xpos * scaleToCompass + offsetXToCompass
+    p_dm._ypos = f_ypos * scaleToCompass + offsetYToCompass
 
     p_dm._n1 = int(np.minimum(margin_i, margin_j))
     p_dm._n2 = p_geom.ssize - 1 - p_dm._n1

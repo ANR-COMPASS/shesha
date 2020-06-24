@@ -1,7 +1,7 @@
 ## @package   shesha.config.PDMS
 ## @brief     Param_dm class definition
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   4.4.1
+## @version   4.4.2
 ## @date      2011/01/28
 ## @copyright GNU Lesser General Public License
 #
@@ -90,14 +90,14 @@ class Param_dm:
         self.__type_kl = scons.KLType.KOLMO  # Private storage for KL type
 
         # HDF5 storage management
-        self.__file_influ_hdf5 = None  # Filename for influ hdf5 file
+        self.__file_influ_fits = None  # Filename for influ hdf5 file
         self.__center_name = None  # Center name in hdf5
         self.__cube_name = None  # Influence function cube name in hdf5
         self.__x_name = None  # x coord name in hdf5
         self.__y_name = None  # y coord name in hdf5
         self.__influ_res = None  # influence resolution name in hdf5
-        self.__diam_dm = None  # name for dm diameter
-        self.__diam_dm_proj = None  # name for dm diameter in pupil plane
+        self.__diam_dm = None  # diam of the tel pupil projected on the dm plane
+        self.__diam_dm_proj = None  # diam of the dm pupil projected on the tel pupil plane
 
         # PXD cleanup
         # internal kwrd
@@ -345,21 +345,21 @@ class Param_dm:
 
     type_pattern = property(get_type_pattern, set_type_pattern)
 
-    def get_file_influ_hdf5(self):
+    def get_file_influ_fits(self):
         """ Get the name of hdf5 influence file
 
         :return: (str) : Hdf5 file influence name
         """
-        return self.__file_influ_hdf5
+        return self.__file_influ_fits
 
-    def set_file_influ_hdf5(self, f):
+    def set_file_influ_fits(self, f):
         """ set the name of hdf5 influence file
 
         :param filename: (str) : Hdf5 file influence name
         """
-        self.__file_influ_hdf5 = f
+        self.__file_influ_fits = f
 
-    file_influ_hdf5 = property(get_file_influ_hdf5, set_file_influ_hdf5)
+    file_influ_fits = property(get_file_influ_fits, set_file_influ_fits)
 
     def get_center_name(self):
         """ Get the name of hdf5 influence file
@@ -442,32 +442,32 @@ class Param_dm:
     influ_res = property(get_influ_res, set_influ_res)
 
     def get_diam_dm(self):
-        """ Get the name of dm diameter in file
+        """ Get the diameter of the tel pupil projected on the dm plane
 
-        :return: (str) : name of diameter (meter) dm
+        :return: (float) : diameter (meters) of the tel pupil projected on the dm plane
         """
         return self.__diam_dm
 
     def set_diam_dm(self, di):
-        """ set the name of dm diameter in file
+        """ Set the diameter of the tel pupil projected on the dm plane
 
-        :param di: (str) : name of diameter (meter) dm
+        :param di: (float) : diameter (meters) of the tel pupil projected on the dm plane
         """
         self.__diam_dm = di
 
     diam_dm = property(get_diam_dm, set_diam_dm)
 
     def get_diam_dm_proj(self):
-        """ Get the name of dm diameter projet on puille in file
+        """ Get the diameter of the dm pupil projected on the tel pupil plane
 
-        :return: (str) : name of diameter (meter in pupil plan) dm
+        :return: (float) : diameter (meters) of the dm pupil projected on the tel pupil plane
         """
         return self.__diam_dm_proj
 
     def set_diam_dm_proj(self, dp):
-        """ set the name of dm diameter projet on puille in file
+        """ Set the diameter of the dm pupil projected on the tel pupil plane
 
-        :param dp: (str) : name of diameter (meter in pupil plan) dm
+        :param dp: (float) : diameter (meters) of the dm pupil projected on the tel pupil plane
         """
         self.__diam_dm_proj = dp
 

@@ -2,7 +2,7 @@
 ## @package   shesha.widgets.widget_ao
 ## @brief     Widget to simulate a closed loop
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   4.4.1
+## @version   4.4.2
 ## @date      2011/01/28
 ## @copyright GNU Lesser General Public License
 #
@@ -171,7 +171,7 @@ class widgetAOWindow(AOClassTemplate, WidgetBase):
         self.uiBase.wao_DisplayDock.setFloating(False)
 
         if expert:
-            from .widget_ao_expert import WidgetAOExpert
+            from shesha.widgets.widget_ao_expert import WidgetAOExpert
             self.expertWidget = WidgetAOExpert()
             # self.expertWidget.setupUi(self)
             self.addDockWidget(

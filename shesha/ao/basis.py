@@ -1,7 +1,7 @@
 ## @package   shesha.ao.basis
 ## @brief     Functions for modal basis (DM basis, KL, Btt, etc...)
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   4.4.1
+## @version   4.4.2
 ## @date      2011/01/28
 ## @copyright GNU Lesser General Public License
 #
