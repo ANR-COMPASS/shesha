@@ -1,8 +1,8 @@
 ## @package   shesha.init.dm_init
 ## @brief     Initialization of a Dms object
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   4.4.2
-## @date      2011/01/28
+## @version   5.0.0
+## @date      2020/05/18
 ## @copyright GNU Lesser General Public License
 #
 #  This file is part of COMPASS <https://anr-compass.github.io/compass/>
@@ -52,6 +52,12 @@ from shesha.sutra_wrap import carmaWrap_context, Dms
 from typing import List
 
 from tqdm import tqdm
+
+import os
+try:
+    shesha_dm = os.environ['SHESHA_DM_ROOT']
+except KeyError as err:
+    shesha_dm = os.environ['SHESHA_ROOT'] + "/data/dm-data"
 
 
 def dm_init(context: carmaWrap_context, p_dms: List[conf.Param_dm],
@@ -145,10 +151,11 @@ def _dm_init(context: carmaWrap_context, dms: Dms, p_dm: conf.Param_dm, xpos_wfs
         max_extent = max(max_extent, p_dm._n2 - p_dm._n1 + 1)
 
         dim = max(p_dm._n2 - p_dm._n1 + 1, p_geom._mpupil.shape[0])
+        p_dm._dim_screen = dim
         ninflupos = p_dm._influpos.size
         n_npts = p_dm._ninflu.size  #// 2
         dms.add_dm(context, p_dm.type, p_dm.alt, dim, p_dm._ntotact, p_dm._influsize,
-                   ninflupos, n_npts, p_dm.push4imat, 0, context.activeDevice)
+                   ninflupos, n_npts, p_dm.push4imat, 0, context.active_device)
         #infludata = p_dm._influ.flatten()[p_dm._influpos]
         dms.d_dms[-1].pzt_loadarrays(p_dm._influ, p_dm._influpos.astype(np.int32),
                                      p_dm._ninflu, p_dm._influstart, p_dm._i1, p_dm._j1)
@@ -167,8 +174,9 @@ def _dm_init(context: carmaWrap_context, dms: Dms, p_dm: conf.Param_dm, xpos_wfs
 
         dim = p_dm._n2 - p_dm._n1 + 1
         make_tiptilt_dm(p_dm, patchDiam, p_geom, diam)
+        p_dm._dim_screen = dim
         dms.add_dm(context, p_dm.type, p_dm.alt, dim, 2, dim, 1, 1, p_dm.push4imat, 0,
-                   context.activeDevice)
+                   context.active_device)
         dms.d_dms[-1].tt_loadarrays(p_dm._influ)
 
     elif (p_dm.type == scons.DmType.KL):
@@ -183,9 +191,10 @@ def _dm_init(context: carmaWrap_context, dms: Dms, p_dm: conf.Param_dm, xpos_wfs
         make_kl_dm(p_dm, patchDiam, p_geom, cobs)
 
         ninflu = p_dm.nkl
+        p_dm._dim_screen = dim
 
         dms.add_dm(context, p_dm.type, p_dm.alt, dim, p_dm.nkl, p_dm._ncp, p_dm._nr,
-                   p_dm._npp, p_dm.push4imat, p_dm._ord.max(), context.activeDevice)
+                   p_dm._npp, p_dm.push4imat, p_dm._ord.max(), context.active_device)
 
         dms.d_dms[-1].kl_loadarrays(p_dm._rabas, p_dm._azbas, p_dm._ord, p_dm._cr,
                                     p_dm._cp)
@@ -275,21 +284,21 @@ def _dm_init_factorized(context: carmaWrap_context, dms: Dms, p_dm: conf.Param_d
         ninflupos = p_dm._influpos.size
         n_npts = p_dm._ninflu.size  #// 2
         dms.add_dm(context, p_dm.type, p_dm.alt, dim, p_dm._ntotact, p_dm._influsize,
-                   ninflupos, n_npts, p_dm.push4imat, 0, context.activeDevice)
+                   ninflupos, n_npts, p_dm.push4imat, 0, context.active_device)
         #infludata = p_dm._influ.flatten()[p_dm._influpos]
         dms.d_dms[-1].pzt_loadarrays(p_dm._influ, p_dm._influpos.astype(np.int32),
                                      p_dm._ninflu, p_dm._influstart, p_dm._i1, p_dm._j1)
     elif (p_dm.type == scons.DmType.TT):
         make_tiptilt_dm(p_dm, patchDiam, p_geom, diam)
         dms.add_dm(context, p_dm.type, p_dm.alt, dim, 2, dim, 1, 1, p_dm.push4imat, 0,
-                   context.activeDevice)
+                   context.active_device)
         dms.d_dms[-1].tt_loadarrays(p_dm._influ)
     elif (p_dm.type == scons.DmType.KL):
         make_kl_dm(p_dm, patchDiam, p_geom, cobs)
         ninflu = p_dm.nkl
 
         dms.add_dm(context, p_dm.type, p_dm.alt, dim, p_dm.nkl, p_dm._ncp, p_dm._nr,
-                   p_dm._npp, p_dm.push4imat, p_dm._ord.max(), context.activeDevice)
+                   p_dm._npp, p_dm.push4imat, p_dm._ord.max(), context.active_device)
         dms.d_dms[-1].kl_loadarrays(p_dm._rabas, p_dm._azbas, p_dm._ord, p_dm._cr,
                                     p_dm._cp)
 
@@ -346,25 +355,25 @@ def make_pzt_dm(p_dm: conf.Param_dm, p_geom: conf.Param_geom, cobs: float,
     coupling = p_dm.coupling
 
     # prepare to compute IF on partial (local) support of size <smallsize>
-    pitch = p_dm._pitch
+    pitch = p_dm._pitch  # unit is pixels
     smallsize = 0
 
     # Petal DM (segmentation of M4)
-    if (p_dm.influType == scons.InfluType.PETAL):
+    if (p_dm.influ_type == scons.InfluType.PETAL):
         makePetalDm(p_dm, p_geom, pupAngle)
         return
 
-    if (p_dm.influType == scons.InfluType.RADIALSCHWARTZ):
+    if (p_dm.influ_type == scons.InfluType.RADIALSCHWARTZ):
         smallsize = influ_util.makeRadialSchwartz(pitch, coupling)
-    elif (p_dm.influType == scons.InfluType.SQUARESCHWARTZ):
+    elif (p_dm.influ_type == scons.InfluType.SQUARESCHWARTZ):
         smallsize = influ_util.makeSquareSchwartz(pitch, coupling)
-    elif (p_dm.influType == scons.InfluType.BLACKNUTT):
+    elif (p_dm.influ_type == scons.InfluType.BLACKNUTT):
         smallsize = influ_util.makeBlacknutt(pitch, coupling)
-    elif (p_dm.influType == scons.InfluType.GAUSSIAN):
+    elif (p_dm.influ_type == scons.InfluType.GAUSSIAN):
         smallsize = influ_util.makeGaussian(pitch, coupling)
-    elif (p_dm.influType == scons.InfluType.BESSEL):
+    elif (p_dm.influ_type == scons.InfluType.BESSEL):
         smallsize = influ_util.makeBessel(pitch, coupling, p_dm.type_pattern)
-    elif (p_dm.influType == scons.InfluType.DEFAULT):
+    elif (p_dm.influ_type == scons.InfluType.DEFAULT):
         smallsize = influ_util.makeRigaut(pitch, coupling)
     else:
         print("ERROR influtype not recognized ")
@@ -433,7 +442,7 @@ def make_pzt_dm(p_dm: conf.Param_dm, p_geom: conf.Param_geom, cobs: float,
     influ = np.zeros((smallsize, smallsize, ntotact), dtype=np.float32)
     # Computation of influence function for each actuator
 
-    print("Computing Influence Function type : ", p_dm.influType)
+    print("Computing Influence Function type : ", p_dm.influ_type)
 
     for i in tqdm(range(ntotact)):
 
@@ -452,18 +461,18 @@ def make_pzt_dm(p_dm: conf.Param_dm, p_geom: conf.Param_geom, cobs: float,
         y -= ypos[i]
         # print("Computing Influence Function #%d/%d \r" % (i, ntotact), end=' ')
 
-        if (p_dm.influType == scons.InfluType.RADIALSCHWARTZ):
+        if (p_dm.influ_type == scons.InfluType.RADIALSCHWARTZ):
             influ[:, :, i] = influ_util.makeRadialSchwartz(pitch, coupling, x=x, y=y)
-        elif (p_dm.influType == scons.InfluType.SQUARESCHWARTZ):
+        elif (p_dm.influ_type == scons.InfluType.SQUARESCHWARTZ):
             influ[:, :, i] = influ_util.makeSquareSchwartz(pitch, coupling, x=x, y=y)
-        elif (p_dm.influType == scons.InfluType.BLACKNUTT):
+        elif (p_dm.influ_type == scons.InfluType.BLACKNUTT):
             influ[:, :, i] = influ_util.makeBlacknutt(pitch, coupling, x=x, y=y)
-        elif (p_dm.influType == scons.InfluType.GAUSSIAN):
+        elif (p_dm.influ_type == scons.InfluType.GAUSSIAN):
             influ[:, :, i] = influ_util.makeGaussian(pitch, coupling, x=x, y=y)
-        elif (p_dm.influType == scons.InfluType.BESSEL):
+        elif (p_dm.influ_type == scons.InfluType.BESSEL):
             influ[:, :, i] = influ_util.makeBessel(pitch, coupling, x=x, y=y,
                                                    patternType=p_dm.type_pattern)
-        elif (p_dm.influType == scons.InfluType.DEFAULT):
+        elif (p_dm.influ_type == scons.InfluType.DEFAULT):
             influ[:, :, i] = influ_util.makeRigaut(pitch, coupling, x=x, y=y)
         else:
             print("ERROR influtype not recognized (defaut or gaussian or bessel)")
@@ -538,7 +547,7 @@ def init_custom_dm(p_dm: conf.Param_dm, p_geom: conf.Param_geom, diam: float):
     from astropy.io import fits as pfits
 
     # read fits file
-    hdul = pfits.open(p_dm.file_influ_fits)
+    hdul = pfits.open(shesha_dm + "/" + p_dm.file_influ_fits)
     print("Read influence function from fits file : ", p_dm.file_influ_fits)
 
     f_xC = hdul[0].header['XCENTER']
@@ -878,7 +887,7 @@ def correct_dm(context, dms: Dms, p_dms: list, p_controller: conf.Param_controll
                           p_dms[nm]._ntotact, p_dms[nm]._influsize, ninflupos, n_npts,
                           p_dms[nm].push4imat, 0, p_dms[nm].dx / p_geom._pixsize,
                           p_dms[nm].dy / p_geom._pixsize, p_dms[nm].theta, p_dms[nm].G,
-                          context.activeDevice, nm)
+                          context.active_device, nm)
             dms.d_dms[nm].pzt_loadarrays(p_dms[nm]._influ, p_dms[nm]._influpos.astype(
                     np.int32), p_dms[nm]._ninflu, p_dms[nm]._influstart, p_dms[nm]._i1,
                                          p_dms[nm]._j1)

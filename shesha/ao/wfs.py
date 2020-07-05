@@ -1,8 +1,8 @@
 ## @package   shesha.ao.wfs
 ## @brief     On the fly modification of the WFS
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   4.4.2
-## @date      2011/01/28
+## @version   5.0.0
+## @date      2020/05/18
 ## @copyright GNU Lesser General Public License
 #
 #  This file is part of COMPASS <https://anr-compass.github.io/compass/>
@@ -45,8 +45,8 @@ import numpy as np
 from shesha.sutra_wrap import Sensors, Rtc_FFF as Rtc
 
 
-def comp_new_pyr_ampl(nwfs: int, ampli: float, wfs: Sensors, rtc: Rtc, p_wfss: list,
-                      p_tel: conf.Param_tel, npts_force: int = None):
+def comp_new_pyr_ampl(nwfs: int, ampli: float, p_wfss: list, p_tel: conf.Param_tel,
+                      npts_force: int = None):
     """ Set the pyramid modulation amplitude
 
     :parameters:
@@ -55,17 +55,12 @@ def comp_new_pyr_ampl(nwfs: int, ampli: float, wfs: Sensors, rtc: Rtc, p_wfss: l
 
         ampli : (float) : new amplitude in units of lambda/D
 
-        rtc: (Rtc): rtc object
-
-        p_centroider : (Param_centroider) : pyr centroider settings
-
         p_wfss : (list of Param_wfs) : list of wfs parameters
 
         p_tel : (Param_tel) : Telescope parameters
     """
 
     pwfs = p_wfss[nwfs]
-    pwfs.set_pyr_ampl(ampli)
     nFace = pwfs.nPupils
 
     if npts_force is None:
@@ -86,13 +81,7 @@ def comp_new_pyr_ampl(nwfs: int, ampli: float, wfs: Sensors, rtc: Rtc, p_wfss: l
     cy = scale_fact * \
         np.cos((np.arange(pyr_npts, dtype=np.float32)) * 2. * np.pi / pyr_npts)
 
-    pwfs.set_pyr_npts(pyr_npts)
-    pwfs.set_pyr_cx(cx)
-    pwfs.set_pyr_cy(cy)
-    wfs.d_wfs[nwfs].set_pyr_modulation(cx, cy, pyr_npts)
-
     scale = pwfs.Lambda * 1e-6 / p_tel.diam * ampli * 180. / np.pi * 3600.
-    rtc.d_centro[nwfs].set_scale(scale)
 
     return cx, cy, scale, pyr_npts
 

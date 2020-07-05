@@ -1,8 +1,8 @@
 ## @package   shesha.init.rtc_init
 ## @brief     Initialization of a Rtc object
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   4.4.2
-## @date      2011/01/28
+## @version   5.0.0
+## @date      2020/05/18
 ## @copyright GNU Lesser General Public License
 #
 #  This file is part of COMPASS <https://anr-compass.github.io/compass/>
@@ -56,7 +56,7 @@ def rtc_init(context: carmaWrap_context, tel: Telescope, wfs: Sensors, dms: Dms,
              p_atmos: conf.Param_atmos, ittime: float, p_centroiders=None,
              p_controllers=None, p_dms=None, do_refslp=False, brahma=False, cacao=False,
              tar=None, dataBase={}, use_DB=False):
-    """Initialize all the sutra_rtc objects : centroiders and controllers
+    """Initialize all the SutraRtc objects : centroiders and controllers
 
     :parameters:
         context: (carmaWrap_context): context
@@ -73,7 +73,7 @@ def rtc_init(context: carmaWrap_context, tel: Telescope, wfs: Sensors, dms: Dms,
         p_controllers : (list of Param_controller): (optional) controllers settings
         p_dms: (list of Param_dms) : (optional) dms settings
         do_refslp : (bool): (optional) do ref slopes flag, default=False
-        brahma: (bool) : (optional) BRAHMA flag
+        brahma: (bool) : (optional) brahma flag
         cacao: (bool) : (optional) cacao flag
         tar: (Target) : (optional)
         dataBase: (dict): (optional) dict containig paths to files to load
@@ -138,12 +138,12 @@ def rtc_init(context: carmaWrap_context, tel: Telescope, wfs: Sensors, dms: Dms,
 
                 rtc.add_controller(context, p_controller.nvalid, p_controller.nslope,
                                    p_controller.nactu, p_controller.delay,
-                                   context.activeDevice, scons.ControllerType.GEO, dms,
+                                   context.active_device, scons.ControllerType.GEO, dms,
                                    p_controller.ndm, p_controller.ndm.size,
                                    p_controller.nwfs, p_controller.nwfs.size, Nphi, True)
 
                 # rtc.add_controller_geo(context, nactu, Nphi, p_controller.delay,
-                #                        context.activeDevice, p_controller.type, dms,
+                #                        context.active_device, p_controller.type, dms,
                 #                        list_dmseen, p_controller.ndm.size, True)
 
                 # list_dmseen,alt,p_controller.ndm.size
@@ -177,13 +177,13 @@ def rtc_standalone(context: carmaWrap_context, nwfs: int, nvalid: list, nactu: i
             rtc = Rtc()
     for k in range(nwfs):
         # print(context, nvalid[k], offset[k], scale[k], False,
-        #                 context.activeDevice, centroider_type[k])
+        #                 context.active_device, centroider_type[k])
         rtc.add_centroider(context, nvalid[k], offset[k], scale[k], False,
-                           context.activeDevice, centroider_type[k])
+                           context.active_device, centroider_type[k])
 
     nslopes = sum([c.nslopes for c in rtc.d_centro])
     rtc.add_controller(context, sum(nvalid), nslopes, nactu, delay[k],
-                       context.activeDevice, "generic", idx_centro=np.arange(nwfs),
+                       context.active_device, "generic", idx_centro=np.arange(nwfs),
                        ncentro=nwfs)
 
     print("rtc_standalone set")
@@ -222,7 +222,7 @@ def init_centroider(context, nwfs: int, p_wfs: conf.Param_wfs,
             p_wfs.pyr_ampl * CONST.RAD2ARCSEC
 
     rtc.add_centroider(context, p_wfs._nvalid, s_offset, s_scale, p_centroider.filter_TT,
-                       context.activeDevice, p_centroider.type, wfs.d_wfs[nwfs])
+                       context.active_device, p_centroider.type, wfs.d_wfs[nwfs])
     rtc.d_centro[-1].load_validpos(p_wfs._validsubsx, p_wfs._validsubsy,
                                    p_wfs._nvalid * p_wfs.nPupils)
 
@@ -383,7 +383,7 @@ def init_controller(context, i: int, p_controller: conf.Param_controller, p_wfss
 
     #TODO : find a proper way to set the number of slope (other than 2 times nvalid)
     rtc.add_controller(context, p_controller.nvalid, p_controller.nslope,
-                       p_controller.nactu, p_controller.delay, context.activeDevice,
+                       p_controller.nactu, p_controller.delay, context.active_device,
                        p_controller.type, dms, p_controller.ndm, p_controller.ndm.size,
                        p_controller.nwfs, p_controller.nwfs.size, Nphi, False,
                        p_controller.nstates)
@@ -473,7 +473,7 @@ def init_controller_ls(i: int, p_controller: conf.Param_controller, p_wfss: list
     M2V = None
     if p_controller.do_kl_imat:
         IF = basis.compute_IFsparse(dms, p_dms, p_geom).T
-        M2V, _ = basis.compute_Btt(IF[:, :-2], IF[:, -2:].toarray())
+        M2V, _ = basis.compute_btt(IF[:, :-2], IF[:, -2:].toarray())
         print("Filtering ", p_controller.nModesFilt, " modes based on mode ordering")
         M2V = M2V[:, list(range(M2V.shape[1] - 2 - p_controller.nModesFilt)) + [-2, -1]]
 
@@ -489,15 +489,15 @@ def init_controller_ls(i: int, p_controller: conf.Param_controller, p_wfss: list
             p_controller.nmodes = sum([p_dms[j]._ntotact for j in range(len(p_dms))])
 
         IF = basis.compute_IFsparse(dms, p_dms, p_geom).T
-        M2V, _ = basis.compute_Btt(IF[:, :-2], IF[:, -2:].toarray())
+        M2V, _ = basis.compute_btt(IF[:, :-2], IF[:, -2:].toarray())
         M2V = M2V[:, list(range(p_controller.nmodes - 2)) + [-2, -1]]
 
         rtc.d_control[i].init_modalOpti(p_controller.nmodes, p_controller.nrec, M2V,
                                         p_controller.gmin, p_controller.gmax,
                                         p_controller.ngain, 1. / ittime)
-        ol_slopes = modopti.openLoopSlp(tel, atmos, wfs, rtc, p_controller.nrec, i,
-                                        p_wfss)
-        rtc.d_control[i].loadOpenLoopSlp(ol_slopes)
+        ol_slopes = modopti.open_loopSlp(tel, atmos, wfs, rtc, p_controller.nrec, i,
+                                         p_wfss)
+        rtc.d_control[i].loadopen_loopSlp(ol_slopes)
         rtc.d_control[i].modalControlOptimization()
     else:
         cmats.cmat_init(i, rtc, p_controller, p_wfss, p_atmos, p_tel, p_dms,
@@ -510,7 +510,7 @@ def init_controller_ls(i: int, p_controller: conf.Param_controller, p_wfss: list
         for ndm in p_dms:
             mgain[cc:cc + ndm._ntotact] = ndm.gain
             cc += ndm._ntotact
-        rtc.d_control[i].set_mgain(mgain)
+        rtc.d_control[i].set_modal_gains(mgain)
 
 
 def init_controller_cured(i: int, rtc: Rtc, p_controller: conf.Param_controller,
@@ -561,7 +561,7 @@ def init_controller_mv(i: int, p_controller: conf.Param_controller, p_wfss: list
     rtc.d_control[i].set_gain(p_controller.gain)
     size = sum([p_dms[j]._ntotact for j in range(len(p_dms))])
     mgain = np.ones(size, dtype=np.float32)
-    rtc.d_control[i].set_mgain(mgain)
+    rtc.d_control[i].set_modal_gains(mgain)
     tomo.do_tomo_matrices(i, rtc, p_wfss, dms, atmos, wfs, p_controller, p_geom, p_dms,
                           p_tel, p_atmos)
     cmats.cmat_init(i, rtc, p_controller, p_wfss, p_atmos, p_tel, p_dms)
@@ -585,6 +585,6 @@ def init_controller_generic(i: int, p_controller: conf.Param_controller, p_dms: 
     cmat = np.zeros((size, p_controller.nslope), dtype=np.float32)
 
     rtc.d_control[i].set_decayFactor(decayFactor)
-    rtc.d_control[i].set_mgain(mgain)
+    rtc.d_control[i].set_modal_gains(mgain)
     rtc.d_control[i].set_cmat(cmat)
     rtc.d_control[i].set_matE(matE)

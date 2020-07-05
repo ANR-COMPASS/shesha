@@ -1,8 +1,8 @@
 ## @package   shesha.config.PWFS
 ## @brief     Param_wfs class definition
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   4.4.2
-## @date      2011/01/28
+## @version   5.0.0
+## @date      2020/05/18
 ## @copyright GNU Lesser General Public License
 #
 #  This file is part of COMPASS <https://anr-compass.github.io/compass/>
@@ -61,7 +61,7 @@ class Param_wfs:
         """ wfs global throughput."""
         self.__fracsub = 0
         """ minimal illumination fraction for valid subaps."""
-        self.__openloop = False
+        self.__open_loop = False
         """ 1 if in "open-loop" mode (i.e. does not see dm)."""
         self.__fssize = 0
         """ size of field stop in arcsec."""
@@ -219,6 +219,7 @@ class Param_wfs:
         self.__pyr_cy = None  # (float*)
         self.__pyr_weights = None
         """ Modulation points ponderation weights"""
+        self.__pyr_scale_pos = None  # (float) : scale to apply on cx, cy
 
     def get_type(self):
         """ Get the type of wfs
@@ -300,6 +301,22 @@ class Param_wfs:
 
     pixsize = property(get_pixsize, set_pixsize)
 
+    def get_pyr_scale_pos(self):
+        """ Get the pixel size
+
+        :return: (float) : pixel size (in arcsec) for a subap
+        """
+        return self.__pyr_scale_pos
+
+    def set_pyr_scale_pos(self, p):
+        """ Set the pixel size
+
+        :param p: (float) : pixel size (in arcsec) for a subap
+        """
+        self.__pyr_scale_pos = csu.enforce_float(p)
+
+    _pyr_scale_pos = property(get_pyr_scale_pos, set_pyr_scale_pos)
+
     def get_Lambda(self):
         """ Get the observation wavelength
 
@@ -348,21 +365,21 @@ class Param_wfs:
 
     fracsub = property(get_fracsub, set_fracsub)
 
-    def get_openloop(self):
+    def get_open_loop(self):
         """ Get the loop state (open or closed)
 
         :return: (long) : 1 if in "open-loop" mode (i.e. does not see dm)
         """
-        return self.__openloop
+        return self.__open_loop
 
-    def set_openloop(self, o):
+    def set_open_loop(self, o):
         """ Set the loop state (open or closed)
 
         :param o: (long) : 1 if in "open-loop" mode (i.e. does not see dm)
         """
-        self.__openloop = csu.enforce_or_cast_bool(o)
+        self.__open_loop = csu.enforce_or_cast_bool(o)
 
-    openloop = property(get_openloop, set_openloop)
+    open_loop = property(get_open_loop, set_open_loop)
 
     def get_fssize(self):
         """ Get the size of field stop
@@ -525,36 +542,36 @@ class Param_wfs:
     fakecam = property(get_fakecam, set_fakecam)
 
     def get_maxFluxPerPix(self):
-        """ Get the maxFluxPerPix
+        """ Get the max_flux_per_pix
 
-        :return: (int) : maxFluxPerPix
+        :return: (int) : max_flux_per_pix
         """
         return self.__maxFluxPerPix
 
-    def set_maxFluxPerPix(self, maxFluxPerPix):
-        """ Set the maxFluxPerPix
+    def set_max_flux_per_pix(self, max_flux_per_pix):
+        """ Set the max_flux_per_pix
 
-        :return: (int) : maxFluxPerPix
+        :return: (int) : max_flux_per_pix
         """
-        self.__maxFluxPerPix = csu.enforce_int(maxFluxPerPix)
+        self.__maxFluxPerPix = csu.enforce_int(max_flux_per_pix)
 
-    maxFluxPerPix = property(get_maxFluxPerPix, set_maxFluxPerPix)
+    max_flux_per_pix = property(get_maxFluxPerPix, set_max_flux_per_pix)
 
     def get_maxPixValue(self):
-        """ Get the maxPixValue
+        """ Get the max_pix_value
 
-        :return: (int) : maxPixValue
+        :return: (int) : max_pix_value
         """
         return self.__maxPixValue
 
-    def set_maxPixValue(self, maxPixValue):
-        """ Set the maxPixValue
+    def set_max_pix_value(self, max_pix_value):
+        """ Set the max_pix_value
 
-        :return: (int) : maxPixValue
+        :return: (int) : max_pix_value
         """
-        self.__maxPixValue = csu.enforce_int(maxPixValue)
+        self.__maxPixValue = csu.enforce_int(max_pix_value)
 
-    maxPixValue = property(get_maxPixValue, set_maxPixValue)
+    max_pix_value = property(get_maxPixValue, set_max_pix_value)
 
     def get_gsalt(self):
         """ Get the altitude of guide star

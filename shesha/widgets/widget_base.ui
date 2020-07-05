@@ -46,7 +46,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QPushButton" name="wao_loadConfig">
+          <widget class="QPushButton" name="wao_load_config">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
              <horstretch>0</horstretch>

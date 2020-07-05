@@ -3,8 +3,8 @@
 ## @package   shesha.script.closed_loop
 ## @brief     script test to simulate a closed loop
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   4.4.2
-## @date      2011/01/28
+## @version   5.0.0
+## @date      2020/05/18
 ## @copyright GNU Lesser General Public License
 #
 #  This file is part of COMPASS <https://anr-compass.github.io/compass/>
@@ -46,23 +46,24 @@ with 'parameters_filename' the path to the parameters file
 
 Options:
   -h --help          Show this help message and exit
-  --brahma           Distribute data with BRAHMA
+  --brahma           Distribute data with brahma
   --bench            For a timed call
   -i, --interactive  keep the script interactive
   -d, --devices devices      Specify the devices
   -n, --niter niter  Number of iterations
-  --DB               Use database to skip init phase
   -g, --generic      Use generic controller
   -f, --fast         Compute PSF only during monitoring
 """
-
+from shesha.util.utilities import load_config_from_file
 from docopt import docopt
 
 if __name__ == "__main__":
     arguments = docopt(__doc__)
+
     param_file = arguments["<parameters_filename>"]
-    use_DB = False
     compute_tar_psf = not arguments["--fast"]
+
+    config = load_config_from_file(param_file)
 
     # Get parameters from file
     if arguments["--bench"]:
@@ -72,24 +73,21 @@ if __name__ == "__main__":
     else:
         from shesha.supervisor.compassSupervisor import CompassSupervisor as Supervisor
 
-    if arguments["--DB"]:
-        use_DB = True
-
-    supervisor = Supervisor(param_file, use_DB=use_DB)
-
     if arguments["--devices"]:
-        supervisor.config.p_loop.set_devices([
+        config.p_loop.set_devices([
                 int(device) for device in arguments["--devices"].split(",")
         ])
+
     if arguments["--generic"]:
-        supervisor.config.p_controllers[0].set_type("generic")
+        config.p_controllers[0].set_type("generic")
         print("Using GENERIC controller...")
 
-    supervisor.initConfig()
     if arguments["--niter"]:
-        supervisor.loop(int(arguments["--niter"]), compute_tar_psf=compute_tar_psf)
-    else:
-        supervisor.loop(supervisor.config.p_loop.niter, compute_tar_psf=compute_tar_psf)
+        config.p_loop.set_niter(int(arguments["--niter"]))
+
+    supervisor = Supervisor(config)
+
+    supervisor.loop(supervisor.config.p_loop.niter, compute_tar_psf=compute_tar_psf)
 
     if arguments["--interactive"]:
         from shesha.util.ipython_embed import embed

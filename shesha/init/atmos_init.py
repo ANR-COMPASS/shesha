@@ -1,8 +1,8 @@
 ## @package   shesha.init.atmos_init
 ## @brief     Initialization of a Atmos object
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   4.4.2
-## @date      2011/01/28
+## @version   5.0.0
+## @date      2020/05/18
 ## @copyright GNU Lesser General Public License
 #
 #  This file is part of COMPASS <https://anr-compass.github.io/compass/>
@@ -117,7 +117,7 @@ def atmos_init(context: carmaWrap_context, p_atmos: conf.Param_atmos,
 
     atm = Atmos(context, p_atmos.nscreens, p_atmos.r0, r0_layers, p_atmos.dim_screens,
                 stencil_size, p_atmos.alt, p_atmos.windspeed, p_atmos.winddir,
-                p_atmos._deltax, p_atmos._deltay, context.activeDevice)
+                p_atmos._deltax, p_atmos._deltay, context.active_device)
 
     print("Creating turbulent layers :")
     for i in tqdm(range(p_atmos.nscreens)):

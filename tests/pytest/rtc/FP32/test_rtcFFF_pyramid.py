@@ -4,32 +4,33 @@ import os
 from shesha.sutra_wrap import Rtc_FFF as Rtc
 from shesha.supervisor.compassSupervisor import CompassSupervisor as Supervisor
 from scipy.ndimage.measurements import center_of_mass
+from shesha.util.utilities import load_config_from_file
 
-precision = 1e-5
-sup = Supervisor(
-        os.getenv("COMPASS_ROOT") +
+precision = 1e-2
+
+config = load_config_from_file(os.getenv("COMPASS_ROOT") +
         "/shesha/tests/pytest/par/test_pyrhr.py")
-sup.initConfig()
-sup.singleNext()
-sup.openLoop()
-sup.closeLoop()
-sup._sim.doControl(0)
+sup = Supervisor(config)
+sup.next()
+sup.rtc.open_loop(0)
+sup.rtc.close_loop(0)
+sup.rtc.do_control(0)
 rtc = Rtc()
-rtc.add_centroider(sup._sim.c, sup.config.p_wfs0._nvalid, 0, sup.config.p_wfs0.pixsize,
+rtc.add_centroider(sup.context, sup.config.p_wfs0._nvalid, 0, sup.config.p_wfs0.pixsize,
                    False, 0, "maskedpix")
-rtc.add_controller(sup._sim.c, sup.config.p_wfs0._nvalid,
+rtc.add_controller(sup.context, sup.config.p_wfs0._nvalid,
                    sup.config.p_controller0.nslope, sup.config.p_controller0.nactu,
                    sup.config.p_controller0.delay, 0, "generic", idx_centro=np.zeros(1), ncentro=1)
 centro = rtc.d_centro[0]
 control = rtc.d_control[0]
 rtc.d_centro[0].set_npix(sup.config.p_wfs0.npix)
-xvalid = np.array(sup._sim.rtc.d_centro[0].d_validx)
-yvalid = np.array(sup._sim.rtc.d_centro[0].d_validy)
+xvalid = np.array(sup.rtc._rtc.d_centro[0].d_validx)
+yvalid = np.array(sup.rtc._rtc.d_centro[0].d_validy)
 rtc.d_centro[0].load_validpos(xvalid, yvalid, xvalid.size)
-cmat = sup.getCmat(0)
+cmat = sup.rtc.get_command_matrix(0)
 rtc.d_control[0].set_cmat(cmat)
 rtc.d_control[0].set_gain(sup.config.p_controller0.gain)
-frame = sup.getWfsImage()
+frame = sup.wfs.get_wfs_image(0)
 frame /= frame.max()
 rtc.d_centro[0].load_img(frame, frame.shape[0])
 rtc.d_centro[0].calibrate_img()

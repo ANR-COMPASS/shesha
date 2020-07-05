@@ -1,8 +1,8 @@
 ## @package   shesha.widgets.widget_base
 ## @brief     Abstract Widget base
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   4.4.2
-## @date      2011/01/28
+## @version   5.0.0
+## @date      2020/05/18
 ## @copyright GNU Lesser General Public License
 #
 #  This file is part of COMPASS <https://anr-compass.github.io/compass/>
@@ -78,7 +78,7 @@ class PupilBoxes(pg.QtGui.QGraphicsPathItem):
 
 class WidgetBase(BaseClassTemplate):
 
-    def __init__(self, parent=None, hideHistograms=False) -> None:
+    def __init__(self, parent=None, hide_histograms=False) -> None:
         BaseClassTemplate.__init__(self, parent=parent)
 
         self.uiBase = BaseWidgetTemplate()
@@ -94,7 +94,7 @@ class WidgetBase(BaseClassTemplate):
             self.gui_timer.start(1000. / self.uiBase.wao_frameRate.value())
         self.loopLock = threading.Lock(
         )  # type: Threading.Lock # Asynchronous loop / display safe-threading
-        self.hideHistograms = hideHistograms
+        self.hide_histograms = hide_histograms
         #############################################################
         #               PYQTGRAPH DockArea INIT                     #
         #############################################################
@@ -109,16 +109,16 @@ class WidgetBase(BaseClassTemplate):
         # Default path for config files
         self.defaultParPath = "."
         self.defaultAreaPath = "."
-        self.uiBase.wao_loadConfig.clicked.connect(self.loadConfig)
+        self.uiBase.wao_load_config.clicked.connect(self.load_config)
         self.uiBase.wao_loadArea.clicked.connect(self.loadArea)
         self.uiBase.wao_saveArea.clicked.connect(self.saveArea)
-        self.uiBase.wao_init.clicked.connect(self.initConfig)
+        self.uiBase.wao_init.clicked.connect(self.init_config)
         self.uiBase.wao_configFromFile.clicked.connect(self.addConfigFromFile)
 
         self.uiBase.wao_Display.stateChanged.connect(self.gui_timer_config)
         self.uiBase.wao_frameRate.setValue(2)
 
-        self.uiBase.wao_loadConfig.setDisabled(False)
+        self.uiBase.wao_load_config.setDisabled(False)
         self.uiBase.wao_init.setDisabled(True)
 
         self.disp_checkboxes = []
@@ -161,7 +161,7 @@ class WidgetBase(BaseClassTemplate):
         '''
             Callback when a area layout file is double clicked in the file browser
             Place the selected file name in the browsing drop-down menu,
-            the call the self.loadConfig callback of the load button.
+            the call the self.load_config callback of the load button.
         '''
         if filename is None:
             filepath = QtWidgets.QFileDialog(
@@ -230,7 +230,7 @@ class WidgetBase(BaseClassTemplate):
         '''
             Callback when a config file is double clicked in the file browser
             Place the selected file name in the browsing drop-down menu,
-            the call the self.loadConfig callback of the load button.
+            the call the self.load_config callback of the load button.
         '''
         filepath = QtWidgets.QFileDialog(directory=self.defaultParPath).getOpenFileName(
                 self, "Select parameter file", "",
@@ -239,7 +239,7 @@ class WidgetBase(BaseClassTemplate):
         self.uiBase.wao_selectConfig.clear()
         self.uiBase.wao_selectConfig.addItem(str(filepath[0]))
 
-        self.loadConfig(configFile=self.uiBase.wao_selectConfig.currentText())
+        self.load_config(config_file=self.uiBase.wao_selectConfig.currentText())
 
     def update_displayDock(self):
         guilty_guy = self.sender().text()
@@ -271,7 +271,7 @@ class WidgetBase(BaseClassTemplate):
             iv = pg.ImageView(view=viewbox, imageItem=img)
             viewbox.invertY(False)
 
-            if (self.hideHistograms):
+            if (self.hide_histograms):
                 iv.ui.histogram.hide()
             iv.ui.histogram.autoHistogramRange()  # init levels
             iv.ui.histogram.setMaximumWidth(100)
@@ -290,7 +290,7 @@ class WidgetBase(BaseClassTemplate):
         #     d.addWidget(self.uiBase.wao_Strehl)
         return d
 
-    def loadConfig(self, *args, **kwargs) -> None:
+    def load_config(self, *args, **kwargs) -> None:
         '''
             Callback when 'LOAD' button is hit
         '''
@@ -345,19 +345,19 @@ class WidgetBase(BaseClassTemplate):
                 parlist[i].split('/')[-1] for i in range(len(parlist))
         ])
 
-    def initConfig(self) -> None:
+    def init_config(self) -> None:
         self.loopLock.acquire(True)
-        self.uiBase.wao_loadConfig.setDisabled(True)
+        self.uiBase.wao_load_config.setDisabled(True)
         self.uiBase.wao_init.setDisabled(True)
-        self.thread = WorkerThread(self.initConfigThread)
-        self.thread.finished.connect(self.initConfigFinished)
+        self.thread = WorkerThread(self.init_configThread)
+        self.thread.finished.connect(self.init_configFinished)
         self.thread.start()
 
-    def initConfigThread(self) -> None:
+    def init_configThread(self) -> None:
         pass
 
-    def initConfigFinished(self) -> None:
-        self.uiBase.wao_loadConfig.setDisabled(False)
+    def init_configFinished(self) -> None:
+        self.uiBase.wao_load_config.setDisabled(False)
         self.uiBase.wao_init.setDisabled(False)
         self.loopLock.release()
 
@@ -392,7 +392,7 @@ class WidgetBase(BaseClassTemplate):
         print(text, end='\r', flush=True)
 
     def run(self):
-        self.loopOnce()
+        self.loop_once()
         if not self.stop:
             QTimer.singleShot(0, self.run)  # Update loop
 

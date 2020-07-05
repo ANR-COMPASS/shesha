@@ -1,8 +1,8 @@
 ## @package   shesha.init.target_init
 ## @brief     Initialization of a Target object
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   4.4.2
-## @date      2011/01/28
+## @version   5.0.0
+## @date      2020/05/18
 ## @copyright GNU Lesser General Public License
 #
 #  This file is part of COMPASS <https://anr-compass.github.io/compass/>
@@ -57,7 +57,7 @@ def target_init(ctxt: carmaWrap_context, telescope: Telescope, p_targets: list,
         p_tel: (Param_tel) : telescope settings
         p_geom: (Param_geom) : geom settings
         dm: (Param_dm) : (optional) dm settings
-        brahma: (bool): (optional) BRAHMA flag
+        brahma: (bool): (optional) brahma flag
     :return:
         tar: (Target): Target object
     """
@@ -91,10 +91,10 @@ def target_init(ctxt: carmaWrap_context, telescope: Telescope, p_targets: list,
 
     if (brahma):
         target = Target_brahma(ctxt, "target_brahma", telescope, 0, len(p_targets), xpos,
-                               ypos, Lambda, mag, zerop, sizes, Npts, ctxt.activeDevice)
+                               ypos, Lambda, mag, zerop, sizes, Npts, ctxt.active_device)
     else:
         target = Target(ctxt, telescope, len(p_targets), xpos, ypos, Lambda, mag, zerop,
-                        sizes, Npts, ctxt.activeDevice)
+                        sizes, Npts, ctxt.active_device)
 
     # cc=i
     for i in range(len(p_targets)):

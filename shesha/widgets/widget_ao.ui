@@ -215,7 +215,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QPushButton" name="wao_openLoop">
+        <widget class="QPushButton" name="wao_open_loop">
          <property name="text">
           <string>Open Loop</string>
          </property>

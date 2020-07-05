@@ -1,8 +1,8 @@
 ## @package   shesha.ao.imats
 ## @brief     Computation implementations of interaction matrix
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   4.4.2
-## @date      2011/01/28
+## @version   5.0.0
+## @date      2020/05/18
 ## @copyright GNU Lesser General Public License
 #
 #  This file is part of COMPASS <https://anr-compass.github.io/compass/>
@@ -203,7 +203,8 @@ def imat_geom_ts_multiple_direction(wfs: Sensors, dms: Dms, p_wfss: List[conf.Pa
 
         meth: (int) : (optional) method type (0 or 1)
     """
-    p_wfs = p_wfss[ind_TS]
+    if (ind_TS < 0):
+        ind_TS = len(p_wfss) - 1
     imat_size2 = 0
     print("DMS_SEEN: ", ind_dmseen)
     for nm in ind_dmseen:
@@ -224,23 +225,11 @@ def imat_geom_ts_multiple_direction(wfs: Sensors, dms: Dms, p_wfss: List[conf.Pa
                 p_dms[k].alt / p_tel.diam * p_geom.pupdiam
             xoff = xoff + (dim - p_geom._n) / 2
             yoff = yoff + (dim - p_geom._n) / 2
+            wfs.d_wfs[ind_TS].d_gs.remove_layer(p_dms[k].type, k)
             wfs.d_wfs[ind_TS].d_gs.add_layer(p_dms[k].type, k, xoff, yoff)
         imat_cpu = np.concatenate(
                 (imat_cpu, imat_geom_ts(wfs, dms, p_wfss, ind_TS, p_dms, ind_dmseen,
                                         meth)), axis=0)
-
-    for k in ind_dmseen:
-        dims = p_dms[k]._n2 - p_dms[k]._n1 + 1
-        dim = p_geom._mpupil.shape[0]
-        if (dim < dims):
-            dim = dims
-        xoff = p_wfs.xpos * CONST.ARCSEC2RAD * \
-            p_dms[k].alt / p_tel.diam * p_geom.pupdiam
-        yoff = p_wfs.ypos * CONST.ARCSEC2RAD * \
-            p_dms[k].alt / p_tel.diam * p_geom.pupdiam
-        xoff = xoff + (dim - p_geom._n) / 2
-        yoff = yoff + (dim - p_geom._n) / 2
-        wfs.d_wfs[ind_TS].d_gs.add_layer(p_dms[k].type, k, xoff, yoff)
 
     return imat_cpu
 
@@ -331,7 +320,7 @@ def get_metaD(sup, TS_xpos=None, TS_ypos=None, ind_TS=-1, save_metaD=False, nCon
     if (TS_ypos.size < 1):
         TS_ypos = np.zeros((1))
 
-    return imat_geom_ts_multiple_direction(sup._sim.wfs, sup._sim.dms, sup.config.p_wfss,
+    return imat_geom_ts_multiple_direction(sup.wfs._wfs, sup.dms._dms, sup.config.p_wfss,
                                            sup.config.p_dms, sup.config.p_geom, ind_TS,
                                            sup.config.p_controllers[nControl].ndm,
                                            sup.config.p_tel, TS_xpos, TS_ypos)

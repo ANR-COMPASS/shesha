@@ -1,8 +1,8 @@
 ## @package   shesha.init.geom_init
 ## @brief     Initialization of the system geometry and of the Telescope object
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   4.4.2
-## @date      2011/01/28
+## @version   5.0.0
+## @date      2020/05/18
 ## @copyright GNU Lesser General Public License
 #
 #  This file is part of COMPASS <https://anr-compass.github.io/compass/>
@@ -71,7 +71,7 @@ def tel_init(context: carmaWrap_context, p_geom: conf.Param_geom, p_tel: conf.Pa
         # dm = None
         if (p_wfss[0].dms_seen is None and dm is not None):
             for i in range(nsensors):
-                if (not p_wfss[i].openloop):
+                if (not p_wfss[i].open_loop):
                     p_wfss[i].set_dms_seen(np.arange(len(dm), dtype=np.int32))
 
         # first get the wfs with max # of subaps
@@ -544,6 +544,7 @@ def init_pyrhr_geom(p_wfs: conf.Param_wfs, r0: float, p_tel: conf.Param_tel,
             np.sin((np.arange(p_wfs.pyr_npts)) * 2. * np.pi / p_wfs.pyr_npts)
         cy = scale_fact * \
             np.cos((np.arange(p_wfs.pyr_npts)) * 2. * np.pi / p_wfs.pyr_npts)
+        p_wfs.set_pyr_scale_pos(scale_fact)
         # mod_npts = p_wfs.pyr_npts #UNUSED
     else:
         if (verbose):

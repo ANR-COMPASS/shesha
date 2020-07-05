@@ -1,8 +1,8 @@
 ## @package   shesha.ao.basis
 ## @brief     Functions for modal basis (DM basis, KL, Btt, etc...)
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   4.4.2
-## @date      2011/01/28
+## @version   5.0.0
+## @date      2020/05/18
 ## @copyright GNU Lesser General Public License
 #
 #  This file is part of COMPASS <https://anr-compass.github.io/compass/>
@@ -112,7 +112,7 @@ def compute_KL2V(p_controller: conf.Param_controller, dms: Dms, p_dms: list,
     return KL2V
 
 
-def compute_DMbasis(g_dm, p_dm: conf.Param_dm, p_geom: conf.Param_geom):
+def compute_dm_basis(g_dm, p_dm: conf.Param_dm, p_geom: conf.Param_geom):
     """ Compute a the DM basis as a sparse matrix :
             - push on each actuator
             - get the corresponding dm shape
@@ -174,7 +174,7 @@ def compute_IFsparse(g_dm: Dms, p_dms: list, p_geom: conf.Param_geom):
     """
     ndm = len(p_dms)
     for i in range(ndm):
-        IFi = compute_DMbasis(g_dm.d_dms[i], p_dms[i], p_geom)
+        IFi = compute_dm_basis(g_dm.d_dms[i], p_dms[i], p_geom)
         if (i == 0):
             val = IFi.data
             col = IFi.indices
@@ -209,7 +209,7 @@ def command_on_Btt(rtc: Rtc, dms: Dms, p_dms: list, p_geom: conf.Param_geom, nfi
     IFtt = IFs[:, -2:].copy().toarray()
     IFpzt = IFs[:, :n - 2]
 
-    Btt, P = compute_Btt(IFpzt, IFtt)
+    Btt, P = compute_btt(IFpzt, IFtt)
     compute_cmat_with_Btt(rtc, Btt, nfilt)
 
 
@@ -345,7 +345,7 @@ def compute_fourier(nActu: int, pitch: float, actu_x_pos: np.ndarray,
     return actuPush
 
 
-def compute_Btt(IFpzt, IFtt):
+def compute_btt(IFpzt, IFtt, influ_petal=None, return_delta=False):
     """ Returns Btt to Volts and Volts to Btt matrices
 
     :parameters:
@@ -353,6 +353,12 @@ def compute_Btt(IFpzt, IFtt):
         IFpzt : (csr_matrix) : influence function matrix of pzt DM, sparse and arrange as (Npts in pup x nactus)
 
         IFtt : (np.ndarray(ndim=2,dtype=np.float32)) : Influence function matrix of the TT mirror arrange as (Npts in pup x 2)
+
+        influ_petal : (np.ndarray) : Influence function matrix of M4 petals.
+                                     Default is None, if set, the Btt produced is also orthogonal
+                                     to petal modes, then only driven by petal DM
+
+        return_delta : (bool, optional) : If True, returns delta instead of P. Default is False
 
     :returns:
 
@@ -374,7 +380,17 @@ def compute_Btt(IFpzt, IFtt):
     deltaT = IFpzt.T.dot(Tp) / N
     # Tip tilt projection on the pzt dm
     tau = np.linalg.inv(delta).dot(deltaT)
+    nfilt = 3  # Piston + tip + tilt
 
+    if influ_petal is not None:
+        # Petal basis generation (orthogonal to global piston)
+        nseg = influ_petal.toarray().shape[0]
+        petal_modes = -1 / (nseg - 1) * np.ones((nseg, (nseg - 1)))
+        petal_modes += nseg / (nseg - 1) * np.eye(nseg)[:, 0:(
+                nseg - 1)]  # petal modes within the petal dm space
+        tau_petal = IFpzt.T.dot(influ_petal).toarray().dot(petal_modes.T)
+        tau = np.concatenate((tau_petal, np.linalg.inv(delta).dot(deltaT)), axis=1)
+        nfilt = 8
     # Famille generatrice sans tip tilt
     G = np.identity(n)
     tdt = tau.T.dot(delta).dot(tau)
@@ -384,8 +400,8 @@ def compute_Btt(IFpzt, IFtt):
     # Base orthonormee sans TT
     gdg = G.T.dot(delta).dot(G)
     U, s, V = np.linalg.svd(gdg)
-    U = U[:, :U.shape[1] - 3]
-    s = s[:s.size - 3]
+    U = U[:, :U.shape[1] - nfilt]
+    s = s[:s.size - nfilt]
     L = np.identity(s.size) / np.sqrt(s)
     B = G.dot(U).dot(L)
 
@@ -396,13 +412,18 @@ def compute_Btt(IFpzt, IFtt):
     mini = 1. / np.sqrt(np.abs(TT))
     mini[0, 1] = 0
     mini[1, 0] = 0
-    Btt[n:, n - 3:] = mini
+    Btt[n:, -2:] = mini
+    if influ_petal is not None:
+        Btt[:n, -7:-2] = tau_petal
 
     # Calcul du projecteur actus-->modes
     Delta = np.zeros((n + IFtt.shape[1], n + IFtt.shape[1]))
     #IFpzt = rtc.get_IFpztsparse(1).T
     Delta[:-2, :-2] = delta
     Delta[-2:, -2:] = TT
-    P = Btt.T.dot(Delta)
+    if return_delta:
+        P = Delta
+    else:
+        P = Btt.T.dot(Delta)
 
     return Btt.astype(np.float32), P.astype(np.float32)
