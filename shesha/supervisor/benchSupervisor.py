@@ -53,12 +53,12 @@ class BenchSupervisor(AoSupervisor):
                  cacao: bool = False):
         """ Init the COMPASS wih the config_file
 
-        Parameters:
-            config_file : (str, optional) : path to the configuration file
+        Kwargs:
+            config_file : (str) : path to the configuration file. Default is None
 
-            brahma : (bool, optional) : Flag to use brahma
+            brahma : (bool) : Flag to use brahma. Default is False
 
-            cacao : (bool, optional) : Flag to use cacao rtc
+            cacao : (bool) : Flag to use cacao rtc. Default is False
         """
         self.pause_loop = None
         self.rtc = None
@@ -102,7 +102,7 @@ class BenchSupervisor(AoSupervisor):
     def set_command(self, nctrl: int, command: np.ndarray) -> None:
         """ Immediately sets provided command to DMs - does not affect integrator
 
-        Parameters:
+        Args:
             nctrl : (int) : Controller index (unused)
 
             command : (np.ndarray) : Command vector to send
@@ -144,7 +144,7 @@ class BenchSupervisor(AoSupervisor):
     def load_new_wfs_frame(self, centro_index: int = 0) -> None:
         """ Acquire a new WFS frame and load it
 
-        Parameters:
+        Args:
             centro_index : (int) : Index of the centroider where to load the frame
         """
         self.frame = self.cam_callback()
@@ -168,16 +168,17 @@ class BenchSupervisor(AoSupervisor):
         self.rtc.do_clipping(0)
         self.rtc.comp_voltage(0)
 
-    def set_one_actu(self, nctrl: int, nactu: int, ampli: float = 1,
+    def set_one_actu(self, nctrl: int, nactu: int, *, ampli: float = 1,
                      reset: bool = True) -> None:
         """ Push the selected actuator
 
-        Parameters:
+        Args:
             nctrl : (int) : controller index
 
             nactu : (int) : actuator index to push
 
-            ampli : (float, optional) : amplitude to apply. Default is 1 volt
+        Kwargs:
+            ampli : (float) : amplitude to apply. Default is 1 volt
 
             reset : (bool) : reset the previous command vector. Default is True
         """
@@ -207,8 +208,8 @@ class BenchSupervisor(AoSupervisor):
     def reset_command(self, nctrl: int = -1) -> None:
         """ Reset the nctrl Controller command buffer, reset all controllers if nctrl  == -1
 
-        Parameters:
-            nctrl : (int, optional) : Controller index. If -1 (default), all controllers commands are reset
+        Kwargs:
+            nctrl : (int) : Controller index. If -1 (default), all controllers commands are reset
         """
         if (nctrl == -1):  # All Dms reset
             for control in self.rtc.d_control:
@@ -219,7 +220,7 @@ class BenchSupervisor(AoSupervisor):
     def load_config(self, config_file: str = None) -> None:
         """ Init the COMPASS with the config_file
 
-        Parameters:
+        Args:
             config_file : (str) : path to the configuration file
         """
         from shesha.util.utilities import load_config_from_file
@@ -228,7 +229,7 @@ class BenchSupervisor(AoSupervisor):
     def set_cam_callback(self, cam_callback: Callable):
         """ Set the externally defined function that allows to grab frames
 
-        Parameters:
+        Args:
             cam_callback : (Callable) : function that allows to grab frames
         """
         self.cam_callback = cam_callback
@@ -236,7 +237,7 @@ class BenchSupervisor(AoSupervisor):
     def set_dm_callback(self, dm_get_callback: Callable, dm_set_callback: Callable):
         """ Set the externally defined function that allows to communicate with the DM
 
-        Parameters:
+        Args:
             dm_get_callback : (Callable) : function that allows to retrieve commands
             dm_set_callback : (Callable) : function that allows to set commands
         """
@@ -349,7 +350,7 @@ class BenchSupervisor(AoSupervisor):
         the new box coordinates in the slopes computation supervisor
         pipeline.
 
-        Parameters:
+        Args:
             init_config : (bool): Flag to reset to the default positions of boxes. Default is False
 
             centro_index : (int) : centroider index
@@ -388,7 +389,7 @@ class BenchSupervisor(AoSupervisor):
     def get_current_windows_pos(self, centro_index: int = 0):
         """ Returns the currently used subapertures positions
 
-        Parameters:
+        Args:
             centro_index : (int) : Index of the centroider
 
         Return:

@@ -53,7 +53,7 @@ class TargetCompass(SourceCompass):
     def __init__(self, context, config, tel):
         """ Initialize a TargetCompass component for target related supervision
 
-        Parameters:
+        Args:
             context : (carmaContext) : CarmaContext instance
 
             config : (config module) : Parameters configuration structure module
@@ -71,10 +71,11 @@ class TargetCompass(SourceCompass):
     def get_tar_image(self, tar_index : int, *, expo_type: str = "se") -> np.ndarray:
         """ Get the PSF in the direction of the given target
 
-        Parameters:
+        Args:
             tar_index : (int) : Index of target
 
-            expo_type : (str, optional) : "se" for short exposure (default)
+        Kwargs:
+            expo_type : (str) : "se" for short exposure (default)
                                           "le" for long exposure
 
         Return:
@@ -93,7 +94,7 @@ class TargetCompass(SourceCompass):
     def set_tar_phase(self, tar_index : int, phase : np.ndarray) -> None:
         """ Set the phase screen seen by the tar
 
-        Parameters:
+        Args:
             tar_index : (int) : target index
 
             phase : (np.ndarray) : phase screen to set
@@ -103,10 +104,11 @@ class TargetCompass(SourceCompass):
     def get_tar_phase(self, tar_index: int, *, pupil: bool = False) -> np.ndarray:
         """ Returns the target phase screen of target number tar_index
 
-        Parameters:
+        Args:
             tar_index : (int) : Target index
 
-            pupil : (bool, optional) : If True, applies the pupil on top of the phase screen
+        Kwargs:
+            pupil : (bool) : If True, applies the pupil on top of the phase screen
                                        Default is False
 
         Return:
@@ -121,7 +123,7 @@ class TargetCompass(SourceCompass):
     def reset_strehl(self, tar_index: int) -> None:
         """ Reset the Strehl Ratio of the target tar_index
 
-        Parameters:
+        Args:
             tar_index : (int) : Target index
         """
         self._target.d_targets[tar_index].reset_strehlmeter()
@@ -129,7 +131,7 @@ class TargetCompass(SourceCompass):
     def reset_tar_phase(self, tar_index: int) -> None:
         """ Reset the phase screen of the target tar_index
 
-        Parameters:
+        Args:
             tar_index : (int) : Target index
         """
         self._target.d_targets[tar_index].d_phase.reset()
@@ -139,10 +141,11 @@ class TargetCompass(SourceCompass):
         This fuction will return an array of 4 values as
         [SR SE, SR LE, phase variance SE [µm²], phase variance LE [µm²]]
 
-        Parameters:
+        Args:
             tar_index : (int) : Target index
 
-            do_fit : (bool, optional) : If True (default), fit the PSF
+        Kwargs:
+            do_fit : (bool) : If True (default), fit the PSF
                                         with a sinc before computing SR
 
         Return:
@@ -158,7 +161,7 @@ class TargetCompass(SourceCompass):
     def get_ncpa_tar(self, tar_index : int) -> np.ndarray:
         """ Return the current NCPA phase screen of the target path
 
-        Parameters:
+        Args:
             tar_index : (int) : Index of the target
 
         Return:
@@ -170,7 +173,7 @@ class TargetCompass(SourceCompass):
         """ Set the additional fixed NCPA phase in the target path.
         ncpa must be of the same size of the spupil support
 
-        Parameters:
+        Args:
             tar_index : (int) : WFS index
 
             ncpa : (ndarray) : NCPA phase screen to set [µm]
@@ -180,19 +183,23 @@ class TargetCompass(SourceCompass):
     def comp_tar_image(self, tarNum: int, *, puponly: int = 0, compLE: bool = True) -> None:
         """ Computes the PSF
 
-        Parameters :
+        Args:
             tarNum: (int): target index
 
-            puponly: (int, optionnal) : if set to 1, computes Airy (default=0)
+        Kwargs:
+            puponly: (int) : if set to 1, computes Airy (default=0)
 
-            compLE: (bool, optionnal) : if True, the computed image is taken into account in long exposure image (default=True)
+            compLE: (bool) : if True, the computed image is taken into account in long exposure image (default=True)
         """
         self._target.d_targets[tarNum].comp_image(puponly, compLE)
 
     def comp_strehl(self, tarNum: int, *, do_fit: bool = True) -> None:
         """ Computes the Strehl ratio
 
-        Parameters :
+        Args:
             tarNum: (int): target index
+
+        Kwargs:
+            do_fit: (bool): Flag for enabling fitting by sinc
         """
         self._target.d_targets[tarNum].comp_strehl(do_fit)

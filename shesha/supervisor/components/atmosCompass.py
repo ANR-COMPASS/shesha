@@ -54,7 +54,7 @@ class AtmosCompass(object):
     def __init__(self, context, config):
         """ Initialize an AtmosCompass component for atmosphere related supervision
 
-        Parameters:
+        Args:
             context : (carmaContext) : CarmaContext instance
 
             config : (config module) : Parameters configuration structure module
@@ -71,7 +71,7 @@ class AtmosCompass(object):
     def enable_atmos(self, enable : bool) -> None:
         """ Set or unset whether atmos is enabled when running loop
 
-        Parameters:
+        Args:
             enable : (bool) : True to enable, False to disable
         """
         self.is_enable = enable
@@ -79,10 +79,11 @@ class AtmosCompass(object):
     def set_r0(self, r0 : float, *, reset_seed : int=-1) -> None:
         """ Change the current r0 for all layers
 
-        Parameters:
+        Args:
             r0 : (float) : r0 @ 0.5 µm
 
-            reset_seed : (int, optional): if -1 (default), keep same seed and same screen
+        Kwargs:
+            reset_seed : (int): if -1 (default), keep same seed and same screen
                                 if 0 random seed is applied and refresh screens
                                 if (value) set the given seed and refresh screens
         """
@@ -101,9 +102,10 @@ class AtmosCompass(object):
     def set_wind(self, screen_index : int, *, windspeed : float = None, winddir : float = None) -> None:
         """ Set new wind information for the given screen
 
-        Parameters:
+        Args:
             screen_index : (int) : Atmos screen to change
 
+        Kwargs:
             windspeed : (float) [m/s] : new wind speed of the screen. If None, the wind speed is unchanged
 
             winddir : (float) [deg]: new wind direction of the screen. If None, the wind direction is unchanged
@@ -144,7 +146,7 @@ class AtmosCompass(object):
     def get_atmos_layer(self, indx: int) -> np.ndarray:
         """ Return the selected atmos screen
 
-        Parameters:
+        Args:
             indx : (int) : Index of the turbulent layer to return
 
         Return:

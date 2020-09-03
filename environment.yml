@@ -1,8 +1,22 @@
 name: compass
 channels:
-    - compass
-    - defaults
+  - compass
 dependencies:
-    - python=3
-    - compass
-
+  - python
+  - astropy
+  - docopt
+  - h5py
+  - ipython
+  - matplotlib
+  - numpy
+  - pandas
+  - pyqtgraph
+  - scipy
+  - pytables
+  - tabulate
+  - tqdm
+  - compass
+  - coverage
+  - pytest-cov
+  - pytest-html
+  - pytest-metadata

@@ -52,7 +52,7 @@ class TelescopeCompass(object):
     def __init__(self, context, config):
         """ Initialize an AtmosCompass component for atmosphere related supervision
 
-        Parameters:
+        Args:
             context : (carmaContext) : CarmaContext instance
 
             config : (config module) : Parameters configuration structure module

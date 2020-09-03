@@ -21,11 +21,11 @@ def test_loop():
 def test_reset():
     sup.reset()
     assert(True)
-#         _                 ___                            
+#         _                 ___
 #    __ _| |_ _ __  ___ ___/ __|___ _ __  _ __  __ _ ______
 #   / _` |  _| '  \/ _ (_-< (__/ _ \ '  \| '_ \/ _` (_-<_-<
 #   \__,_|\__|_|_|_\___/__/\___\___/_|_|_| .__/\__,_/__/__/
-#                                        |_|               
+#                                        |_|
 def test_enable_atmos():
     sup.atmos.enable_atmos(False)
     assert(sup.atmos.is_enable == False)
@@ -49,13 +49,15 @@ def test_get_atmos_layer():
 def test_move_atmos():
     sup.atmos.move_atmos()
     assert(True)
-#    ___        ___                            
+#    ___        ___
 #   |   \ _ __ / __|___ _ __  _ __  __ _ ______
 #   | |) | '  \ (__/ _ \ '  \| '_ \/ _` (_-<_-<
 #   |___/|_|_|_\___\___/_|_|_| .__/\__,_/__/__/
-#                            |_|               
+#                            |_|
 def test_set_command():
     sup.dms.set_command(np.zeros(sup.config.p_controllers[0].nactu))
+    sup.dms.set_command(np.zeros(sup.config.p_controllers[0].nactu), shape_dm=False)
+    sup.dms.set_command(np.zeros(sup.config.p_dms[0]._ntotact), dm_index=0)
     assert(True)
 
 def test_set_one_actu():
@@ -81,11 +83,11 @@ def test_get_dm_shape():
 def test_set_dm_registration():
     sup.dms.set_dm_registration(0, dx=0, dy=0, theta=0, G=1)
     assert(True)
-#    _____                  _    ___                            
+#    _____                  _    ___
 #   |_   _|_ _ _ _ __ _ ___| |_ / __|___ _ __  _ __  __ _ ______
 #     | |/ _` | '_/ _` / -_)  _| (__/ _ \ '  \| '_ \/ _` (_-<_-<
 #     |_|\__,_|_| \__, \___|\__|\___\___/_|_|_| .__/\__,_/__/__/
-#                 |___/                       |_|               
+#                 |___/                       |_|
 def test_get_tar_image():
     sup.target.get_tar_image(0)
     sup.target.get_tar_image(0, expo_type="le")
@@ -130,11 +132,11 @@ def test_get_strehl():
     sup.target.get_strehl(0)
     sup.target.get_strehl(0, do_fit=False)
     assert(True)
-#   __      ____     ___                             
-#   \ \    / / _|___/ __|___ _ __  _ __  __ _ ______  
-#    \ \/\/ /  _(_-< (__/ _ \ '  \| '_ \/ _` (_-<_-< 
-#     \_/\_/|_| /__/\___\___/_|_|_| .__/\__,_/__/__/ 
-#                                 |_|                
+#   __      ____     ___
+#   \ \    / / _|___/ __|___ _ __  _ __  __ _ ______
+#    \ \/\/ /  _(_-< (__/ _ \ '  \| '_ \/ _` (_-<_-<
+#     \_/\_/|_| /__/\___\___/_|_|_| .__/\__,_/__/__/
+#                                 |_|
 def test_get_wfs_image():
     sup.wfs.get_wfs_image(0)
     assert(True)
@@ -150,7 +152,7 @@ def test_set_gs_mag():
 
 def test_compute_wfs_image():
     sup.wfs.compute_wfs_image(0)
-    sup.wfs.compute_wfs_image(0, noise=False)       
+    sup.wfs.compute_wfs_image(0, noise=False)
     assert(True)
 
 def test_reset_noise():
@@ -189,7 +191,7 @@ def test_set_pyr_modulation_ampli():
 
 @pytest.mark.skip(reason="How does it work ?")
 def test_set_pyr_multiple_stars_source():
-    
+
     assert(True)
 
 @pytest.mark.skipif(sup.config.p_wfss[0].type != "pyrhr", reason="pyrhr only")
@@ -225,13 +227,18 @@ def test_get_pyrhr_image():
 def test_get_pyr_focal_plane():
     sup.wfs.get_pyr_focal_plane(0)
     assert(True)
-#    ___ _       ___                            
+#    ___ _       ___
 #   | _ \ |_ __ / __|___ _ __  _ __  __ _ ______
 #   |   /  _/ _| (__/ _ \ '  \| '_ \/ _` (_-<_-<
 #   |_|_\\__\__|\___\___/_|_|_| .__/\__,_/__/__/
-#                             |_|               
+#                             |_|
 def test_set_perturbation_voltage():
     sup.rtc.set_perturbation_voltage(0,"test",np.zeros(sup.config.p_controllers[0].nactu))
+    assert(True)
+
+def test_get_perturbation_voltage():
+    sup.rtc.get_perturbation_voltage(0)
+    sup.rtc.get_perturbation_voltage(0, name="test")
     assert(True)
 
 def test_get_slopes():
@@ -435,11 +442,11 @@ def test_set_scale():
 def test_publish():
     sup.rtc.publish()
     assert(True)
-#    __  __         _      _ ___          _    
+#    __  __         _      _ ___          _
 #   |  \/  |___  __| |__ _| | _ ) __ _ __(_)___
 #   | |\/| / _ \/ _` / _` | | _ \/ _` (_-< (_-<
 #   |_|  |_\___/\__,_\__,_|_|___/\__,_/__/_/__/
-#                                              
+#
 def test_compute_influ_basis():
     sup.basis.compute_influ_basis(0)
     assert(True)
@@ -466,11 +473,11 @@ def test_compute_btt_petal():
 def test_compute_phase_to_modes():
     sup.basis.compute_phase_to_modes(sup.basis.projection_matrix)
     assert(True)
-#     ___      _ _ _             _   _          
-#    / __|__ _| (_) |__ _ _ __ _| |_(_)___ _ _  
-#   | (__/ _` | | | '_ \ '_/ _` |  _| / _ \ ' \ 
+#     ___      _ _ _             _   _
+#    / __|__ _| (_) |__ _ _ __ _| |_(_)___ _ _
+#   | (__/ _` | | | '_ \ '_/ _` |  _| / _ \ ' \
 #    \___\__,_|_|_|_.__/_| \__,_|\__|_\___/_||_|
-#                                               
+#
 def test_apply_volts_and_get_slopes():
     sup.calibration.apply_volts_and_get_slopes(0)
     sup.calibration.apply_volts_and_get_slopes(0, noise=True, turbu=True, reset=False)

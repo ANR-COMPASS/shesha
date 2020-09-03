@@ -73,7 +73,7 @@ class GenericSupervisor(object):
     def __init__(self, config):
         """ Init the a supervisor
 
-        Parameters:
+        Args:
             config : (config module) : Configuration module
         """
         self.context = None
@@ -183,20 +183,20 @@ class GenericSupervisor(object):
              compute_tar_psf: bool = True) -> None:
         """Iterates the AO loop, with optional parameters
 
-        Parameters :
-            move_atmos: (bool), optional: move the atmosphere for this iteration. Default is True
+        Kwargs:
+            move_atmos: (bool): move the atmosphere for this iteration. Default is True
 
-            nControl: (int, optional): Controller number to use. Default is 0 (single control configuration)
+            nControl: (int): Controller number to use. Default is 0 (single control configuration)
 
-            tar_trace: (List, optional): list of targets to trace. None is equivalent to all (default)
+            tar_trace: (List): list of targets to trace. None is equivalent to all (default)
 
-            wfs_trace: (List, optional): list of WFS to trace. None is equivalent to all (default)
+            wfs_trace: (List): list of WFS to trace. None is equivalent to all (default)
 
-            do_control : (bool, optional) : Performs RTC operations if True (Default)
+            do_control : (bool) : Performs RTC operations if True (Default)
 
-            apply_control: (bool): (optional) if True (default), apply control on DMs
+            apply_control: (bool): if True (default), apply control on DMs
 
-            compute_tar_psf : (bool, optional) : If True (default), computes the PSF at the end of the iteration
+            compute_tar_psf : (bool) : If True (default), computes the PSF at the end of the iteration
         """
         if tar_trace is None and self.target is not None:
             tar_trace = range(len(self.config.p_targets))
@@ -221,7 +221,7 @@ class GenericSupervisor(object):
                     self.wfs.raytrace(w, tel=self.tel)
 
                 if not self.config.p_wfss[w].open_loop and self.dms is not None:
-                    self.wfs.raytrace(w, dms=self.dms, reset=False)
+                    self.wfs.raytrace(w, dms=self.dms, ncpa=False, reset=False)
                 self.wfs.compute_wfs_image(w)
         if do_control and self.rtc is not None:
             for ncontrol in range(len(self.config.p_controllers)):
@@ -246,14 +246,15 @@ class GenericSupervisor(object):
                       tar_index: int = 0):
         """ Print the Strehl ratio SE and LE from a target on the terminal, the estimated remaining time and framerate
 
-        Parameters:
+        Args:
             monitoring_freq : (int) : Number of frames between two prints
 
             iters_time : (float) : time elapsed between two prints
 
             total_iters : (int) : Total number of iterations
 
-            tar_index : (int, optional) : Index of the target. Default is 0
+        Kwargs:
+            tar_index : (int) : Index of the target. Default is 0
         """
         framerate = monitoring_freq / iters_time
         strehl = self.target.get_strehl(tar_index)
@@ -265,12 +266,13 @@ class GenericSupervisor(object):
              compute_tar_psf: bool = True, **kwargs):
         """ Perform the AO loop for <number_of_iter> iterations
 
-        Parameters :
+        Args:
             number_of_iter: (int) : Number of iteration that will be done
 
-            monitoring_freq: (int, optional) : Monitoring frequency [frames]. Default is 100
+        Kwargs:
+            monitoring_freq: (int) : Monitoring frequency [frames]. Default is 100
 
-            compute_tar_psf : (bool, optional) : If True (default), computes the PSF at each iteration
+            compute_tar_psf : (bool) : If True (default), computes the PSF at each iteration
                                                  Else, only computes it each <monitoring_freq> frames
         """
         if not compute_tar_psf:

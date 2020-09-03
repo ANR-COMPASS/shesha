@@ -46,7 +46,7 @@ class SourceCompass(object):
     def __init__(self, sources : List):
         """ Initialize a SourceCompass component for target and wfs source related supervision
 
-        Parameters:
+        Args:
             sources : (List) : List of SutraSource instances
         """
         self.sources = sources
@@ -55,21 +55,22 @@ class SourceCompass(object):
         """ Performs the raytracing operation through provided object phase screens 
         to obtain the phase screen of the SutraSource
 
-        Parameters :
+        Args:
             index : (int) : Index of the source  to raytrace in self.sources list 
 
-            tel : (TelescopeCompass, optional) : TelescopeCompass instance.
+        Kwargs:
+            tel : (TelescopeCompass) : TelescopeCompass instance.
                                                  If provided, raytrace through the telescope aberration phase in the pupil
 
-            atm : (AtmosCompass, optional) : AtmosCompass instance.
+            atm : (AtmosCompass) : AtmosCompass instance.
                                             If provided, raytrace through the layers phase screens 
 
-            dms : (dmsCompass, optional) : DmCompass instance.
+            dms : (dmsCompass) : DmCompass instance.
                                             If provided, raytrace through the DM shapes
 
-            ncpa : (bool, optional) : If True (default), raytrace through NCPA phase screen of the source (default is array of 0, i.e. no impact) 
+            ncpa : (bool) : If True (default), raytrace through NCPA phase screen of the source (default is array of 0, i.e. no impact) 
 
-            rst: (bool): reset the phase screen before raytracing. Default is True
+            reset: (bool): reset the phase screen before raytracing. Default is True
         """
         if (reset):
             self.sources[index].d_phase.reset()

@@ -58,7 +58,7 @@ class Calibration(object):
     def __init__(self, config, tel, atmos, dms, target, rtc, wfs):
         """ Instantiate a ModalBasis object
 
-        Parameters:
+        Args:
             config : (config) : Configuration parameters module
 
             tel : (TelescopeCompass) : TelescopeCompass instance
@@ -85,15 +85,16 @@ class Calibration(object):
                                    turbu: bool = False, reset: bool = True):
         """ Apply voltages, raytrace, compute WFS image, compute slopes and returns it
 
-        Parameters:
+        Args:
             controller_index : (int) : Controller index
 
-            noise : (bool, optional) : Flag to enable noise for WFS image compuation. Default is False
+        Kwargs:
+            noise : (bool) : Flag to enable noise for WFS image computation. Default is False
 
-            turbu : (bool, optional) : Flag to enable atmosphere for WFS phase screen raytracing.
+            turbu : (bool) : Flag to enable atmosphere for WFS phase screen raytracing.
                                        Default is False
 
-            reset : (bool, optional) : Flag to reset previous phase screen before raytracing.
+            reset : (bool) : Flag to reset previous phase screen before raytracing.
                                        Default is True
         """
         self._rtc.apply_control(controller_index)
@@ -109,21 +110,22 @@ class Calibration(object):
                       *, noise : bool=False, nmodes_max : int=0, with_turbu : bool=False, push_pull : bool=False) -> np.ndarray:
         """ Computes an interaction matrix from provided modal basis
 
-        Parameters:
+        Args:
             controller_index : (int) : Controller index
 
             ampli : (np.ndarray) : amplitude to apply on each mode
 
             modal_basis : (np.ndarray) : modal basis matrix
 
-            noise : (bool, optional) : Flag to enable noise for WFS image compuation. Default is False
+        Kwargs:
+            noise : (bool) : Flag to enable noise for WFS image compuation. Default is False
 
-            nmodes_max : (int, optional) : Default is 0. TODO : description
+            nmodes_max : (int) : Default is 0. TODO : description
 
-            with_turbu : (bool, optional) : Flag to enable atmosphere for WFS phase screen raytracing.
+            with_turbu : (bool) : Flag to enable atmosphere for WFS phase screen raytracing.
                                             Default is False
 
-            push_pull : (bool, optional) : If True, imat is computed as an average of push and pull ampli
+            push_pull : (bool) : If True, imat is computed as an average of push and pull ampli
                                             on each mode
 
         Return:
@@ -161,22 +163,23 @@ class Calibration(object):
                       nmodes_max : int=0, with_turbu : bool=False, push_pull : bool=False, wfs_index : int=0) -> np.ndarray:
         """ Computes an interaction matrix with the provided cube phase
 
-        Parameters:
+        Args:
             controller_index : (int) : Controller index
 
             cube_phase : (np.ndarray) : Cube of phase to insert as NCPA
 
-            noise : (bool, optional) : Flag to enable noise for WFS image compuation. Default is False
+        Kwargs:
+            noise : (bool) : Flag to enable noise for WFS image compuation. Default is False
 
-            nmodes_max : (int, optional) : Default is 0. TODO : description
+            nmodes_max : (int) : Default is 0. TODO : description
 
-            with_turbu : (bool, optional) : Flag to enable atmosphere for WFS phase screen raytracing.
+            with_turbu : (bool) : Flag to enable atmosphere for WFS phase screen raytracing.
                                             Default is False
 
-            push_pull : (bool, optional) : If True, imat is computed as an average of push and pull ampli
+            push_pull : (bool) : If True, imat is computed as an average of push and pull ampli
                                             on each mode
 
-            wfs_index : (int, optional) : WFS index. Default is 0
+            wfs_index : (int) : WFS index. Default is 0
 
         Return:
             phase_imat : (np.ndarray) : Phase interaction matrix
@@ -212,9 +215,10 @@ class Calibration(object):
 
         Uses the projection matrix computed from compute_modes_to_volts_basis (modalBasis module)
 
-        Parameters:
+        Args:
             projection_matrix : (np.ndarray) : Modal projection matrix
 
+        Kwargs:
             selected_actus : (np.ndarray) : TODO : description
 
         Return:

@@ -160,7 +160,7 @@ def load_config_from_file(filename_path: str):
     """
     Load the parameters from the parameters file
 
-    Parameters:
+    Args:
         filename_path: (str): path to the parameters file
 
     Return:
@@ -188,7 +188,7 @@ def load_config_from_module(filepath: str):
     """
     Load the parameters from the parameters module
 
-    Parameters:
+    Args:
         filename_path: (str): path to the parameters file
 
     Return:
@@ -233,7 +233,7 @@ def load_config_from_module(filepath: str):
 def generate_square(radius: float, density: float = 1.):
     """ Generate modulation points positions following a square pattern
 
-    Parameters:
+    Args:
         radius : (float) : half the length of a side in lambda/D
 
         density : (float), optional) : number of psf per lambda/D. Default is 1
@@ -253,7 +253,7 @@ def generate_square(radius: float, density: float = 1.):
 def generate_circle(radius: float, density: float = 1.):
     """ Generate modulation points positions following a circular pattern
 s
-    Parameters:
+    Args:
         radius : (float) : half the length of a side in lambda/D
 
         density : (float), optional) : number of psf per lambda/D. Default is 1
@@ -270,7 +270,7 @@ s
     def generate_pseudo_source(radius: float, additional_psf=0, density=1.):
         """ Used to generate a pseudo source for PYRWFS
 
-        Parameters:
+        Args:
             radius : (float) : TODO description
 
             additional_psf : (int) :TODO description
@@ -345,7 +345,7 @@ s
 def first_non_zero(array: np.ndarray, axis: int, invalid_val: int = -1) -> np.ndarray:
     """ Find the first non zero element of an array
 
-    Parameters:
+    Args:
         array : (np.ndarray) : input array
 
         axis : (int) : axis index

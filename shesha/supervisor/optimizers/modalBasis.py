@@ -68,7 +68,7 @@ class ModalBasis(object):
     def __init__(self, config, dms, target):
         """ Instantiate a ModalBasis object
 
-        Parameters:
+        Args:
             config : (config) : Configuration parameters module
 
             dms : (DmCompass) : DmCompass instance
@@ -89,7 +89,7 @@ class ModalBasis(object):
         """ Computes and return the influence function phase basis of the specified DM
         as a sparse matrix
 
-        Parameters:
+        Args:
             dm_index : (int) : Index of the DM
 
         Return:
@@ -103,12 +103,13 @@ class ModalBasis(object):
                                      nbpairs: int = None, return_delta: bool = False) -> np.ndarray:
         """ Computes a given modal basis ("KL2V", "Btt", "Btt_petal") and return the 2 transfer matrices
 
-        Parameters:
+        Args:
             modal_basis_type : (str) : modal basis to compute ("KL2V", "Btt", "Btt_petal")
 
-            merged : (bool, optional) :
+        Kwargs:
+            merged : (bool) : TODO description
 
-            nbpairs : (int, optional) :
+            nbpairs : (int) : TODO description
 
         Return:
             modal_basis : (np.ndarray) : modes to volts matrix
@@ -154,14 +155,14 @@ class ModalBasis(object):
         """ Computes the so-called Btt modal basis. The <merged> flag allows merto merge
         2x2 the actuators influence functions for actuators on each side of the spider (ELT case)
 
-        Parameters:
-            merged : (bool, optional) : If True, merge 2x2 the actuators influence functions for
+        Kwargs:
+            merged : (bool) : If True, merge 2x2 the actuators influence functions for
                                         actuators on each side of the spider (ELT case). Default
                                         is False
 
-            nbpairs : (int, optional) : Default is None. TODO : description
+            nbpairs : (int) : Default is None. TODO : description
 
-            return_delta : (bool, optional) : If False (default), the function returns
+            return_delta : (bool) : If False (default), the function returns
                                               Btt (modes to volts matrix),
                                               and P (volts to mode matrix).
                                               If True, returns delta = IF.T.dot(IF) / N
@@ -214,10 +215,11 @@ class ModalBasis(object):
         """ Used to compute merged IF from each side of the spider
         for an ELT case (Petalling Effect)
 
-        Parameters:
+        Args:
             dm_index : (int) : DM index
 
-            nbpairs : (int, optional) : Default is None. TODO : description
+        Kwargs:
+            nbpairs : (int) : Default is None. TODO : description
 
         Return:
             pairs : (np.ndarray) : TODO description
@@ -346,7 +348,7 @@ class ModalBasis(object):
     def compute_phase_to_modes(self, modal_basis: np.ndarray) -> np.ndarray:
         """ Return the phase to modes matrix by using the given modal basis
 
-        Parameters:
+        Args:
             modal_basis : (np.ndarray) : Modal basis matrix
 
         Return:
