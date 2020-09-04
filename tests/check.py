@@ -71,7 +71,7 @@ if __name__ == "__main__":
 
         idx = len(df.index)
         df.loc[idx, "Test name"] = param_file.split('/')[-1]
-        df.loc[idx, "Init"] = is_init
-        df.loc[idx, "SR@100iter"] = SR
+        df.loc[idx, "Init"] = str(is_init)
+        df.loc[idx, "SR@100iter"] = str(SR)
 
         df.to_hdf("check.h5", "check")
