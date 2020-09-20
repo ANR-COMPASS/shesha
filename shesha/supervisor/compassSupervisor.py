@@ -41,9 +41,8 @@ from shesha.supervisor.optimizers import ModalBasis, Calibration
 import numpy as np
 
 import shesha.constants as scons
-from shesha.constants import CONST
 
-from typing import List, Iterable
+from typing import Iterable
 
 
 class CompassSupervisor(GenericSupervisor):
@@ -54,7 +53,7 @@ class CompassSupervisor(GenericSupervisor):
 
         config : (config) : Parameters structure
 
-        telescope : (TelescopeComponent) : a TelescopeComponent instance
+        tel : (TelescopeComponent) : a TelescopeComponent instance
 
         atmos : (AtmosComponent) : An AtmosComponent instance
 
@@ -348,10 +347,7 @@ class CompassSupervisor(GenericSupervisor):
         Extract and convert compass supervisor configuration parameters
         into 2 dictionnaries containing relevant AO parameters
 
-        Args:
-            root: (object), COMPASS supervisor object to be parsed
-
-        Returns : 2 dictionnaries
+        Returns : 2 dictionaries
         """
         from shesha.util.exportConfig import export_config
         return export_config(self)
