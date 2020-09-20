@@ -191,7 +191,7 @@ class Calibration(object):
                 self._wfs.set_ncpa_wfs(wfs_index, cube_phase[nphase, :, :])
                 devpos = self.apply_volts_and_get_slopes(controller_index,
                                                          turbu=with_turbu, noise=noise)
-                self.set_ncpa_wfs(wfs_index, -cube_phase[nphase, :, :])
+                self._wfs.set_ncpa_wfs(wfs_index, -cube_phase[nphase, :, :])
                 devmin = self.apply_volts_and_get_slopes(controller_index,
                                                          turbu=with_turbu, noise=noise)
                 imat_phase[nphase, :] = (devpos - devmin) / 2
