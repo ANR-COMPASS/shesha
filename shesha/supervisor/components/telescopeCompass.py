@@ -35,7 +35,6 @@
 #  You should have received a copy of the GNU Lesser General Public License along with COMPASS.
 #  If not, see <https://www.gnu.org/licenses/lgpl-3.0.txt>.
 from shesha.init.geom_init import tel_init
-import numpy as np
 
 
 class TelescopeCompass(object):
