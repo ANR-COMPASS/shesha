@@ -56,23 +56,10 @@ Options:
 """
 from shesha.util.utilities import load_config_from_file
 from docopt import docopt
-import sys
-import subprocess
-import shesha
-
-
-def check_shesha_compass_versions():
-    shesha_version = shesha.__version__
-    compass_version = subprocess.check_output('conda list | grep compass',shell=True).decode(
-            sys.stdout.encoding).split()[1]
-    assert(shesha_version == compass_version), 'SHESHA and COMPASS versions are not matching : %r != %r ' %\
-                                              (shesha_version, compass_version)
 
 
 if __name__ == "__main__":
     arguments = docopt(__doc__)
-
-    check_shesha_compass_versions()
     param_file = arguments["<parameters_filename>"]
     compute_tar_psf = not arguments["--fast"]
 

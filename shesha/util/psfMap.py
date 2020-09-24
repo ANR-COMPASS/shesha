@@ -141,8 +141,8 @@ class PSF_map:
             self.TSx = TS[0]
             self.TSy = TS[1]
         else:
-            self.TS = TS
-            self.TSy = TS
+            self.TSx = TS
+            self.TSy = TSy
         self._Rts = max(self.TSx.max(), self.TSy.max())
 
     def setWaveLength(self, wl):

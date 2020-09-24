@@ -228,11 +228,11 @@ class GenericSupervisor(object):
                 self.rtc.do_control(ncontrol)
                 self.rtc.do_clipping(ncontrol)
 
-            if apply_control:
-                self.rtc.apply_control(ncontrol)
+                if apply_control:
+                    self.rtc.apply_control(ncontrol)
 
-        if self.cacao:
-            self.rtc.publish()
+            if self.cacao:
+                self.rtc.publish()
 
         if compute_tar_psf:
             for tar_index in tar_trace:
