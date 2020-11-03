@@ -277,7 +277,7 @@ class WfsCompass(SourceCompass):
                                                             density)
         cx = cx.flatten() * self._config.p_wfss[wfs_index]._pyr_scale_pos
         cy = cy.flatten() * self._config.p_wfss[wfs_index]._pyr_scale_pos
-        self.set_pyr_modulation_points(wfs_index, cx, cy, weights)
+        self.set_pyr_modulation_points(wfs_index, cx, cy, weights=weights)
 
     def set_fourier_mask(self, wfs_index : int, new_mask: np.ndarray) -> None:
         """ Set a mask in the Fourier Plane of the given WFS

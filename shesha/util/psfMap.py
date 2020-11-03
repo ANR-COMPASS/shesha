@@ -38,8 +38,6 @@
 import numpy as np
 import astropy.io.fits as fits
 import matplotlib.pyplot as plt
-import os
-import shutil
 
 
 class PSF_map:
@@ -125,8 +123,8 @@ class PSF_map:
             self.NGSx = NGS[0]
             self.NGSy = NGS[1]
         else:
-            self.NGS = NGS
-            self.NGSy = NGS
+            self.NGSx = NGS
+            self.NGSy = NGSy
         self._Rngs = max((self.NGSx.max(), self.NGSy.max()))
 
     def setLGS(self, LGS, LGSy=None):
@@ -134,17 +132,17 @@ class PSF_map:
             self.LGSx = LGS[0]
             self.LGSy = LGS[1]
         else:
-            self.LGS = LGS
-            self.LGSy = LGS
+            self.LGSx = LGS
+            self.LGSy = LGSy
         self._Rlgs = max(self.LGSx.max(), self.LGSy.max())
 
     def setTS(self, TS, TSy=None):
         if (TSy is None):
-            self.TSx = LGS[0]
-            self.TSy = LGS[1]
+            self.TSx = TS[0]
+            self.TSy = TS[1]
         else:
-            self.TS = LGS
-            self.TSy = LGS
+            self.TSx = TS
+            self.TSy = TSy
         self._Rts = max(self.TSx.max(), self.TSy.max())
 
     def setWaveLength(self, wl):

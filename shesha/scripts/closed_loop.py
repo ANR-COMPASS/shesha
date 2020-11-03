@@ -57,9 +57,9 @@ Options:
 from shesha.util.utilities import load_config_from_file
 from docopt import docopt
 
+
 if __name__ == "__main__":
     arguments = docopt(__doc__)
-
     param_file = arguments["<parameters_filename>"]
     compute_tar_psf = not arguments["--fast"]
 

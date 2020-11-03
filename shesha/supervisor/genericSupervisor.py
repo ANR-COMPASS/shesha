@@ -36,7 +36,6 @@
 #  If not, see <https://www.gnu.org/licenses/lgpl-3.0.txt>.
 
 from abc import abstractmethod
-import numpy as np
 import time
 from shesha.sutra_wrap import carmaWrap_context
 from typing import Iterable
@@ -53,7 +52,7 @@ class GenericSupervisor(object):
 
         config : (config) : Parameters structure
 
-        telescope : (TelescopeComponent) : a TelescopeComponent instance
+        tel : (TelescopeComponent) : a TelescopeComponent instance
 
         atmos : (AtmosComponent) : An AtmosComponent instance
 
@@ -78,7 +77,7 @@ class GenericSupervisor(object):
         """
         self.context = None
         self.config = config
-        self.telescope = None
+        self.tel = None
         self.atmos = None
         self.target = None
         self.wfs = None
@@ -229,11 +228,11 @@ class GenericSupervisor(object):
                 self.rtc.do_control(ncontrol)
                 self.rtc.do_clipping(ncontrol)
 
-        if apply_control:
-            self.rtc.apply_control(ncontrol)
+                if apply_control:
+                    self.rtc.apply_control(ncontrol)
 
-        if self.cacao:
-            self.rtc.publish()
+            if self.cacao:
+                self.rtc.publish()
 
         if compute_tar_psf:
             for tar_index in tar_trace:
@@ -290,8 +289,8 @@ class GenericSupervisor(object):
                 self.next(compute_tar_psf=compute_tar_psf, **kwargs)
                 if ((self.iter + 1) % monitoring_freq == 0):
                     if not compute_tar_psf:
-                        self.comp_tar_image(0)
-                        self.comp_strehl(0)
+                        self.target.comp_tar_image(0)
+                        self.target.comp_strehl(0)
                     self._print_strehl(monitoring_freq, time.time() - t1, number_of_iter)
                     t1 = time.time()
 
