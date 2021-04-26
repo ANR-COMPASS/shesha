@@ -13,7 +13,7 @@ Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc)
 
 ## Requirements
 
-Linux computer with CUDA >= 9.0
+Linux computer with CUDA >= 10.1
 
 ## Installation de COMPASS via conda
 
@@ -24,13 +24,15 @@ export PATH=$HOME/miniconda3/bin:$PATH
 conda install -c compass compass -y
 ```
 
-Note: conda main channel is compiled with CUDA 10.0, for previous version please use:
+Note: conda main channel is compiled with CUDA 11.3.0, for previous version please use:
 
 ```bash
-conda install -c compass/label/cuda92 compass
-conda install -c compass/label/cuda91 compass
-conda install -c compass/label/cuda90 compass
-```
+conda install -c compass/label/cuda113 compass -y  # support for compute capability 3.5 – 8.6
+conda install -c compass/label/cuda112 compass -y  # support for compute capability 3.5 – 8.6
+conda install -c compass/label/cuda111 compass -y  # support for compute capability 3.5 – 8.6
+conda install -c compass/label/cuda110 compass -y  # support for compute capability 3.5 – 8.0
+conda install -c compass/label/cuda102 compass -y  # support for compute capability 3.5 – 7.5
+conda install -c compass/label/cuda101 compass -y  # support for compute capability 3.5 – 7.5```
 
 ## Installation de SHESHA package for COMPASS
 
