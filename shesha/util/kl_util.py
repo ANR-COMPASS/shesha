@@ -1,7 +1,7 @@
 ## @package   shesha.util.kl_util
 ## @brief     Functions for DM KL initialization
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   5.0.0
+## @version   5.1.0
 ## @date      2020/05/18
 ## @copyright GNU Lesser General Public License
 #
@@ -45,7 +45,7 @@ from typing import Tuple
 def make_radii(cobs: float, nr: int) -> float:
     """ TODO: docstring
 
-        :parameters:
+        Args:
 
             cobs: (float) : central obstruction
 
@@ -68,7 +68,7 @@ def make_kernels(cobs: float, nr: int, radp: np.ndarray, kl_type: bytes,
 
     TODO:
 
-    :parameters:
+    Args:
 
         cobs : (float): central obstruction
 
@@ -117,7 +117,7 @@ def make_kernels(cobs: float, nr: int, radp: np.ndarray, kl_type: bytes,
 def piston_orth(nr: int) -> np.ndarray:
     """ TODO: docstring
 
-        :parameters:
+        Args:
 
             nr:
 
@@ -139,7 +139,7 @@ def piston_orth(nr: int) -> np.ndarray:
 def make_azimuth(nord: int, npp: int) -> np.ndarray:
     """ TODO: docstring
 
-        :parameters:
+        Args:
 
             nord:
 
@@ -173,7 +173,7 @@ def radii(nr: int, npp: int, cobs: float) -> np.ndarray:
 
     TODO:
 
-        :parameters:
+        Args:
 
             nr:
 
@@ -204,7 +204,7 @@ def polang(r: np.ndarray) -> np.ndarray:
 
     TODO:
 
-        :parameters:
+        Args:
 
             r:
 
@@ -236,7 +236,7 @@ def setpincs(ax: np.ndarray, ay: np.ndarray, px: np.ndarray, py: np.ndarray,
 
     TODO:
 
-        :parameters:
+        Args:
 
             ax:
 
@@ -312,7 +312,7 @@ def pcgeom(nr, npp, cobs, ncp, ncmar):
 
     TODO:
 
-        :parameters:
+        Args:
 
             nr:
 
@@ -389,7 +389,7 @@ def set_pctr(dim: int, nr, npp, nkl: int, cobs: float, nord, ncmar=None, ncp=Non
     the gkl_bas routine.
     TODO:
 
-    :parameters:
+    Args:
 
         dim:
 
@@ -448,7 +448,7 @@ def gkl_fcom(kers: np.ndarray, cobs: float, nf: int):
     a bunch of indices used to recover the modes in cartesian
     coordinates (nord, npo and ordd).
 
-    :parameters:
+    Args:
 
         kerns : (np.ndarray[ndim= ,dtype=np.float32]) :
 

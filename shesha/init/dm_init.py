@@ -1,7 +1,7 @@
 ## @package   shesha.init.dm_init
 ## @brief     Initialization of a Dms object
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   5.0.0
+## @version   5.1.0
 ## @date      2020/05/18
 ## @copyright GNU Lesser General Public License
 #
@@ -62,10 +62,10 @@ except KeyError as err:
 
 def dm_init(context: carmaWrap_context, p_dms: List[conf.Param_dm],
             p_tel: conf.Param_tel, p_geom: conf.Param_geom,
-            p_wfss: List[conf.Param_wfs] = None, keepAllActu: bool = False) -> Dms:
+            p_wfss: List[conf.Param_wfs] = None) -> Dms:
     """Create and initialize a Dms object on the gpu
 
-    :parameters:
+    Args:
         context: (carmaWrap_context): context
         p_dms: (list of Param_dms) : dms settings
         p_tel: (Param_tel) : telescope settings
@@ -94,18 +94,17 @@ def dm_init(context: carmaWrap_context, p_dms: List[conf.Param_dm],
 
         for i in range(len(p_dms)):
             max_extent = _dm_init(context, dms, p_dms[i], xpos_wfs, ypos_wfs, p_geom,
-                                  p_tel.diam, p_tel.cobs, p_tel.pupangle, max_extent,
-                                  keepAllActu=keepAllActu)
+                                  p_tel.diam, p_tel.cobs, p_tel.pupangle, max_extent)
 
     return dms
 
 
 def _dm_init(context: carmaWrap_context, dms: Dms, p_dm: conf.Param_dm, xpos_wfs: list,
              ypos_wfs: list, p_geom: conf.Param_geom, diam: float, cobs: float,
-             pupAngle: float, max_extent: int, keepAllActu: bool = False):
+             pupAngle: float, max_extent: int):
     """ inits a Dms object on the gpu
 
-    :parameters:
+    Args:
         context: (carmaWrap_context): context
         dms: (Dms) : dm object
 
@@ -136,14 +135,17 @@ def _dm_init(context: carmaWrap_context, dms: Dms, p_dm: conf.Param_dm, xpos_wfs
 
     if (p_dm.type == scons.DmType.PZT):
         if p_dm.file_influ_fits == None:
-            p_dm._pitch = patchDiam / float(p_dm.nact - 1)
+            if p_dm._pitch is None:
+                p_dm._pitch = patchDiam / float(p_dm.nact - 1)
+            print(f"DM pitch = {p_dm._pitch:8.5f} pix = {p_dm._pitch*diam/p_geom.pupdiam:8.5f} m",
+                    flush=True)
             # + 2.5 pitch each side
             extent = p_dm._pitch * (p_dm.nact + p_dm.pzt_extent)
             p_dm._n1, p_dm._n2 = dm_util.dim_dm_support(p_geom.cent, extent,
                                                         p_geom.ssize)
 
             # calcul defaut influsize
-            make_pzt_dm(p_dm, p_geom, cobs, pupAngle, keepAllActu=keepAllActu)
+            make_pzt_dm(p_dm, p_geom, cobs, pupAngle)
         else:
             init_custom_dm(p_dm, p_geom, diam)
 
@@ -211,12 +213,11 @@ def _dm_init(context: carmaWrap_context, dms: Dms, p_dm: conf.Param_dm, xpos_wfs
 
 def _dm_init_factorized(context: carmaWrap_context, dms: Dms, p_dm: conf.Param_dm,
                         xpos_wfs: list, ypos_wfs: list, p_geom: conf.Param_geom,
-                        diam: float, cobs: float, pupAngle: float, max_extent: int,
-                        keepAllActu: bool = False):
+                        diam: float, cobs: float, pupAngle: float, max_extent: int):
     """ inits a Dms object on the gpu
     NOTE: This is the
 
-    :parameters:
+    Args:
         context: (carmaWrap_context): context
         dms: (Dms) : dm object
 
@@ -254,7 +255,7 @@ def _dm_init_factorized(context: carmaWrap_context, dms: Dms, p_dm: conf.Param_d
             extent = p_dm._pitch * (p_dm.nact + p_dm.pzt_extent)
 
             # calcul defaut influsize
-            make_pzt_dm(p_dm, p_geom, cobs, pupAngle, keepAllActu=keepAllActu)
+            make_pzt_dm(p_dm, p_geom, cobs, pupAngle)
 
         elif (p_dm.type == scons.DmType.TT):
             if (p_dm.alt == 0) and (max_extent != 0):
@@ -309,7 +310,7 @@ def dm_init_standalone(context: carmaWrap_context, p_dms: list, p_geom: conf.Par
                        diam=1., cobs=0., pupAngle=0., wfs_xpos=[0], wfs_ypos=[0]):
     """Create and initialize a Dms object on the gpu
 
-    :parameters:
+    Args:
         p_dms: (list of Param_dms) : dms settings
 
         p_geom: (Param_geom) : geom settings
@@ -335,11 +336,11 @@ def dm_init_standalone(context: carmaWrap_context, p_dms: list, p_geom: conf.Par
 
 
 def make_pzt_dm(p_dm: conf.Param_dm, p_geom: conf.Param_geom, cobs: float,
-                pupAngle: float, keepAllActu: bool = False):
+                pupAngle: float):
     """Compute the actuators positions and the influence functions for a pzt DM.
     NOTE: if the DM is in altitude, central obstruction is forced to 0
 
-    :parameters:
+    Args:
         p_dm: (Param_dm) : dm parameters
 
         p_geom: (Param_geom) : geometry parameters
@@ -388,10 +389,10 @@ def make_pzt_dm(p_dm: conf.Param_dm, p_geom: conf.Param_geom, cobs: float,
     if p_dm.type_pattern == scons.PatternType.HEXA:
         print("Pattern type : hexa")
         cub = dm_util.createHexaPattern(pitch, p_geom.pupdiam * 1.1)
-        keepAllActu = True
+        p_dm.keep_all_actu = True
     elif p_dm.type_pattern == scons.PatternType.HEXAM4:
         print("Pattern type : hexaM4")
-        keepAllActu = True
+        p_dm.keep_all_actu = True
         cub = dm_util.createDoubleHexaPattern(pitch, p_geom.pupdiam * 1.1, pupAngle)
         if p_dm.margin_out is not None:
             print(f'p_dm.margin_out={p_dm.margin_out} is being '
@@ -408,7 +409,7 @@ def make_pzt_dm(p_dm: conf.Param_dm, p_geom: conf.Param_geom, cobs: float,
     else:
         raise ValueError("This pattern does not exist for pzt dm")
 
-    if keepAllActu:
+    if p_dm.keep_all_actu:
         inbigcirc = np.arange(cub.shape[1])
     else:
         if (p_dm.alt > 0):
@@ -518,7 +519,7 @@ def make_pzt_dm(p_dm: conf.Param_dm, p_geom: conf.Param_geom, cobs: float,
 def init_custom_dm(p_dm: conf.Param_dm, p_geom: conf.Param_geom, diam: float):
     """Read Fits for influence pzt fonction and form
 
-    :parameters:
+    Args:
         p_dm: (Param_dm) : dm settings
 
         p_geom: (Param_geom) : geom settings
@@ -669,7 +670,7 @@ def make_tiptilt_dm(p_dm: conf.Param_dm, patchDiam: int, p_geom: conf.Param_geom
                     diam: float):
     """Compute the influence functions for a tip-tilt DM
 
-    :parameters:
+    Args:
         p_dm: (Param_dm) : dm settings
 
         patchDiam: (int) : patchDiam for dm size
@@ -705,7 +706,7 @@ def make_kl_dm(p_dm: conf.Param_dm, patchDiam: int, p_geom: conf.Param_geom,
                cobs: float) -> None:
     """Compute the influence function for a Karhunen-Loeve DM
 
-    :parameters:
+    Args:
         p_dm: (Param_dm) : dm settings
 
         patchDiam: (int) : patchDiam for dm size
@@ -757,7 +758,7 @@ def make_kl_dm(p_dm: conf.Param_dm, patchDiam: int, p_geom: conf.Param_geom,
 def comp_dmgeom(p_dm: conf.Param_dm, p_geom: conf.Param_geom):
     """Compute the geometry of a DM : positions of actuators and influence functions
 
-    :parameters:
+    Args:
         dm: (Param_dm) : dm settings
 
         geom: (Param_geom) : geom settings
@@ -826,7 +827,7 @@ def correct_dm(context, dms: Dms, p_dms: list, p_controller: conf.Param_controll
                use_DB: bool = False):
     """Correct the geometry of the DMs using the imat (filter unseen actuators)
 
-    :parameters:
+    Args:
         context: (carmaWrap_context): context
         dms: (Dms) : Dms object
         p_dms: (list of Param_dm) : dms settings

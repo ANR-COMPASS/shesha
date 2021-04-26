@@ -1,7 +1,7 @@
 ## @package   shesha.util.iterkolmo
 ## @brief     Stencil and matrices computation for the creation of a turbulent screen
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   5.0.0
+## @version   5.1.0
 ## @date      2020/05/18
 ## @copyright GNU Lesser General Public License
 #
@@ -101,7 +101,7 @@ def stencil_size_array(size):
 
     Compute the size of a stencil, given the screen size
 
-    :parameters:
+    Args:
 
         size: (np.ndarray[ndim=1,dtype=np.int64_t]) :screen size
     """
@@ -367,8 +367,8 @@ def macdo_x56(x, k=10):
     """ Computation of the function
     f(x) = x^(5/6)*K_{5/6}(x)
     using a series for the esimation of K_{5/6}, taken from Rod Conan thesis :
-    K_a(x)=1/2 \sum_{n=0}^\infty \frac{(-1)^n}{n!}
-    \left(\Gamma(-n-a) (x/2)^{2n+a} + \Gamma(-n+a) (x/2)^{2n-a} \right) ,
+    K_a(x)=1/2 \\sum_{n=0}^\\infty \\frac{(-1)^n}{n!}
+    \\left(\\Gamma(-n-a) (x/2)^{2n+a} + \\Gamma(-n+a) (x/2)^{2n-a} \\right) ,
     with a = 5/6.
 
     Setting x22 = (x/2)^2, setting uda = (1/2)^a, and multiplying by x^a,

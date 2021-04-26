@@ -1,7 +1,7 @@
 ## @package   shesha.util.hdf5_util
 ## @brief     Functions for handling the database system
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   5.0.0
+## @version   5.1.0
 ## @date      2020/05/18
 ## @copyright GNU Lesser General Public License
 #
@@ -48,32 +48,24 @@ def updateParamDict(pdict, pClass, prefix):
     Prefix must be set to define the key value of the new dict entries
     """
     if (isinstance(pClass, list)):
-        params = [
-                i for i in dir(pClass[0])
-                if (not i.startswith('_') and not i.startswith('set_') and
-                    not i.startswith('get_'))
-        ]
+        params = pClass[0].__dict__.keys()
         for k in params:
             pdict.update({
-                    prefix + k: [
-                            p.__dict__[prefix + k].encode("utf8") if isinstance(
-                                    p.__dict__[prefix + k], str) else
-                            p.__dict__[prefix + k] for p in pClass
+                    k: [
+                            p.__dict__[k].encode("utf8") if isinstance(
+                                    p.__dict__[k], str) else
+                            p.__dict__[k] for p in pClass
                     ]
             })
 
     else:
-        params = [
-                i for i in dir(pClass)
-                if (not i.startswith('_') and not i.startswith('set_') and
-                    not i.startswith('get_'))
-        ]
+        params = pClass.__dict__.keys()
 
         for k in params:
-            if isinstance(pClass.__dict__[prefix + k], str):
-                pdict.update({prefix + k: pClass.__dict__[prefix + k].encode("utf8")})
+            if isinstance(pClass.__dict__[k], str):
+                pdict.update({k: pClass.__dict__[k].encode("utf8")})
             else:
-                pdict.update({prefix + k: pClass.__dict__[prefix + k]})
+                pdict.update({k: pClass.__dict__[k]})
 
 
 def params_dictionary(config):
@@ -94,7 +86,7 @@ def params_dictionary(config):
     updateParamDict(param_dict, config.p_tel, "_Param_tel__")
     if config.p_atmos is not None:
         updateParamDict(param_dict, config.p_atmos, "_Param_atmos__")
-    if config.p_target is not None:
+    if config.p_targets is not None:
         updateParamDict(param_dict, config.p_targets, "_Param_target__")
         param_dict.update({"ntargets": len(config.p_targets)})
     if config.p_wfss is not None:
@@ -139,7 +131,16 @@ def create_file_attributes(filename, param_dict):
             ]
         else:
             attr = param_dict[i]
-        f.attrs.create(i, attr)
+        if(isinstance(attr, np.ndarray)):
+            save_hdf5(filename, i, attr)
+        elif(isinstance(attr, list)):
+            if(isinstance(attr[0], np.ndarray)):
+                for k,data in enumerate(attr):
+                    save_hdf5(filename, i + str(k), data)
+            else:
+                f.attrs.create(i, attr)
+        else:
+            f.attrs.create(i, attr)
     f.attrs.create("validity", False)
     print(filename, "initialized")
     f.close()
@@ -176,7 +177,7 @@ def initDataBase(savepath, param_dict):
     """ Initialize and create the database for all the saved matrices. This database
     will be placed on the top of the savepath and be named matricesDataBase.h5.
 
-    :parameters:
+    Args:
 
         savepath : (str) : path to the data repertory
 
@@ -197,7 +198,7 @@ def initDataBase(savepath, param_dict):
 def updateDataBase(h5file, savepath, matrix_type):
     """ Update the database adding a new row to the matrix_type database.
 
-    :parameters:
+    Args:
 
         h5file : (str) : path to the new h5 file to add
 
@@ -268,7 +269,7 @@ def checkMatricesDataBase(savepath, config, param_dict):
     to the database during the simulation.
     If the database doesn't exist, this function creates it.
 
-    :parameters:
+    Args:
 
         savepath : (str) : path to the data repertory
 
@@ -301,7 +302,7 @@ def checkTurbuParams(savepath, config, pdict, matricesToLoad):
     Since all the turbulence matrices are computed together, we only check the parameters
     for the A matrix : if we load A, we load B, istx and isty too.
 
-    :parameters:
+    Args:
 
         config : (module) : simulation parameters
 
@@ -358,7 +359,7 @@ def checkControlParams(savepath, config, pdict, matricesToLoad):
     Since all the controller matrices are computed together, we only check the parameters
     for the imat matrix : if we load imat, we load eigenv and U too.
 
-    :parameters:
+    Args:
 
         config : (module) : simulation parameters
 
@@ -422,7 +423,7 @@ def checkDmsParams(savepath, config, pdict, matricesToLoad):
     Since all the dms matrices are computed together, we only check the parameters
     for the pztok matrix : if we load pztok, we load pztnok too.
 
-    :parameters:
+    Args:
 
         config : (module) : simulation parameters
 
@@ -664,7 +665,7 @@ def writeHdf5SingleDataset(filename, data, datasetName="dataset"):
 def readHdf5SingleDataset(filename, datasetName="dataset"):
     """ Read a single dataset from an hdf5 file
 
-    :parameters:
+    Args:
 
         filename: (str) : name of the file to read from
 
@@ -680,7 +681,7 @@ def readHdf5SingleDataset(filename, datasetName="dataset"):
 def load_AB_from_dataBase(database, ind):
     """ Read and return A, B, istx and isty from the database
 
-    :parameters:
+    Args:
 
         database: (dict): dictionary containing paths to matrices to load
 
@@ -700,7 +701,7 @@ def load_AB_from_dataBase(database, ind):
 def save_AB_in_database(k, A, B, istx, isty):
     """ Save A, B, istx and isty in the database
 
-    :parameters:
+    Args:
 
         ind:
 
@@ -728,7 +729,7 @@ def save_AB_in_database(k, A, B, istx, isty):
 def load_dm_geom_from_dataBase(database, ndm):
     """ Read and return the DM geometry
 
-    :parameters:
+    Args:
 
         database: (dict): dictionary containing paths to matrices to load
 
@@ -750,7 +751,7 @@ def load_dm_geom_from_dataBase(database, ndm):
 def save_dm_geom_in_dataBase(ndm, influpos, ninflu, influstart, i1, j1, ok):
     """ Save the DM geometry in the database
 
-    :parameters:
+    Args:
 
         ndm:
 
@@ -782,7 +783,7 @@ def save_dm_geom_in_dataBase(ndm, influpos, ninflu, influstart, i1, j1, ok):
 def load_imat_from_dataBase(database):
     """ Read and return the imat
 
-    :parameters:
+    Args:
 
         database: (dict): dictionary containing paths to matrices to load
     """
@@ -797,7 +798,7 @@ def load_imat_from_dataBase(database):
 def save_imat_in_dataBase(imat):
     """ Save the DM geometry in the database
 
-    :parameters:
+    Args:
 
         imat: (np.ndarray): imat to save
     """

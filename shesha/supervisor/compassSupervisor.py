@@ -1,7 +1,7 @@
 ## @package   shesha.supervisor.compassSupervisor
 ## @brief     Initialization and execution of a COMPASS supervisor
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   5.0.0
+## @version   5.1.0
 ## @date      2020/05/18
 ## @copyright GNU Lesser General Public License
 #
@@ -37,8 +37,9 @@
 
 from shesha.supervisor.genericSupervisor import GenericSupervisor
 from shesha.supervisor.components import AtmosCompass, DmCompass, RtcCompass, TargetCompass, TelescopeCompass, WfsCompass
-from shesha.supervisor.optimizers import ModalBasis, Calibration
+from shesha.supervisor.optimizers import ModalBasis, Calibration, ModalGains
 import numpy as np
+import time
 
 import shesha.constants as scons
 
@@ -48,12 +49,17 @@ from typing import Iterable
 class CompassSupervisor(GenericSupervisor):
     """ This class implements generic supervisor to handle compass simulation
 
-    Attributes:
+    Attributes inherited from GenericSupervisor:
         context : (CarmaContext) : a CarmaContext instance
 
         config : (config) : Parameters structure
 
-        tel : (TelescopeComponent) : a TelescopeComponent instance
+        is_init : (bool) : Flag equals to True if the supervisor has already been initialized
+
+        iter : (int) : Frame counter
+
+    Attributes:
+        telescope : (TelescopeComponent) : a TelescopeComponent instance
 
         atmos : (AtmosComponent) : An AtmosComponent instance
 
@@ -65,15 +71,15 @@ class CompassSupervisor(GenericSupervisor):
 
         rtc : (RtcComponent) : A Rtc component instance
 
-        is_init : (bool) : Flag equals to True if the supervisor has already been initialized
-
-        iter : (int) : Frame counter
-
         cacao : (bool) : CACAO features enabled in the RTC
 
         basis : (ModalBasis) : a ModalBasis instance (optimizer)
 
         calibration : (Calibration) : a Calibration instance (optimizer)
+
+        modalgains : (ModalGains) : a ModalGain instance (optimizer) using CLOSE algorithm
+
+        close_modal_gains : (list of floats) : list of the previous values of the modal gains
     """
 
     def __init__(self, config, *, cacao: bool = False):
@@ -84,13 +90,23 @@ class CompassSupervisor(GenericSupervisor):
 
         Kwargs:
             cacao : (bool) : If True, enables CACAO features in RTC (Default is False)
-                                      /!\ Requires OCTOPUS to be installed
+                                      Requires OCTOPUS to be installed
         """
         self.cacao = cacao
+        self.telescope = None
+        self.atmos = None
+        self.target = None
+        self.wfs = None
+        self.dms = None
+        self.rtc = None
         GenericSupervisor.__init__(self, config)
         self.basis = ModalBasis(self.config, self.dms, self.target)
         self.calibration = Calibration(self.config, self.tel, self.atmos, self.dms,
                                        self.target, self.rtc, self.wfs)
+        self.modalgains = ModalGains(self.config, self.rtc)
+        self.close_modal_gains = []
+
+
 #     ___                  _      __  __     _   _            _
 #    / __|___ _ _  ___ _ _(_)__  |  \/  |___| |_| |_  ___  __| |___
 #   | (_ / -_) ' \/ -_) '_| / _| | |\/| / -_)  _| ' \/ _ \/ _` (_-<
@@ -136,6 +152,27 @@ class CompassSupervisor(GenericSupervisor):
         else:
             raise ValueError("Configuration not loaded or Telescope not initilaized")
 
+    def _init_components(self) -> None:
+        """ Initialize all the components
+        """
+
+        if self.config.p_tel is None or self.config.p_geom is None:
+            raise ValueError("Telescope geometry must be defined (p_geom and p_tel)")
+        self._init_tel()
+
+        if self.config.p_atmos is not None:
+            self._init_atmos()
+        if self.config.p_dms is not None:
+            self._init_dms()
+        if self.config.p_targets is not None:
+            self._init_target()
+        if self.config.p_wfss is not None:
+            self._init_wfs()
+        if self.config.p_controllers is not None or self.config.p_centroiders is not None:
+            self._init_rtc()
+
+        GenericSupervisor._init_components(self)
+
     def next(self, *, move_atmos: bool = True, nControl: int = 0,
              tar_trace: Iterable[int] = None, wfs_trace: Iterable[int] = None,
              do_control: bool = True, apply_control: bool = True,
@@ -160,17 +197,26 @@ class CompassSupervisor(GenericSupervisor):
 
             compute_tar_psf : (bool) : If True (default), computes the PSF at the end of the iteration
         """
-        if (
-                self.config.p_controllers is not None and
-                self.config.p_controllers[nControl].type == scons.ControllerType.GEO):
-            if tar_trace is None and self.target is not None:
-                tar_trace = range(len(self.config.p_targets))
-            if wfs_trace is None and self.wfs is not None:
-                wfs_trace = range(len(self.config.p_wfss))
+        try:
+            iter(nControl)
+        except TypeError:
+            # nControl is not an iterable creating a list
+            nControl = [nControl]
 
-            if move_atmos and self.atmos is not None:
-                self.atmos.move_atmos()
+        #get the index of the first GEO controller (-1 if there is no GEO controller)
+        geo_index = next(( i for i,c in enumerate(self.config.p_controllers)
+            if c.type== scons.ControllerType.GEO ), -1)
 
+        if tar_trace is None and self.target is not None:
+            tar_trace = range(len(self.config.p_targets))
+        if wfs_trace is None and self.wfs is not None:
+            wfs_trace = range(len(self.config.p_wfss))
+
+        if move_atmos and self.atmos is not None:
+            self.atmos.move_atmos()
+        # in case there is at least 1 controller GEO in the controller list : use this one only
+        if ( geo_index > -1):
+            nControl = geo_index
             if tar_trace is not None:
                 for t in tar_trace:
                     if self.atmos.is_enable:
@@ -185,18 +231,124 @@ class CompassSupervisor(GenericSupervisor):
                             self.rtc.apply_control(nControl)
                         if self.cacao:
                             self.rtc.publish()
-            if compute_tar_psf:
-                for tar_index in tar_trace:
-                    self.target.comp_tar_image(tar_index)
-                    self.target.comp_strehl(tar_index)
-
-            self.iter += 1
-
         else:
-            GenericSupervisor.next(self, move_atmos=move_atmos, nControl=nControl,
-                                   tar_trace=tar_trace, wfs_trace=wfs_trace,
-                                   do_control=do_control, apply_control=apply_control,
-                                   compute_tar_psf=compute_tar_psf)
+            if tar_trace is not None: # already checked at line 213?
+                for t in tar_trace:
+                    if self.atmos.is_enable:
+                        self.target.raytrace(t, tel=self.tel, atm=self.atmos,
+                                             dms=self.dms)
+                    else:
+                        self.target.raytrace(t, tel=self.tel, dms=self.dms)
+
+            if wfs_trace is not None: # already checked at line 215?
+                for w in wfs_trace:
+                    if self.atmos.is_enable:
+                        self.wfs.raytrace(w, tel=self.tel, atm=self.atmos)
+                    else:
+                        self.wfs.raytrace(w, tel=self.tel)
+
+                    if not self.config.p_wfss[w].open_loop and self.dms is not None:
+                        self.wfs.raytrace(w, dms=self.dms, reset=False)
+                    self.wfs.compute_wfs_image(w)
+            if do_control and self.rtc is not None:
+                for ncontrol in nControl : # range(len(self.config.p_controllers)):
+                    self.rtc.do_centroids(ncontrol)
+                    self.rtc.do_control(ncontrol)
+                    self.rtc.do_clipping(ncontrol)
+
+            if apply_control:
+                for ncontrol in nControl :
+                    self.rtc.apply_control(ncontrol)
+
+            if self.cacao:
+                self.rtc.publish()
+
+        if compute_tar_psf:
+            for tar_index in tar_trace:
+                self.target.comp_tar_image(tar_index)
+                self.target.comp_strehl(tar_index)
+
+        if self.config.p_controllers[0].close_opti:
+            self.modalgains.update_mgains()
+            self.close_modal_gains.append(self.modalgains.get_modal_gains())
+
+        self.iter += 1
+
+    def _print_strehl(self, monitoring_freq: int, iters_time: float, total_iters: int, *,
+                      tar_index: int = 0):
+        """ Print the Strehl ratio SE and LE from a target on the terminal, the estimated remaining time and framerate
+
+        Args:
+            monitoring_freq : (int) : Number of frames between two prints
+
+            iters_time : (float) : time elapsed between two prints
+
+            total_iters : (int) : Total number of iterations
+
+        Kwargs:
+            tar_index : (int) : Index of the target. Default is 0
+        """
+        framerate = monitoring_freq / iters_time
+        strehl = self.target.get_strehl(tar_index)
+        etr = (total_iters - self.iter) / framerate
+        print("%d \t %.3f \t  %.3f\t     %.1f \t %.1f" % (self.iter + 1, strehl[0],
+                                                          strehl[1], etr, framerate))
+
+    def loop(self, number_of_iter: int, *, monitoring_freq: int = 100,
+             compute_tar_psf: bool = True, **kwargs):
+        """ Perform the AO loop for <number_of_iter> iterations
+
+        Args:
+            number_of_iter: (int) : Number of iteration that will be done
+
+        Kwargs:
+            monitoring_freq: (int) : Monitoring frequency [frames]. Default is 100
+
+            compute_tar_psf : (bool) : If True (default), computes the PSF at each iteration
+                                                 Else, only computes it each <monitoring_freq> frames
+        """
+        if not compute_tar_psf:
+            print("WARNING: Target PSF will be computed (& accumulated) only during monitoring"
+                  )
+
+        print("----------------------------------------------------")
+        print("iter# | S.E. SR | L.E. SR | ETR (s) | Framerate (Hz)")
+        print("----------------------------------------------------")
+        # self.next(**kwargs)
+        t0 = time.time()
+        t1 = time.time()
+        if number_of_iter == -1:  # Infinite loop
+            while (True):
+                self.next(compute_tar_psf=compute_tar_psf, **kwargs)
+                if ((self.iter + 1) % monitoring_freq == 0):
+                    if not compute_tar_psf:
+                        self.target.comp_tar_image(0)
+                        self.target.comp_strehl(0)
+                    self._print_strehl(monitoring_freq, time.time() - t1, number_of_iter)
+                    t1 = time.time()
+
+        for _ in range(number_of_iter):
+            self.next(compute_tar_psf=compute_tar_psf, **kwargs)
+            if ((self.iter + 1) % monitoring_freq == 0):
+                if not compute_tar_psf:
+                    self.target.comp_tar_image(0)
+                    self.target.comp_strehl(0)
+                self._print_strehl(monitoring_freq, time.time() - t1, number_of_iter)
+                t1 = time.time()
+        t1 = time.time()
+        print(" loop execution time:", t1 - t0, "  (", number_of_iter, "iterations), ",
+              (t1 - t0) / number_of_iter, "(mean)  ", number_of_iter / (t1 - t0), "Hz")
+
+    def reset(self):
+        """ Reset the simulation to return to its original state
+        """
+        self.atmos.reset_turbu()
+        self.wfs.reset_noise()
+        for tar_index in range(len(self.config.p_targets)):
+            self.target.reset_strehl(tar_index)
+        self.dms.reset_dm()
+        self.rtc.open_loop()
+        self.rtc.close_loop()
 
 
 #    ___              _  __ _      __  __     _   _            _
@@ -239,7 +391,7 @@ class CompassSupervisor(GenericSupervisor):
 
             projection_matrix : (np.ndarray) : projection matrix on modal basis to compute residual coefficients
 
-        Return:
+        Returns:
             slopes:  (int) : the slopes CB
 
             volts:  (int) : the volts applied to the DM(s) CB
@@ -248,9 +400,9 @@ class CompassSupervisor(GenericSupervisor):
 
             psf_le:  (int) : Long exposure PSF over the <cb_count> iterations (I.e SR is reset at the begining of the CB if ditch_strehl=True)
 
-            sthrel_se_list:  (int) : The SR short exposure evolution during CB recording
+            strehl_se_list:  (int) : The SR short exposure evolution during CB recording
 
-            sthrel_le_list:  (int) : The SR long exposure evolution during CB recording
+            strehl_le_list:  (int) : The SR long exposure evolution during CB recording
 
             g_ncpa_list:  (int) : the gain applied to the NCPA (PYRWFS CASE) if NCPA is set to True
 
@@ -347,25 +499,29 @@ class CompassSupervisor(GenericSupervisor):
         Extract and convert compass supervisor configuration parameters
         into 2 dictionnaries containing relevant AO parameters
 
-        Returns : 2 dictionaries
+        Args:
+            root: (object), COMPASS supervisor object to be parsed
+
+        Returns :
+            2 dictionaries... See F. Vidal :)
         """
-        from shesha.util.exportConfig import export_config
-        return export_config(self)
+        return self.config.export_config()
 
     def get_s_pupil(self):
         """
         Returns the so called S Pupil of COMPASS
 
-        Return np.array
+        Return:
+            s_pupil: (np.array) : S Pupil of COMPASS
         """
         return self.config.p_geom.get_spupil()
-
 
     def get_i_pupil(self):
         """
         Returns the so called I Pupil of COMPASS
 
-        Return np.array
+        Return:
+            i_pupil: (np.array) : I Pupil of COMPASS
         """
         return self.config.p_geom.get_ipupil()
 
@@ -373,6 +529,7 @@ class CompassSupervisor(GenericSupervisor):
         """
         Returns the so called M Pupil of COMPASS
 
-        Return np.array
+        Return:
+            m_pupil: (np.array) : M Pupil of COMPASS
         """
         return self.config.p_geom.get_mpupil()

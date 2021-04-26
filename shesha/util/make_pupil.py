@@ -1,7 +1,7 @@
 ## @package   shesha.util.make_pupil
 ## @brief     Pupil creation functions
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   5.0.0
+## @version   5.1.0
 ## @date      2020/05/18
 ## @copyright GNU Lesser General Public License
 #
@@ -50,7 +50,7 @@ EELT_data = os.environ.get('SHESHA_ROOT') + "/data/apertures/"
 def make_pupil(dim, pupd, tel, xc=-1, yc=-1, real=0, halfSpider=False):
     """Initialize the system pupil
 
-    :parameters:
+    Args:
 
         dim: (long) : = p_geom.pupdiam
 
@@ -122,7 +122,7 @@ def make_pupil_generic(dim, pupd, t_spiders=0.01, spiders_type=SpiderType.SIX, x
     """
         Initialize the system pupil
 
-    :parameters:
+    Args:
 
         dim: (long) : linear size of ???
 
@@ -204,7 +204,7 @@ def make_VLT(dim, pupd, tel):
     """
         Initialize the VLT pupil
 
-    :parameters:
+    Args:
 
         dim: (long) : linear size of ???
 
@@ -246,7 +246,7 @@ def make_EELT(dim, pupd, tel, N_seg=-1):
     """
         Initialize the EELT pupil
 
-    :parameters:
+    Args:
 
         dim: (long) : linear size of ???
 
@@ -368,7 +368,7 @@ def make_EELT(dim, pupd, tel, N_seg=-1):
 def make_phase_ab(dim, pupd, tel, pup=None, xc=-1, yc=-1, real=0, halfSpider=False):
     """Compute the EELT M1 phase aberration
 
-    :parameters:
+    Args:
 
         dim: (long) : linear size of ???
 
@@ -494,14 +494,11 @@ def make_phase_ab(dim, pupd, tel, pup=None, xc=-1, yc=-1, real=0, halfSpider=Fal
 
 
 """
-
- _____ _   _____   ____  ___ ____ ___
-| ____| | |_   _| |  _ \|_ _/ ___/ _ \
-|  _| | |   | |   | |_) || | |  | | | |
-| |___| |___| |   |  _ < | | |__| |_| |
-|_____|_____|_|   |_| \_\___\____\___/
-
-
+ooooooooooo ooooo    ooooooooooo      oooooooooo  ooooo  oooooooo8   ooooooo
+ 888    88   888     88  888  88       888    888  888 o888     88 o888   888o
+ 888ooo8     888         888           888oooo88   888 888         888     888
+ 888    oo   888      o  888           888  88o    888 888o     oo 888o   o888
+o888ooo8888 o888ooooo88 o888o         o888o  88o8 o888o 888oooo88    88ooo88
 """
 
 
@@ -843,16 +840,22 @@ def generateCoordSegments(D, rot, pitch=1.244683637214, nseg=33, inner_rad=4.1,
     segments of M1.
     Result is a tuple of arrays(6, 798).
 
-    Parameters
-    -----------------------------------------
-    D: (float) : pupil diameter in meters (it must be set to 40.0 m for the ELT)
-    rot: (float) : pupil rotation angle in radians
-    pitch: (float): Segment pitch [meters]
-    nseg: (int) : number of segments across the diameter
-    inner_rad : (float): Inner radius [meters]
-    outer_rad : (float): Outer radius [meters]
-    R : (float): Curvature radius of the M1
-    nominalD: (float): diameter for nominal pupil
+    Args:
+        D: (float) : pupil diameter in meters (it must be set to 40.0 m for the ELT)
+
+        rot: (float) : pupil rotation angle in radians
+
+        pitch: (float): Segment pitch [meters]
+
+        nseg: (int) : number of segments across the diameter
+
+        inner_rad : (float): Inner radius [meters]
+
+        outer_rad : (float): Outer radius [meters]
+
+        R : (float): Curvature radius of the M1
+
+        nominalD: (float): diameter for nominal pupil
 
     """
     V3 = np.sqrt(3)
@@ -918,11 +921,12 @@ def gendron():
 
     """
     mymsg = [
-            "\n\n\n\n", "__        ___    ____  _   _ ___ _   _  ___ _",
-            "\ \      / / \  |  _ \| \ | |_ _| \ | |/ ___|",
-            " \ \ /\ / / _ \ | |_) |  \| || ||  \| | |  _ ",
-            "  \ V  V / ___ \|  _ <| |\  || || |\  | |_| |",
-            "   \_/\_/_/   \_\_| \_\_| \_|___|_| \_|\____|", " \n",
+            "\n\n\n\n",
+            # "__        ___    ____  _   _ ___ _   _  ___ _",
+            # "\ \      / / \  |  _ \| \ | |_ _| \ | |/ ___|",
+            # " \ \ /\ / / _ \ | |_) |  \| || ||  \| | |  _ ",
+            # "  \ V  V / ___ \|  _ <| |\  || || |\  | |_| |",
+            # "   \_/\_/_/   \_\_| \_\_| \_|___|_| \_|\____|", " \n",
             "Vous utilisez un telescope de type ELT. Ce telescope",
             "est fait pour etre utilise avec un diametre de 40 m.", " ",
             "Or, vous utilisez un diametre different. Cela signifie",

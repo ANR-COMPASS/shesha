@@ -1,7 +1,7 @@
 ## @package   shesha.util.utilities
 ## @brief     Basic utilities function
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   5.0.0
+## @version   5.1.0
 ## @date      2020/05/18
 ## @copyright GNU Lesser General Public License
 #
@@ -54,7 +54,7 @@ def rebin(a, shape):
 def fft_goodsize(s):
     """find best size for a fft from size s
 
-    :parameters:
+    Args:
 
          s: (int) size
     """
@@ -156,80 +156,6 @@ def makegaussian(size, fwhm, xc=-1, yc=-1, norm=0):
     return tmp
 
 
-def load_config_from_file(filename_path: str):
-    """
-    Load the parameters from the parameters file
-
-    Args:
-        filename_path: (str): path to the parameters file
-
-    Return:
-        config : (config) : a config module
-    """
-    path = os.path.dirname(os.path.abspath(filename_path))
-    filename = os.path.basename(filename_path)
-    name, ext = os.path.splitext(filename)
-
-    if (ext == ".py"):
-        if (path not in sys.path):
-            sys.path.insert(0, path)
-
-        return load_config_from_module(name)
-
-        # exec("import %s as wao_config" % filename)
-        sys.path.remove(path)
-    elif importlib.util.find_spec(filename_path) is not None:
-        return load_config_from_module(filename_path)
-    else:
-        raise ValueError("Config file must be .py or a module")
-
-
-def load_config_from_module(filepath: str):
-    """
-    Load the parameters from the parameters module
-
-    Args:
-        filename_path: (str): path to the parameters file
-
-    Return:
-        config : (config) : a config module
-    """
-    filename = filepath.split('.')[-1]
-    print("loading: %s" % filename)
-
-    config = importlib.import_module(filepath)
-    del sys.modules[config.__name__]  # Forced reload
-    config = importlib.import_module(filepath)
-
-    if hasattr(config, 'par'):
-        config = getattr("config.par.par4bench", filename)
-
-    # Set missing config attributes to None
-    if not hasattr(config, 'p_loop'):
-        config.p_loop = None
-    if not hasattr(config, 'p_geom'):
-        config.p_geom = None
-    if not hasattr(config, 'p_tel'):
-        config.p_tel = None
-    if not hasattr(config, 'p_atmos'):
-        config.p_atmos = None
-    if not hasattr(config, 'p_dms'):
-        config.p_dms = None
-    if not hasattr(config, 'p_targets'):
-        config.p_targets = None
-    if not hasattr(config, 'p_wfss'):
-        config.p_wfss = None
-    if not hasattr(config, 'p_centroiders'):
-        config.p_centroiders = None
-    if not hasattr(config, 'p_controllers'):
-        config.p_controllers = None
-
-    if not hasattr(config, 'simul_name'):
-        config.simul_name = None
-
-    return config
-
-
 def generate_square(radius: float, density: float = 1.):
     """ Generate modulation points positions following a square pattern
 
@@ -238,7 +164,7 @@ def generate_square(radius: float, density: float = 1.):
 
         density : (float), optional) : number of psf per lambda/D. Default is 1
 
-    Return:
+    Returns:
         cx : (np.ndarray) : X-positions of the modulation points
 
         cy : (np.ndarray) : Y-positions of the modulation points
@@ -258,7 +184,7 @@ s
 
         density : (float), optional) : number of psf per lambda/D. Default is 1
 
-    Return:
+    Returns:
         cx : (np.ndarray) : X-positions of the modulation points
 
         cy : (np.ndarray) : Y-positions of the modulation points
@@ -277,7 +203,7 @@ def generate_pseudo_source(radius: float, additional_psf=0, density=1.):
 
         density : (float, optional) :TODO description
 
-    Return:
+    Returns:
         ox : TODO description & explicit naming
 
         oy : TODO description & explicit naming
@@ -352,7 +278,7 @@ def first_non_zero(array: np.ndarray, axis: int, invalid_val: int = -1) -> np.nd
 
         invalid_val : (int, optional) : Default is -1
 
-    Return:
+    Returns:
         non_zeros_pos : (np.ndarray) : Index of the first non-zero element
                                         for each line or column following the axis
     """
@@ -372,7 +298,7 @@ def first_non_zero(array: np.ndarray, axis: int, invalid_val: int = -1) -> np.nd
 
 #     modif dg : allow to rotate a cube of images with one angle per image
 
-#     :parameters:
+#     Args:
 
 #         im: (np.ndarray[ndim=3,dtype=np.float32_t]) : array to rotate
 
@@ -461,7 +387,7 @@ def first_non_zero(array: np.ndarray, axis: int, invalid_val: int = -1) -> np.nd
 #     center of the image.
 #     If zoom is not specified, the default value of 1.0 is taken.
 
-#     :parameters:
+#     Args:
 
 #         im: (np.ndarray[ndim=3,dtype=np.float32_t]) : array to rotate
 

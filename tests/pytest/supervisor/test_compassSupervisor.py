@@ -1,11 +1,48 @@
+## @package   shesha.tests
+## @brief     Tests the supervisor module
+## @author    COMPASS Team <https://github.com/ANR-COMPASS>
+## @version   5.1.0
+## @date      2020/05/18
+## @copyright GNU Lesser General Public License
+#
+#  This file is part of COMPASS <https://anr-compass.github.io/compass/>
+#
+#  Copyright (C) 2011-2019 COMPASS Team <https://github.com/ANR-COMPASS>
+#  All rights reserved.
+#  Distributed under GNU - LGPL
+#
+#  COMPASS is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser
+#  General Public License as published by the Free Software Foundation, either version 3 of the License,
+#  or any later version.
+#
+#  COMPASS: End-to-end AO simulation tool using GPU acceleration
+#  The COMPASS platform was designed to meet the need of high-performance for the simulation of AO systems.
+#
+#  The final product includes a software package for simulating all the critical subcomponents of AO,
+#  particularly in the context of the ELT and a real-time core based on several control approaches,
+#  with performances consistent with its integration into an instrument. Taking advantage of the specific
+#  hardware architecture of the GPU, the COMPASS tool allows to achieve adequate execution speeds to
+#  conduct large simulation campaigns called to the ELT.
+#
+#  The COMPASS platform can be used to carry a wide variety of simulations to both testspecific components
+#  of AO of the E-ELT (such as wavefront analysis device with a pyramid or elongated Laser star), and
+#  various systems configurations such as multi-conjugate AO.
+#
+#  COMPASS is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the
+#  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+#  See the GNU Lesser General Public License for more details.
+#
+#  You should have received a copy of the GNU Lesser General Public License along with COMPASS.
+#  If not, see <https://www.gnu.org/licenses/lgpl-3.0.txt>.
+
 from shesha.supervisor.compassSupervisor import CompassSupervisor
-from shesha.util.utilities import load_config_from_file
+from shesha.config import ParamConfig
 
 import os
 import numpy as np
 import pytest
 
-config = load_config_from_file(os.getenv("COMPASS_ROOT") + "/shesha/tests/pytest/par/test_pyrhr.py")
+config = ParamConfig(os.getenv("COMPASS_ROOT") + "/shesha/tests/pytest/par/test_pyrhr.py")
 config.p_controllers[0].set_type("generic")
 
 sup = CompassSupervisor(config)
@@ -21,6 +58,32 @@ def test_loop():
 def test_reset():
     sup.reset()
     assert(True)
+
+#                 __ _
+#    __ ___ _ _  / _(_)__ _
+#   / _/ _ \ ' \|  _| / _` |
+#   \__\___/_||_|_| |_\__, |
+#                     |___/
+
+def test_get_ipupil():
+    ipupil = sup.config.get_pupil("i")
+    ipupil = sup.config.get_pupil("ipupil")
+    assert(ipupil is sup.config.p_geom._ipupil)
+
+def test_get_mpupil():
+    mpupil = sup.config.get_pupil("m")
+    mpupil = sup.config.get_pupil("mpupil")
+    assert(mpupil is sup.config.p_geom._mpupil)
+
+def test_get_spupil():
+    spupil = sup.config.get_pupil("spupil")
+    spupil = sup.config.get_pupil("s")
+    assert(spupil is sup.config.p_geom._spupil)
+
+def test_export_config():
+    aodict, datadict = sup.config.export_config()
+    assert(True)
+
 #         _                 ___
 #    __ _| |_ _ __  ___ ___/ __|___ _ __  _ __  __ _ ______
 #   / _` |  _| '  \/ _ (_-< (__/ _ \ '  \| '_ \/ _` (_-<_-<
@@ -493,4 +556,59 @@ def test_do_imat_phase():
 
 def test_compute_modal_residuals():
     sup.calibration.compute_modal_residuals(sup.basis.projection_matrix)
+    assert(True)
+
+#
+# ModalGains
+#
+
+def test_set_modal_basis():
+    nactu = sup.config.p_controllers[0].nactu
+    sup.modalgains.set_modal_basis(np.ones((nactu, nactu)))
+    assert(True)
+
+def test_get_modal_basis():
+    sup.modalgains.get_modal_basis()
+    assert(True)
+
+def test_set_cmat_modal():
+    nslope = sup.config.p_controllers[0].nslope
+    nactu = sup.config.p_controllers[0].nactu
+    sup.modalgains.set_cmat_modal(np.ones((nactu, nslope)))
+    assert(True)
+
+def test_get_modal_gains():
+    sup.modalgains.get_modal_gains()
+    assert(True)
+
+def test_set_mask():
+    sup.modalgains.set_mask(np.zeros(sup.config.p_controllers[0].nactu))
+    assert(True)
+
+def test_set_initial_gain():
+    sup.modalgains.set_initial_gain(1)
+    assert(True)
+
+def test_set_config():
+    sup.modalgains.set_config(0.1, 0.05, 0.05, 0.0)
+    assert(True)
+
+def test_adapt_modal_gains():
+    sup.modalgains.adapt_modal_gains(False)
+    assert(True)
+
+def test_reset_mgains():
+    sup.modalgains.reset_mgains()
+    assert(True)
+
+def test_reset_close():
+    sup.modalgains.reset_close()
+    assert(True)
+
+def test_update_modal_meas():
+    sup.modalgains.update_modal_meas()
+    assert(True)
+
+def test_update_mgains():
+    sup.modalgains.update_mgains()
     assert(True)

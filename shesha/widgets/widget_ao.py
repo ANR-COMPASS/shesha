@@ -2,7 +2,7 @@
 ## @package   shesha.widgets.widget_ao
 ## @brief     Widget to simulate a closed loop
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   5.0.0
+## @version   5.1.0
 ## @date      2020/05/18
 ## @copyright GNU Lesser General Public License
 #
@@ -60,7 +60,7 @@ import pyqtgraph as pg
 from pyqtgraph.dockarea import Dock, DockArea
 
 from shesha.util.tools import plsh, plpyr
-from shesha.util.utilities import load_config_from_file
+from shesha.config import ParamConfig
 
 import warnings
 
@@ -257,7 +257,7 @@ class widgetAOWindow(AOClassTemplate, WidgetBase):
             sys.path.insert(0, self.defaultParPath)
 
         if supervisor is None:
-            self.config = load_config_from_file(config_file)
+            self.config = ParamConfig(config_file)
         else:
             self.config = supervisor.get_config()
 
@@ -340,8 +340,8 @@ class widgetAOWindow(AOClassTemplate, WidgetBase):
             self.expertWidget.setSupervisor(self.supervisor)
             self.expertWidget.updatePanels()
 
-        if (hasattr(self.config, "layout")):
-            area_filename = self.defaultAreaPath + "/" + self.config.layout + ".area"
+        if (hasattr(self.config._config, "layout")):
+            area_filename = self.defaultAreaPath + "/" + self.config._config.layout + ".area"
             self.loadArea(filename=area_filename)
 
         self.adjustSize()

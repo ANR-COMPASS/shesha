@@ -1,7 +1,7 @@
 ## @package   shesha.init.atmos_init
 ## @brief     Initialization of a Atmos object
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   5.0.0
+## @version   5.1.0
 ## @date      2020/05/18
 ## @copyright GNU Lesser General Public License
 #
@@ -50,16 +50,26 @@ def atmos_init(context: carmaWrap_context, p_atmos: conf.Param_atmos,
     """
     Initializes an Atmos object
 
-    :parameters:
+    Args:
         context: (carmaWrap_context): GPU device context
+
         p_atmos: (Param_atmos): Atmosphere parameters
+
         p_tel: (Param_tel): Telescope parameters
+
         p_geom: (Param_geom): Geometry parameters
-        ittime: (float): (optional) exposition time [s]
-        p_wfss: (list of Param_wfs): (optional) WFS parameters
-        p_targets: (list of Param_target): (optional) target parameters
-        dataBase: (dict): (optional) dictionary for data base
-        use_DB: (bool): (optional) flag for using the dataBase system
+
+    Kwargs:
+        ittime: (float): exposition time [s]
+
+        p_wfss: (list of Param_wfs): WFS parameters
+
+        p_targets: (list of Param_target): target parameters
+
+        dataBase: (dict): dictionary for data base
+
+        use_DB: (bool): flag for using the dataBase system
+
     :return:
         atm : (Atmos): Atmos object
     """

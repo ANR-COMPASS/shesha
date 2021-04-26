@@ -1,7 +1,7 @@
 ## @package   shesha.supervisor.optimizers
 ## @brief     User layer for optimizing AO supervisor loop
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   5.0.0
+## @version   5.1.0
 ## @date      2020/05/18
 ## @copyright GNU Lesser General Public License
 #
@@ -92,7 +92,7 @@ class ModalBasis(object):
         Args:
             dm_index : (int) : Index of the DM
 
-        Return:
+        Returns:
             influ_sparse : (csr_matrix) : influence function phases
         """
         return basis.compute_dm_basis(self._dms._dms.d_dms[dm_index],
@@ -111,7 +111,7 @@ class ModalBasis(object):
 
             nbpairs : (int) : TODO description
 
-        Return:
+        Returns:
             modal_basis : (np.ndarray) : modes to volts matrix
 
             projection_matrix : (np.ndarray) : volts to modes matrix (None if "KL")
@@ -168,7 +168,7 @@ class ModalBasis(object):
                                               If True, returns delta = IF.T.dot(IF) / N
                                               instead of P
 
-        Return:
+        Returns:
             Btt : (np.ndarray) : Btt modes to volts matrix
 
             projection_matrix : (np.ndarray) : volts to Btt modes matrix
@@ -221,7 +221,7 @@ class ModalBasis(object):
         Kwargs:
             nbpairs : (int) : Default is None. TODO : description
 
-        Return:
+        Returns:
             pairs : (np.ndarray) : TODO description
 
             discard : (list) : TODO description
@@ -328,7 +328,7 @@ class ModalBasis(object):
     def compute_btt_petal(self) -> np.ndarray:
         """ Computes a Btt modal basis with Pistons filtered
 
-        Return:
+        Returns:
             Btt : (np.ndarray) : Btt modes to volts matrix
 
             P : (np.ndarray) : volts to Btt modes matrix
@@ -351,7 +351,7 @@ class ModalBasis(object):
         Args:
             modal_basis : (np.ndarray) : Modal basis matrix
 
-        Return:
+        Returns:
             phase_to_modes : (np.ndarray) : phase to modes matrix
         """
         nbmode = modal_basis.shape[1]
@@ -365,5 +365,6 @@ class ModalBasis(object):
             phase = self._target.get_tar_phase(0, pupil=True)
             # Normalisation pour les unites rms en microns !!!
             norm = np.sqrt(np.sum((phase)**2) / S)
+            if norm == 0: norm = 1
             phase_to_modes[i] = phase / norm
         return phase_to_modes

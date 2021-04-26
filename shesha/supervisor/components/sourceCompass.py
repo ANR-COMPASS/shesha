@@ -1,7 +1,7 @@
 ## @package   shesha.supervisor
 ## @brief     User layer for initialization and execution of a COMPASS simulation
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   5.0.0
+## @version   5.1.0
 ## @date      2020/05/18
 ## @copyright GNU Lesser General Public License
 #
@@ -51,23 +51,23 @@ class SourceCompass(object):
         self.sources = sources
 
     def raytrace(self, index, *, tel=None, atm=None, dms=None, ncpa : bool=True, reset : bool = True) -> None:
-        """ Performs the raytracing operation through provided object phase screens 
+        """ Performs the raytracing operation through provided object phase screens
         to obtain the phase screen of the SutraSource
 
         Args:
-            index : (int) : Index of the source  to raytrace in self.sources list 
+            index : (int) : Index of the source  to raytrace in self.sources list
 
         Kwargs:
             tel : (TelescopeCompass) : TelescopeCompass instance.
                                                  If provided, raytrace through the telescope aberration phase in the pupil
 
             atm : (AtmosCompass) : AtmosCompass instance.
-                                            If provided, raytrace through the layers phase screens 
+                                            If provided, raytrace through the layers phase screens
 
             dms : (dmsCompass) : DmCompass instance.
                                             If provided, raytrace through the DM shapes
 
-            ncpa : (bool) : If True (default), raytrace through NCPA phase screen of the source (default is array of 0, i.e. no impact) 
+            ncpa : (bool) : If True (default), raytrace through NCPA phase screen of the source (default is array of 0, i.e. no impact)
 
             reset: (bool): reset the phase screen before raytracing. Default is True
         """
@@ -82,4 +82,3 @@ class SourceCompass(object):
             self.sources[index].raytrace(dms._dms)
         if ncpa:
             self.sources[index].raytrace()
-

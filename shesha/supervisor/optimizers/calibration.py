@@ -1,7 +1,7 @@
 ## @package   shesha.supervisor.optimizers
 ## @brief     User layer for optimizing AO supervisor loop
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   5.0.0
+## @version   5.1.0
 ## @date      2020/05/18
 ## @copyright GNU Lesser General Public License
 #
@@ -106,7 +106,7 @@ class Calibration(object):
             self._wfs.compute_wfs_image(w, noise=noise)
         return self._rtc.compute_slopes(controller_index)
 
-    def do_imat_modal(self, controller_index : int, ampli : np.ndarray, modal_basis : np.ndarray, 
+    def do_imat_modal(self, controller_index : int, ampli : np.ndarray, modal_basis : np.ndarray,
                       *, noise : bool=False, nmodes_max : int=0, with_turbu : bool=False, push_pull : bool=False) -> np.ndarray:
         """ Computes an interaction matrix from provided modal basis
 
@@ -128,7 +128,7 @@ class Calibration(object):
             push_pull : (bool) : If True, imat is computed as an average of push and pull ampli
                                             on each mode
 
-        Return:
+        Returns:
             modal_imat : (np.ndarray) : Modal interaction matrix
         """
         modal_imat = np.zeros((self._config.p_controllers[controller_index].nslope, modal_basis.shape[1]))
@@ -181,7 +181,7 @@ class Calibration(object):
 
             wfs_index : (int) : WFS index. Default is 0
 
-        Return:
+        Returns:
             phase_imat : (np.ndarray) : Phase interaction matrix
         """
         imat_phase = np.zeros((cube_phase.shape[0], self._config.p_controllers[controller_index].nslope))
@@ -207,11 +207,11 @@ class Calibration(object):
 
         return imat_phase
 
-    def compute_modal_residuals(self, projection_matrix : np.ndarray, 
+    def compute_modal_residuals(self, projection_matrix : np.ndarray,
                                 *, selected_actus : np.ndarray=None) -> np.ndarray:
         """ Computes the modal residual coefficients of the residual phase.
 
-        /!\ It supposed that roket is enabled, and the associated GEO controller is index 1.
+        It supposed that roket is enabled, and the associated GEO controller is index 1.
 
         Uses the projection matrix computed from compute_modes_to_volts_basis (modalBasis module)
 
@@ -221,7 +221,7 @@ class Calibration(object):
         Kwargs:
             selected_actus : (np.ndarray) : TODO : description
 
-        Return:
+        Returns:
             ai : (np.ndarray) : Modal coefficients
         """
         try:
@@ -237,4 +237,3 @@ class Calibration(object):
             v3 = v[-2:]
             ai = projection_matrix.dot(np.concatenate((v2, v3))) * 1000.
         return ai
-

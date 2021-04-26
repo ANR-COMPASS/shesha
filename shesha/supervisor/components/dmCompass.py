@@ -1,7 +1,7 @@
 ## @package   shesha.supervisor
 ## @brief     User layer for initialization and execution of a COMPASS simulation
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   5.0.0
+## @version   5.1.0
 ## @date      2020/05/18
 ## @copyright GNU Lesser General Public License
 #
@@ -100,7 +100,7 @@ class DmCompass(object):
         Args:
             dm_index : (int) : index of the DM
 
-        Return:
+        Returns:
             influ : (np.ndarray) : Influence functions of the DM dm_index
         """
         return self._config.p_dms[dm_index]._influ
@@ -111,13 +111,13 @@ class DmCompass(object):
         Args:
             dm_index : (int) : index of the DM
 
-        Return:
+        Returns:
             coords : (tuple) : (i, j)
         """
-        i1 = self._config.p_dm0._i1  # i1 is in the dmshape support coords
-        j1 = self._config.p_dm0._j1  # j1 is in the dmshape support coords
-        ii1 = i1 + self._config.p_dm0._n1  # in  ipupil coords
-        jj1 = j1 + self._config.p_dm0._n1  # in  ipupil coords
+        i1 = self._config.p_dms[0]._i1  # i1 is in the dmshape support coords
+        j1 = self._config.p_dms[0]._j1  # j1 is in the dmshape support coords
+        ii1 = i1 + self._config.p_dms[0]._n1  # in  ipupil coords
+        jj1 = j1 + self._config.p_dms[0]._n1  # in  ipupil coords
         return ii1, jj1
 
     def reset_dm(self, dm_index: int = -1) -> None:
@@ -139,7 +139,7 @@ class DmCompass(object):
         Args:
             indx : (int) : Index of the DM
 
-        Return:
+        Returns:
             dm_shape : (np.ndarray) : DM phase screen
 
         """
