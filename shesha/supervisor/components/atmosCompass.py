@@ -37,7 +37,6 @@
 from shesha.init.atmos_init import atmos_init
 from shesha.constants import CONST
 import numpy as np
-from typing import List
 
 class AtmosCompass(object):
     """ Atmosphere handler for compass simulation

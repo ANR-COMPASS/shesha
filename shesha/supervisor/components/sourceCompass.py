@@ -34,7 +34,6 @@
 #
 #  You should have received a copy of the GNU Lesser General Public License along with COMPASS.
 #  If not, see <https://www.gnu.org/licenses/lgpl-3.0.txt>.
-import numpy as np
 from typing import List
 
 class SourceCompass(object):
