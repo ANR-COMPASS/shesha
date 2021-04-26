@@ -1,7 +1,7 @@
 ## @package   shesha.init.geom_init
 ## @brief     Initialization of the system geometry and of the Telescope object
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   5.0.0
+## @version   5.1.0
 ## @date      2020/05/18
 ## @copyright GNU Lesser General Public License
 #
@@ -51,14 +51,22 @@ def tel_init(context: carmaWrap_context, p_geom: conf.Param_geom, p_tel: conf.Pa
     """
         Initialize the overall geometry of the AO system, including pupil and WFS
 
-    :parameters:
+    Args:
         context: (carmaWrap_context) : context
+
         p_geom: (Param_geom) : geom settings
+
         p_tel: (Param_tel) : telescope settings
+
         r0: (float) : atmos r0 @ 0.5 microns
+
         ittime: (float) : 1/loop frequency [s]
+
         p_wfss: (list of Param_wfs) : wfs settings
-        dm: (list of Param_dm) : (optional) dms settings [=None]
+
+    Kwargs:
+        dm: (list of Param_dm) : dms settings [=None]
+
     :return:
         telescope: (Telescope): Telescope object
 
@@ -113,7 +121,7 @@ def init_wfs_geom(p_wfs: conf.Param_wfs, r0: float, p_tel: conf.Param_tel,
     """Compute the geometry of WFSs: valid subaps, positions of the subaps,
     flux per subap, etc...
 
-    :parameters:
+    Args:
         p_wfs: (Param_wfs) : wfs settings
 
         r0: (float) : atmos r0 @ 0.5 microns
@@ -168,7 +176,7 @@ def init_wfs_geom(p_wfs: conf.Param_wfs, r0: float, p_tel: conf.Param_tel,
 def init_wfs_size(p_wfs: conf.Param_wfs, r0: float, p_tel: conf.Param_tel, verbose=1):
     """Compute all the parameters usefull for further WFS image computation (array sizes)
 
-    :parameters:
+    Args:
         p_wfs: (Param_wfs) : wfs settings
 
         r0: (float) : atmos r0 @ 0.5 microns
@@ -344,7 +352,7 @@ def compute_nphotons(wfs_type, ittime, optthroughput, diam, cobs=0, nxsub=0, zer
                      gsmag=0, lgsreturnperwatt=0, laserpower=0, verbose=1):
     ''' Determines the number of photons TBC
 
-    :parameters:
+    Args:
         wfs_type: (scons.WFSType) : wfs type: SH or PYRHR.
 
         ittime: (float) : 1/loop frequency [s].
@@ -412,7 +420,7 @@ def init_pyrhr_geom(p_wfs: conf.Param_wfs, r0: float, p_tel: conf.Param_tel,
     """Compute the geometry of PYRHR WFSs: valid subaps, positions of the subaps,
     flux per subap, etc...
 
-    :parameters:
+    Args:
         p_wfs: (Param_wfs) : wfs settings
 
         r0: (float) : atmos r0 @ 0.5 microns
@@ -624,7 +632,7 @@ def init_sh_geom(p_wfs: conf.Param_wfs, r0: float, p_tel: conf.Param_tel,
     """Compute the geometry of SH WFSs: valid subaps, positions of the subaps,
     flux per subap, etc...
 
-    :parameters:
+    Args:
         p_wfs: (Param_wfs) : wfs settings
 
         r0: (float) : atmos r0 @ 0.5 microns
@@ -814,7 +822,7 @@ def geom_init(p_geom: conf.Param_geom, p_tel: conf.Param_tel, padding=2):
     """
         Initialize the system geometry
 
-    :parameters:
+    Args:
         p_geom: (Param_geom) : geometry settings
         p_tel: (Param_tel) : telescope settings
         padding: (optional) : padding factor for PYRHR geometry
@@ -872,7 +880,7 @@ def geom_init_generic(p_geom, pupdiam, t_spiders=0.01, spiders_type="six", xc=0,
                       real=0, cobs=0):
     """Initialize the system geometry
 
-    :parameters:
+    Args:
         pupdiam: (long) : linear size of total pupil
 
         t_spiders: (float) : secondary supports ratio.

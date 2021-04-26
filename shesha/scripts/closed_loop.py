@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 
-## @package   shesha.script.closed_loop
+## @package   shesha.scripts.closed_loop
 ## @brief     script test to simulate a closed loop
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   5.0.0
+## @version   5.1.0
 ## @date      2020/05/18
 ## @copyright GNU Lesser General Public License
 #
@@ -54,16 +54,16 @@ Options:
   -g, --generic      Use generic controller
   -f, --fast         Compute PSF only during monitoring
 """
-from shesha.util.utilities import load_config_from_file
+from shesha.config import ParamConfig
 from docopt import docopt
-
 
 if __name__ == "__main__":
     arguments = docopt(__doc__)
+
     param_file = arguments["<parameters_filename>"]
     compute_tar_psf = not arguments["--fast"]
 
-    config = load_config_from_file(param_file)
+    config = ParamConfig(param_file)
 
     # Get parameters from file
     if arguments["--bench"]:

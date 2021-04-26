@@ -1,7 +1,7 @@
 ## @package   shesha.constants
 ## @brief     Numerical constants for shesha and config enumerations for safe-typing
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   5.0.0
+## @version   5.1.0
 ## @date      2020/05/18
 ## @copyright GNU Lesser General Public License
 #
@@ -36,6 +36,7 @@
 #  If not, see <https://www.gnu.org/licenses/lgpl-3.0.txt>.
 
 import numpy as np
+from aenum import MultiValueEnum
 
 
 class CONST:
@@ -109,6 +110,16 @@ class ControllerType:
     MV = 'mv'
     CURED = 'cured'
     GEO = 'geo'
+
+
+class CommandLawType:
+    """
+        Command law types for generic controller only
+    """
+
+    INTEGRATOR = 'integrator'
+    MODAL_INTEGRATOR = 'modal_integrator'
+    TWO_MATRICES = '2matrices'
 
 
 class CentroiderType:
@@ -194,11 +205,13 @@ class ProfType:
     GAUSS2 = 'Gauss2'
     GAUSS3 = 'Gauss3'
     EXP = 'Exp'
+    MULTIPEAK = 'Multipeak'
     FILES = dict({
             GAUSS1: "allProfileNa_withAltitude_1Gaussian.npy",
             GAUSS2: "allProfileNa_withAltitude_2Gaussian.npy",
             GAUSS3: "allProfileNa_withAltitude_3Gaussian.npy",
-            EXP: "allProfileNa_withAltitude.npy"
+            EXP: "allProfileNa_withAltitude.npy",
+            MULTIPEAK: "multipeakProfileNa_withAltitude.npy"
     })
 
 
@@ -208,3 +221,10 @@ class FieldStopType:
     """
     SQUARE = 'square'
     ROUND = 'round'
+
+class PupilType(MultiValueEnum):
+    """Compass pupil enumeration
+    """
+    SPUPIL = "spupil", "s"
+    MPUPIL = "mpupil", "m"
+    IPUPIL = "ipupil", "i"

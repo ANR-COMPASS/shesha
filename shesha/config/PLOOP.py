@@ -1,7 +1,7 @@
 ## @package   shesha.config.PLOOP
 ## @brief     Param_loop class definition
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   5.0.0
+## @version   5.1.0
 ## @date      2020/05/18
 ## @copyright GNU Lesser General Public License
 #
@@ -59,7 +59,7 @@ class Param_loop:
     def set_devices(self, devices):
         """ Set the list of GPU devices used
 
-        :parameters:
+        Args:
             devices: (np.ndarray[ndim=1, dtype=np.int32_t]) : list of GPU devices
         """
         self.__devices = csu.enforce_array(devices, len(devices), dtype=np.int32,
@@ -77,7 +77,7 @@ class Param_loop:
     def set_niter(self, n):
         """ Set the number of iteration
 
-        :parameters:
+        Args:
             n: (long) : number of iteration
         """
         self.__niter = csu.enforce_int(n)
@@ -94,7 +94,7 @@ class Param_loop:
     def set_ittime(self, t):
         """ Set iteration time
 
-        :parameters:
+        Args:
             t: (float) :iteration time
         """
         self.__ittime = csu.enforce_float(t)

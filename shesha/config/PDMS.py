@@ -1,7 +1,7 @@
 ## @package   shesha.config.PDMS
 ## @brief     Param_dm class definition
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   5.0.0
+## @version   5.1.0
 ## @date      2020/05/18
 ## @copyright GNU Lesser General Public License
 #
@@ -51,6 +51,7 @@ class Param_dm:
         self.__nact = 0  # linear number of actuators across the pupil diameter
         self.__alt = 0.0  # DM conjugation altitude
         self.__thresh = 0.0  # Threshold on response for selection
+        self.__keep_all_actu = False  # if True, don't mask actu by pupil
         self.__coupling = 0.2  # Actuator coupling (< .3)
         self.__gain = 1.0  # Actuator gains
         self.__pupoffset = np.array([0, 0])
@@ -569,6 +570,22 @@ class Param_dm:
         self.__thresh = csu.enforce_float(t)
 
     thresh = property(get_thresh, set_thresh)
+
+    def get_keep_all_actu(self):
+        """ Get the flag for keeping all actuators
+
+        :return: (bool) : keep all actuator flag (boolean)
+        """
+        return self.__keep_all_actu
+
+    def set_keep_all_actu(self, k):
+        """ set the flag for keeping all actuators
+
+        :param k: (f) : keep all actuator flag (boolean)
+        """
+        self.__keep_all_actu = csu.enforce_or_cast_bool(k)
+
+    keep_all_actu = property(get_keep_all_actu, set_keep_all_actu)
 
     def get_coupling(self):
         """ Get the actuators coupling

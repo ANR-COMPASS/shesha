@@ -1,7 +1,7 @@
 ## @package   shesha.init.target_init
 ## @brief     Initialization of a Target object
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   5.0.0
+## @version   5.1.0
 ## @date      2020/05/18
 ## @copyright GNU Lesser General Public License
 #
@@ -49,7 +49,7 @@ def target_init(ctxt: carmaWrap_context, telescope: Telescope, p_targets: list,
                 p_geom: conf.Param_geom, dm=None, brahma=False):
     """Create a cython target from parametres structures
 
-    :parameters:
+    Args:
         ctxt: (carmaWrap_context) :
         telescope: (Telescope): Telescope object
         p_targets: (lis of Param_target) : target_settings

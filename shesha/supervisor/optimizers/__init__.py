@@ -1,7 +1,7 @@
 ## @package   shesha.supervisor.optimizers
 ## @brief     User layer for optimizing AO supervisor loop
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   5.0.0
+## @version   5.1.0
 ## @date      2020/05/18
 ## @copyright GNU Lesser General Public License
 #
@@ -34,7 +34,8 @@
 #
 #  You should have received a copy of the GNU Lesser General Public License along with COMPASS.
 #  If not, see <https://www.gnu.org/licenses/lgpl-3.0.txt>.
-__all__ = ["modalBasis", "calibration"]
+__all__ = ["modalBasis", "calibration", "modalGains"]
 
 from .modalBasis import ModalBasis
 from .calibration import Calibration
+from .modalGains import ModalGains

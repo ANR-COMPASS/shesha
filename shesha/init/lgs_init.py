@@ -1,7 +1,7 @@
 ## @package   shesha.init.lgs_init
 ## @brief     Initialization of a LGS in a Wfs object
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   5.0.0
+## @version   5.1.0
 ## @date      2020/05/18
 ## @copyright GNU Lesser General Public License
 #
@@ -59,7 +59,7 @@ def make_lgs_prof1d(p_wfs: conf.Param_wfs, p_tel: conf.Param_tel, prof: np.ndarr
                     h: np.ndarray, beam: float, center=""):
     """same as prep_lgs_prof but cpu only. original routine from rico
 
-    :parameters:
+    Args:
         p_tel: (Param_tel) : telescope settings
 
         prof: (np.ndarray[dtype=np.float32]) : Na profile intensity, in arbitrary units
@@ -204,7 +204,7 @@ def prep_lgs_prof(p_wfs: conf.Param_wfs, nsensors: int, p_tel: conf.Param_tel,
     effect. It is obtaind by convolution of a gaussian of width "lgsWidth" arcseconds, with the
     line of the sodium profile "prof". The altitude of the profile is the array "h".
 
-        :parameters:
+        Args:
             p_wfs: (Param_wfs) : WFS settings
 
             nsensors: (int) : wfs index

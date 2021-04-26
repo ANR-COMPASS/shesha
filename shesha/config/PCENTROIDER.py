@@ -1,7 +1,7 @@
 ## @package   shesha.config.PCENTROIDER
 ## @brief     Param_centroider class definition
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   5.0.0
+## @version   5.1.0
 ## @date      2020/05/18
 ## @copyright GNU Lesser General Public License
 #

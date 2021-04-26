@@ -1,7 +1,7 @@
 ## @package   shesha.util.dm_util
 ## @brief     Utilities function for DM geometry initialization
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   5.0.0
+## @version   5.1.0
 ## @date      2020/05/18
 ## @copyright GNU Lesser General Public License
 #
@@ -48,7 +48,7 @@ from typing import List, Union
 def dim_dm_support(cent: float, extent: int, ssize: int):
     """ Compute the DM support dimensions
 
-    :parameters:
+    Args:
 
         cent : (float): center of the pupil
 
@@ -70,7 +70,7 @@ def dim_dm_patch(pupdiam: int, diam: float, type: bytes, alt: float,
                  xpos_wfs: List[float], ypos_wfs: List[float]):
     """ compute patchDiam for DM
 
-    :parameters:
+    Args:
 
         pupdiam: (int) : pupil diameter
 
@@ -107,7 +107,7 @@ def createSquarePattern(pitch: float, nxact: int):
     Creates a list of M=nxact^2 actuator positions spread over an square grid.
     Coordinates are centred around (0,0).
 
-    :parameters:
+    Args:
 
         pitch: (float) : distance in pixels between 2 adjacent actus
 
@@ -132,7 +132,7 @@ def createHexaPattern(pitch: float, supportSize: int):
     Coordinates are centred around (0,0).
     The support that limits the grid is a square [-supportSize/2, supportSize/2].
 
-    :parameters:
+    Args:
 
         pitch: (float) : distance in pixels between 2 adjacent actus
 
@@ -166,7 +166,7 @@ def createDoubleHexaPattern(pitch: float, supportSize: int, pupAngleDegree: floa
     Coordinates are centred around (0,0).
     The support of the grid is a square [-supportSize/2,vsupportSize/2].
 
-    :parameters:
+    Args:
 
         pitch: (float) : distance in pixels between 2 adjacent actus
         supportSize: (int) : size in pixels of the support over which the coordinate list
@@ -250,7 +250,7 @@ def select_actuators(xc: np.ndarray, yc: np.ndarray, nxact: int, pitch: int, cob
     """
     Select the "valid" actuators according to the system geometry
 
-    :parameters:
+    Args:
 
         xc: actuators x positions (origine in center of mirror)
 
@@ -303,7 +303,7 @@ def select_actuators(xc: np.ndarray, yc: np.ndarray, nxact: int, pitch: int, cob
 def make_zernike(nzer: int, size: int, diameter: int, xc=-1., yc=-1., ext=0):
     """Compute the zernike modes
 
-    :parameters:
+    Args:
 
         nzer: (int) : number of modes
 
@@ -388,7 +388,7 @@ def zernumero(zn: int):
     Returns the radial degree and the azimuthal number of zernike
     number zn, according to Noll numbering (Noll, JOSA, 1976)
 
-    :parameters:
+    Args:
 
         zn: (int) : zernike number
 

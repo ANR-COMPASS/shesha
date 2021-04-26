@@ -1,7 +1,7 @@
 ## @package   shesha.init.rtc_init
 ## @brief     Initialization of a Rtc object
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   5.0.0
+## @version   5.1.0
 ## @date      2020/05/18
 ## @copyright GNU Lesser General Public License
 #
@@ -58,27 +58,47 @@ def rtc_init(context: carmaWrap_context, tel: Telescope, wfs: Sensors, dms: Dms,
              tar=None, dataBase={}, use_DB=False):
     """Initialize all the SutraRtc objects : centroiders and controllers
 
-    :parameters:
+    Args:
         context: (carmaWrap_context): context
+
         tel: (Telescope) : Telescope object
+
         wfs: (Sensors) : Sensors object
+
         dms: (Dms) : Dms object
+
         atmos: (Atmos) : Atmos object
+
         p_wfss: (list of Param_wfs) : wfs settings
+
         p_tel: (Param_tel) : telescope settings
+
         p_geom: (Param_geom) : geom settings
+
         p_atmos: (Param_atmos) : atmos settings
+
         ittime: (float) : iteration time [s]
-        p_centroiders : (list of Param_centroider): (optional) centroiders settings
-        p_controllers : (list of Param_controller): (optional) controllers settings
-        p_dms: (list of Param_dms) : (optional) dms settings
-        do_refslp : (bool): (optional) do ref slopes flag, default=False
-        brahma: (bool) : (optional) brahma flag
-        cacao: (bool) : (optional) cacao flag
-        tar: (Target) : (optional)
-        dataBase: (dict): (optional) dict containig paths to files to load
+
+    Kwargs:
+        p_centroiders : (list of Param_centroider): centroiders settings
+
+        p_controllers : (list of Param_controller): controllers settings
+
+        p_dms: (list of Param_dms) : dms settings
+
+        do_refslp : (bool): do ref slopes flag, default=False
+
+        brahma: (bool) : brahma flag
+
+        cacao: (bool) : cacao flag
+
+        tar: (Target) : Target object
+
+        dataBase: (dict): dict containig paths to files to load
+
         use_DB: (bool): use dataBase flag
-    :return:
+
+    Returns:
         Rtc : (Rtc) : Rtc object
     """
     # initialisation var
@@ -153,12 +173,37 @@ def rtc_init(context: carmaWrap_context, tel: Telescope, wfs: Sensors, dms: Dms,
     return rtc
 
 
-# MODBY J
 def rtc_standalone(context: carmaWrap_context, nwfs: int, nvalid: list, nactu: int,
                    centroider_type: list, delay: list, offset: list, scale: list,
                    brahma: bool = False, fp16: bool = False, cacao: bool = False) -> Rtc:
-    """
-    TODO docstring
+    """Initialize all the SutraRtc objects : centroiders and controllers
+
+    Args:
+        context: (carmaWrap_context): context
+
+        nwfs: (int): number of wavefront sensors
+
+        nvalid: (int): number of valid measures as input
+
+        nactu: (int): number of actuators as output
+
+        centroider_type: (list): type of centroiders
+
+        delay: (list): delay of each controller
+
+        offset: (list): offset added in the cog computation of each WFS
+
+        scale: (list): scale factor used in the cog computation of each WFS
+
+    Kwargs:
+        brahma: (bool) : brahma flag (default=False)
+
+        fp16: (bool) : fp16 flag (default=False)
+
+        cacao: (bool) : cacao flag (default=False)
+
+    Returns:
+        Rtc : (Rtc) : Rtc object
     """
     print("start rtc_standalone")
     if brahma:
@@ -182,7 +227,7 @@ def rtc_standalone(context: carmaWrap_context, nwfs: int, nvalid: list, nactu: i
                            context.active_device, centroider_type[k])
 
     nslopes = sum([c.nslopes for c in rtc.d_centro])
-    rtc.add_controller(context, sum(nvalid), nslopes, nactu, delay[k],
+    rtc.add_controller(context, sum(nvalid), nslopes, nactu, delay[0],
                        context.active_device, "generic", idx_centro=np.arange(nwfs),
                        ncentro=nwfs)
 
@@ -195,12 +240,17 @@ def init_centroider(context, nwfs: int, p_wfs: conf.Param_wfs,
                     p_atmos: conf.Param_atmos, wfs: Sensors, rtc: Rtc):
     """ Initialize a centroider object in Rtc
 
-    :parameters:
+    Args:
         context: (carmaWrap_context): context
+
         nwfs : (int) : index of wfs
+
         p_wfs : (Param_wfs): wfs settings
+
         p_centroider : (Param_centroider) : centroider settings
+
         wfs: (Sensors): Sensor object
+
         rtc : (Rtc) : Rtc object
     """
     if (p_wfs.type == scons.WFSType.SH):
@@ -269,12 +319,13 @@ def init_centroider(context, nwfs: int, p_wfs: conf.Param_wfs,
 
 
 def comp_weights(p_centroider: conf.Param_centroider, p_wfs: conf.Param_wfs, npix: int):
-    """
-        Compute the weights used by centroider wcog and corr
+    """ Compute the weights used by centroider wcog and corr
 
-    :parameters:
+    Args:
         p_centroider : (Param_centroider) : centroider settings
+
         p_wfs : (Param_wfs) : wfs settings
+
         npix: (int):
     """
     if (p_centroider.type_fct == scons.CentroiderFctType.MODEL):
@@ -329,25 +380,45 @@ def init_controller(context, i: int, p_controller: conf.Param_controller, p_wfss
                     wfs: Sensors, tel: Telescope, atmos: Atmos,
                     p_centroiders: List[conf.Param_centroider], do_refslp=False,
                     dataBase={}, use_DB=False):
-    """
-        Initialize the controller part of rtc
+    """ Initialize the controller part of rtc
 
-    :parameters:
+    Args:
         context: (carmaWrap_context): context
+
         i : (int) : controller index
+
         p_controller: (Param_controller) : controller settings
+
         p_wfss: (list of Param_wfs) : wfs settings
+
         p_geom: (Param_geom) : geom settings
+
         p_dms: (list of Param_dms) : dms settings
+
         p_atmos: (Param_atmos) : atmos settings
+
         ittime: (float) : iteration time [s]
+
         p_tel: (Param_tel) : telescope settings
+
         rtc: (Rtc) : Rtc objet
+
         dms: (Dms) : Dms object
+
         wfs: (Sensors) : Sensors object
+
         tel: (Telescope) : Telescope object
+
         atmos: (Atmos) : Atmos object
+
         p_centroiders: (list of Param_centroider): centroiders settings
+
+    Kwargs:
+        do_refslp: (bool): do the reference slopes at startup,
+
+        dataBase: (dict): database used
+
+        use_DB: (bool): use database or not
     """
     if (p_controller.type != scons.ControllerType.GEO):
         nwfs = p_controller.nwfs
@@ -417,16 +488,22 @@ def init_controller(context, i: int, p_controller: conf.Param_controller, p_wfss
 
 def init_controller_geo(i: int, rtc: Rtc, dms: Dms, p_geom: conf.Param_geom,
                         p_controller: conf.Param_controller, p_dms: list, roket=False):
-    """
-        Initialize geometric controller
+    """ Initialize geometric controller
 
-    :parameters:
+    Args:
         i: (int): controller index
+
         rtc: (Rtc): rtc object
+
         dms: (Dms): Dms object
+
         p_geom: (Param_geom): geometry settings
+
         p_controller: (Param_controller): controller settings
+
         p_dms: (list of Param_dms): dms settings
+
+    Kwargs
         roket: (bool): Flag to initialize ROKET
     """
     indx_pup = np.where(p_geom._spupil.flatten('F'))[0].astype(np.int32)
@@ -453,22 +530,39 @@ def init_controller_ls(i: int, p_controller: conf.Param_controller, p_wfss: list
                        ittime: float, p_tel: conf.Param_tel, rtc: Rtc, dms: Dms,
                        wfs: Sensors, tel: Telescope, atmos: Atmos, dataBase: dict = {},
                        use_DB: bool = False):
-    """
-        Initialize the least square controller
-    :parameters:
+    """ Initialize the least square controller
+
+    Args:
         i : (int) : controller index
+
         p_controller: (Param_controller) : controller settings
+
         p_wfss: (list of Param_wfs) : wfs settings
+
         p_geom: (Param_geom) : geom settings
+
         p_dms: (list of Param_dms) : dms settings
+
         p_atmos: (Param_atmos) : atmos settings
+
         ittime: (float) : iteration time [s]
+
         p_tel: (Param_tel) : telescope settings
+
         rtc: (Rtc) : Rtc objet
+
         dms: (Dms) : Dms object
+
         wfs: (Sensors) : Sensors object
+
         tel: (Telescope) : Telescope object
+
         atmos: (Atmos) : Atmos object
+
+    Kwargs:
+        dataBase: (dict): database used
+
+        use_DB: (bool): use database or not
     """
     M2V = None
     if p_controller.do_kl_imat:
@@ -515,13 +609,17 @@ def init_controller_ls(i: int, p_controller: conf.Param_controller, p_wfss: list
 
 def init_controller_cured(i: int, rtc: Rtc, p_controller: conf.Param_controller,
                           p_dms: list, p_wfss: list):
-    """
-        Initialize the CURED controller
-    :parameters:
+    """ Initialize the CURED controller
+
+    Args:
         i : (int) : controller index
+
         rtc: (Rtc) : Rtc objet
+
         p_controller: (Param_controller) : controller settings
+
         p_dms: (list of Param_dms) : dms settings
+
         p_wfss: (list of Param_wfs) : wfs settings
     """
 
@@ -539,20 +637,29 @@ def init_controller_mv(i: int, p_controller: conf.Param_controller, p_wfss: list
                        p_geom: conf.Param_geom, p_dms: list, p_atmos: conf.Param_atmos,
                        p_tel: conf.Param_tel, rtc: Rtc, dms: Dms, wfs: Sensors,
                        atmos: Atmos):
-    """
-        Initialize the MV controller
+    """ Initialize the MV controller
 
-    :parameters:
+    Args:
         i : (int) : controller index
+
         p_controller: (Param_controller) : controller settings
+
         p_wfss: (list of Param_wfs) : wfs settings
+
         p_geom: (Param_geom) : geom settings
+
         p_dms: (list of Param_dms) : dms settings
+
         p_atmos: (Param_atmos) : atmos settings
+
         p_tel: (Param_tel) : telescope settings
+
         rtc: (Rtc) : Rtc objet
+
         dms: (Dms) : Dms object
+
         wfs: (Sensors) : Sensors object
+
         atmos: (Atmos) : Atmos object
     """
     p_controller._imat = imats.imat_geom(wfs, dms, p_wfss, p_dms, p_controller)
@@ -569,13 +676,15 @@ def init_controller_mv(i: int, p_controller: conf.Param_controller, p_wfss: list
 
 def init_controller_generic(i: int, p_controller: conf.Param_controller, p_dms: list,
                             rtc: Rtc):
-    """
-        Initialize the generic controller
+    """ Initialize the generic controller
 
-    :parameters:
+    Args:
         i: (int): controller index
+
         p_controller: (Param_controller): controller settings
+
         p_dms: (list of Param_dm): dms settings
+
         rtc: (Rtc): Rtc object
     """
     size = sum([p_dms[j]._ntotact for j in range(len(p_dms))])
@@ -583,6 +692,9 @@ def init_controller_generic(i: int, p_controller: conf.Param_controller, p_dms: 
     mgain = np.ones(size, dtype=np.float32) * p_controller.gain
     matE = np.identity(size, dtype=np.float32)
     cmat = np.zeros((size, p_controller.nslope), dtype=np.float32)
+
+    if p_controller.command_law is not None:
+        rtc.d_control[i].set_commandlaw(p_controller.command_law)
 
     rtc.d_control[i].set_decayFactor(decayFactor)
     rtc.d_control[i].set_modal_gains(mgain)

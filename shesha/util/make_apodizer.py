@@ -1,7 +1,7 @@
 ## @package   shesha.util.make_apodizer
 ## @brief     make_apodizer function
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   5.0.0
+## @version   5.1.0
 ## @date      2020/05/18
 ## @copyright GNU Lesser General Public License
 #
@@ -44,7 +44,7 @@ from . import utilities as util
 def make_apodizer(dim, pupd, filename, angle):
     """TODO doc
 
-    :parameters:
+    Args:
 
         (int) : im:
 

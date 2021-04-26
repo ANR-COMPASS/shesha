@@ -1,7 +1,7 @@
 ## @package   shesha.supervisor.canapassSupervisor
 ## @brief     Initialization and execution of a CANAPASS supervisor
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   5.0.0
+## @version   5.1.0
 ## @date      2020/05/18
 ## @copyright GNU Lesser General Public License
 #
@@ -107,48 +107,61 @@ class CanapassSupervisor(CompassSupervisor):
 #     ctrl = self._sim.rtc.d_control[control]
 #     ctrl.set_commandlaw('integrator')
 
+class loopHandler:
+
+    def __init__(self):
+        pass
+
+    def start(self):
+        pass
+
+    def stop(self):
+        pass
+
+    def alive(self):
+        return "alive"
+
 if __name__ == '__main__':
     from docopt import docopt
-    from shesha.util.utilities import load_config_from_file
+    from shesha.config import ParamConfig
     arguments = docopt(__doc__)
-    config = load_config_from_file(arguments["<parameters_filename>"])
+    config = ParamConfig(arguments["<parameters_filename>"])
     supervisor = CanapassSupervisor(config, cacao=True)
     if (arguments["--freq"]):
         print("Warning changed frequency loop to: ", arguments["--freq"])
-        supervisor.config.p_loop.set_ittime(1 / float(arguments["--freq"]))
+        config.p_loop.set_ittime(1 / float(arguments["--freq"]))
     if (arguments["--delay"]):
         print("Warning changed delay loop to: ", arguments["--delay"])
-        supervisor.config.p_controllers[0].set_delay(float(arguments["--delay"]))
+        config.p_controllers[0].set_delay(float(arguments["--delay"]))
+    supervisor = CanapassSupervisor(config, cacao=True)
 
     try:
         from subprocess import Popen, PIPE
         from hraa.server.pyroServer import PyroServer
+        # Init looper
+        wao_loop = loopHandler()
 
+        # Find username
         p = Popen("whoami", shell=True, stdout=PIPE, stderr=PIPE)
         out, err = p.communicate()
         if (err != b''):
             print(err)
-            raise ValueError("ERROR CANNOT RECOGNIZE USER")
+            raise Exception("ERROR CANNOT RECOGNIZE USER")
         else:
             user = out.split(b"\n")[0].decode("utf-8")
             print("User is " + user)
 
-        devices = [
-                supervisor, supervisor.rtc, supervisor.wfs, supervisor.target,
-                supervisor.tel, supervisor.basis, supervisor.calibration,
-                supervisor.atmos, supervisor.dms
-        ]
+        devices = [supervisor, supervisor.rtc, supervisor.wfs,
+        supervisor.target, supervisor.tel,supervisor.basis, supervisor.calibration,
+        supervisor.atmos, supervisor.dms,  supervisor.config, supervisor.modalgains, wao_loop]
 
-        names = [
-                "supervisor", "supervisor_rtc", "supervisor_wfs", "supervisor_target",
-                "supervisor_tel", "supervisor_basis", "supervisor_calibration",
-                "supervisor_atmos", "supervisor_dms"
-        ]
-        nname = []
+        names = ["supervisor", "supervisor_rtc", "supervisor_wfs",
+        "supervisor_target", "supervisor_tel", "supervisor_basis", "supervisor_calibration",
+        "supervisor_atmos", "supervisor_dms", "supervisor_config", "supervisor_modalgains", "wao_loop"]
+        nname = [];
         for name in names:
-            nname.append(name + "_" + user)
-        server = PyroServer(listDevices=devices, listNames=names)
-        #server.add_device(supervisor, "waoconfig_" + user)
+            nname.append(name+"_"+user)
+        server = PyroServer(listDevices=devices, listNames=nname)
         server.start()
     except:
         raise EnvironmentError(

@@ -1,7 +1,7 @@
 ## @package   shesha.config.PCONTROLLER
 ## @brief     Param_controller class definition
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   5.0.0
+## @version   5.1.0
 ## @date      2020/05/18
 ## @copyright GNU Lesser General Public License
 #
@@ -49,6 +49,8 @@ class Param_controller:
     def __init__(self):
         self.__type = None
         """ type of controller"""
+        self.__command_law = None
+        """ type of command law type for generic controller only"""
         self.__nwfs = None
         """ index of wfss in controller"""
         self.__nvalid = 0
@@ -96,6 +98,17 @@ class Param_controller:
         """ Gain applied to modes at cMat inversion """
         self.__nstates = 0
         """ Number of states"""
+        ''' MODAL OPTIMIZATION CLOSE'''
+        self.__close_opti = False
+        """ Flag for modal optimization with close """
+        self.__mgain_init = 1.0
+        """ Initial values of the modal gains """
+        self.__lfdownup = (0.01, 0.01)
+        """ Modal gain correction learning factor """
+        self.__close_learning_factor = 0.3
+        """ Autocorrelation learning factor """
+        self.__close_target = 0.0
+        """ Target value """
 
     def get_type(self):
         """ Get the controller type
@@ -112,6 +125,22 @@ class Param_controller:
         self.__type = scons.check_enum(scons.ControllerType, t)
 
     type = property(get_type, set_type)
+
+    def get_command_law(self):
+        """ Get the command law type for generic controller only
+
+        :return: (string) : Command law type
+        """
+        return self.__command_law
+
+    def set_command_law(self, t):
+        """ Set the command law type for generic controller only
+
+        :param t: (string) : Command law type
+        """
+        self.__command_law = scons.check_enum(scons.CommandLawType, t)
+
+    command_law = property(get_command_law, set_command_law)
 
     def get_do_kl_imat(self):
         """Get type imat, for imat on kl set at 1
@@ -484,3 +513,84 @@ class Param_controller:
         self.__nstates = csu.enforce_int(l)
 
     nstates = property(get_nstates, set_nstates)
+
+    def get_close_opti(self):
+        """ Get flag for CLOSE modal optimization
+
+        :return: (bool) : CLOSE flag
+        """
+        return self.__close_opti
+
+    def set_close_opti(self, close_opti):
+        """ Set the flag for CLOSE modal optimization
+
+        :param close_opti: (bool) : CLOSE flag
+        """
+        self.__close_opti = close_opti
+
+    close_opti = property(get_close_opti, set_close_opti)
+
+    def get_mgain_init(self):
+        """ Get the initial value of modal gains
+
+        :return: (float) : initial value for modal gains
+        """
+        return self.__mgain_init
+
+    def set_mgain_init(self, mgain_init):
+        """ Set the initial value of modal gains
+
+        :param mgain_init: (float) : init valuo of modal gain
+        """
+        self.__mgain_init = csu.enforce_float(mgain_init)
+
+    mgain_init = property(get_mgain_init, set_mgain_init)
+
+    def get_lfdownup(self):
+        """ Get the autocorrelation learning factors
+
+        :return: (tuple) : learning factors for autocorrelation
+        """
+        return self.__lfdownup
+
+    def set_lfdownup(self, qplus, qminus):
+        """ Set the autocorrelation learning factor
+
+        :param qplus: (float) : learning factor when higher than target
+        :param qminus: (float) : learning factor when lower than target
+        """
+        self.__lfdownup = (csu.enforce_float(qplus), csu.enforce_float(qminus))
+
+    lfdownup = property(get_lfdownup, set_lfdownup)
+
+    def get_close_learning_factor(self):
+        """ Get the modal gain learning factor
+
+        :return: (float) : learning factor for modal gain
+        """
+        return self.__close_learning_factor
+
+    def set_close_learning_factor(self, p):
+        """ Set the modal gain optimization learning factor
+
+        :param p: (float) : learning factor
+        """
+        self.__close_learning_factor = csu.enforce_float(p)
+
+    lf = property(get_close_learning_factor, set_close_learning_factor)
+
+    def get_close_target(self):
+        """ Get the autocorrelation target
+
+        :return: (float) : CLOSE autocorrelation target
+        """
+        return self.__close_target
+
+    def set_close_target(self, t):
+        """ Set the autocorrelation target
+
+        :param t: (float) : close target
+        """
+        self.__close_target = csu.enforce_float(t)
+
+    close_target = property(get_close_target, set_close_target)
