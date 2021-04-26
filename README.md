@@ -32,7 +32,8 @@ conda install -c compass/label/cuda112 compass -y  # support for compute capabil
 conda install -c compass/label/cuda111 compass -y  # support for compute capability 3.5 – 8.6
 conda install -c compass/label/cuda110 compass -y  # support for compute capability 3.5 – 8.0
 conda install -c compass/label/cuda102 compass -y  # support for compute capability 3.5 – 7.5
-conda install -c compass/label/cuda101 compass -y  # support for compute capability 3.5 – 7.5```
+conda install -c compass/label/cuda101 compass -y  # support for compute capability 3.5 – 7.5
+```
 
 ## Installation de SHESHA package for COMPASS
 
