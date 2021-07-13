@@ -1,7 +1,7 @@
 ## @package   shesha.util.dm_util
 ## @brief     Utilities function for DM geometry initialization
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   5.1.0
+## @version   5.2.0
 ## @date      2020/05/18
 ## @copyright GNU Lesser General Public License
 #
@@ -329,7 +329,7 @@ def make_zernike(nzer: int, size: int, diameter: int, xc=-1., yc=-1., ext=0):
     if (yc == -1):
         yc = size / 2
 
-    radius = (diameter + 1.) / 2.
+    radius = (diameter) / 2.
     zr = util.dist(size, xc, yc).astype(np.float32).T / radius
     zmask = np.zeros((zr.shape[0], zr.shape[1], nzer), dtype=np.float32)
     zmaskmod = np.zeros((zr.shape[0], zr.shape[1], nzer), dtype=np.float32)
@@ -345,7 +345,7 @@ def make_zernike(nzer: int, size: int, diameter: int, xc=-1., yc=-1., ext=0):
 
     zr = zr * zmask[:, :, 0]
 
-    x = np.tile(np.linspace(1, size, size).astype(np.float32), (size, 1))
+    x = np.tile(np.arange(size).astype(np.float32), (size, 1))
     zteta = np.arctan2(x - yc, x.T - xc).astype(np.float32)
 
     z = np.zeros((size, size, nzer), dtype=np.float32)

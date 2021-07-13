@@ -1,7 +1,7 @@
 ## @package   shesha.constants
 ## @brief     Numerical constants for shesha and config enumerations for safe-typing
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   5.1.0
+## @version   5.2.0
 ## @date      2020/05/18
 ## @copyright GNU Lesser General Public License
 #
@@ -106,6 +106,7 @@ class ControllerType:
     """
 
     GENERIC = 'generic'
+    GENERIC_LINEAR = 'generic_linear'
     LS = 'ls'
     MV = 'mv'
     CURED = 'cured'

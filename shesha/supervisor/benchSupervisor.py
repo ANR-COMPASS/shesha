@@ -1,7 +1,7 @@
 ## @package   shesha.supervisor.benchSupervisor
 ## @brief     Initialization and execution of a Bench supervisor
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   5.1.0
+## @version   5.2.0
 ## @date      2020/05/18
 ## @copyright GNU Lesser General Public License
 #

@@ -59,11 +59,15 @@ class Roket(CompassSupervisor):
         self.nslopes = self.rtc.get_slopes(0).size
         self.com = np.zeros((self.n, self.nactus), dtype=np.float32)
         self.noise_com = np.zeros((self.n, self.nactus), dtype=np.float32)
+        self.noise_buf = np.zeros((self.n, self.nactus), dtype=np.float32)
         self.alias_wfs_com = np.copy(self.noise_com)
+        self.ageom = np.copy(self.noise_com)
         self.alias_meas = np.zeros((self.n, self.nslopes), dtype=np.float32)
         self.wf_com = np.copy(self.noise_com)
         self.tomo_com = np.copy(self.noise_com)
+        self.tomo_buf = np.copy(self.noise_com)
         self.trunc_com = np.copy(self.noise_com)
+        self.trunc_buf = np.copy(self.noise_com)
         self.trunc_meas = np.copy(self.alias_meas)
         self.H_com = np.copy(self.noise_com)
         self.mod_com = np.copy(self.noise_com)
@@ -76,7 +80,7 @@ class Roket(CompassSupervisor):
         #gamma = 1.0
         self.config.p_loop.set_niter(self.n)
         #self.IFpzt = self.get_influ_basis_sparse(1)
-        self.IFpzt = self.rtc._rtc.d_control[1].d_IFsparse.get_csr()
+        self.IFpzt = self.rtc._rtc.d_control[1].d_IFsparse.get_csr().astype(np.float32)
         #self.IFpzt.P = scipy.sparse.csr_matrix.transpose(self.IFpzt.get_csr())
         #self.TT = self.get_tt_influ_basis(1)
         self.TT = np.array(self.rtc._rtc.d_control[1].d_TT)
@@ -88,11 +92,13 @@ class Roket(CompassSupervisor):
         self.cmat = self.rtc.get_command_matrix(0)
         self.D = self.rtc.get_interaction_matrix(0)
         self.RD = np.dot(self.cmat, self.D)
-        self.gRD = np.identity(
-                self.RD.
-                shape[0]) - self.config.p_controllers[0].gain * self.gamma * self.RD
+        # self.gRD = np.identity(
+        #         self.RD.
+        #         shape[0]) - self.config.p_controllers[0].gain * self.gamma * self.RD
+        self.gRD = self.config.p_controllers[0].gain * self.gamma * self.RD
 
         self.Nact = create_nact_geom(self.config.p_dms[0])
+        self.delay = int(self.config.p_controllers[0].delay) + 1
 
     def loop_next(self, **kwargs):
         """
@@ -125,8 +131,8 @@ class Roket(CompassSupervisor):
             self.loop_next(**kwargs)
             if ((i + 1) % monitoring_freq == 0):
                 framerate = (i + 1) / (time.time() - t0)
-                self.target.comp_tar_image(0)
-                self.target.comp_strehl(0)
+                # self.target.comp_tar_image(0)
+                # self.target.comp_strehl(0)
                 strehltmp = self.target.get_strehl(0)
                 etr = (self.n - i) / framerate
                 print("%d \t %.2f \t  %.2f\t %.2f \t %.2f \t    %.1f \t %.1f" %
@@ -139,7 +145,7 @@ class Roket(CompassSupervisor):
 
         #self.tar.comp_image(0)
         SRs = self.target.get_strehl(0)
-        self.SR2 = np.exp(SRs[3])
+        self.SR2 = np.exp(-SRs[3])
         self.SR = SRs[1]
 
     def error_breakdown(self):
@@ -198,10 +204,11 @@ class Roket(CompassSupervisor):
         self.rtc.do_control(0)
         E = self.rtc.get_err(0)
         E_meas = self.rtc.get_slopes(0)
+        self.noise_buf[self.iter_number, :] = (Derr - E)
         # Apply loop filter to get contribution of noise on commands
-        if (self.iter_number + 1 < self.config.p_loop.niter):
-            self.noise_com[self.iter_number + 1, :] = self.gRD.dot(
-                    self.noise_com[self.iter_number, :]) + g * (Derr - E)
+        # if (self.iter_number + 1 < self.config.p_loop.niter):
+        self.noise_com[self.iter_number, :] = self.noise_com[self.iter_number - 1, :] - self.gRD.dot(
+                    self.noise_com[self.iter_number - self.delay, :]) + g * self.noise_buf[self.iter_number - self.delay, :]
         ###########################################################################
         ## Sampling/truncature contribution
         ###########################################################################
@@ -210,10 +217,11 @@ class Roket(CompassSupervisor):
         F = self.rtc.get_err(0)
         F_meas = self.rtc.get_slopes(0)
         self.trunc_meas[self.iter_number, :] = E_meas - F_meas
+        self.trunc_buf[self.iter_number, :] = (E - self.gamma * F)
         # Apply loop filter to get contribution of sampling/truncature on commands
-        if (self.iter_number + 1 < self.config.p_loop.niter):
-            self.trunc_com[self.iter_number + 1, :] = self.gRD.dot(
-                    self.trunc_com[self.iter_number, :]) + g * (E - self.gamma * F)
+        #if (self.iter_number + 1 < self.config.p_loop.niter):
+        self.trunc_com[self.iter_number, :] = self.trunc_com[self.iter_number - 1, :] - self.gRD.dot(
+                    self.trunc_com[self.iter_number - self.delay, :]) + g * self.trunc_buf[self.iter_number - self.delay, :]
         self.centroid_gain += centroid_gain(E, F)
         #Derr = np.ones(Derr)
         #print(Derr)
@@ -245,17 +253,16 @@ class Roket(CompassSupervisor):
         """
         self.rtc.do_centroids_geom(0)
         self.rtc.do_control(0)
-        Ageom = self.rtc.get_err(0)
+        self.ageom[self.iter_number, :] = self.rtc.get_err(0)
         self.alias_meas[self.iter_number, :] = self.rtc.get_slopes(0)
-        if (self.iter_number + 1 < self.config.p_loop.niter):
-            self.alias_wfs_com[self.iter_number + 1, :] = self.gRD.dot(
-                    self.alias_wfs_com[self.iter_number, :]) + self.gamma * g * (
-                            Ageom)  # - (E-F))
+        # if (self.iter_number + 1 < self.config.p_loop.niter):
+        self.alias_wfs_com[self.iter_number, :] = self.alias_wfs_com[self.iter_number - 1, :] - self.gRD.dot(
+                    self.alias_wfs_com[self.iter_number - self.delay, :]) + self.gamma * g * self.ageom[self.iter_number - self.delay, :]# - (E-F))
 
         ###########################################################################
         ## Wavefront + filtered modes reconstruction
         ###########################################################################
-        self.target.raytrace(0, atm=self.atmos)
+        self.target.raytrace(0, atm=self.atmos, ncpa=False)
         #self.rtc.do_control(1, 0, wfs_direction=False)
         self.rtc.do_control(1, sources=self.target.sources, is_wfs_phase=False)
         #self.rtc.do_control(0)
@@ -266,7 +273,7 @@ class Roket(CompassSupervisor):
         ## Fitting
         ###########################################################################
         self.rtc.apply_control(1)
-        self.target.raytrace(0, dms=self.dms, reset=False)
+        self.target.raytrace(0, dms=self.dms, ncpa=False, reset=False, comp_avg_var=False)
         self.target.comp_tar_image(0, compLE=False)
         self.target.comp_strehl(0)
         self.fit[self.iter_number] = self.target.get_strehl(0)[2]
@@ -288,8 +295,8 @@ class Roket(CompassSupervisor):
         ###########################################################################
         C = self.mod_com[self.iter_number, :] - self.mod_com[self.iter_number - 1, :]
 
-        self.bp_com[self.iter_number, :] = self.gRD.dot(
-                self.bp_com[self.iter_number - 1, :]) - C
+        self.bp_com[self.iter_number, :] = self.bp_com[self.iter_number - 1, :] - self.gRD.dot(
+                self.bp_com[self.iter_number - self.delay, :]) - C
 
         ###########################################################################
         ## Tomographic error
@@ -307,10 +314,10 @@ class Roket(CompassSupervisor):
         modes[-self.nfiltered - 2:-2] = 0
         self.wf_com[self.iter_number, :] = self.Btt.dot(modes)
 
-        G = self.mod_com[self.iter_number, :] - self.wf_com[self.iter_number, :]
-        if (self.iter_number + 1 < self.config.p_loop.niter):
-            self.tomo_com[self.iter_number + 1, :] = self.gRD.dot(
-                    self.tomo_com[self.iter_number, :]) - g * self.gamma * self.RD.dot(G)
+        self.tomo_buf[self.iter_number, :] = self.mod_com[self.iter_number, :] - self.wf_com[self.iter_number, :]
+        # if (self.iter_number + 1 < self.config.p_loop.niter):
+        self.tomo_com[self.iter_number, :] = self.tomo_com[self.iter_number - 1, :] - self.gRD.dot(
+                    self.tomo_com[self.iter_number - self.delay, :]) - g * self.gamma * self.RD.dot(self.tomo_buf[self.iter_number - self.delay, :])
 
         # Without anyone noticing...
         #self._sim.tar.d_targets[0].set_phase(tarphase)

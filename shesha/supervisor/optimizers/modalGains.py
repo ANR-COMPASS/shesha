@@ -85,7 +85,8 @@ class ModalGains(object):
         This function computes and updates the modal gains according to the
         CLOSE algorithm.
         """
-        ctrl_modes = self._mask != 0    # where modes are controlled
+        #ctrl_modes = self._mask != 0    # where modes are controlled
+        ctrl_modes = np.where(self._mask)[0]    # where modes are controlled
         if self.cmat_modal is None or self.modal_basis is None :
             raise Exception("Modal basis and cmat modal should be not None")
         # get new measurement
@@ -94,6 +95,7 @@ class ModalGains(object):
         self._modal_meas.append(temp_modal_meas)
         # estimate autocorrelation
         if np.all(self._ac_est_0 == 0):
+
             self._ac_est_0[ctrl_modes] = self._modal_meas[-1][ctrl_modes] ** 2
         else:
             self._ac_est_0[ctrl_modes] = self._ac_est_0[ctrl_modes] * (1 - self._lf) + self._modal_meas[-1][ctrl_modes] ** 2 * self._lf
@@ -172,7 +174,17 @@ class ModalGains(object):
         Returns:
             self.mgains : (np.ndarray) : modal gains
         """
-        return self.mgains
+        return self._rtc.get_modal_gains(0)
+
+    def set_modal_gains(self, mgains):
+        """Sets manually the modal gains
+
+        Args:
+            mgains : (np.ndarray) : the modal gains array
+        """
+        self.mgains = mgains
+        self._rtc.set_modal_gains(0, mgains)
+
 
     def set_mask(self, mask):
         """Set the mode mask
@@ -182,6 +194,7 @@ class ModalGains(object):
         """
         self._mask = mask
         self.mgains[mask == 0] = 0
+        self._rtc.set_modal_gains(0, self.mgains)
 
     def set_initial_gain(self, gain):
         """Set the initial value for modal gains. This function reinitializes the modal gains.

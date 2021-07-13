@@ -1,7 +1,7 @@
 ## @package   shesha.util.psfMap
 ## @brief     class PSF_map
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   5.1.0
+## @version   5.2.0
 ## @date      2020/05/18
 ## @copyright GNU Lesser General Public License
 #
@@ -123,8 +123,8 @@ class PSF_map:
             self.NGSx = NGS[0]
             self.NGSy = NGS[1]
         else:
-            self.NGSx = NGS
-            self.NGSy = NGSy
+            self.NGS = NGS
+            self.NGSy = NGS
         self._Rngs = max((self.NGSx.max(), self.NGSy.max()))
 
     def setLGS(self, LGS, LGSy=None):
@@ -132,8 +132,8 @@ class PSF_map:
             self.LGSx = LGS[0]
             self.LGSy = LGS[1]
         else:
-            self.LGSx = LGS
-            self.LGSy = LGSy
+            self.LGS = LGS
+            self.LGSy = LGS
         self._Rlgs = max(self.LGSx.max(), self.LGSy.max())
 
     def setTS(self, TS, TSy=None):

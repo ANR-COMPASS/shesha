@@ -1,7 +1,7 @@
 ## @package   shesha.supervisor.canapassSupervisor
 ## @brief     Initialization and execution of a CANAPASS supervisor
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   5.1.0
+## @version   5.2.0
 ## @date      2020/05/18
 ## @copyright GNU Lesser General Public License
 #
@@ -46,6 +46,9 @@ Options:
   -h, --help          Show this help message and exit
   -f, --freq freq       change the frequency of the loop
   -d, --delay delay     change the delay of the loop
+  -s, --spiders spiders     change the spiders size
+  -n, --nxsub nxsub     change the number of pixels in subap
+  -p, --pupsep pupsep     change the distance between subap center and frame center
 """
 
 import os, sys
@@ -126,22 +129,28 @@ if __name__ == '__main__':
     from shesha.config import ParamConfig
     arguments = docopt(__doc__)
     config = ParamConfig(arguments["<parameters_filename>"])
-    supervisor = CanapassSupervisor(config, cacao=True)
     if (arguments["--freq"]):
         print("Warning changed frequency loop to: ", arguments["--freq"])
         config.p_loop.set_ittime(1 / float(arguments["--freq"]))
     if (arguments["--delay"]):
         print("Warning changed delay loop to: ", arguments["--delay"])
         config.p_controllers[0].set_delay(float(arguments["--delay"]))
+    if (arguments["--spiders"]):
+        print("Warning changed spiders size to: ", arguments["--spiders"])
+        config.p_tel.set_t_spiders(float(arguments["--spiders"]))
+    if (arguments["--nxsub"]):
+        print("Warning changed number of pixels per subaperture to: ", arguments["--nxsub"])
+        config.p_wfss[0].set_nxsub(int(arguments["--nxsub"]))
+    if (arguments["--pupsep"]):
+        print("Warning changed distance between subaperture center and frame center to: ", arguments["--pupsep"])
+        config.p_wfss[0].set_pyr_pup_sep(int(arguments["--pupsep"]))
     supervisor = CanapassSupervisor(config, cacao=True)
 
     try:
         from subprocess import Popen, PIPE
         from hraa.server.pyroServer import PyroServer
-        # Init looper
-        wao_loop = loopHandler()
-
-        # Find username
+        import Pyro4
+        Pyro4.config.REQUIRE_EXPOSE = False
         p = Popen("whoami", shell=True, stdout=PIPE, stderr=PIPE)
         out, err = p.communicate()
         if (err != b''):
@@ -150,18 +159,21 @@ if __name__ == '__main__':
         else:
             user = out.split(b"\n")[0].decode("utf-8")
             print("User is " + user)
-
-        devices = [supervisor, supervisor.rtc, supervisor.wfs,
-        supervisor.target, supervisor.tel,supervisor.basis, supervisor.calibration,
-        supervisor.atmos, supervisor.dms,  supervisor.config, supervisor.modalgains, wao_loop]
-
-        names = ["supervisor", "supervisor_rtc", "supervisor_wfs",
-        "supervisor_target", "supervisor_tel", "supervisor_basis", "supervisor_calibration",
-        "supervisor_atmos", "supervisor_dms", "supervisor_config", "supervisor_modalgains", "wao_loop"]
-        nname = [];
+        devices = [
+                supervisor, supervisor.rtc, supervisor.wfs, supervisor.target,
+                supervisor.tel, supervisor.basis, supervisor.calibration,
+                supervisor.atmos, supervisor.dms, supervisor.config, supervisor.modalgains
+        ]
+        names = [
+                "supervisor", "supervisor_rtc", "supervisor_wfs", "supervisor_target",
+                "supervisor_tel", "supervisor_basis", "supervisor_calibration",
+                "supervisor_atmos", "supervisor_dms", "supervisor_config", "supervisor_modalgains"
+        ]
+        nname = []
         for name in names:
-            nname.append(name+"_"+user)
-        server = PyroServer(listDevices=devices, listNames=nname)
+            nname.append(name + "_" + user)
+        server = PyroServer(listDevices=devices, listNames=names)
+        #server.add_device(supervisor, "waoconfig_" + user)
         server.start()
     except:
         raise EnvironmentError(

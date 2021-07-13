@@ -1,7 +1,7 @@
 ## @package   shesha.config.PCONTROLLER
 ## @brief     Param_controller class definition
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   5.1.0
+## @version   5.2.0
 ## @date      2020/05/18
 ## @copyright GNU Lesser General Public License
 #
@@ -57,6 +57,8 @@ class Param_controller:
         """ number of valid subaps"""
         self.__nslope = 0
         """ number of slope to handle"""
+        self.__nslope_buffer = 1
+        """ number of previous slopes to use in control"""
         self.__ndm = None
         """ index of dms in controller"""
         self.__nactu = 0
@@ -83,6 +85,8 @@ class Param_controller:
         """ Number of sample of open loop slopes for modal optimization computation"""
         self.__nmodes = None
         """ Number of modes for M2V matrix (modal optimization)"""
+        self.__nmode_buffer = 0
+        """ Number of previous modal vectors to use for control"""
         self.__gmin = 0.
         """ Minimum gain for modal optimization"""
         self.__gmax = 1.
@@ -97,7 +101,9 @@ class Param_controller:
         self.__klgain = None
         """ Gain applied to modes at cMat inversion """
         self.__nstates = 0
-        """ Number of states"""
+        """ Number of states for generic linear controller """
+        self.__nstate_buffer = 0
+        """ Number of state vectors to use for control"""
         ''' MODAL OPTIMIZATION CLOSE'''
         self.__close_opti = False
         """ Flag for modal optimization with close """
@@ -109,6 +115,14 @@ class Param_controller:
         """ Autocorrelation learning factor """
         self.__close_target = 0.0
         """ Target value """
+        self.__n_iir_in = 0
+        """ number of input taps to iir filter """
+        self.__n_iir_out = 0
+        """ number of output taps to iir filter """
+        self.__polc = 0
+        """ flag to do polc in generic linear controller """
+        self.__modal = 0
+        """ flag to use a modal control in generic linenar controller """
 
     def get_type(self):
         """ Get the controller type
@@ -270,6 +284,22 @@ class Param_controller:
 
     nslope = property(get_nslope, set_nslope)
 
+    def get_nslope_buffer(self):
+        """ Get the number of slope buffers
+
+        :return: (int) : number of slopes buffers
+        """
+        return self.__nslope_buffer
+
+    def set_nslope_buffer(self, l):
+        """ Set the number of slope buffers
+
+        :param l: (int) : number of slope buffers
+        """
+        self.__nslope_buffer = csu.enforce_int(l)
+
+    nslope_buffer = property(get_nslope_buffer, set_nslope_buffer)
+
     def get_nvalid(self):
         """ Get the number of valid subaps
 
@@ -414,6 +444,22 @@ class Param_controller:
 
     nmodes = property(get_nmodes, set_nmodes)
 
+    def get_nmode_buffer(self):
+        """ Get the number of mode buffers
+
+        :return: (int) : number of mode buffers
+        """
+        return self.__nmode_buffer
+
+    def set_nmode_buffer(self, n):
+        """ Set the number of mode buffers
+
+        :param n: (int) : number of modes buffers
+        """
+        self.__nmode_buffer = csu.enforce_int(n)
+
+    nmode_buffer = property(get_nmode_buffer, set_nmode_buffer)
+
     def get_gmin(self):
         """ Get the minimum gain for modal optimization
 
@@ -514,6 +560,22 @@ class Param_controller:
 
     nstates = property(get_nstates, set_nstates)
 
+    def get_nstate_buffer(self):
+        """ Get the number of state buffer
+
+        :return: (int) : number of state buffer
+        """
+        return self.__nstate_buffer
+
+    def set_nstate_buffer(self, l):
+        """ Set the number of state buffer
+
+        :param l: (int) : number of state buffer
+        """
+        self.__nstate_buffer = csu.enforce_int(l)
+
+    nstate_buffer = property(get_nstate_buffer, set_nstate_buffer)
+
     def get_close_opti(self):
         """ Get flag for CLOSE modal optimization
 
@@ -594,3 +656,67 @@ class Param_controller:
         self.__close_target = csu.enforce_float(t)
 
     close_target = property(get_close_target, set_close_target)
+
+    def get_n_iir_in(self):
+        """ Get the number of inputs used in iir filter
+
+        :return: (int) : number of iir inputs
+        """
+        return self.__n_iir_in
+
+    def set_n_iir_in(self, n):
+        """ Set the number of inputs used in iir filter
+
+        :param : (int) : number of iir inputs
+        """
+        self.__n_iir_in = csu.enforce_int(n)
+
+    n_iir_in = property(get_n_iir_in, set_n_iir_in)
+
+    def get_n_iir_out(self):
+        """ Get the number of outputs used in iir filter
+
+        :return: (int) : number of iir outputs
+        """
+        return self.__n_iir_out
+
+    def set_n_iir_out(self, n):
+        """ Set the number of outputs used in iir filter
+
+        :param : (int) : number of iir outputs
+        """
+        self.__n_iir_out = csu.enforce_int(n)
+
+    n_iir_out = property(get_n_iir_out, set_n_iir_out)
+
+    def get_polc(self):
+        """ Get POLC flag (True means using POL slopes)
+
+        :return: (bool) : POLC flag
+        """
+        return self.__polc
+
+    def set_polc(self, p):
+        """ Set POLC flag (True means using POL slopes)
+
+        :param : (bool) : POLC flag
+        """
+        self.__polc = csu.enforce_or_cast_bool(p)
+
+    polc = property(get_polc, set_polc)
+
+    def get_modal(self):
+        """ Get flag to use modal control \n(allows MVM from modes to actu)
+
+        :return: (bool) : modal flag
+        """
+        return self.__modal
+
+    def set_modal(self, m):
+        """ Set flag to use modal control \n(allows MVM from modes to actu)
+
+        :param : (bool) : modal flag
+        """
+        self.__modal = csu.enforce_or_cast_bool(m)
+
+    modal = property(get_modal, set_modal)

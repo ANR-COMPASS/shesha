@@ -1,7 +1,7 @@
 ## @package   shesha.tests
 ## @brief     Tests the supervisor module
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   5.1.0
+## @version   5.2.0
 ## @date      2020/05/18
 ## @copyright GNU Lesser General Public License
 #
@@ -41,6 +41,7 @@ from shesha.config import ParamConfig
 import os
 import numpy as np
 import pytest
+import shesha.config as conf
 
 config = ParamConfig(os.getenv("COMPASS_ROOT") + "/shesha/tests/pytest/par/test_pyrhr.py")
 config.p_controllers[0].set_type("generic")
@@ -514,6 +515,10 @@ def test_compute_influ_basis():
     sup.basis.compute_influ_basis(0)
     assert(True)
 
+def test_compute_influ_delta():
+    sup.basis.compute_influ_delta(0)
+    assert(True)
+
 def test_compute_modes_to_volts_basis():
     _ = sup.basis.compute_modes_to_volts_basis("KL2V")
     _ = sup.basis.compute_modes_to_volts_basis("Btt")
@@ -611,4 +616,113 @@ def test_update_modal_meas():
 
 def test_update_mgains():
     sup.modalgains.update_mgains()
+    assert(True)
+
+# All of the "generic_linear" tests are run on the p_controller[1] controller:
+@pytest.mark.skipif(sup.config.p_controllers[1].type != "generic_linear",
+                        reason="Generic Linear only")
+def test_get_x_buffer():
+    sup.rtc._get_x_buffer(1)
+    assert(True)
+
+@pytest.mark.skipif(sup.config.p_controllers[1].type != "generic_linear",
+                        reason="Generic Linear only")
+def test_get_s_buffer():
+    sup.rtc._get_s_buffer(1)
+    assert(True)
+
+@pytest.mark.skipif(sup.config.p_controllers[1].type != "generic_linear",
+                        reason="Generic Linear only")
+def test_get_u_in_buffer():
+    sup.rtc._get_u_in_buffer(1)
+    assert(True)
+
+@pytest.mark.skipif(sup.config.p_controllers[1].type != "generic_linear",
+                        reason="Generic Linear only")
+def test_get_u_out_buffer():
+    sup.rtc._get_u_out_buffer(1)
+    assert(True)
+
+@pytest.mark.skipif(sup.config.p_controllers[1].type != "generic_linear",
+                        reason="Generic Linear only")
+def test_get_A_matrix():
+    sup.rtc._get_A_matrix(1,0)
+    assert(True)
+
+@pytest.mark.skipif(sup.config.p_controllers[1].type != "generic_linear",
+                        reason="Generic Linear only")
+def test_get_L_matrix():
+    sup.rtc._get_L_matrix(1,0)
+    assert(True)
+
+@pytest.mark.skipif(sup.config.p_controllers[1].type != "generic_linear",
+                        reason="Generic Linear only")
+def test_get_K_matrix():
+    sup.rtc._get_K_matrix(1)
+    assert(True)
+
+@pytest.mark.skipif(sup.config.p_controllers[1].type != "generic_linear",
+                        reason="Generic Linear only")
+def test_get_D_matrix():
+    sup.rtc._get_D_matrix(1)
+    assert(True)
+
+@pytest.mark.skipif(sup.config.p_controllers[1].type != "generic_linear",
+                        reason="Generic Linear only")
+def test_get_F_matrix():
+    sup.rtc._get_F_matrix(1)
+    assert(True)
+
+@pytest.mark.skipif(sup.config.p_controllers[1].type != "generic_linear",
+                        reason="Generic Linear only")
+def test_get_iir_a_vector():
+    sup.rtc._get_iir_a_vector(1,0)
+    assert(True)
+
+@pytest.mark.skipif(sup.config.p_controllers[1].type != "generic_linear",
+                        reason="Generic Linear only")
+def test_get_iir_b_vector():
+    sup.rtc._get_iir_b_vector(1,0)
+    assert(True)
+
+@pytest.mark.skipif(sup.config.p_controllers[1].type != "generic_linear",
+                        reason="Generic Linear only")
+def test_set_A_matrix():
+    sup.rtc.set_A_matrix(1,0,sup.rtc._get_A_matrix(1,0))
+    assert(True)
+
+@pytest.mark.skipif(sup.config.p_controllers[1].type != "generic_linear",
+                        reason="Generic Linear only")
+def test_set_L_matrix():
+    sup.rtc.set_L_matrix(1,0,sup.rtc._get_L_matrix(1,0))
+    assert(True)
+
+@pytest.mark.skipif(sup.config.p_controllers[1].type != "generic_linear",
+                        reason="Generic Linear only")
+def test_set_K_matrix():
+    sup.rtc.set_K_matrix(1,sup.rtc._get_K_matrix(1))
+    assert(True)
+
+@pytest.mark.skipif(sup.config.p_controllers[1].type != "generic_linear",
+                        reason="Generic Linear only")
+def test_set_D_matrix():
+    sup.rtc.set_D_matrix(1,sup.rtc._get_D_matrix(1))
+    assert(True)
+
+@pytest.mark.skipif(sup.config.p_controllers[1].type != "generic_linear",
+                        reason="Generic Linear only")
+def test_set_F_matrix():
+    sup.rtc.set_F_matrix(1,sup.rtc._get_F_matrix(1))
+    assert(True)
+
+@pytest.mark.skipif(sup.config.p_controllers[1].type != "generic_linear",
+                        reason="Generic Linear only")
+def test_set_iir_a_vector():
+    sup.rtc.set_iir_a_vector(1,0,sup.rtc._get_iir_a_vector(1,0))
+    assert(True)
+
+@pytest.mark.skipif(sup.config.p_controllers[1].type != "generic_linear",
+                        reason="Generic Linear only")
+def test_set_iir_b_vector():
+    sup.rtc.set_iir_b_vector(1,0,sup.rtc._get_iir_b_vector(1,0))
     assert(True)

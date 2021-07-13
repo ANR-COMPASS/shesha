@@ -1,7 +1,7 @@
 ## @package   shesha.util.iterkolmo
 ## @brief     Stencil and matrices computation for the creation of a turbulent screen
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   5.1.0
+## @version   5.2.0
 ## @date      2020/05/18
 ## @copyright GNU Lesser General Public License
 #

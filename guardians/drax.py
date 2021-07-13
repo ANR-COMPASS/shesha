@@ -365,82 +365,6 @@ def get_breakdown(filename):
                                     ((2 * np.pi / Lambda)**2)) * 1e3)
     }
 
-
-# def plotContributions(filename):
-#     f = h5py.File(filename, 'r')
-#     P = f["P"][:]
-#     noise = f["noise"][:]
-#     trunc = f["non linearity"][:]
-#     bp = f["bandwidth"][:]
-#     tomo = f["tomography"][:]
-#     aliasing = f["aliasing"][:]
-#     filt = f["filtered modes"][:]
-#     nmodes = P.shape[0]
-#     swap = np.arange(nmodes) - 2
-#     swap[0:2] = [nmodes - 2, nmodes - 1]
-
-#     plt.figure()
-#     plt.plot(np.var(noise, axis=1), color="black")
-#     plt.plot(np.var(trunc, axis=1), color="green")
-#     plt.plot(np.var(bp, axis=1), color="red")
-#     plt.plot(np.var(tomo, axis=1), color="blue")
-#     plt.plot(np.var(aliasing, axis=1), color="cyan")
-#     plt.plot(np.var(filt, axis=1), color="magenta")
-#     plt.xlabel("Actuators")
-#     plt.ylabel("Variance [microns^2]")
-#     plt.title("Variance of estimated errors on actuators")
-#     plt.legend([
-#             "noise", "WFS non-linearity", "Bandwidth", "Anisoplanatism", "Aliasing",
-#             "Filtered modes"
-#     ])
-
-#     plt.figure()
-#     N = np.var(P.dot(noise), axis=1)
-#     S = np.var(P.dot(trunc), axis=1)
-#     B = np.var(P.dot(bp), axis=1)
-#     T = np.var(P.dot(tomo), axis=1)
-#     A = np.var(P.dot(aliasing), axis=1)
-#     F = np.var(P.dot(filt), axis=1)
-#     plt.plot(N[swap], color="black")
-#     plt.plot(S[swap], color="green")
-#     plt.plot(B[swap], color="red")
-#     plt.plot(T[swap], color="blue")
-#     plt.plot(A[swap], color="cyan")
-#     plt.plot(F[swap], color="magenta")
-#     plt.xlabel("Modes")
-#     plt.ylabel("Variance [microns^2]")
-#     plt.yscale("log")
-#     plt.title("Variance of estimated errors on modal basis B")
-
-#     if (list(f.attrs.keys()).count("_Param_target__Lambda")):
-#         Lambda = f.attrs["_Param_target__Lambda"][0]
-#     else:
-#         Lambda = 1.65
-
-#     print("noise :",
-#           np.sqrt(np.sum(N)) * 1e3, " nm, ", "SR : ",
-#           np.exp(-np.sum(N) * (2 * np.pi / Lambda)**2))
-#     print("trunc :",
-#           np.sqrt(np.sum(S)) * 1e3, " nm, ", "SR : ",
-#           np.exp(-np.sum(S) * (2 * np.pi / Lambda)**2))
-#     print("bp :",
-#           np.sqrt(np.sum(B)) * 1e3, " nm, ", "SR : ",
-#           np.exp(-np.sum(B) * (2 * np.pi / Lambda)**2))
-#     print("tomo :",
-#           np.sqrt(np.sum(T)) * 1e3, " nm, ", "SR : ",
-#           np.exp(-np.sum(T) * (2 * np.pi / Lambda)**2))
-#     print("aliasing :",
-#           np.sqrt(np.sum(A)) * 1e3, " nm, ", "SR : ",
-#           np.exp(-np.sum(A) * (2 * np.pi / Lambda)**2))
-#     print("filt :",
-#           np.sqrt(np.sum(F)) * 1e3, " nm, ", "SR : ",
-#           np.exp(-np.sum(F) * (2 * np.pi / Lambda)**2))
-#     print("fitting :",
-#           np.sqrt(f["fitting"].value / ((2 * np.pi / Lambda)**2)) * 1e3, " nm, ",
-#           "SR : ", np.exp(-f["fitting"].value))
-#     #plt.legend(["noise","WFS non-linearity","Bandwidth","Anisoplanatism","Aliasing","Filtered modes"])
-
-
 def plotCovCor(filename, maparico=None):
     """
     Displays the covariance and correlation matrix between the contributors
@@ -760,7 +684,18 @@ def get_slopessMap(covmat, filename=None, nssp=None, validint=None):
 
     return Map
 
+def get_psf(filename):
+    """
+    Return the PSF computed from COMPASS saved in the roket file given
 
+    Args:
+        filename : (str): path to the ROKET file
+    """
+    f = h5py.File(filename, 'r')
+    psf = f["psf"][:]
+    f.close()
+    return psf
+    
 def ensquare_PSF(filename, psf, N, display=False, cmap="jet"):
     """
     Return the ensquared PSF

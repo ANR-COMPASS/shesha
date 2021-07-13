@@ -1,7 +1,7 @@
 ## @package   shesha.tests
 ## @brief     Tests the RTC module
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   5.1.0
+## @version   5.2.0
 ## @date      2020/05/18
 ## @copyright GNU Lesser General Public License
 #
@@ -57,9 +57,9 @@ rtc = Rtc()
 rtc.add_centroider(sup.context, sup.config.p_wfss[0]._nvalid,
                    sup.config.p_wfss[0].npix / 2 - 0.5, sup.config.p_wfss[0].pixsize, False, 0,
                    "cog")
-rtc.add_controller(sup.context, sup.config.p_wfss[0]._nvalid,
+rtc.add_controller(sup.context, "generic", 0, sup.config.p_controllers[0].delay,
                    sup.config.p_wfss[0]._nvalid * 2, sup.config.p_controllers[0].nactu,
-                   sup.config.p_controllers[0].delay, 0, "generic", idx_centro=np.zeros(1),
+                   idx_centro=np.zeros(1),
                    ncentro=1)
 centro = rtc.d_centro[0]
 control = rtc.d_control[0]

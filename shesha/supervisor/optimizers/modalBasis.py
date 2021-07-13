@@ -1,7 +1,7 @@
 ## @package   shesha.supervisor.optimizers
 ## @brief     User layer for optimizing AO supervisor loop
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   5.1.0
+## @version   5.2.0
 ## @date      2020/05/18
 ## @copyright GNU Lesser General Public License
 #
@@ -98,6 +98,23 @@ class ModalBasis(object):
         return basis.compute_dm_basis(self._dms._dms.d_dms[dm_index],
                                               self._config.p_dms[dm_index],
                                               self._config.p_geom)
+
+    def compute_influ_delta(self, dm_index: int) -> np.ndarray:
+        """ Computes and return IF delta for the specified DM
+
+        Args:
+            dm_index : (int) : Index of the DM
+
+        Return:
+            influ_delta : (np.ndarray) : influence function deltas
+        """
+        ifsparse =  basis.compute_dm_basis(self._dms._dms.d_dms[dm_index],
+                                              self._config.p_dms[dm_index],
+                                              self._config.p_geom)
+        mpup = self._config.p_geom.get_mpupil()
+        npix_in_pup = np.sum(mpup)
+        ifdelta = ifsparse.dot(ifsparse.T) / np.sum(mpup)
+        return ifdelta.toarray()
 
     def compute_modes_to_volts_basis(self, modal_basis_type: str, *, merged: bool = False,
                                      nbpairs: int = None, return_delta: bool = False) -> np.ndarray:

@@ -1,7 +1,7 @@
 ## @package   shesha.init.rtc_init
 ## @brief     Initialization of a Rtc object
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   5.1.0
+## @version   5.2.0
 ## @date      2020/05/18
 ## @copyright GNU Lesser General Public License
 #
@@ -156,17 +156,16 @@ def rtc_init(context: carmaWrap_context, tel: Telescope, wfs: Sensors, dms: Dms,
                 list_dmseen = [p_dms[j].type for j in p_controller.ndm]
                 nactu = np.sum([p_dms[j]._ntotact for j in p_controller.ndm])
 
-                rtc.add_controller(context, p_controller.nvalid, p_controller.nslope,
-                                   p_controller.nactu, p_controller.delay,
-                                   context.active_device, scons.ControllerType.GEO, dms,
-                                   p_controller.ndm, p_controller.ndm.size,
-                                   p_controller.nwfs, p_controller.nwfs.size, Nphi, True)
+                nmodes = 0
+                if(p_controller.nmodes is not None):
+                    nmodes = p_controller.nmodes
 
-                # rtc.add_controller_geo(context, nactu, Nphi, p_controller.delay,
-                #                        context.active_device, p_controller.type, dms,
-                #                        list_dmseen, p_controller.ndm.size, True)
-
-                # list_dmseen,alt,p_controller.ndm.size
+                rtc.add_controller(context, scons.ControllerType.GEO, context.active_device,
+                    0, p_controller.nslope, p_controller.nactu,
+                    p_controller.nslope_buffer, p_controller.nstates, p_controller.nstate_buffer,
+                    nmodes, p_controller.n_iir_in, p_controller.n_iir_out,
+                    p_controller.polc, p_controller.modal, dms, p_controller.ndm,
+                    p_controller.ndm.size, p_controller.nwfs, p_controller.nwfs.size, Nphi, True)
                 init_controller_geo(ncontrol, rtc, dms, p_geom, p_controller, p_dms,
                                     roket=True)
 
@@ -227,9 +226,10 @@ def rtc_standalone(context: carmaWrap_context, nwfs: int, nvalid: list, nactu: i
                            context.active_device, centroider_type[k])
 
     nslopes = sum([c.nslopes for c in rtc.d_centro])
-    rtc.add_controller(context, sum(nvalid), nslopes, nactu, delay[0],
-                       context.active_device, "generic", idx_centro=np.arange(nwfs),
-                       ncentro=nwfs)
+
+    rtc.add_controller(context, "generic", context.active_device,delay[0],
+                        nslopes, nactu, idx_centro=np.arange(nwfs),
+                        ncentro=nwfs)
 
     print("rtc_standalone set")
     return rtc
@@ -425,7 +425,6 @@ def init_controller(context, i: int, p_controller: conf.Param_controller, p_wfss
         if (len(p_wfss) == 1):
             nwfs = p_controller.nwfs
             # TODO fixing a bug ... still not understood
-        nvalid = sum([p_wfss[k]._nvalid for k in nwfs])
         p_controller.set_nvalid(int(np.sum([p_wfss[k]._nvalid for k in nwfs])))
         tmp = 0
         for c in p_centroiders:
@@ -452,12 +451,22 @@ def init_controller(context, i: int, p_controller: conf.Param_controller, p_wfss
     #nslope = np.sum([c._nslope for c in p_centroiders])
     #p_controller.set_nslope(int(nslope))
 
+    nmodes = 0
+    if(p_controller.nmodes is not None):
+        nmodes = p_controller.nmodes
+
+    if (p_controller.type == scons.ControllerType.GENERIC_LINEAR):
+        configure_generic_linear(p_controller)
+        nmodes = p_controller.nmodes
+
     #TODO : find a proper way to set the number of slope (other than 2 times nvalid)
-    rtc.add_controller(context, p_controller.nvalid, p_controller.nslope,
-                       p_controller.nactu, p_controller.delay, context.active_device,
-                       p_controller.type, dms, p_controller.ndm, p_controller.ndm.size,
-                       p_controller.nwfs, p_controller.nwfs.size, Nphi, False,
-                       p_controller.nstates)
+    rtc.add_controller(context, p_controller.type, context.active_device,p_controller.delay,
+                    p_controller.nslope, p_controller.nactu, p_controller.nslope_buffer,
+                    p_controller.nstates, p_controller.nstate_buffer, nmodes,
+                    p_controller.n_iir_in, p_controller.n_iir_out,
+                    p_controller.polc, p_controller.modal, dms, p_controller.ndm,
+                    p_controller.ndm.size, p_controller.nwfs, p_controller.nwfs.size, Nphi, False)
+
     print("CONTROLLER ADDED")
     if (p_wfss is not None and do_refslp):
         rtc.do_centroids_ref(i)
@@ -700,3 +709,20 @@ def init_controller_generic(i: int, p_controller: conf.Param_controller, p_dms: 
     rtc.d_control[i].set_modal_gains(mgain)
     rtc.d_control[i].set_cmat(cmat)
     rtc.d_control[i].set_matE(matE)
+
+def configure_generic_linear(p_controller: conf.Param_controller):
+    """ Configures the generic controller based on set parameters.
+
+    Args:
+        i: (int): controller index
+
+        p_controller: (Param_controller): controller settings
+
+        p_dms: (list of Param_dm): dms settings
+
+        rtc: (Rtc): Rtc object
+    """
+    if not p_controller.get_modal():
+        p_controller.set_nmodes(p_controller.get_nactu())
+    if p_controller.get_nstate_buffer() == 0:
+        p_controller.set_nstates(p_controller.get_nmodes())

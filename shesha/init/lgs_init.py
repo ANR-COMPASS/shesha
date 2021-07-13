@@ -1,7 +1,7 @@
 ## @package   shesha.init.lgs_init
 ## @brief     Initialization of a LGS in a Wfs object
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   5.1.0
+## @version   5.2.0
 ## @date      2020/05/18
 ## @copyright GNU Lesser General Public License
 #

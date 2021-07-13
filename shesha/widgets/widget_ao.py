@@ -2,7 +2,7 @@
 ## @package   shesha.widgets.widget_ao
 ## @brief     Widget to simulate a closed loop
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   5.1.0
+## @version   5.2.0
 ## @date      2020/05/18
 ## @copyright GNU Lesser General Public License
 #
@@ -276,6 +276,9 @@ class widgetAOWindow(AOClassTemplate, WidgetBase):
         self.SRCrossY.clear()
         self.PyrEdgeX.clear()
         self.PyrEdgeY.clear()
+        self.nctrl = len(self.config.p_controllers)
+        for ctrl in range(self.nctrl):
+            self.add_dispDock("modalGains_"+str(ctrl), self.wao_graphgroup_cb, "MPL")
 
         self.natm = len(self.config.p_atmos.alt)
         for atm in range(self.natm):
@@ -594,7 +597,14 @@ class widgetAOWindow(AOClassTemplate, WidgetBase):
                                     )  # Preparing mesh and vector for display
                                 self.imgs[key].canvas.axes.quiver(x, y, vx, vy)
                             self.imgs[key].canvas.draw()
+                        elif "modalGains" in key:
+                            data = self.supervisor.rtc.get_modal_gains(index)
+                            self.imgs[key].canvas.axes.clear()
+                            self.imgs[key].canvas.axes.plot(data)
+                            self.imgs[key].canvas.draw()
+
                 self.firstTime = 1
+
             finally:
                 self.loopLock.release()
 
