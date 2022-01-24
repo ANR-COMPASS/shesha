@@ -1,6 +1,7 @@
 # COMPASS Change logs
 
 - [COMPASS Change logs](#compass-change-logs)
+  - [Release v5.2.1](#release-v521)
   - [Release v5.2](#release-v52)
   - [Release v5.1](#release-v51)
   - [Release v5.0](#release-v50)
@@ -19,6 +20,17 @@
   - [Release v3.0](#release-v30)
   - [Release v2.0](#release-v20)
   - [Release v1.1](#release-v11)
+
+## Release v5.2.1
+
+COMPASS v5.2.1 release notes :
+
+- Add new geometric WFS method which takes into account pupil masks
+- Bug fixes:
+    - Wind interpolation
+    - Slope-based pyramid centroider "pyr"
+    - Pupil transpose
+    - Generic linear controller
 
 ## Release v5.2
 

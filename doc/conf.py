@@ -55,7 +55,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'COMPASS'
-copyright = u'2013-2017, COMPASS team'
+copyright = u'2011-2022, COMPASS team'
 author = u'COMPASS team'
 
 # The version info for the project you're documenting, acts as replacement for

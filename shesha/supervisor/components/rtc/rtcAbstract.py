@@ -1,13 +1,13 @@
 ## @package   shesha.supervisor
 ## @brief     User layer for initialization and execution of a COMPASS simulation
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   5.2.0
-## @date      2020/05/18
+## @version   5.2.1
+## @date      2022/01/24
 ## @copyright GNU Lesser General Public License
 #
 #  This file is part of COMPASS <https://anr-compass.github.io/compass/>
 #
-#  Copyright (C) 2011-2019 COMPASS Team <https://github.com/ANR-COMPASS>
+#  Copyright (C) 2011-2022 COMPASS Team <https://github.com/ANR-COMPASS>
 #  All rights reserved.
 #  Distributed under GNU - LGPL
 #
@@ -680,16 +680,17 @@ class RtcAbstract(ABC):
         else:
             self._rtc.d_control[controller_index].d_com.reset()
 
-    def get_slopes_geom(self, controller_index: int) -> np.ndarray:
+    def get_slopes_geom(self, controller_index: int, geom_type: int = 0) -> np.ndarray:
         """ Computes and return the slopes geom from the specified controller
 
         Args:
             controller_index : (int) : controller index
-
+            
+            geom_type : (int) : geom centroiding method, default = 0, others (1,2) are experimental
         Returns:
             slopes_geom : (np.ndarray) : geometrically computed slopes
         """
-        self._rtc.do_centroids_geom(controller_index)
+        self.do_centroids_geom(controller_index, geom_type=geom_type)
         slopes_geom = np.array(self._rtc.d_control[controller_index].d_centroids)
         self._rtc.do_centroids(controller_index)  # To return in non-geo state
         return slopes_geom
@@ -758,13 +759,15 @@ class RtcAbstract(ABC):
         """
         self._rtc.do_centroids(controller_index)
 
-    def do_centroids_geom(self, controller_index: int) -> None:
+    def do_centroids_geom(self, controller_index: int, *, geom_type: int = 0) -> None:
         """ Computes the centroids geom from the Wfs image
 
         Args:
             controller_index: (int): controller index
+            
+            geom_type : (int) : geom centroiding method, default = 0, others (1,2) are experimental
         """
-        self._rtc.do_centroids_geom(controller_index)
+        self._rtc.do_centroids_geom(controller_index, geom_type)
 
     def apply_control(self, controller_index: int, *, comp_voltage: bool = True) -> None:
         """ Computes the final voltage vector to apply on the DM by taking into account delay and perturbation voltages, and shape the DMs

@@ -1,13 +1,13 @@
 ## @package   shesha.tests
 ## @brief     Tests the supervisor module
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   5.2.0
-## @date      2020/05/18
+## @version   5.2.1
+## @date      2022/01/24
 ## @copyright GNU Lesser General Public License
 #
 #  This file is part of COMPASS <https://anr-compass.github.io/compass/>
 #
-#  Copyright (C) 2011-2019 COMPASS Team <https://github.com/ANR-COMPASS>
+#  Copyright (C) 2011-2022 COMPASS Team <https://github.com/ANR-COMPASS>
 #  All rights reserved.
 #  Distributed under GNU - LGPL
 #
@@ -487,7 +487,10 @@ def test_do_centroids():
     assert(True)
 
 def test_do_centroids_geom():
-    sup.rtc.do_centroids_geom(0)
+    sup.rtc.do_centroids_geom(0)    # default 
+    sup.rtc.do_centroids_geom(0, geom_type=0)  # type 0
+    sup.rtc.do_centroids_geom(0, geom_type=1)  # type 1
+    sup.rtc.do_centroids_geom(0, geom_type=2)  # type 2
     assert(True)
 
 def test_apply_control():

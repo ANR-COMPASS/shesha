@@ -38,7 +38,8 @@ def write_parfiles(sup, *,  param_file_name="./yao.par",
     conf = sup.config
     if(n_wfs is None):
         n_wfs = len(conf.p_wfss)
-    zerop = conf.p_wfss[0].zerop
+    zerop = conf.p_wfss[0].zerop * sup.get_s_pupil().sum() * \
+                (conf.p_tel.diam / conf.p_geom.pupdiam) ** 2
     lgs_return_per_watt = max([w.lgsreturnperwatt for w in conf.p_wfss])
 
     print("writing parameter file to " + param_file_name)

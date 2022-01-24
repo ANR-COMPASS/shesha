@@ -1,13 +1,13 @@
 ## @package   shesha.init.rtc_init
 ## @brief     Initialization of a Rtc object
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   5.2.0
-## @date      2020/05/18
+## @version   5.2.1
+## @date      2022/01/24
 ## @copyright GNU Lesser General Public License
 #
 #  This file is part of COMPASS <https://anr-compass.github.io/compass/>
 #
-#  Copyright (C) 2011-2019 COMPASS Team <https://github.com/ANR-COMPASS>
+#  Copyright (C) 2011-2022 COMPASS Team <https://github.com/ANR-COMPASS>
 #  All rights reserved.
 #  Distributed under GNU - LGPL
 #
@@ -722,7 +722,7 @@ def configure_generic_linear(p_controller: conf.Param_controller):
 
         rtc: (Rtc): Rtc object
     """
-    if not p_controller.get_modal():
+    if not p_controller.get_modal() or p_controller.get_nmodes() is None:
         p_controller.set_nmodes(p_controller.get_nactu())
     if p_controller.get_nstate_buffer() == 0:
         p_controller.set_nstates(p_controller.get_nmodes())

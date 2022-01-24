@@ -16,8 +16,8 @@ def write_gs(file_name, zero_point, lgs_return_per_watt, zenith_angle):
     f.write("\n//GS parameters")
     f.write("\n//------------------------------")
 
-    f.write("\ngs.zeropoint         = " + str(zero_point)+"; //TODO get ")
-    # Consider later (ngs intensity)
-    f.write("\ngs.lgsreturnperwatt  = " + str(lgs_return_per_watt) + \
-            "; //TODO check lgs case")
+    # N.B. YAO zeropoint is in flux/telescope aperture, so this value is scaled
+    # in outer function
+    f.write("\ngs.zeropoint         = " + str(zero_point)+";")
+    f.write("\ngs.lgsreturnperwatt  = " + str(lgs_return_per_watt)+";")
     f.write("\ngs.zenithangle       = " + str(zenith_angle) + ";")

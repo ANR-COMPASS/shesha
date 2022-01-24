@@ -1,13 +1,13 @@
 ## @package   shesha.config.PWFS
 ## @brief     Param_wfs class definition
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   5.2.0
-## @date      2020/05/18
+## @version   5.2.1
+## @date      2022/01/24
 ## @copyright GNU Lesser General Public License
 #
 #  This file is part of COMPASS <https://anr-compass.github.io/compass/>
 #
-#  Copyright (C) 2011-2019 COMPASS Team <https://github.com/ANR-COMPASS>
+#  Copyright (C) 2011-2022 COMPASS Team <https://github.com/ANR-COMPASS>
 #  All rights reserved.
 #  Distributed under GNU - LGPL
 #
@@ -161,6 +161,8 @@ class Param_wfs:
         """ (int*) array of 0/1 for valid subaps"""
         self.__phasemap = None
         """ (int*) array of pixels transform from phase screen into subaps phase screens"""
+        self.__ttprojmat = None
+        """ (float*) matrices to project subap phase to geometric slope (considering valid pup)"""
         self.__hrmap = None
         """ (int*) array of pixels transform from minimal FoV image to (in case type is sh or geo)"""
         self.__sincar = None
@@ -1346,6 +1348,23 @@ class Param_wfs:
                                                     dtype=np.int32)
 
     _phasemap = property(get_phasemap, set_phasemap)
+
+    def get_ttprojmat(self):
+        """ Get the TT subaperture projection matrices for this WFS
+
+        :return: (np.ndarray) : TT projection matrices (2,NPHASE,NSUB)
+        """
+        return self.__ttprojmat
+
+    def set_ttprojmat(self, data):
+        """ Set the TT subaperture projection matrices for this WFS
+
+        :param data: (np.ndarray) : TT projection matrices (2,NPHASE,NSUB)
+        """
+        self.__ttprojmat = csu.enforce_arrayMultiDim(data.copy(), data.shape,
+                                                    dtype=np.float32)
+
+    _ttprojmat = property(get_ttprojmat, set_ttprojmat)
 
     def get_validpuppixx(self):
         """ TODO : docstring

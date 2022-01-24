@@ -2,13 +2,13 @@
 ## @package   shesha.widgets.widget_ao
 ## @brief     Widget to simulate a closed loop
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   5.2.0
-## @date      2020/05/18
+## @version   5.2.1
+## @date      2022/01/24
 ## @copyright GNU Lesser General Public License
 #
 #  This file is part of COMPASS <https://anr-compass.github.io/compass/>
 #
-#  Copyright (C) 2011-2019 COMPASS Team <https://github.com/ANR-COMPASS>
+#  Copyright (C) 2011-2022 COMPASS Team <https://github.com/ANR-COMPASS>
 #  All rights reserved.
 #  Distributed under GNU - LGPL
 #
