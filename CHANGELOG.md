@@ -1,6 +1,7 @@
 # COMPASS Change logs
 
 - [COMPASS Change logs](#compass-change-logs)
+  - [Release v5.3.0](#release-v530)
   - [Release v5.2.1](#release-v521)
   - [Release v5.2](#release-v52)
   - [Release v5.1](#release-v51)
@@ -20,6 +21,15 @@
   - [Release v3.0](#release-v30)
   - [Release v2.0](#release-v20)
   - [Release v1.1](#release-v11)
+
+## Release v5.3.0
+
+- **New feature**: User-defined phase screens circular buffer in the telescope. Allows to put a cube of phase screens as an additional input of the telescope.
+- **New feature**: Field stop can now be used with SHWFS. Does not simulate flux reduction.
+- Modification of the custom DM construction: see the [new tutorial dedicated to this topic](../tutorials/2022-06-09-custom-dm)
+- Support for clang compiler
+- Fix a bug of the KL basis computation due to the move from MAGMA to CUSOLVER library
+- Minor fixes
 
 ## Release v5.2.1
 

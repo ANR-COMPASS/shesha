@@ -1,7 +1,7 @@
 ## @package   shesha.tests
 ## @brief     Tests the supervisor module
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   5.2.1
+## @version   5.3.0
 ## @date      2022/01/24
 ## @copyright GNU Lesser General Public License
 #
@@ -291,6 +291,32 @@ def test_get_pyrhr_image():
 def test_get_pyr_focal_plane():
     sup.wfs.get_pyr_focal_plane(0)
     assert(True)
+
+#    _____    _                          
+#   |_   _|__| |___ ___ __ ___ _ __  ___ 
+#     | |/ -_) / -_|_-</ _/ _ \ '_ \/ -_)
+#     |_|\___|_\___/__/\__\___/ .__/\___|
+#                             |_|        
+def test_set_input_phase():
+    phase_shape = sup.config.get_pupil("m").shape
+    phase = np.ones((phase_shape[0], phase_shape[1], 5))
+    for i in range(5):
+        phase[:,:,i] += i
+    sup.tel.set_input_phase(phase)
+    assert(True)
+
+def test_get_input_phase():
+    phase_shape = sup.config.get_pupil("m").shape
+    phase = np.ones((phase_shape[0], phase_shape[1], 5))
+    for i in range(5):
+        phase[:,:,i] += i
+    input_phase = sup.tel.get_input_phase()
+    np.testing.assert_equal(phase, input_phase)
+
+def test_update_input_phase():
+    sup.tel.update_input_phase()
+    counter = sup.tel.get_input_phase_counter()
+    assert(counter == 1)
 #    ___ _       ___
 #   | _ \ |_ __ / __|___ _ __  _ __  __ _ ______
 #   |   /  _/ _| (__/ _ \ '  \| '_ \/ _` (_-<_-<
@@ -598,7 +624,7 @@ def test_set_initial_gain():
     assert(True)
 
 def test_set_config():
-    sup.modalgains.set_config(0.1, 0.05, 0.05, 0.0)
+    sup.modalgains.set_config(0.1, 0.05, 0.05, 0.0, 1)
     assert(True)
 
 def test_adapt_modal_gains():

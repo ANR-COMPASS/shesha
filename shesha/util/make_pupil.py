@@ -1,7 +1,7 @@
 ## @package   shesha.util.make_pupil
 ## @brief     Pupil creation functions
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   5.2.1
+## @version   5.3.0
 ## @date      2022/01/24
 ## @copyright GNU Lesser General Public License
 #
@@ -75,7 +75,7 @@ def make_pupil(dim, pupd, tel, xc=-1, yc=-1, real=0, halfSpider=False):
                                      tel.pupangle, D=tel.diam, halfSpider=halfSpider,
                                      pitch=1.244683637214, nseg=33, inner_rad=4.1,
                                      outer_rad=15.4, R=95.7853, nominalD=40,
-                                     half_seg=0.75, refl=tel.referr)
+                                     half_seg=0.75, refl=tel.referr, nmissing=tel.nbrmissing)
     elif (tel.type_ap == ApertureType.KECK):
         seg_corner = 1.8
         kpitch = seg_corner / 2 * np.sqrt(3)
@@ -505,7 +505,7 @@ o888ooo8888 o888ooooo88 o888o         o888o  88o8 o888o 888oooo88    88ooo88
 def generateEeltPupilMask(npt, dspider, i0, j0, pixscale, gap, rotdegree, D=40.0, cobs=0,
                           centerMark=0, halfSpider=False, pitch=1.244683637214, nseg=33,
                           inner_rad=4.1, outer_rad=15.4, R=95.7853, nominalD=40,
-                          half_seg=0.75, refl=None, rotSpiderDegree=None):
+                          half_seg=0.75, refl=None, rotSpiderDegree=None, nmissing=0):
     """
     Generates a boolean pupil mask of the binary EELT pupil
     on a map of size (npt, npt).
@@ -563,6 +563,7 @@ def generateEeltPupilMask(npt, dspider, i0, j0, pixscale, gap, rotdegree, D=40.0
     # From the data of hex mirrors, we build the pupil image using
     # boolean
     #pup = generateSegmentProperties(True, hx, hy, i0, j0, pixscale, gap, npt, D)
+    np.random.seed(42) #to ensure we have the same distribution for different simulations
     if (refl == 0):
         refl = True
     elif np.isscalar(refl):
@@ -571,17 +572,32 @@ def generateEeltPupilMask(npt, dspider, i0, j0, pixscale, gap, rotdegree, D=40.0
         refl = np.ones(hx.size) - referr
     elif type(refl) == list:
         if len(refl) == 3:
-            refpist = np.random.random(hx.size)
+            refpist = np.random.randn(hx.size)
             refpist = refpist * refl[0] / np.std(refpist)
-            reftip = np.random.random(hx.size)
+            reftip = np.random.randn(hx.size)
             reftip = reftip * refl[1] / np.std(reftip)
-            reftilt = np.random.random(hx.size)
+            reftilt = np.random.randn(hx.size)
             reftilt = reftilt * refl[2] / np.std(reftilt)
             refl = np.array([refpist, reftip, reftilt])
     else:
         raise ValueError(
                 "refl param must be None, scalar (reflectivity std error) or list of 3 elements (piston, tip and tilt std errors)"
         )
+
+    if (nmissing != 0):
+        np.random.seed(44)
+        ind_missing = np.random.randint(0, hx.size / 6, nmissing)
+        #ind_missing = np.arange(798)
+        print(ind_missing)
+        if np.isscalar(refl):
+            refl = np.ones(hx.size)
+            refl[ind_missing] = 0
+            #refl[ind_missing] = (ind_missing % 133 / (hx.size / 6)).astype(float)
+        elif (refl.shape[0] == 3): #piston tip tilt
+            print("WARNING: there are piston, tip and tilt std errors, missing segments will be ignored")
+        else: #there is already a 1D array containing reflectivity error
+            refl[ind_missing] = 0
+
 
     pup = generateSegmentProperties(refl, hx, hy, i0, j0, pixscale, gap, npt, D,
                                     nominalD=nominalD, pitch=pitch, half_seg=half_seg)

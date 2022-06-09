@@ -1,7 +1,7 @@
 ## @package   shesha.init.geom_init
 ## @brief     Initialization of the system geometry and of the Telescope object
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   5.2.1
+## @version   5.3.0
 ## @date      2022/01/24
 ## @copyright GNU Lesser General Public License
 #
@@ -497,7 +497,7 @@ def init_pyrhr_geom(p_wfs: conf.Param_wfs, r0: float, p_tel: conf.Param_tel,
 
     # Valid pixels identification
     # Generate buffer with pupil at center
-    pup = np.zeros((pyrsize, pyrsize), dtype=np.int32)
+    pup = np.zeros((pyrsize, pyrsize))#, dtype=np.int32)
     pup[pyrsize // 2 - p_geom._n // 2:pyrsize // 2 + p_geom._n // 2,
         pyrsize // 2 - p_geom._n // 2:pyrsize // 2 + p_geom._n // 2] = \
             p_geom._mpupil
@@ -867,7 +867,28 @@ def init_sh_geom(p_wfs: conf.Param_wfs, r0: float, p_tel: conf.Param_tel,
                                            p_tel.diam, nxsub=p_wfs.nxsub,
                                            lgsreturnperwatt=p_wfs.lgsreturnperwatt,
                                            laserpower=p_wfs.laserpower, verbose=verbose)
+    # Creating field stop mask
+    if(p_wfs.fssize != 0):
+        fftsize = util.fft_goodsize(p_geom._mpupil.shape[0])
+        fspixsize = (p_geom.pupdiam *
+                    (p_wfs.Lambda * 1.e-6) / p_tel.diam * CONST.RAD2ARCSEC) / fftsize
 
+        fsradius_pixels = int(p_wfs.fssize / fspixsize / 2.)
+        if (p_wfs.fstop == scons.FieldStopType.ROUND):
+            focmask = util.dist(fftsize, xc=fftsize / 2. - 0.5,
+                                yc=fftsize / 2. - 0.5) < (fsradius_pixels)
+        elif (p_wfs.fstop == scons.FieldStopType.SQUARE):
+            X = np.indices((fftsize, fftsize)) + 1  # TODO: +1 ??
+            x = X[1] - (fftsize + 1.) / 2.
+            y = X[0] - (fftsize + 1.) / 2.
+            focmask = (np.abs(x) <= (fsradius_pixels)) * \
+                (np.abs(y) <= (fsradius_pixels))
+        else:
+            msg = "wfs fstop must be FieldStopType.[ROUND|SQUARE]"
+            raise ValueError(msg)
+
+        pyr_focmask = focmask * 1.0  # np.fft.fftshift(focmask*1.0)
+        p_wfs._submask = np.fft.fftshift(pyr_focmask)
 
 def geom_init(p_geom: conf.Param_geom, p_tel: conf.Param_tel, padding=2):
     """
@@ -905,7 +926,7 @@ def geom_init(p_geom: conf.Param_geom, p_tel: conf.Param_tel, padding=2):
     # useful pupil + 4 pixels
     p_geom._mpupil = util.pad_array(p_geom._spupil, p_geom._n).astype(np.float32)
 
-    if (p_tel.std_piston and p_tel.std_tt):
+    if (p_tel.std_piston or p_tel.std_tt):
         p_geom._phase_ab_M1 = mkP.make_phase_ab(p_geom.pupdiam, p_geom.pupdiam, p_tel,
                                                 p_geom._spupil, cent,
                                                 cent).astype(np.float32)

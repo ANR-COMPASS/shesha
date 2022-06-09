@@ -2,7 +2,7 @@
 ## @package   shesha.widgets.widget_ao
 ## @brief     Widget to simulate a closed loop
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   5.2.1
+## @version   5.3.0
 ## @date      2022/01/24
 ## @copyright GNU Lesser General Public License
 #
@@ -574,7 +574,7 @@ class widgetAOWindow(AOClassTemplate, WidgetBase):
                                         self.config.p_tel.cobs, returnquiver=True
                                 )  # Preparing mesh and vector for display
                             if "Comp" in key:
-                                centroids = self.supervisor.rtc.get_slopes()
+                                centroids = self.supervisor.rtc.get_slopes(index)
                                 nmes = [
                                         2 * p_wfs._nvalid for p_wfs in self.config.p_wfss
                                 ]
@@ -582,12 +582,12 @@ class widgetAOWindow(AOClassTemplate, WidgetBase):
                                 if (self.config.p_wfss[index].type == scons.WFSType.PYRHR
                                             or self.config.p_wfss[index].type == scons.
                                             WFSType.PYRLR):
-                                    #TODO: DEBUG...
+                                    #TODO: DEBUG... with full pixels (only works with classic slopes method)
                                     plpyr(
                                             centroids[first_ind:first_ind + nmes[index]],
                                             np.stack([
-                                                    wao.config.p_wfss[index]._validsubsx,
-                                                    wao.config.p_wfss[index]._validsubsy
+                                                    self.config.p_wfss[index]._validsubsx,
+                                                    self.config.p_wfss[index]._validsubsy
                                             ]))
                                 else:
                                     x, y, vx, vy = plsh(
@@ -661,6 +661,7 @@ class widgetAOWindow(AOClassTemplate, WidgetBase):
             except Exception as e:
                 print(e)
                 print("error!!")
+                raise e
             finally:
                 self.loopLock.release()
 

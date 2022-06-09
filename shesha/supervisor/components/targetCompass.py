@@ -1,7 +1,7 @@
 ## @package   shesha.supervisor
 ## @brief     User layer for initialization and execution of a COMPASS simulation
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   5.2.1
+## @version   5.3.0
 ## @date      2022/01/24
 ## @copyright GNU Lesser General Public License
 #
@@ -139,7 +139,7 @@ class TargetCompass(SourceCompass):
     def get_strehl(self, tar_index: int, *, do_fit: bool = True) -> np.ndarray:
         """ Return the Strehl Ratio of target number tar_index.
         This fuction will return an array of 4 values as
-        [SR SE, SR LE, phase variance SE [µm²], phase variance LE [µm²]]
+        [SR SE, SR LE, phase variance SE [rad²], phase variance LE [rad²]]
 
         Args:
             tar_index : (int) : Target index

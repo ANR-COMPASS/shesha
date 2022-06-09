@@ -1,7 +1,7 @@
 ## @package   shesha.supervisor.canapassSupervisor
 ## @brief     Initialization and execution of a CANAPASS supervisor
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   5.2.1
+## @version   5.3.0
 ## @date      2022/01/24
 ## @copyright GNU Lesser General Public License
 #
@@ -43,12 +43,16 @@ Usage:
 with 'parameters_filename' the path to the parameters file
 
 Options:
-  -h, --help          Show this help message and exit
-  -f, --freq freq       change the frequency of the loop
-  -d, --delay delay     change the delay of the loop
+  -h, --help                Show this help message and exit
+  -f, --freq freq           change the frequency of the loop
+  -d, --delay delay         change the delay of the loop
   -s, --spiders spiders     change the spiders size
-  -n, --nxsub nxsub     change the number of pixels in subap
-  -p, --pupsep pupsep     change the distance between subap center and frame center
+  -n, --nxsub nxsub         change the number of pixels in subap
+  -p, --pupsep pupsep       change the distance between subap center and frame center
+  -g, --gsmag gsmag         change guide star magnitude
+  -r, --rmod rmod           change modulation radius
+  -x, --offaxis offaxis     change all targets position along x axis
+  -r0,--setr0 setr0        change the global r0
 """
 
 import os, sys
@@ -144,6 +148,24 @@ if __name__ == '__main__':
     if (arguments["--pupsep"]):
         print("Warning changed distance between subaperture center and frame center to: ", arguments["--pupsep"])
         config.p_wfss[0].set_pyr_pup_sep(int(arguments["--pupsep"]))
+    if (arguments["--gsmag"]):
+        print("Warning changed guide star magnitude to: ", arguments["--gsmag"])
+        config.p_wfss[0].set_gsmag(float(arguments["--gsmag"]))
+    if (arguments["--setr0"]):
+        print("Warning changed r0 to: ", arguments["--setr0"])
+        config.p_atmos.set_r0(float(arguments["--setr0"]))
+    if (arguments["--rmod"]):
+        print("Warning changed modulation radius to: ", arguments["--rmod"])
+        rMod = int(arguments["--rmod"])
+        nbPtMod = int(np.ceil(int(rMod * 2 * 3.141592653589793) / 4.) * 4)
+        config.p_wfss[0].set_pyr_npts(nbPtMod)
+        config.p_wfss[0].set_pyr_ampl(rMod)
+    if (arguments["--offaxis"]):
+        print("Warning changed target x position: ", arguments["--offaxis"])
+        config.p_targets[0].set_xpos(float(arguments["--offaxis"]))
+        config.p_targets[1].set_xpos(float(arguments["--offaxis"]))
+        config.p_targets[2].set_xpos(float(arguments["--offaxis"]))
+
     supervisor = CanapassSupervisor(config, cacao=True)
 
     try:
@@ -172,7 +194,7 @@ if __name__ == '__main__':
         nname = []
         for name in names:
             nname.append(name + "_" + user)
-        server = PyroServer(listDevices=devices, listNames=names)
+        server = PyroServer(listDevices=devices, listNames=nname)
         #server.add_device(supervisor, "waoconfig_" + user)
         server.start()
     except:

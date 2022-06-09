@@ -1,7 +1,7 @@
 ## @package   shesha.config.PCONTROLLER
 ## @brief     Param_controller class definition
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   5.2.1
+## @version   5.3.0
 ## @date      2022/01/24
 ## @copyright GNU Lesser General Public License
 #
@@ -114,6 +114,8 @@ class Param_controller:
         self.__close_learning_factor = 0.3
         """ Autocorrelation learning factor """
         self.__close_target = 0.0
+        """ Update framerate """
+        self.__close_update_index = 1
         """ Target value """
         self.__n_iir_in = 0
         """ number of input taps to iir filter """
@@ -615,13 +617,13 @@ class Param_controller:
         """
         return self.__lfdownup
 
-    def set_lfdownup(self, qplus, qminus):
+    def set_lfdownup(self, qminus, qplus):
         """ Set the autocorrelation learning factor
 
-        :param qplus: (float) : learning factor when higher than target
-        :param qminus: (float) : learning factor when lower than target
+        :param qminus: (float) : learning factor when higher than target
+        :param qplus: (float) : learning factor when lower than target
         """
-        self.__lfdownup = (csu.enforce_float(qplus), csu.enforce_float(qminus))
+        self.__lfdownup = (csu.enforce_float(qminus), csu.enforce_float(qplus))
 
     lfdownup = property(get_lfdownup, set_lfdownup)
 
@@ -656,6 +658,22 @@ class Param_controller:
         self.__close_target = csu.enforce_float(t)
 
     close_target = property(get_close_target, set_close_target)
+
+    def get_close_update_index(self):
+        """ Get the modal gains update rate
+
+        :return: (int) : CLOSE update index
+        """
+        return self.__close_update_index
+
+    def set_close_update_index(self, idx):
+        """ Set the modal gains update rate
+
+        :param idx: (int) : close update index
+        """
+        self.__close_update_index = csu.enforce_int(idx)
+
+    close_update_index = property(get_close_update_index, set_close_update_index)
 
     def get_n_iir_in(self):
         """ Get the number of inputs used in iir filter

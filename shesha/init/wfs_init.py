@@ -1,7 +1,7 @@
 ## @package   shesha.init.wfs_init
 ## @brief     Initialization of a Sensors object
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   5.2.1
+## @version   5.3.0
 ## @date      2022/01/24
 ## @copyright GNU Lesser General Public License
 #
@@ -157,6 +157,8 @@ def wfs_init(context: carmaWrap_context, telescope: Telescope, p_wfss: list,
                             fluxPerSub, p_wfs._validsubsx, p_wfs._validsubsy,
                             p_wfs._validpuppixx, p_wfs._validpuppixy, p_wfs._ttprojmat,
                             p_wfs._ftkernel)
+            if (p_wfs._submask is not None):
+                g_wfs.set_field_stop(i, p_wfs._submask, p_wfs._submask.shape[0])
 
     # lgs case
     for i in range(nsensors):

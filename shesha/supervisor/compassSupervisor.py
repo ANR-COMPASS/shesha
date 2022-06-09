@@ -1,7 +1,7 @@
 ## @package   shesha.supervisor.compassSupervisor
 ## @brief     Initialization and execution of a COMPASS supervisor
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   5.2.1
+## @version   5.3.0
 ## @date      2022/01/24
 ## @copyright GNU Lesser General Public License
 #
@@ -93,7 +93,7 @@ class CompassSupervisor(GenericSupervisor):
                                       Requires OCTOPUS to be installed
         """
         self.cacao = cacao
-        self.telescope = None
+        self.tel = None
         self.atmos = None
         self.target = None
         self.wfs = None
@@ -215,6 +215,7 @@ class CompassSupervisor(GenericSupervisor):
         if move_atmos and self.atmos is not None:
             self.atmos.move_atmos()
         # in case there is at least 1 controller GEO in the controller list : use this one only
+        self.tel.update_input_phase()
         if ( geo_index > -1):
             nControl = geo_index
             if tar_trace is not None:

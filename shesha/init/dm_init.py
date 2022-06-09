@@ -1,7 +1,7 @@
 ## @package   shesha.init.dm_init
 ## @brief     Initialization of a Dms object
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   5.2.1
+## @version   5.3.0
 ## @date      2022/01/24
 ## @copyright GNU Lesser General Public License
 #
@@ -120,6 +120,8 @@ def _dm_init(context: carmaWrap_context, dms: Dms, p_dm: conf.Param_dm, xpos_wfs
 
         cobs: (float) : cobs of telescope
 
+        pupAngle: (float) : rotation/clocking angle of the pupil in degrees
+
         max_extent: (int) : maximum dimension of all dms
 
     :return:
@@ -219,6 +221,7 @@ def _dm_init_factorized(context: carmaWrap_context, dms: Dms, p_dm: conf.Param_d
 
     Args:
         context: (carmaWrap_context): context
+    
         dms: (Dms) : dm object
 
         p_dm: (Param_dms) : dm settings
@@ -232,6 +235,8 @@ def _dm_init_factorized(context: carmaWrap_context, dms: Dms, p_dm: conf.Param_d
         diam: (float) : diameter of telescope
 
         cobs: (float) : cobs of telescope
+
+        pupAngle: (float) : rotation/clocking angle of the pupil in degrees
 
         max_extent: (int) : maximum dimension of all dms
 
@@ -347,22 +352,21 @@ def make_pzt_dm(p_dm: conf.Param_dm, p_geom: conf.Param_geom, cobs: float,
 
         cobs: (float) : telescope central obstruction
 
-    :return:
+        pupAngle: (float) : rotation/clocking angle of the pupil in degrees
+
+    Returns:
         influ: (np.ndarray(dims=3, dtype=np.float64)) : cube of the IF for each actuator
 
     """
-    # best parameters, as determined by a multi-dimensional fit
-    #(see coupling3.i)
-    coupling = p_dm.coupling
-
-    # prepare to compute IF on partial (local) support of size <smallsize>
-    pitch = p_dm._pitch  # unit is pixels
-    smallsize = 0
-
     # Petal DM (segmentation of M4)
     if (p_dm.influ_type == scons.InfluType.PETAL):
         makePetalDm(p_dm, p_geom, pupAngle)
         return
+
+    # prepare to compute IF on partial (local) support of size <smallsize>
+    coupling = p_dm.coupling
+    pitch = p_dm._pitch  # unit is pixels
+    smallsize = 0
 
     if (p_dm.influ_type == scons.InfluType.RADIALSCHWARTZ):
         smallsize = influ_util.makeRadialSchwartz(pitch, coupling)
@@ -381,57 +385,52 @@ def make_pzt_dm(p_dm: conf.Param_dm, p_geom: conf.Param_geom, cobs: float,
     p_dm._influsize = smallsize
 
     # compute location (x,y and i,j) of each actuator:
-    nxact = p_dm.nact
-
     if p_dm.type_pattern is None:
         p_dm.type_pattern = scons.PatternType.SQUARE
 
     if p_dm.type_pattern == scons.PatternType.HEXA:
         print("Pattern type : hexa")
-        cub = dm_util.createHexaPattern(pitch, p_geom.pupdiam * 1.1)
+        xypos = dm_util.createHexaPattern(pitch, p_geom.pupdiam * 1.1)
         p_dm.keep_all_actu = True
     elif p_dm.type_pattern == scons.PatternType.HEXAM4:
         print("Pattern type : hexaM4")
         p_dm.keep_all_actu = True
-        cub = dm_util.createDoubleHexaPattern(pitch, p_geom.pupdiam * 1.1, pupAngle)
+        xypos = dm_util.createDoubleHexaPattern(pitch, p_geom.pupdiam * 1.1, pupAngle)
         if p_dm.margin_out is not None:
             print(f'p_dm.margin_out={p_dm.margin_out} is being '
                   'used for pupil-based actuator filtering')
             pup_side = p_geom._ipupil.shape[0]
-            cub_off = dm_util.filterActuWithPupil(cub + pup_side // 2 - 0.5,
+            cub_off = dm_util.filterActuWithPupil(xypos + pup_side // 2 - 0.5,
                                                   p_geom._ipupil,
                                                   p_dm.margin_out * p_dm.get_pitch())
-            cub = cub_off - pup_side // 2 + 0.5
-            p_dm.set_ntotact(cub.shape[1])
+            xypos = cub_off - pup_side // 2 + 0.5
+            p_dm.set_ntotact(xypos.shape[1])
     elif p_dm.type_pattern == scons.PatternType.SQUARE:
         print("Pattern type : square")
-        cub = dm_util.createSquarePattern(pitch, nxact + 4)
+        xypos = dm_util.createSquarePattern(pitch, p_dm.nact + 4)
     else:
         raise ValueError("This pattern does not exist for pzt dm")
 
     if p_dm.keep_all_actu:
-        inbigcirc = np.arange(cub.shape[1])
+        inbigcirc = np.arange(xypos.shape[1])
     else:
         if (p_dm.alt > 0):
             cobs = 0
-        inbigcirc = dm_util.select_actuators(cub[0, :], cub[1, :], p_dm.nact,
+        inbigcirc = dm_util.select_actuators(xypos[0, :], xypos[1, :], p_dm.nact,
                                              p_dm._pitch, cobs, p_dm.margin_in,
                                              p_dm.margin_out, p_dm._ntotact)
     p_dm._ntotact = inbigcirc.size
 
-    # print(('inbigcirc',inbigcirc.shape))
-
     # converting to array coordinates:
-    cub += p_geom.cent
+    xypos += p_geom.cent
 
     # filtering actuators outside of a disk radius = rad (see above)
-    cubval = cub[:, inbigcirc]
-    ntotact = cubval.shape[1]
-    #pfits.writeto("cubeval.fits", cubval)
-    xpos = cubval[0, :]
-    ypos = cubval[1, :]
-    i1t = (cubval[0, :] - smallsize / 2 - 0.5 - p_dm._n1).astype(np.int32)
-    j1t = (cubval[1, :] - smallsize / 2 - 0.5 - p_dm._n1).astype(np.int32)
+    xypos = xypos[:, inbigcirc]
+    ntotact = xypos.shape[1]
+    xpos = xypos[0, :]
+    ypos = xypos[1, :]
+    i1t = (xpos - smallsize / 2 - 0.5 - p_dm._n1).astype(np.int32)
+    j1t = (ypos - smallsize / 2 - 0.5 - p_dm._n1).astype(np.int32)
 
     p_dm._xpos = xpos
     p_dm._ypos = ypos
@@ -439,12 +438,10 @@ def make_pzt_dm(p_dm: conf.Param_dm, p_geom: conf.Param_geom, cobs: float,
     p_dm._j1 = j1t
 
     # Allocate array of influence functions
-
     influ = np.zeros((smallsize, smallsize, ntotact), dtype=np.float32)
+    
     # Computation of influence function for each actuator
-
     print("Computing Influence Function type : ", p_dm.influ_type)
-
     for i in tqdm(range(ntotact)):
 
         i1 = i1t[i]
@@ -516,6 +513,7 @@ def make_pzt_dm(p_dm: conf.Param_dm, p_geom: conf.Param_geom, cobs: float,
     off = (dim - p_dm._influsize) // 2
 
 
+
 def init_custom_dm(p_dm: conf.Param_dm, p_geom: conf.Param_geom, diam: float):
     """Read Fits for influence pzt fonction and form
 
@@ -548,31 +546,43 @@ def init_custom_dm(p_dm: conf.Param_dm, p_geom: conf.Param_geom, diam: float):
     from astropy.io import fits as pfits
 
     # read fits file
-    hdul = pfits.open(shesha_dm + "/" + p_dm.file_influ_fits)
-    print("Read influence function from fits file : ", p_dm.file_influ_fits)
+    file_name = p_dm.file_influ_fits
+    if(not os.path.isfile(file_name)):
+        file_name = shesha_dm + "/" + p_dm.file_influ_fits
 
+    hdul = pfits.open(file_name)
+    print("Read influence function from fits file : ", file_name)
+
+    dm_fits_version = hdul[0].header['VERSION']
+
+    # read mandatory keywords from the FITS file
     f_xC = hdul[0].header['XCENTER']
     f_yC = hdul[0].header['YCENTER']
     f_pixsize = hdul[0].header['PIXSIZE']
-    f_pitchm = hdul[0].header['PITCHM']
-    f_pupm = hdul[0].header['PUPM']
-    fi_i1, fi_j1 = hdul[1].data
-    f_influ = hdul[2].data
-    f_xpos, f_ypos = hdul[3].data
+    if(dm_fits_version < 1.2 ):
+        fi_i1 , fi_j1  = hdul[1].data
+        f_influ        = hdul[2].data
+        f_xpos, f_ypos = hdul[3].data
+    else:
+        fi_i1, fi_j1 = hdul['I1_J1'].data
+        f_influ = hdul['INFLU'].data
+        f_xpos, f_ypos = hdul['XPOS_YPOS'].data
+
+    # Analysis of the requirements set in the COMPASS configuration file
+    cases = [ p_dm.diam_dm is not None, p_dm._pitch is not None,
+              p_dm.diam_dm_proj is not None ]
 
     # Projecting the dm in the tel pupil plane with the desired factor
-    cases = [
-            p_dm.diam_dm is not None, p_dm._pitch is not None,
-            p_dm.diam_dm_proj is not None
-    ]
-
     if cases == [False, False, False]:
+        f_pupm = hdul[0].header['PUPM']
         scale = diam / f_pupm
     elif cases == [True, False, False]:
         scale = diam / p_dm.diam_dm
     elif cases == [False, True, False]:
+        f_pitchm = hdul[0].header['PITCHM']
         scale = p_dm._pitch / f_pitchm
     elif cases == [False, False, True]:
+        f_pupm = hdul[0].header['PUPM']
         scale = p_dm.diam_dm_proj / f_pupm
     else:
         err_msg = '''Invalid rescaling parameters
@@ -588,7 +598,7 @@ def init_custom_dm(p_dm: conf.Param_dm, p_geom: conf.Param_geom, diam: float):
     print("Custom dm scaling factor to pupil plane :", scale)
 
     # Scaling factor from fits to compass system
-    scaleToCompass = f_pixsize / p_geom._pixsize
+    scaleToCompass = np.float32(f_pixsize) / np.float32(p_geom._pixsize)
 
     # shift to add to coordinates from fits to compass
     # Compass = Fits * scaleToCompass + offsetToCompass
@@ -908,6 +918,7 @@ def makePetalDm(p_dm, p_geom, pupAngleDegree):
                in order to know what is the pupil mask, and what is the mpupil.
     <p_dm>   : compass petal dm object p_dm to be created. The function will
                transform/modify in place the attributes of the object p_dm.
+    <pupAngleDegree> : rotation/clocking angle of the pupil in degrees
 
 
     '''
@@ -929,6 +940,7 @@ def makePetalDm(p_dm, p_geom, pupAngleDegree):
 def make_petal_dm_core(pupImage, pupAngleDegree):
     """
     <pupImage> : image of the pupil
+    <pupAngleDegree> : rotation angle of the pupil in degrees
 
     La fonction renvoie des fn d'influence en forme de petale d'apres
     une image de la pupille, qui est supposee etre segmentee.
@@ -1012,7 +1024,7 @@ def build_petals(nbSeg, pupAngleDegree, i0, j0, npt):
     For this reason, an <esoOffsetAngle> = -pi/6 is introduced in the code.
 
     nbSeg = 6
-    pupAngleDegree = 5.0
+    pupAngleDegree = 5.0   # pupil rotation/clocking angle
     i0 = j0 = 112.3
     npt = 222
     p = build_petals(nbSeg, pupAngleDegree, i0, j0, npt)

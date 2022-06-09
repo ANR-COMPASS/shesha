@@ -19,6 +19,8 @@ class ModalGains(object):
 
         _ac_idx : (int) : autocorrelation index
 
+        _up_idx : (int) : update index (averaging length of AC estimator before modal gains update)
+
         _lf : (float) : learning factor of the autocorrelation computation
 
         _lfdownup : (float) : learning factors for modal gain update
@@ -55,12 +57,14 @@ class ModalGains(object):
         self.cmat_modal = None
         self._mask = np.ones(self._ntotact)
         self._ac_idx = int(config.p_controllers[0].delay * 2 + 1)
+        self._up_idx = config.p_controllers[0].get_close_update_index()
         self._lf = config.p_controllers[0].get_close_learning_factor()
         self._lfdownup = np.array(config.p_controllers[0].get_lfdownup())
         self._trgt = config.p_controllers[0].get_close_target()
         self._initial_gain = config.p_controllers[0].get_mgain_init()
         # computation intermediaries
         self._modal_meas = []
+        self._buffer = []
         self._ac_est_0 = np.zeros((self._ntotact), dtype=np.float32)
         self._ac_est_dt = np.zeros((self._ntotact), dtype=np.float32)
         # out variables
@@ -68,8 +72,8 @@ class ModalGains(object):
         self.close_iter = 0
         if (self._config.p_controllers[0].close_opti):
             self._rtc.set_modal_gains(0, self.mgains)
-        print(f"total number of actuators {self._ntotact}")
-        print(f"Autocorrelation index for CLOSE optimization is {self._ac_idx}")
+        # print(f"total number of actuators {self._ntotact}")
+        # print(f"Autocorrelation index for CLOSE optimization is {self._ac_idx}")
 
     def update_modal_meas(self):
         """Save the modal measurement of the current iter"""
@@ -107,12 +111,14 @@ class ModalGains(object):
                     + self._modal_meas[0][ctrl_modes] * self._modal_meas[-1][ctrl_modes] * self._lf
             # compute new modal gains
             x = self._ac_est_dt[ctrl_modes] / self._ac_est_0[ctrl_modes] - self._trgt
-            sign_ac = (x > 0).astype(np.int8)
-            self.mgains[ctrl_modes] = self.mgains[ctrl_modes] * (1 + self._lfdownup[sign_ac] * x)
-            self.mgains[ctrl_modes] += 0.01
+            self._buffer.append(x)
+            if len(self._buffer) >= self._up_idx:
+                mean = np.mean(self._buffer, axis=0)
+                sign_ac = (mean > 0).astype(np.int8)
+                self.mgains[ctrl_modes] = self.mgains[ctrl_modes] * (1 + self._lfdownup[sign_ac] * x)
+                self._rtc.set_modal_gains(0, self.mgains)
+                self._buffer = []
             self._modal_meas.pop(0)
-            # set modal gains
-            self._rtc.set_modal_gains(0, self.mgains)
         self.close_iter +=1
 
     def reset_close(self):
@@ -208,21 +214,25 @@ class ModalGains(object):
         self._rtc.set_modal_gains(0, self.mgains)
         self._config.p_controllers[0].set_mgain_init(gain)
 
-    def set_config(self, p, qplus, qminus, target):
+    def set_config(self, p, qminus, qplus, target, up_idx):
         """Set the 4 parameters for the CLOSE optimization loop
 
         Args:
             p: (float) : learning factor for autocorrelation
 
-            qplus: (float) : learning factor for mgain optimization when higher than target
-
             qminus: (float) : learning factor for mgain optimization when lower than target
 
+            qplus: (float) : learning factor for mgain optimization when higher than target
+
             target: (float) : autocorrelation target for optimization
+        
+            up_idx: (int) : modal gains update rate [frame] 
         """
         self._lf = p
         self._config.p_controllers[0].set_close_learning_factor(p)
-        self._lfdownup = np.array([qplus, qminus])
-        self._config.p_controllers[0].set_lfdownup(qplus, qminus)
+        self._lfdownup = np.array([qminus, qplus])
+        self._config.p_controllers[0].set_lfdownup(qminus, qplus)
         self._trgt = target
         self._config.p_controllers[0].set_close_target(target)
+        self._up_idx = up_idx
+        self._config.p_controllers[0].set_close_update_index(up_idx)
