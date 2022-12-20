@@ -222,7 +222,6 @@ class FieldStopType:
     """
     SQUARE = 'square'
     ROUND = 'round'
-    NONE = 'none'
 
 class PupilType(MultiValueEnum):
     """Compass pupil enumeration
