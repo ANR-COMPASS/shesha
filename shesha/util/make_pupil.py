@@ -107,6 +107,8 @@ def make_pupil(dim, pupd, tel, xc=-1, yc=-1, real=0, halfSpider=False):
         tel.set_type_ap(ApertureType.EELT_NOMINAL)
         return make_EELT(dim, pupd, tel, N_seg)
     elif tel.type_ap == ApertureType.VLT:
+        tel.set_cobs(0.14)
+        print("force_VLT_pup_cobs = %5.3f" % 0.14)
         return make_VLT(dim, pupd, tel)
     elif tel.type_ap == ApertureType.GENERIC:
         return make_pupil_generic(dim, pupd, tel.t_spiders, tel.spiders_type, xc, yc,
@@ -211,9 +213,6 @@ def make_VLT(dim, pupd, tel):
         tel: (Param_tel) : Telescope structure
     """
 
-    if(tel.cobs == -1):
-        tel.set_cobs(0.14)
-        print("force_VLT_pup_cobs = %5.3f" % 0.14)
     if (tel.t_spiders == -1):
         print("force t_spider =%5.3f" % (0.09 / 18.))
         tel.set_t_spiders(0.09 / 18.)
