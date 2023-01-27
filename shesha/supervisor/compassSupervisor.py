@@ -1,13 +1,13 @@
 ## @package   shesha.supervisor.compassSupervisor
 ## @brief     Initialization and execution of a COMPASS supervisor
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   5.4.0
+## @version   5.4.1
 ## @date      2022/01/24
 ## @copyright GNU Lesser General Public License
 #
 #  This file is part of COMPASS <https://anr-compass.github.io/compass/>
 #
-#  Copyright (C) 2011-2022 COMPASS Team <https://github.com/ANR-COMPASS>
+#  Copyright (C) 2011-2023 COMPASS Team <https://github.com/ANR-COMPASS>
 #  All rights reserved.
 #  Distributed under GNU - LGPL
 #
@@ -509,7 +509,8 @@ class CompassSupervisor(GenericSupervisor):
                 k += 1
         if (cube_data_file_path != ""):
             print("Saving tarPhase cube at: ", cube_data_file_path)
-            pfits.writeto(cube_data_file_path, cube_data, overwrite=True)
+            from astropy.io import fits as pf
+            pf.writeto(cube_data_file_path, cube_data, overwrite=True)
 
         psf_le = self.target.get_tar_image(tar_index, expo_type="le")
         return slopes_data, volts_data, ai_data, psf_le, sthrel_se_list, sthrel_le_list, g_ncpa_list, cube_data

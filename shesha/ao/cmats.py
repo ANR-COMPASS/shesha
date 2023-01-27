@@ -1,13 +1,13 @@
 ## @package   shesha.ao.cmats
 ## @brief     Computation implementations of command matrix
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   5.4.0
+## @version   5.4.1
 ## @date      2022/01/24
 ## @copyright GNU Lesser General Public License
 #
 #  This file is part of COMPASS <https://anr-compass.github.io/compass/>
 #
-#  Copyright (C) 2011-2022 COMPASS Team <https://github.com/ANR-COMPASS>
+#  Copyright (C) 2011-2023 COMPASS Team <https://github.com/ANR-COMPASS>
 #  All rights reserved.
 #  Distributed under GNU - LGPL
 #
@@ -176,7 +176,7 @@ def Btt_for_cmat(rtc, dms, p_dms, p_geom):
         p_geom: (Param_geom): geometry settings
 
     """
-
+    from shesha.ao import basis
     IFs = basis.compute_IFsparse(dms, p_dms, p_geom).T
     n = IFs.shape[1]
     IFtt = IFs[:, -2:].toarray()

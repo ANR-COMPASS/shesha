@@ -58,9 +58,9 @@ def check():
         print("you must define the location of the tao executables \n\tex: TAO_SETTINGS[\"TAOPATH\"]=\"~/workspace/tao/install/bin\"")
         stop=1
     try :
-        STARPU_FLAGS
+        TAO_SETTINGS["STARPU_FLAGS"]
     except:
-        STARPU_FLAGS=""
+        TAO_SETTINGS["STARPU_FLAGS"]=""
 
     return stop
 

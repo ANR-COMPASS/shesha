@@ -1,13 +1,13 @@
 ## @package   shesha.util.dm_util
 ## @brief     Utilities function for DM geometry initialization
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   5.4.0
+## @version   5.4.1
 ## @date      2022/01/24
 ## @copyright GNU Lesser General Public License
 #
 #  This file is part of COMPASS <https://anr-compass.github.io/compass/>
 #
-#  Copyright (C) 2011-2022 COMPASS Team <https://github.com/ANR-COMPASS>
+#  Copyright (C) 2011-2023 COMPASS Team <https://github.com/ANR-COMPASS>
 #  All rights reserved.
 #  Distributed under GNU - LGPL
 #
@@ -357,13 +357,13 @@ def make_zernike(nzer: int, size: int, diameter: int, xc=-1., yc=-1., ext=0):
         if ext:
             for i in range((n - m) // 2 + 1):
                 z[:, :, zn] = z[:, :, zn] + (-1.) ** i * zrmod ** (n - 2. * i) * float(np.math.factorial(n - i)) / \
-                    float(np.math.factorial(i) * np.math.factorial((n + m) / 2. - i) *
-                          np.math.factorial((n - m) / 2. - i))
+                    float(np.math.factorial(i) * np.math.factorial((n + m) // 2 - i) *
+                          np.math.factorial((n - m) // 2 - i))
         else:
             for i in range((n - m) // 2 + 1):
                 z[:, :, zn] = z[:, :, zn] + (-1.) ** i * zr ** (n - 2. * i) * float(np.math.factorial(n - i)) / \
                     float(np.math.factorial(i) * np.math.factorial((n + m) // 2 - i) *
-                          np.math.factorial((n - m) / 2. - i))
+                          np.math.factorial((n - m) // 2 - i))
 
         if ((zn + 1) % 2 == 1):
             if (m == 0):

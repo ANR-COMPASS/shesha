@@ -5,6 +5,7 @@ Python module for modelization of error covariance matrix
 import numpy as np
 import h5py
 from shesha.sutra_wrap import carmaWrap_context, Groot
+
 import time
 import sys
 import os
@@ -253,24 +254,24 @@ def compare_GPU_vs_CPU(filename):
         filename : (string) : full path to the ROKET file
 
     """
-    timer = ch.carmaWrap_timer()
+    from carmaWrap import timer as carmaWrap_timer
+    timer = carmaWrap_timer()
 
-    ch.threadSync()
     timer.start()
-    ch.threadSync()
-    synctime = timer.stop()
+    timer.stop()
+    synctime = timer.total_time
     timer.reset()
 
     timer.start()
     cov_err_gpu_s = compute_Cerr(filename)
-    ch.threadSync()
-    gpu_time_s = timer.stop() - synctime
+    timer.stop()
+    gpu_time_s = timer.total_time - synctime
     timer.reset()
 
     timer.start()
     cov_err_gpu_d = compute_Cerr(filename, ctype="double")
-    ch.threadSync()
-    gpu_time_d = timer.stop() - synctime
+    timer.stop()
+    gpu_time_d = timer.total_time - synctime
     timer.reset()
 
     tic = time.time()

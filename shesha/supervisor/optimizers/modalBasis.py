@@ -1,13 +1,13 @@
 ## @package   shesha.supervisor.optimizers
 ## @brief     User layer for optimizing AO supervisor loop
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   5.4.0
+## @version   5.4.1
 ## @date      2022/01/24
 ## @copyright GNU Lesser General Public License
 #
 #  This file is part of COMPASS <https://anr-compass.github.io/compass/>
 #
-#  Copyright (C) 2011-2022 COMPASS Team <https://github.com/ANR-COMPASS>
+#  Copyright (C) 2011-2023 COMPASS Team <https://github.com/ANR-COMPASS>
 #  All rights reserved.
 #  Distributed under GNU - LGPL
 #
@@ -167,7 +167,7 @@ class ModalBasis(object):
             print("Computing Btt with a Petal basis...")
             self.modal_basis, self.projection_matrix = self.compute_btt_petal()
         else:
-            raise ArgumentError("Unsupported modal basis")
+            raise RuntimeError("Unsupported modal basis")
 
         return self.modal_basis, self.projection_matrix
 
@@ -194,6 +194,7 @@ class ModalBasis(object):
 
             projection_matrix : (np.ndarray) : volts to Btt modes matrix
         """
+        from shesha.ao import basis
         dms_basis = basis.compute_IFsparse(self._dms._dms, self._config.p_dms, self._config.p_geom)
         influ_basis = dms_basis[:-2,:]
         tt_basis = dms_basis[-2:,:].toarray()

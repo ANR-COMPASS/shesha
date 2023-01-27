@@ -1,13 +1,13 @@
 ## @package   shesha.init.rtc_init
 ## @brief     Initialization of a Rtc object
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   5.4.0
+## @version   5.4.1
 ## @date      2022/01/24
 ## @copyright GNU Lesser General Public License
 #
 #  This file is part of COMPASS <https://anr-compass.github.io/compass/>
 #
-#  Copyright (C) 2011-2022 COMPASS Team <https://github.com/ANR-COMPASS>
+#  Copyright (C) 2011-2023 COMPASS Team <https://github.com/ANR-COMPASS>
 #  All rights reserved.
 #  Distributed under GNU - LGPL
 #
@@ -579,6 +579,7 @@ def init_controller_ls(i: int, p_controller: conf.Param_controller, p_wfss: list
 
         silence_tqdm : (bool) : Silence tqdm's output
     """
+    from shesha.ao import basis
     M2V = None
     if p_controller.do_kl_imat:
         IF = basis.compute_IFsparse(dms, p_dms, p_geom, silence_tqdm=silence_tqdm).T

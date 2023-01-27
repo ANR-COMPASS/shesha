@@ -7,7 +7,7 @@
 #
 #  This file is part of COMPASS <https://anr-compass.github.io/compass/>
 #
-#  Copyright (C) 2011-2022 COMPASS Team <https://github.com/ANR-COMPASS>
+#  Copyright (C) 2011-2023 COMPASS Team <https://github.com/ANR-COMPASS>
 #  All rights reserved.
 #  Distributed under GNU - LGPL
 #
@@ -234,17 +234,29 @@ class widgetTwoStagesWindowPyro():
             supervisor1 = self.manager.first_stage
             supervisor2 = self.manager.second_stage
 
+            if(supervisor1.corono == None):
+                from shesha.util.pyroEmptyClass import PyroEmptyClass
+                coro2pyro1 = PyroEmptyClass()
+            else:
+                coro2pyro1 = supervisor1.corono
+
+            if(supervisor2.corono == None):
+                from shesha.util.pyroEmptyClass import PyroEmptyClass
+                coro2pyro2 = PyroEmptyClass()
+            else:
+                coro2pyro2 = supervisor2.corono
+
             devices1 = [
                     supervisor1, supervisor1.rtc, supervisor1.wfs, supervisor1.target,
                     supervisor1.tel, supervisor1.basis, supervisor1.calibration,
                     supervisor1.atmos, supervisor1.dms, supervisor1.config, supervisor1.modalgains,
-                    supervisor1.corono
+                    coro2pyro1
             ]
             devices2 = [
                     supervisor2, supervisor2.rtc, supervisor2.wfs, supervisor2.target,
                     supervisor2.tel, supervisor2.basis, supervisor2.calibration,
                     supervisor2.atmos, supervisor2.dms, supervisor2.config, supervisor2.modalgains,
-                    supervisor2.corono
+                    coro2pyro2
             ]
             names = [
                     "supervisor", "supervisor_rtc", "supervisor_wfs", "supervisor_target",
