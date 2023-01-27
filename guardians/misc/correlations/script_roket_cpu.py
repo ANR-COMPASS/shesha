@@ -109,7 +109,7 @@ def init_config(config):
 # /_/ \_\___/  |_\___/\___/ .__/
 #                         |_|
 ##############################################################################
-def loop(n):
+def loop(config, n):
     """
     Performs the main AO loop for n interations. First, initialize buffers
     for error breakdown computations. Then, at the end of each iteration, just
@@ -197,7 +197,7 @@ def loop(n):
                 fit[N_preloop:]), SR, SR2, psf_ortho
 
 
-def preloop(n):
+def preloop(config, n):
     """
     Performs the main AO loop for n interations. First, initialize buffers
     for error breakdown computations. Then, at the end of each iteration, just
@@ -252,7 +252,7 @@ def preloop(n):
 # | _|| '_| '_/ _ \ '_| | _ \ '_/ -_) _` | / / _` / _ \ V  V / ' \
 # |___|_| |_| \___/_|   |___/_| \___\__,_|_\_\__,_\___/\_/\_/|_||_|
 ###################################################################################
-def error_breakdown(com, noise_com, alias_wfs_com, tomo_com, H_com, trunc_com, bp_com,
+def error_breakdown(config, com, noise_com, alias_wfs_com, tomo_com, H_com, trunc_com, bp_com,
                     wf_com, mod_com, fit, psf_ortho, i):
     """
     Compute the error breakdown of the AO simulation. Returns the error commands of
@@ -614,7 +614,7 @@ def cov_cor(P, noise, trunc, alias, H, bp, tomo):
 ###########################################################################################
 
 
-def save_it(filename):
+def save_it(config, filename):
     IF = rtc.get_IFsparse(1)
     TT = rtc.get_IFtt(1)
 
@@ -669,6 +669,7 @@ def save_it(filename):
 ###############################################################################################
 param_file = "/home/fferreira/compass/trunk/shesha/data/par/par4roket/correlation_study/roket_8m_1layer.py"
 error_flag = True
+config = None
 if (param_file.split('.')[-1] == b"py"):
     filename = param_file.split('/')[-1]
     param_path = param_file.split(filename)[0]
@@ -702,7 +703,7 @@ imat = rtc.get_imat(0)
 RD = np.dot(R, imat).astype(np.float32)
 gRD = (np.identity(RD.shape[0]) - config.p_controllers[0].gain * RD).astype(np.float32)
 
-com, noise_com, alias_wfs_com, tomo_com, H_com, trunc_com, bp_com, wf_com, fit, SR, SR2, psf_ortho = loop(
+com, noise_com, alias_wfs_com, tomo_com, H_com, trunc_com, bp_com, wf_com, fit, SR, SR2, psf_ortho = loop( config, 
         niters + N_preloop)
 noise_com = noise_com[N_preloop:, :]
 trunc_com = trunc_com[N_preloop:, :]
@@ -710,4 +711,4 @@ alias_wfs_com = alias_wfs_com[N_preloop:, :]
 H_com = H_com[N_preloop:, :]
 bp_com = bp_com[N_preloop:, :]
 tomo_com = tomo_com[N_preloop:, :]
-save_it(savename)
+save_it(config, savename)

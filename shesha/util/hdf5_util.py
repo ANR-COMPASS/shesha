@@ -557,7 +557,7 @@ def configFromH5(filename, config):
     # WFS
     config.p_wfss = []
     for i in range(f.attrs.get("nwfs")):
-        config.p_wfss.append(ao.Param_wfs())
+        config.p_wfss.append(config.Param_wfs())
         config.p_wfss[i].set_type(str(f.attrs.get("type")[i]))
         config.p_wfss[i].set_nxsub(f.attrs.get("nxsub")[i])
         config.p_wfss[i].set_npix(f.attrs.get("npix")[i])
@@ -593,7 +593,7 @@ def configFromH5(filename, config):
     config.p_dms = []
     if (f.attrs.get("ndms")):
         for i in range(f.attrs.get("ndms")):
-            config.p_dms.append(ao.Param_dm())
+            config.p_dms.append(config.Param_dm())
             config.p_dms[i].set_type(str(f.attrs.get("type")[i]))
             config.p_dms[i].set_nact(f.attrs.get("nact")[i])
             config.p_dms[i].set_alt(f.attrs.get("dm.alt")[i])
@@ -606,7 +606,7 @@ def configFromH5(filename, config):
     config.p_centroiders = []
     if (f.attrs.get("ncentroiders")):
         for i in range(f.attrs.get("ncentroiders")):
-            config.p_centroiders.append(ao.Param_centroider())
+            config.p_centroiders.append(config.Param_centroider())
             config.p_centroiders[i].set_nwfs(f.attrs.get("centro.nwfs")[i])
             config.p_centroiders[i].set_type(str(f.attrs.get("type")[i]))
             config.p_centroiders[i].set_type_fct(str(f.attrs.get("type_fct")[i]))
@@ -621,7 +621,7 @@ def configFromH5(filename, config):
     config.p_controllers = []
     if (f.attrs.get("ncontrollers")):
         for i in range(f.attrs.get("ncontrollers")):
-            config.p_controllers.append(ao.Param_controller())
+            config.p_controllers.append(config.Param_controller())
             config.p_controllers[i].set_type(str(f.attrs.get("type")[i]))
             config.p_controllers[i].set_nwfs(f.attrs.get("control.nwfs")[i])
             config.p_controllers[i].set_ndm(f.attrs.get("ndm")[i])

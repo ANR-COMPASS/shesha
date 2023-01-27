@@ -167,7 +167,7 @@ class ModalBasis(object):
             print("Computing Btt with a Petal basis...")
             self.modal_basis, self.projection_matrix = self.compute_btt_petal()
         else:
-            raise ArgumentError("Unsupported modal basis")
+            raise RuntimeError("Unsupported modal basis")
 
         return self.modal_basis, self.projection_matrix
 
@@ -194,6 +194,7 @@ class ModalBasis(object):
 
             projection_matrix : (np.ndarray) : volts to Btt modes matrix
         """
+        from shesha.ao import basis
         dms_basis = basis.compute_IFsparse(self._dms._dms, self._config.p_dms, self._config.p_geom)
         influ_basis = dms_basis[:-2,:]
         tt_basis = dms_basis[-2:,:].toarray()

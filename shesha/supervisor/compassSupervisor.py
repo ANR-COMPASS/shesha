@@ -509,7 +509,8 @@ class CompassSupervisor(GenericSupervisor):
                 k += 1
         if (cube_data_file_path != ""):
             print("Saving tarPhase cube at: ", cube_data_file_path)
-            pfits.writeto(cube_data_file_path, cube_data, overwrite=True)
+            from astropy.io import fits as pf
+            pf.writeto(cube_data_file_path, cube_data, overwrite=True)
 
         psf_le = self.target.get_tar_image(tar_index, expo_type="le")
         return slopes_data, volts_data, ai_data, psf_le, sthrel_se_list, sthrel_le_list, g_ncpa_list, cube_data

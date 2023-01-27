@@ -579,6 +579,7 @@ def init_controller_ls(i: int, p_controller: conf.Param_controller, p_wfss: list
 
         silence_tqdm : (bool) : Silence tqdm's output
     """
+    from shesha.ao import basis
     M2V = None
     if p_controller.do_kl_imat:
         IF = basis.compute_IFsparse(dms, p_dms, p_geom, silence_tqdm=silence_tqdm).T

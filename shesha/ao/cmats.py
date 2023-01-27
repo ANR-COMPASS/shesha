@@ -176,7 +176,7 @@ def Btt_for_cmat(rtc, dms, p_dms, p_geom):
         p_geom: (Param_geom): geometry settings
 
     """
-
+    from shesha.ao import basis
     IFs = basis.compute_IFsparse(dms, p_dms, p_geom).T
     n = IFs.shape[1]
     IFtt = IFs[:, -2:].toarray()
