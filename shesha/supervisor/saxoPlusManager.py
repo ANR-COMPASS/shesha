@@ -122,7 +122,7 @@ class SaxoPlusManager():
         self.first_stage.computeCoroImage = False
         self.second_stage.computeCoroImage = False
 
-    def next(self, seeAtmos=True):
+    def next(self):
         """
         MAIN method that allows to manage properly the 2 AO stages of SAXO+ system. 
         The phase residuals (including turbulence + AO loop residuals) of the first stage simulation is sent to second stage simulation
@@ -135,12 +135,11 @@ class SaxoPlusManager():
         # Iteration time of the first stage is set as the same as the second stage to allow
         # correct atmosphere movement for second stage integration. Then, first stage as to compute
         # every 3 iteration to be 3 times slower than the second stage
-        # self.first_stage.atmos.enable_atmos(seeAtmos) #Enabling (or not) Turbulence
         self.second_stage.atmos.enable_atmos(False) # Turbulence always disabled on 2nd instance of COMPASS
         if not (self.iterations % self.frequency_ratio): # Time for first stage full computation: We update the first stage command every frequency_ratio iterations. 
             self.first_stage.next()
         else: # Only raytracing current tubulence phase (if any) and current DMs phase (no command updates). 
-            self.first_stage.next(do_control=False, apply_control=False, compute_tar_psf=False)
+            self.first_stage.next(do_control=False, apply_control=False, compute_tar_psf=True)
         # Get residual of first stage to put it into second stage
         # For now, involves GPU-CPU memory copies, can be improved later if speed is a limiting factor here... 
         first_stage_residual = self.first_stage.target.get_tar_phase(0)

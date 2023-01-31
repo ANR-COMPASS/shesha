@@ -188,6 +188,7 @@ class ApertureType:
     EELT_CUSTOM = 'EELT-Custom'
     VLT = 'VLT'
     KECK = 'keck'
+    VLT_NOOBS = 'VLT-NoObs'
 
 
 class SpiderType:

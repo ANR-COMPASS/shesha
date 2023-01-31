@@ -269,8 +269,9 @@ def init_wfs_size(p_wfs: conf.Param_wfs, r0: float, p_tel: conf.Param_tel, verbo
     else:
         pdiam = p_wfs._pdiam
         # this case is for a wfs with fixed # of phase points
-        Nfft = util.fft_goodsize(2 * pdiam)
-    # size of the support in fourier domain
+        # Change to 4* pdiam for SAXO/SAXO+ simulations, instead of usual 2* pdiam in COMPASS
+        Nfft = util.fft_goodsize(4 * pdiam)
+        # size of the support in fourier domain
 
     # qpixsize = pdiam * \
     #     (p_wfs.Lambda * 1.e-6) / subapdiam * CONST.RAD2ARCSEC / Nfft
@@ -823,8 +824,10 @@ def init_sh_geom(p_wfs: conf.Param_wfs, r0: float, p_tel: conf.Param_tel,
         (p_tel.diam / np.sqrt(p_wfs.nxsub ** 2. + (dr0 / 1.5) ** 2.)) / 4.848
     kernelfwhm = np.sqrt(fwhmseeing**2. + p_wfs.kernel**2.)
 
+    # C. Bechet / F. Ferreira : Fix for SAXO+ project to improve SH WFS response
+    # fix consists in multiplying tmp below by 0
     tmp = util.makegaussian(p_wfs._Ntot, kernelfwhm / p_wfs._qpixsize, p_wfs._Ntot // 2,
-                            p_wfs._Ntot // 2).astype(np.float32)
+                            p_wfs._Ntot // 2).astype(np.float32)*0
 
     tmp = np.roll(tmp, tmp.shape[0] // 2, axis=0)
     tmp = np.roll(tmp, tmp.shape[1] // 2, axis=1)

@@ -110,6 +110,10 @@ def make_pupil(dim, pupd, tel, xc=-1, yc=-1, real=0, halfSpider=False):
         tel.set_cobs(0.14)
         print("force_VLT_pup_cobs = %5.3f" % 0.14)
         return make_VLT(dim, pupd, tel)
+    elif tel.type_ap == ApertureType.VLT_NOOBS:
+        tel.set_cobs(0.)
+        print("Remove central obstruction to the VLT")
+        return make_VLT(dim, pupd, tel)
     elif tel.type_ap == ApertureType.GENERIC:
         return make_pupil_generic(dim, pupd, tel.t_spiders, tel.spiders_type, xc, yc,
                                   real, tel.cobs)
