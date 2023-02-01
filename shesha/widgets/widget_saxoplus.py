@@ -35,20 +35,21 @@
 #  You should have received a copy of the GNU Lesser General Public License along with COMPASS.
 #  If not, see <https://www.gnu.org/licenses/lgpl-3.0.txt>.
 """
-Widget built to simulate a 2 stage AO loop mainly in the SAXO+ context (1st stage = SH; second stage = pyramid)
+Widget built to simulate a 2 stage AO loop mainly in the SAXO+ context (1st stage = SH; second stage = pyramid). Both parameters files must be prepared such that the SH param file ittime is equal to the second stage ittime. The frequency ratio is then required to specify the WFS integration time of the first stage.
 
 Usage:
-  widget_saxoplus.py <saxoparameters_filename> <saxoPlusparameters_filename>  [options]
+  widget_saxoplus.py <saxoparameters_filename> <saxoPlusparameters_filename>  frequency_ratio [options]
 
 with 'saxoparameters_filename' the path to the parameters file for SAXO+ First stage
 with 'saxoPlusparameters_filename' the path to the parameters file for SAXO+ Second stage
+with 'frequency_ratio' the ratio of the second stage frequency over the first stage one.
 
 Options:
   -a, --adopt       used to connect ADOPT (via pyro + shm cacao)
 
 Example: 
-    ipython -i widget_saxoplus.py ../../data/par/SPHERE+/sphere.py ../../data/par/SPHERE+/sphere+.py
-    ipython -i widget_saxoplus.py ../../data/par/SPHERE+/sphere.py ../../data/par/SPHERE+/sphere+.py -- --adopt
+    ipython -i widget_saxoplus.py ../../data/par/SPHERE+/sphere.py ../../data/par/SPHERE+/sphere+.py 3
+    ipython -i widget_saxoplus.py ../../data/par/SPHERE+/sphere.py ../../data/par/SPHERE+/sphere+.py 3 -- --adopt
 """
 
 import os, sys
