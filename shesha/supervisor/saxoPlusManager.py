@@ -44,7 +44,7 @@ IMPORTANT:
 The next method of this manager --superseeds-- the compass next method so that the loop is fully handled by the saxoPlus manager. 
 
 Usage:
-  saxoPlusmanager.py <saxoparameters_filename> <saxoPlusparameters_filename> frequency_ratio [options]
+  saxoPlusmanager.py <saxoparameters_filename> <saxoPlusparameters_filename> <frequency_ratio> [options]
 
 with 'saxoparameters_filename' the path to the parameters file for SAXO+ First stage (I.e current SAXO system)
 with 'saxoPlusparameters_filename' the path to the parameters file for SAXO+ Second stage
