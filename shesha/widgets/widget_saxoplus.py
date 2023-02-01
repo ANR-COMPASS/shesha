@@ -38,7 +38,7 @@
 Widget built to simulate a 2 stage AO loop mainly in the SAXO+ context (1st stage = SH; second stage = pyramid). Both parameters files must be prepared such that the SH param file ittime is equal to the second stage ittime. The frequency ratio is then required to specify the WFS integration time of the first stage.
 
 Usage:
-  widget_saxoplus.py <saxoparameters_filename> <saxoPlusparameters_filename>  frequency_ratio [options]
+  widget_saxoplus.py <saxoparameters_filename> <saxoPlusparameters_filename>  <frequency_ratio> [options]
 
 with 'saxoparameters_filename' the path to the parameters file for SAXO+ First stage
 with 'saxoPlusparameters_filename' the path to the parameters file for SAXO+ Second stage
