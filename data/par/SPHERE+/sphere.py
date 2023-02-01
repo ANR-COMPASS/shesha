@@ -119,7 +119,7 @@ p_controller0.set_type("generic")   # /?\ ls (classic easy simple) or generic
 p_controller0.set_nwfs([0])         # /!\
 p_controller0.set_ndm([0, 1])       # /!\
 p_controller0.set_maxcond(1500)     #     determines the nb of modes to be filtered
-p_controller0.set_delay(1.15 * 1000 / 1380) # /!\ same delay in ms as in saxo.py
+p_controller0.set_delay(1.15 * 3000 / 1380) # /!\ same delay in ms as in saxo.py
 p_controller0.set_gain(0.3)
 p_controller0.set_calpix_name("compass1_calPix")
 p_controller0.set_loopdata_name("compass1_loopData")
