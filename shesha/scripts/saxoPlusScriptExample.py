@@ -4,11 +4,11 @@ This script is intended to be used with the saxo+ Manager ONLY!
 The saxo+ manager can be instanciated using the follwing commands. 
 
 > cd $HOME/compass/shesha/shesha/widgets/
-> ipython -i widget_saxoplus.py ../../data/par/SPHERE+/sphere.py ../../data/par/SPHERE+/sphere+.py 3
+> ipython -i widget_saxoplus.py ../../data/par/SPHERE+/sphere.py ../../data/par/SPHERE+/sphere+.py--freqratio 3
 
 The first argument (here ../../data/par/SPHERE+/sphere.py) point towards the saxo parameter configuration file
 The second argument (here ../../data/par/SPHERE+/sphere+.py) point towards the saxo+ parameter configuration file
-The third argument is the frequency_ratio between the second and the first stage.
+An optional argument is the frequency ratio between the second and the first stage (default = 3)
 
 Once started the GUI interface should show 3 windows. 
 1) is the main control window of the manager (which controls the 2 instance of COMPASS)
@@ -47,7 +47,6 @@ wao.wao1.enable_atmos(False) # disabling turbulence
 saxo.wfs.set_noise(0, -1) #removing noise on SH WFS (-1 = no noise)
 saxo.rtc.reset_ref_slopes(0) # reset refslopes from saxo to 0 (check)                    
 saxoplusmanager.iterations=0 # reset iterations count
-saxo.reset_wfs_exposure()
 saxoplusmanager.next(do_control=False) # do a complete loop with no control computation
 saxo.rtc.do_ref_slopes(0) # meaure and load reflopes from null phase
 
@@ -55,14 +54,12 @@ saxo.rtc.do_ref_slopes(0) # meaure and load reflopes from null phase
 saxoplus.wfs.set_noise(0, -1) #removing noise on PYR WFS (-1 = no noise)
 saxoplus.rtc.reset_ref_slopes(0) # reset refslopes from saxo to 0 (check)
 saxoplusmanager.iterations=0 # reset iterations count
-saxo.reset_wfs_exposure()
 saxoplusmanager.next(do_control=False) # do a complete loop with no control computation
 saxoplus.rtc.do_ref_slopes(0) # meaure and load reflopes from null phase                 
 
 
 # 2. Start measurements of iMats                                                         
 saxoplusmanager.iterations=0 # reset iterations count
-saxo.reset_wfs_exposure()
 
 
 # Computing modified KL basis (Gendron modal basis)
@@ -94,7 +91,6 @@ imat01 = np.zeros((Nslopes1, nModes0))
 for mode in trange(nModes0):
     volts = B0All[:, mode] * ampli0;
     saxoplusmanager.iterations=0
-    saxo.reset_wfs_exposure()
     
     saxo.rtc.set_perturbation_voltage(0, "tmp", volts)
     saxoplusmanager.next(do_control=False); 
@@ -108,7 +104,6 @@ saxo.wfs.set_noise(0, saxo.config.p_wfss[0].get_noise()) #  sets the noise back 
 
 
 # Measuring imat on saxo+. ( Boston and PYR (imat1))
-for i in range(6): saxoplusmanager.next(seeAtmos=False); # check
 nmodes1 = B1.shape[1] # number of modes for second stage AO
 ampli1 = 1.0e-2
 imat1 = np.zeros((Nslopes1, nmodes1))
@@ -161,7 +156,6 @@ saxoplus.rtc.close_loop(0) # closing loop on second stage
 # starting long exposure... 
 nbiters = 300
 saxoplusmanager.iterations = 0 # reset iterations to zero to reset WFS integration
-saxo.reset_wfs_exposure()
 
 print("starting long exposure")
 plt.ion()

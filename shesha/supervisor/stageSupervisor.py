@@ -1,6 +1,6 @@
-## @package   shesha.supervisor.stage2Supervisor
-## @brief     Initialization and execution of a second stage supervisor
-## @author    SAXO+ Team (Clementine Bechet)
+## @package   shesha.supervisor.stageSupervisor
+## @brief     Initialization and execution of a single stage supervisor for cascaded AO systems
+## @author    SAXO+ Team <https://github.com/ANR-COMPASS> (Clementine Bechet)
 ## @version   5.3.0
 ## @date      2023/01/31
 ## @copyright GNU Lesser General Public License
@@ -46,8 +46,9 @@ import shesha.constants as scons
 from typing import Iterable
 
 
-class Stage2Supervisor(CompassSupervisor):
-    """ This class implements a second stage supervisor to handle compass cascaded simulations.
+class StageSupervisor(CompassSupervisor):
+    """ This class implements a single stage (e.g. first stage, second stage) supervisor 
+    to handle compass simulations of cascaded AO. The main supervision will be handled by another     supervisor (manager). 
 
     Attributes inherited from CompassSupervisor:
         context : (CarmaContext) : a CarmaContext instance
@@ -83,11 +84,13 @@ class Stage2Supervisor(CompassSupervisor):
     def next(self, *, move_atmos: bool = True, nControl: int = 0,
              tar_trace: Iterable[int] = None, wfs_trace: Iterable[int] = None,
              do_control: bool = True, apply_control: bool = True,
-             compute_tar_psf: bool = True) -> None:
-        """Iterates the AO loop, with optional parameters, considering it is a second 
-        stage. 
+             compute_tar_psf: bool = True, stack_wfs_image: bool = False,
+             do_centroids: bool = True) -> None:
+        """Iterates the AO loop, with optional parameters, considering it is a single 
+        stage and may be called in the middle of WFS frames. 
 
-        Overload the CompassSupervisor next() method to fix the order of the AO tasks.
+        Overload the CompassSupervisor next() method to arrange tasks orders and allow cascaded 
+        simulation.
 
         Kwargs:
             move_atmos: (bool): move the atmosphere for this iteration. Default is True
@@ -102,7 +105,14 @@ class Stage2Supervisor(CompassSupervisor):
 
             apply_control: (bool): if True (default), apply control on DMs
 
-            compute_tar_psf : (bool) : If True (default), computes the PSF at the end of the iteration
+            compute_tar_psf : (bool) : If True (default), computes the PSF at the end of the
+        iteration
+
+            stack_wfs_image : (bool) : If False (default), the Wfs image is computed as 
+        usual. Otherwise, a newly computed WFS image is accumulated to the previous one.
+
+            do_centroids : (bool) : If True (default), the last WFS image is stacked and 
+        centroids computation is done. WFS image must be reset before next loop (in the manager).
         """
         try:
             iter(nControl)
@@ -141,14 +151,19 @@ class Stage2Supervisor(CompassSupervisor):
                     if do_control and self.rtc is not None:
                         self.rtc.do_control(nControl, sources=self.target.sources)
                         self.target.raytrace(t, dms=self.dms, ncpa=True, reset=False)
+
+                    if self.cacao:
+                        self.rtc.publish()
                         
         else:
             # start updating the DM shape
             if apply_control:
                 for ncontrol in nControl :
+                    # command buffer is updated and commands voltages update is applied
                     self.rtc.apply_control(ncontrol)
+                    # Note: clipping is always made by apply_control (CBE. 2023.01.27)
 
-            # start with the propagations
+            # start the propagations
             if tar_trace is not None: # already checked at line 213?
                 for t in tar_trace:
                     if self.atmos.is_enable:
@@ -166,21 +181,29 @@ class Stage2Supervisor(CompassSupervisor):
 
                     if not self.config.p_wfss[w].open_loop and self.dms is not None:
                         self.wfs.raytrace(w, dms=self.dms, ncpa=False, reset=False)
-                    self.wfs.compute_wfs_image(w)
+
+                    if stack_wfs_image:
+                        # accumulate image during sub-integration frames
+                        wfs_image = self.wfs.get_wfs_image(w)
+                        self.wfs.compute_wfs_image(w)
+                        self.wfs.set_wfs_image(w, self.wfs.get_wfs_image(w) + wfs_image)
+                    else:
+                        self.wfs.compute_wfs_image(w)
                     
             if self.rtc is not None:
-                for ncontrol in nControl : # range(len(self.config.p_controllers)):       
-                   self.rtc.do_centroids(ncontrol)
+                for ncontrol in nControl : # range(len(self.config.p_controllers)):                                                          
+                    # modified to allow do_centroids when the WFS exposure is over.
+                    # Also useful for calibration. (CBE 2023.01.30)
+                    if do_centroids:
+                        self.rtc.do_centroids(ncontrol)
 
-            # modified to allow do_centroids even if do_control is False.
-            # Required for calibration. (CBE 2023.01.19)
-            if do_control:
-                for ncontrol in nControl:
-                    self.rtc.do_control(ncontrol)
+                    if do_control:
+                        self.rtc.do_control(ncontrol)
 
-        if self.cacao:
-            self.rtc.publish()
-           
+            if self.cacao:
+                self.rtc.publish()
+
+                   
         if compute_tar_psf:
             for tar_index in tar_trace:
                 self.target.comp_tar_image(tar_index)
@@ -191,4 +214,28 @@ class Stage2Supervisor(CompassSupervisor):
             self.close_modal_gains.append(self.modalgains.get_modal_gains())
 
         self.iter += 1
+
+
+    def reset(self):
+        """ 
+        Reset the simulation to return to its original state.
+        Overwrites the compassSupervisor reset function, reseting explicitely the WFS image, to force a new integration of the frame.
+        """
+        self.atmos.reset_turbu()
+        self.wfs.reset_noise()
+        for w in range(len(self.config.p_wfss)):
+            self.wfs.set_wfs_image(w, self.wfs.get_wfs_image(w)*0)
+        for tar_index in range(len(self.config.p_targets)):
+            self.target.reset_strehl(tar_index)
+
+        self.dms.reset_dm()
+        self.rtc.open_loop()
+        self.rtc.close_loop()
+
+    def reset_wfs_exposure(self):
+        """                                                                              
+        Reset the wfs exposure. Required for cascaded AO simulations.
+        """
+        for w in range(len(self.config.p_wfss)):
+            self.wfs.set_wfs_image(w, self.wfs.get_wfs_image(w)*0)
 
