@@ -38,6 +38,7 @@
 Initialization and execution of a saxo+ manager. 
 It instanciates in one process two compass simulations: 
 1 for first stage and 1 for the second stage (as defined in their relative .par files)
+The frequency ratio between the 2 stages (second stage is assumed to have higher frequency) must be specified, in order to properly call for each stage next method for their respective loops (accumulated integration on the first stage WFS and low frequency update of the first stage control).
 
 IMPORTANT:
 The next method of this manager --superseeds-- the compass next method so that the loop is fully handled by the saxoPlus manager. 
@@ -47,13 +48,14 @@ Usage:
 
 with 'saxoparameters_filename' the path to the parameters file for SAXO+ First stage (I.e current SAXO system)
 with 'saxoPlusparameters_filename' the path to the parameters file for SAXO+ Second stage
+with 'frequency_ratio' the ratio of the frequencies of the two stages
 
 Options:
   -a, --adopt       used to connect optional ADOPT client to the manager (via pyro + shm cacao)
-
+  -f, --freqratio freqratio Ratio of the frequencies of the two stages
 Example: 
-    ipython -i saxoPlusManager.py ../../data/par/SPHERE+/sphere.py ../../data/par/SPHERE+/sphere+.py
-    ipython -i saxoPlusManager.py ../../data/par/SPHERE+/sphere.py ../../data/par/SPHERE+/sphere+.py -- --adopt
+    ipython -i saxoPlusManager.py ../../data/par/SPHERE+/sphere.py ../../data/par/SPHERE+/sphere+.py 3
+    ipython -i saxoPlusManager.py ../../data/par/SPHERE+/sphere.py ../../data/par/SPHERE+/sphere+.py 3 -- --adopt --freqratio 3
 """
 
 import os, sys
@@ -70,7 +72,7 @@ import shesha.constants as scons
 from shesha.constants import CentroiderType, WFSType
 
 from typing import Any, Dict, Tuple, Callable, List
-from shesha.supervisor.compassSupervisor import CompassSupervisor
+from shesha.supervisor.stageSupervisor import StageSupervisor
 
 import shesha.util.sphere_pupil as pup
 try: 
@@ -86,9 +88,9 @@ class SaxoPlusManager():
     Class handling both supervisors of first stage and second stage.
 
     Attributes:
-        first_stage : (CompassSupervisor) : first stage CompassSupervisor instance
+        first_stage : (stageSupervisor) : first stage stageSupervisor instance
 
-        second_stage : (CompassSupervisor) : second stage CompassSupervisor instance
+        second_stage : (stageSupervisor) : second stage stageSupervisor instance
 
         iterations : (int) : frame counter
 
@@ -98,14 +100,16 @@ class SaxoPlusManager():
 
         frequency_ratio : (int) : second stage simulated frequency over first stage simulated frequency
     """
-    def __init__(self, first_stage, second_stage):
+    def __init__(self, first_stage, second_stage, frequency_ratio):
         """ 
         Init of the saxoPlusManager object
 
         Args:
-            first_stage : (CompassSupervisor) : first stage CompassSupervisor instance
+            first_stage : (stageSupervisor) : first stage stageSupervisor instance
 
-            second_stage : (CompassSupervisor) : second stage CompassSupervisor instance
+            second_stage : (stageSupervisor) : second stage stageSupervisor instance
+
+            frequency_ratio : (int) : ratio between second stage frequency and first stage frequency. Only integers are accepted.
         """
 
         self.first_stage = first_stage
@@ -116,13 +120,15 @@ class SaxoPlusManager():
         self.second_stage_input = np.zeros((mpup_shape[0], mpup_shape[1], 1))
         residual_shape = self.first_stage.config.p_geom._spupil.shape
         self.mpup_offset = (mpup_shape[0] - residual_shape[0]) // 2
-        self.frequency_ratio = round(1e-3 / self.second_stage.config.p_loop.ittime)
+
+        # Must be an input to configure the manager
+        self.frequency_ratio = frequency_ratio
 
         # flags for enabling asterix coronagraph
         self.first_stage.computeCoroImage = False
         self.second_stage.computeCoroImage = False
 
-    def next(self):
+    def next(self, *, do_control: bool = True) -> None:
         """
         MAIN method that allows to manage properly the 2 AO stages of SAXO+ system. 
         The phase residuals (including turbulence + AO loop residuals) of the first stage simulation is sent to second stage simulation
@@ -130,23 +136,51 @@ class SaxoPlusManager():
         The saxo+ manager disable the seconds stage turbulence simulation (as it is propageated through the first stage residals if any). 
 
         This next method sould ALWAYS be called to perform a regular SAXO+ simulation 
-        instead of the individuals COMPASS next methods to ensure the correct synchronisation of the 2 systems. 
+        instead of the individual stage next methods to ensure the correct synchronisation of the 2 systems. 
         """
-        # Iteration time of the first stage is set as the same as the second stage to allow
-        # correct atmosphere movement for second stage integration. Then, first stage as to compute
-        # every 3 iteration to be 3 times slower than the second stage
-        self.second_stage.atmos.enable_atmos(False) # Turbulence always disabled on 2nd instance of COMPASS
-        if not (self.iterations % self.frequency_ratio): # Time for first stage full computation: We update the first stage command every frequency_ratio iterations. 
-            self.first_stage.next()
-        else: # Only raytracing current tubulence phase (if any) and current DMs phase (no command updates). 
-            self.first_stage.next(do_control=False, apply_control=False, compute_tar_psf=True)
+        # Iteration time of the first stage is set as the same as the second stage to
+        # allow correct atmosphere movement for second stage integration. Then,
+        # first stage is controlled only once every frequency_ratio times
+
+        # Turbulence always disabled on 2nd instance of COMPASS                         
+        self.second_stage.atmos.enable_atmos(False) 
+
+        if do_control:
+            # compute flags to specify which action need to be done in this first stage:
+            # 1. check if go on stacking WFS image
+            first_stage_stack_wfs = bool(self.iterations % self.frequency_ratio)
+            # 2. check if centroids need to be computed  (end of WFS exposure)
+            first_stage_centroids = not(bool((self.iterations + 1) % self.frequency_ratio))
+            # 3. Check if a new command is computed (when new centroids appear)
+            first_stage_control = first_stage_centroids
+            self.first_stage.next(do_control = first_stage_control,
+                                  apply_control = True,
+                                  do_centroids = first_stage_centroids,
+                                  compute_tar_psf = True,
+                                  stack_wfs_image = first_stage_stack_wfs)
+        else:
+            self.first_stage.next(do_control=False,
+                                  do_centroids=True,
+                                  apply_control=True,
+                                  compute_tar_psf = True)
+        
+        # FIRST STAGE IS DONE.
+
         # Get residual of first stage to put it into second stage
-        # For now, involves GPU-CPU memory copies, can be improved later if speed is a limiting factor here... 
+        # For now, involves GPU-CPU memory copies, can be improved later if speed is
+        # a limiting factor here... 
         first_stage_residual = self.first_stage.target.get_tar_phase(0)
-        self.second_stage_input[self.mpup_offset:-self.mpup_offset,self.mpup_offset:-self.mpup_offset,:] = first_stage_residual[:,:,None]
+        self.second_stage_input[self.mpup_offset:-self.mpup_offset,
+                                self.mpup_offset:-self.mpup_offset,:] = first_stage_residual[:,:,None]
         self.second_stage.tel.set_input_phase(self.second_stage_input) # 1st stage residuals sent to seconds stage simulation. 
-        # Second stage computation
-        self.second_stage.next(move_atmos=False) #"Updates the second stage siulation accordingly". 
+
+        # SECOND STAGE LOOP STARTS...
+        
+        #"Updates the second stage simulation accordingly".
+        # WFS exposure is always reset (default).
+        self.second_stage.next(move_atmos=False, do_control=do_control) 
+        # SECOND STAGE IS DONE.
+            
         if(ASTERIX): # Works only with Asterix installed in python path.
             if self.first_stage.computeCoroImage and not (self.iterations % self.frequency_ratio):
                 targetOPD = self.first_stage.target.get_tar_phase(0)  # OPD [micron]
@@ -277,6 +311,11 @@ if __name__ == '__main__':
     config1 = ParamConfig(arguments["<saxoparameters_filename>"])
     config2 = ParamConfig(arguments["<saxoPlusparameters_filename>"])
 
+    frequency_ratio = 3 # Default value
+    if arguments["--freqratio"]: # If provided by user, overwrite the default value
+        frequency_ratio = int(arguments["--freqratio"])
+
+
     """
     if (arguments["--freq"]):
         print("Warning changed frequency loop to: ", arguments["--freq"])
@@ -313,9 +352,9 @@ if __name__ == '__main__':
     """
 
 
-    first_stage = CompassSupervisor(config1, cacao=adopt)
-    second_stage = CompassSupervisor(config2, cacao=adopt)
-    manager = SaxoPlusManager(first_stage, second_stage)
+    first_stage = StageSupervisor(config1, cacao=adopt)
+    second_stage = StageSupervisor(config2, cacao=adopt)
+    manager = SaxoPlusManager(first_stage, second_stage, frequency_ratio)
 
     if(adopt): 
         

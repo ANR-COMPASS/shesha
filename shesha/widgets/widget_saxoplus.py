@@ -35,20 +35,21 @@
 #  You should have received a copy of the GNU Lesser General Public License along with COMPASS.
 #  If not, see <https://www.gnu.org/licenses/lgpl-3.0.txt>.
 """
-Widget built to simulate a 2 stage AO loop mainly in the SAXO+ context (1st stage = SH; second stage = pyramid)
+Widget built to simulate a 2 stage AO loop mainly in the SAXO+ context (1st stage = SH; second stage = pyramid). Both parameters files must be prepared such that the SH param file ittime is equal to the second stage ittime. The frequency ratio is then required to specify the WFS integration time of the first stage.
 
 Usage:
-  widget_saxoplus.py <saxoparameters_filename> <saxoPlusparameters_filename>  [options]
+  widget_saxoplus.py <saxoparameters_filename> <saxoPlusparameters_filename> [options]
 
 with 'saxoparameters_filename' the path to the parameters file for SAXO+ First stage
 with 'saxoPlusparameters_filename' the path to the parameters file for SAXO+ Second stage
+with 'freqratio' (default = 3) the ratio of the second stage frequency over the first stage one.
 
 Options:
   -a, --adopt       used to connect ADOPT (via pyro + shm cacao)
-
+  -f, --freqratio freqratio Ratio of the 2 stages frequencies
 Example: 
-    ipython -i widget_saxoplus.py ../../data/par/SPHERE+/sphere.py ../../data/par/SPHERE+/sphere+.py
-    ipython -i widget_saxoplus.py ../../data/par/SPHERE+/sphere.py ../../data/par/SPHERE+/sphere+.py -- --adopt
+    ipython -i widget_saxoplus.py ../../data/par/SPHERE+/sphere.py ../../data/par/SPHERE+/sphere+.py 
+    ipython -i widget_saxoplus.py ../../data/par/SPHERE+/sphere.py ../../data/par/SPHERE+/sphere+.py --freqratio 3 -- --adopt
 """
 
 import os, sys
@@ -74,7 +75,8 @@ server = None
 
 class widgetSaxoPlusWindowPyro():
 
-    def __init__(self, config_file1: Any = None, config_file2: Any = None, cacao: bool = False,
+    def __init__(self, config_file1: Any = None, config_file2: Any = None,
+                 frequency_ratio: int = 3, cacao: bool = False,
                  expert: bool = False) -> None:
         self.config1 = config_file1
         self.config2 = config_file2
@@ -111,7 +113,8 @@ class widgetSaxoPlusWindowPyro():
         #                       METHODS                             #
         #############################################################
 
-        self.manager = SaxoPlusManager(self.wao1.supervisor, self.wao2.supervisor)
+        self.manager = SaxoPlusManager(self.wao1.supervisor, self.wao2.supervisor,
+                                       frequency_ratio)
         if(self.cacao):
             global server
             server = self.start_pyro_server()
@@ -290,9 +293,14 @@ class loopHandler:
 if __name__ == '__main__':
     arguments = docopt(__doc__)
     adopt = arguments["--adopt"]
+
+    frequency_ratio = 3 # Default value                                                           
+    if arguments["--freqratio"]: # If provided by user, overwrite the default value               
+        frequency_ratio = int(arguments["--freqratio"])
+
     app = QtWidgets.QApplication(sys.argv)
     app.setStyle('cleanlooks')
-    wao = widgetSaxoPlusWindowPyro(arguments["<saxoparameters_filename>"], arguments["<saxoPlusparameters_filename>"], cacao=adopt)
+    wao = widgetSaxoPlusWindowPyro(arguments["<saxoparameters_filename>"], arguments["<saxoPlusparameters_filename>"], frequency_ratio=frequency_ratio, cacao=adopt)
 
     wao.wao1.show()
     # wao.wao2.show()

@@ -85,6 +85,16 @@ class WfsCompass(SourceCompass):
             return np.array(self._wfs.d_wfs[wfs_index].d_camimg)
         else:
             return np.array(self._wfs.d_wfs[wfs_index].d_binimg)
+        
+    def set_wfs_image(self, wfs_index : int, img: np.ndarray):
+        """ Set an image in the WFS (wfs[0] by default)
+
+        Args:
+            wfs_index : (int) : index of the WFS (or the centroider) to request an image
+
+            img: (np.ndarray) : Image to set
+        """
+        self._wfs.d_wfs[wfs_index].set_binimg(img, img.size)
 
     def set_pyr_modulation_points(self, wfs_index : int, cx: np.ndarray, cy: np.ndarray,
                                   *, weights: np.ndarray = None) -> None:
