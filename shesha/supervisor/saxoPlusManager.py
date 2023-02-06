@@ -144,21 +144,25 @@ class SaxoPlusManager():
 
         # Turbulence always disabled on 2nd instance of COMPASS                         
         self.second_stage.atmos.enable_atmos(False) 
-        
-        # compute flags to specify which action need to be done in this first stage:
-        # 1. check if go on stacking WFS image
-        first_stage_stack_wfs = bool(self.iterations % self.frequency_ratio)
-        # 2. check if centroids need to be computed
-        # - either do_control = False (calibration on-going)
-        # - or end of WFS exposure
-        first_stage_centroids = not((do_control) & (bool((self.iterations+1)%self.frequency_ratio)))
-        # 3. Check if a new command is computed (no, if calibration is ongoing)
-        first_stage_control = (do_control & first_stage_centroids)
-        
-        self.first_stage.next(do_control = first_stage_control, apply_control = True,
-                              do_centroids = first_stage_centroids,
-                              compute_tar_psf = True,
-                              stack_wfs_image = first_stage_stack_wfs)
+
+        if do_control:
+            # compute flags to specify which action need to be done in this first stage:
+            # 1. check if go on stacking WFS image
+            first_stage_stack_wfs = bool(self.iterations % self.frequency_ratio)
+            # 2. check if centroids need to be computed  (end of WFS exposure)
+            first_stage_centroids = not(bool((self.iterations + 1) % self.frequency_ratio))
+            # 3. Check if a new command is computed (when new centroids appear)
+            first_stage_control = first_stage_centroids
+            self.first_stage.next(do_control = first_stage_control,
+                                  apply_control = True,
+                                  do_centroids = first_stage_centroids,
+                                  compute_tar_psf = True,
+                                  stack_wfs_image = first_stage_stack_wfs)
+        else:
+            self.first_stage.next(do_control=False,
+                                  do_centroids=True,
+                                  apply_control=True,
+                                  compute_tar_psf = True)
         
         # FIRST STAGE IS DONE.
 
