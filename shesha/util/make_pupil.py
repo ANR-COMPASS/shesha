@@ -619,7 +619,7 @@ def generateEeltPupilMask(npt, dspider, i0, j0, pixscale, gap, rotdegree, D=40.0
         obstru = (util.dist(pup.shape[0], pup.shape[0] // 2 + 0.5,
                             pup.shape[0] // 2 + 0.5) >=
                   (pup.shape[0] * cobs + 1.) * 0.5).astype(np.float32)
-        pup *= obstru
+        pup = pup * obstru
     return pup
 
 
