@@ -1,7 +1,7 @@
 ## @package   shesha.supervisor.optimizers
 ## @brief     User layer for optimizing AO supervisor loop
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   5.3.0
+## @version   5.4.0
 ## @date      2022/01/24
 ## @copyright GNU Lesser General Public License
 #

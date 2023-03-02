@@ -1,7 +1,7 @@
 ## @package   shesha.supervisor.compassSupervisor
 ## @brief     Initialization and execution of a COMPASS supervisor
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   5.3.0
+## @version   5.4.0
 ## @date      2022/01/24
 ## @copyright GNU Lesser General Public License
 #
@@ -36,7 +36,7 @@
 #  If not, see <https://www.gnu.org/licenses/lgpl-3.0.txt>.
 
 from shesha.supervisor.genericSupervisor import GenericSupervisor
-from shesha.supervisor.components import AtmosCompass, DmCompass, RtcCompass, TargetCompass, TelescopeCompass, WfsCompass
+from shesha.supervisor.components import AtmosCompass, DmCompass, RtcCompass, TargetCompass, TelescopeCompass, WfsCompass, CoronagraphCompass
 from shesha.supervisor.optimizers import ModalBasis, Calibration, ModalGains
 import numpy as np
 import time
@@ -73,6 +73,8 @@ class CompassSupervisor(GenericSupervisor):
 
         cacao : (bool) : CACAO features enabled in the RTC
 
+        silence_tqdm : (bool) : Silence tqdm's output
+
         basis : (ModalBasis) : a ModalBasis instance (optimizer)
 
         calibration : (Calibration) : a Calibration instance (optimizer)
@@ -82,7 +84,7 @@ class CompassSupervisor(GenericSupervisor):
         close_modal_gains : (list of floats) : list of the previous values of the modal gains
     """
 
-    def __init__(self, config, *, cacao: bool = False):
+    def __init__(self, config, *, cacao: bool = False, silence_tqdm: bool = False):
         """ Instantiates a CompassSupervisor object
 
         Args:
@@ -99,13 +101,15 @@ class CompassSupervisor(GenericSupervisor):
         self.wfs = None
         self.dms = None
         self.rtc = None
-        GenericSupervisor.__init__(self, config)
+        self.corono = None
+        
+        GenericSupervisor.__init__(self, config, silence_tqdm=silence_tqdm)
         self.basis = ModalBasis(self.config, self.dms, self.target)
         self.calibration = Calibration(self.config, self.tel, self.atmos, self.dms,
                                        self.target, self.rtc, self.wfs)
-        self.modalgains = ModalGains(self.config, self.rtc)
+        if config.p_controllers is not None:
+            self.modalgains = ModalGains(self.config, self.rtc)
         self.close_modal_gains = []
-
 
 #     ___                  _      __  __     _   _            _
 #    / __|___ _ _  ___ _ _(_)__  |  \/  |___| |_| |_  ___  __| |___
@@ -120,12 +124,12 @@ class CompassSupervisor(GenericSupervisor):
     def _init_atmos(self):
         """Initialize the atmosphere component of the supervisor as a AtmosCompass
         """
-        self.atmos = AtmosCompass(self.context, self.config)
+        self.atmos = AtmosCompass(self.context, self.config, silence_tqdm=self.silence_tqdm)
 
     def _init_dms(self):
         """Initialize the DM component of the supervisor as a DmCompass
         """
-        self.dms = DmCompass(self.context, self.config)
+        self.dms = DmCompass(self.context, self.config, silence_tqdm=self.silence_tqdm)
 
     def _init_target(self):
         """Initialize the target component of the supervisor as a TargetCompass
@@ -148,7 +152,7 @@ class CompassSupervisor(GenericSupervisor):
         """
         if self.wfs is not None:
             self.rtc = RtcCompass(self.context, self.config, self.tel, self.wfs,
-                                  self.dms, self.atmos, cacao=self.cacao)
+                                  self.dms, self.atmos, cacao=self.cacao, silence_tqdm=self.silence_tqdm)
         else:
             raise ValueError("Configuration not loaded or Telescope not initilaized")
 
@@ -170,13 +174,22 @@ class CompassSupervisor(GenericSupervisor):
             self._init_wfs()
         if self.config.p_controllers is not None or self.config.p_centroiders is not None:
             self._init_rtc()
+        if self.config.p_coronos is not None:
+            self._init_coronagraph()
 
         GenericSupervisor._init_components(self)
+
+    def _init_coronagraph(self):
+        """ Initialize the coronagraph
+        """
+        self.corono = CoronagraphCompass()
+        for p_corono in self.config.p_coronos:
+            self.corono.add_corono(self.context, p_corono, self.config.p_geom, self.target)
 
     def next(self, *, move_atmos: bool = True, nControl: int = 0,
              tar_trace: Iterable[int] = None, wfs_trace: Iterable[int] = None,
              do_control: bool = True, apply_control: bool = True,
-             compute_tar_psf: bool = True) -> None:
+             compute_tar_psf: bool = True, compute_corono: bool=True) -> None:
         """Iterates the AO loop, with optional parameters.
 
         Overload the GenericSupervisor next() method to handle the GEO controller
@@ -196,6 +209,8 @@ class CompassSupervisor(GenericSupervisor):
             apply_control: (bool): if True (default), apply control on DMs
 
             compute_tar_psf : (bool) : If True (default), computes the PSF at the end of the iteration
+
+            compute_corono: (bool): If True (default), computes the coronagraphic image
         """
         try:
             iter(nControl)
@@ -268,6 +283,10 @@ class CompassSupervisor(GenericSupervisor):
             for tar_index in tar_trace:
                 self.target.comp_tar_image(tar_index)
                 self.target.comp_strehl(tar_index)
+
+        if self.corono is not None and compute_corono:
+            for coro_index in range(len(self.config.p_coronos)):
+                self.corono.compute_image(coro_index)
 
         if self.config.p_controllers[0].close_opti and (not self.rtc._rtc.d_control[0].open_loop):
             self.modalgains.update_mgains()

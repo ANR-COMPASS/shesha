@@ -1,7 +1,7 @@
 ## @package   shesha.init.geom_init
 ## @brief     Initialization of the system geometry and of the Telescope object
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   5.3.0
+## @version   5.4.0
 ## @date      2022/01/24
 ## @copyright GNU Lesser General Public License
 #
@@ -140,7 +140,7 @@ def init_wfs_geom(p_wfs: conf.Param_wfs, r0: float, p_tel: conf.Param_tel,
     if p_geom.pupdiam:
         if p_wfs.type == scons.WFSType.SH or p_wfs.type == scons.WFSType.PYRHR or p_wfs.type == scons.WFSType.PYRLR:
             pdiam = p_geom.pupdiam // p_wfs.nxsub
-            if (p_geom.pupdiam % p_wfs.nxsub > 0):
+            if ((pdiam * p_wfs.nxsub) % 2):
                 pdiam += 1
 
     else:
@@ -821,6 +821,7 @@ def init_sh_geom(p_wfs: conf.Param_wfs, r0: float, p_tel: conf.Param_tel,
         np.cos(p_geom.zenithangle * CONST.DEG2RAD) ** 0.6
     fwhmseeing = p_wfs.Lambda / \
         (p_tel.diam / np.sqrt(p_wfs.nxsub ** 2. + (dr0 / 1.5) ** 2.)) / 4.848
+    fwhmseeing = min(fwhmseeing, 2 * p_wfs.pixsize)
     kernelfwhm = np.sqrt(fwhmseeing**2. + p_wfs.kernel**2.)
 
     tmp = util.makegaussian(p_wfs._Ntot, kernelfwhm / p_wfs._qpixsize, p_wfs._Ntot // 2,

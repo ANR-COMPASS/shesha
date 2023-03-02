@@ -6,7 +6,7 @@ More details.
 
 import subprocess, sys
 
-__version__ = "5.3.0"
+__version__ = "5.4.0"
 
 def check_shesha_compass_versions():
     compass_package = subprocess.check_output('conda list compass | tail -n1',shell=True).decode(

@@ -1,7 +1,7 @@
 ## @package   shesha.supervisor
 ## @brief     User layer for initialization and execution of a COMPASS simulation
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   5.3.0
+## @version   5.4.0
 ## @date      2022/01/24
 ## @copyright GNU Lesser General Public License
 #
@@ -47,3 +47,4 @@ from .targetCompass import TargetCompass
 from .sourceCompass import SourceCompass
 from .telescopeCompass import TelescopeCompass
 from .wfsCompass import WfsCompass
+from .coronagraph.coronagraphCompass import CoronagraphCompass

@@ -1,7 +1,7 @@
 ## @package   shesha.init.rtc_init
 ## @brief     Initialization of a Rtc object
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   5.3.0
+## @version   5.4.0
 ## @date      2022/01/24
 ## @copyright GNU Lesser General Public License
 #
@@ -55,7 +55,7 @@ def rtc_init(context: carmaWrap_context, tel: Telescope, wfs: Sensors, dms: Dms,
              atmos: Atmos, p_wfss: list, p_tel: conf.Param_tel, p_geom: conf.Param_geom,
              p_atmos: conf.Param_atmos, ittime: float, p_centroiders=None,
              p_controllers=None, p_dms=None, do_refslp=False, brahma=False, cacao=False,
-             tar=None, dataBase={}, use_DB=False):
+             tar=None, dataBase={}, use_DB=False, silence_tqdm: bool = False):
     """Initialize all the SutraRtc objects : centroiders and controllers
 
     Args:
@@ -98,6 +98,8 @@ def rtc_init(context: carmaWrap_context, tel: Telescope, wfs: Sensors, dms: Dms,
 
         use_DB: (bool): use dataBase flag
 
+        silence_tqdm : (bool) : Silence tqdm's output
+
     Returns:
         Rtc : (Rtc) : Rtc object
     """
@@ -106,7 +108,7 @@ def rtc_init(context: carmaWrap_context, tel: Telescope, wfs: Sensors, dms: Dms,
     if brahma:
         rtc = Rtc_brahma(context, wfs, tar, "rtc_brahma")
     elif cacao:
-        rtc = Rtc_cacao_FFF("compass_calPix", "compass_loopData")
+        rtc = Rtc_cacao_FFF(p_controllers[0].calpix_name, p_controllers[0].loopdata_name)
     else:
         rtc = Rtc()
 
@@ -134,7 +136,7 @@ def rtc_init(context: carmaWrap_context, tel: Telescope, wfs: Sensors, dms: Dms,
             for i in range(ncontrol):
                 if not "dm" in dataBase:
                     imat = imats.imat_geom(wfs, dms, p_wfss, p_dms, p_controllers[i],
-                                           meth=0)
+                                           meth=0, silence_tqdm=silence_tqdm)
                 else:
                     imat = None
 
@@ -145,7 +147,7 @@ def rtc_init(context: carmaWrap_context, tel: Telescope, wfs: Sensors, dms: Dms,
                 init_controller(context, i, p_controllers[i], p_wfss, p_geom, p_dms,
                                 p_atmos, ittime, p_tel, rtc, dms, wfs, tel, atmos,
                                 p_centroiders, do_refslp, dataBase=dataBase,
-                                use_DB=use_DB)
+                                use_DB=use_DB, silence_tqdm=silence_tqdm)
 
             # add a geometric controller for processing error breakdown
             roket_flag = True in [w.roket for w in p_wfss]
@@ -379,7 +381,7 @@ def init_controller(context, i: int, p_controller: conf.Param_controller, p_wfss
                     ittime: float, p_tel: conf.Param_tel, rtc: Rtc, dms: Dms,
                     wfs: Sensors, tel: Telescope, atmos: Atmos,
                     p_centroiders: List[conf.Param_centroider], do_refslp=False,
-                    dataBase={}, use_DB=False):
+                    dataBase={}, use_DB=False, silence_tqdm: bool = False):
     """ Initialize the controller part of rtc
 
     Args:
@@ -419,6 +421,8 @@ def init_controller(context, i: int, p_controller: conf.Param_controller, p_wfss
         dataBase: (dict): database used
 
         use_DB: (bool): use database or not
+
+        silence_tqdm : (bool) : Silence tqdm's output
     """
     if (p_controller.type != scons.ControllerType.GEO):
         nwfs = p_controller.nwfs
@@ -477,20 +481,20 @@ def init_controller(context, i: int, p_controller: conf.Param_controller, p_wfss
     if (p_controller.type == scons.ControllerType.LS):
         init_controller_ls(i, p_controller, p_wfss, p_geom, p_dms, p_atmos, ittime,
                            p_tel, rtc, dms, wfs, tel, atmos, dataBase=dataBase,
-                           use_DB=use_DB)
+                           use_DB=use_DB, silence_tqdm=silence_tqdm)
 
     if (p_controller.type == scons.ControllerType.CURED):
         init_controller_cured(i, rtc, p_controller, p_dms, p_wfss)
 
     if (p_controller.type == scons.ControllerType.MV):
         init_controller_mv(i, p_controller, p_wfss, p_geom, p_dms, p_atmos, p_tel, rtc,
-                           dms, wfs, atmos)
+                           dms, wfs, atmos, silence_tqdm=silence_tqdm)
 
     elif (p_controller.type == scons.ControllerType.GENERIC):
         init_controller_generic(i, p_controller, p_dms, rtc)
         try:
             p_controller._imat = imats.imat_geom(wfs, dms, p_wfss, p_dms, p_controller,
-                                                 meth=0)
+                                                 meth=0, silence_tqdm=silence_tqdm)
         except:
             print("p_controller._imat not set")
 
@@ -538,7 +542,7 @@ def init_controller_ls(i: int, p_controller: conf.Param_controller, p_wfss: list
                        p_geom: conf.Param_geom, p_dms: list, p_atmos: conf.Param_atmos,
                        ittime: float, p_tel: conf.Param_tel, rtc: Rtc, dms: Dms,
                        wfs: Sensors, tel: Telescope, atmos: Atmos, dataBase: dict = {},
-                       use_DB: bool = False):
+                       use_DB: bool = False, silence_tqdm: bool = False):
     """ Initialize the least square controller
 
     Args:
@@ -572,10 +576,12 @@ def init_controller_ls(i: int, p_controller: conf.Param_controller, p_wfss: list
         dataBase: (dict): database used
 
         use_DB: (bool): use database or not
+
+        silence_tqdm : (bool) : Silence tqdm's output
     """
     M2V = None
     if p_controller.do_kl_imat:
-        IF = basis.compute_IFsparse(dms, p_dms, p_geom).T
+        IF = basis.compute_IFsparse(dms, p_dms, p_geom, silence_tqdm=silence_tqdm).T
         M2V, _ = basis.compute_btt(IF[:, :-2], IF[:, -2:].toarray())
         print("Filtering ", p_controller.nModesFilt, " modes based on mode ordering")
         M2V = M2V[:, list(range(M2V.shape[1] - 2 - p_controller.nModesFilt)) + [-2, -1]]
@@ -591,7 +597,7 @@ def init_controller_ls(i: int, p_controller: conf.Param_controller, p_wfss: list
         if p_controller.nmodes is None:
             p_controller.nmodes = sum([p_dms[j]._ntotact for j in range(len(p_dms))])
 
-        IF = basis.compute_IFsparse(dms, p_dms, p_geom).T
+        IF = basis.compute_IFsparse(dms, p_dms, p_geom, silence_tqdm=silence_tqdm).T
         M2V, _ = basis.compute_btt(IF[:, :-2], IF[:, -2:].toarray())
         M2V = M2V[:, list(range(p_controller.nmodes - 2)) + [-2, -1]]
 
@@ -645,7 +651,7 @@ def init_controller_cured(i: int, rtc: Rtc, p_controller: conf.Param_controller,
 def init_controller_mv(i: int, p_controller: conf.Param_controller, p_wfss: list,
                        p_geom: conf.Param_geom, p_dms: list, p_atmos: conf.Param_atmos,
                        p_tel: conf.Param_tel, rtc: Rtc, dms: Dms, wfs: Sensors,
-                       atmos: Atmos):
+                       atmos: Atmos, silence_tqdm: bool = False):
     """ Initialize the MV controller
 
     Args:
@@ -670,8 +676,10 @@ def init_controller_mv(i: int, p_controller: conf.Param_controller, p_wfss: list
         wfs: (Sensors) : Sensors object
 
         atmos: (Atmos) : Atmos object
+
+        silence_tqdm : (bool) : Silence tqdm's output
     """
-    p_controller._imat = imats.imat_geom(wfs, dms, p_wfss, p_dms, p_controller)
+    p_controller._imat = imats.imat_geom(wfs, dms, p_wfss, p_dms, p_controller, silence_tqdm=silence_tqdm)
     # imat_init(i,rtc,p_rtc,dms,wfs,p_wfss,p_tel,clean=1,simul_name=simul_name)
     rtc.d_control[i].set_imat(p_controller._imat)
     rtc.d_control[i].set_gain(p_controller.gain)

@@ -45,7 +45,7 @@ p_wfs0 = conf.Param_wfs()
 p_wfss = [p_wfs0]
 
 p_wfs0.set_type("sh")
-p_wfs0.set_nxsub(8)
+p_wfs0.set_nxsub(16)
 p_wfs0.set_npix(8)
 p_wfs0.set_pixsize(0.3)
 p_wfs0.set_fracsub(0.8)

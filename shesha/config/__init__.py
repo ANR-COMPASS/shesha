@@ -1,7 +1,7 @@
 ## @package   shesha.config
 ## @brief     Parameter classes for COMPASS
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   5.3.0
+## @version   5.4.0
 ## @date      2022/01/24
 ## @copyright GNU Lesser General Public License
 #
@@ -49,4 +49,5 @@ from .PWFS import Param_wfs
 from .PTARGET import Param_target
 from .PCENTROIDER import Param_centroider
 from .PCONTROLLER import Param_controller
+from .PCORONO import Param_corono
 from .pconfig import ParamConfig

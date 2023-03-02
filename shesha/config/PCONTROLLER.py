@@ -1,7 +1,7 @@
 ## @package   shesha.config.PCONTROLLER
 ## @brief     Param_controller class definition
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   5.3.0
+## @version   5.4.0
 ## @date      2022/01/24
 ## @copyright GNU Lesser General Public License
 #
@@ -125,6 +125,43 @@ class Param_controller:
         """ flag to do polc in generic linear controller """
         self.__modal = 0
         """ flag to use a modal control in generic linenar controller """
+        self.__kernconv4imat = 1
+        """ Flag to use kernel convolution when computing imat """
+        self.__calpix_name = "compass_calPix"
+        self.__loopdata_name = "compass_loopData"
+
+
+    def get_calpix_name(self):
+        """ Get the topic name of calpix stream
+
+        :return: (string) : type
+        """
+        return self.__calpix_name
+
+    def set_calpix_name(self, calpix_name):
+        """ Set the calpix topic name type
+
+        :param t: (string) : type
+        """
+        self.__calpix_name = calpix_name
+
+    calpix_name = property(get_calpix_name, set_calpix_name)
+
+    def get_loopdata_name(self):
+        """ Get the topic name of calpix stream
+
+        :return: (string) : type
+        """
+        return self.__loopdata_name
+
+    def set_loopdata_name(self, loopdata_name):
+        """ Set the loop data topic name type
+
+        :param t: (string) : type
+        """
+        self.__loopdata_name = loopdata_name
+
+    loopdata_name = property(get_loopdata_name, set_loopdata_name)
 
     def get_type(self):
         """ Get the controller type
@@ -738,3 +775,21 @@ class Param_controller:
         self.__modal = csu.enforce_or_cast_bool(m)
 
     modal = property(get_modal, set_modal)
+
+    def get_kernconv4imat(self):
+        """Get kernconv4imat, i.e. a flag for using kernel convolution to have better
+        sensitivity on SH spot movements for imat computation
+
+        :return: (int) : kernconv4imat
+        """
+        return self.__kernconv4imat
+
+    def set_kernconv4imat(self, n):
+        """Set kernconv4imat, i.e. a flag for using kernel convolution to have better
+        sensitivity on SH spot movements for imat computation
+
+        :param k: (int) : kernconv4imat
+        """
+        self.__kernconv4imat = csu.enforce_or_cast_bool(n)
+
+    kernconv4imat = property(get_kernconv4imat, set_kernconv4imat)

@@ -1,7 +1,7 @@
 ## @package   shesha.supervisor.canapassSupervisor
 ## @brief     Initialization and execution of a CANAPASS supervisor
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   5.3.0
+## @version   5.4.0
 ## @date      2022/01/24
 ## @copyright GNU Lesser General Public License
 #
@@ -80,10 +80,10 @@ from shesha.supervisor.compassSupervisor import CompassSupervisor
 
 class CanapassSupervisor(CompassSupervisor):
 
-    def __init__(self, config, cacao: bool = True) -> None:
+    def __init__(self, config, cacao: bool = True, silence_tqdm: bool = False) -> None:
         print("switching to a generic controller")
         config.p_controllers[0].type = scons.ControllerType.GENERIC
-        CompassSupervisor.__init__(self, config, cacao=cacao)
+        CompassSupervisor.__init__(self, config, cacao=cacao, silence_tqdm=silence_tqdm)
 
 
 ########################## PROTO #############################

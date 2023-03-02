@@ -1,7 +1,7 @@
 ## @package   shesha.supervisor
 ## @brief     User layer for initialization and execution of a COMPASS simulation
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   5.3.0
+## @version   5.4.0
 ## @date      2022/01/24
 ## @copyright GNU Lesser General Public License
 #
@@ -50,13 +50,15 @@ class AtmosCompass(object):
 
         _config : (config module) : Parameters configuration structure module
     """
-    def __init__(self, context, config):
+    def __init__(self, context, config, silence_tqdm: bool = False):
         """ Initialize an AtmosCompass component for atmosphere related supervision
 
         Args:
             context : (carmaContext) : CarmaContext instance
 
             config : (config module) : Parameters configuration structure module
+
+            silence_tqdm : (bool) : Silence tqdm's output
         """
         self.is_enable = True # Flag to enable/disable atmophere
         self._context = context
@@ -64,7 +66,7 @@ class AtmosCompass(object):
         print("->atmosphere init")
         self._atmos = atmos_init(self._context, self._config.p_atmos, self._config.p_tel,
                         self._config.p_geom, self._config.p_loop.ittime, p_wfss=self._config.p_wfss,
-                        p_targets=self._config.p_targets)
+                        p_targets=self._config.p_targets, silence_tqdm=silence_tqdm)
 
 
     def enable_atmos(self, enable : bool) -> None:
