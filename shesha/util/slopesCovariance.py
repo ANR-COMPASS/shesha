@@ -206,7 +206,7 @@ def compute_Caa(vv1, vv2, s1, s2, Cn2h, L0, alt1, alt2, altitude):
     if False:
         # Calcul du rico pour ameliorer l'exactitude du modele en xy
         # Bon on desactive quand meme... c'est idem a 1e-5 pres
-        s0 = sqrt(s1**2+s2**2)   # size of the subaperture equivalent to a convolution by s1 and s2
+        s0 = np.sqrt(s1**2+s2**2)   # size of the subaperture equivalent to a convolution by s1 and s2
         caa_xy = -DPHI(vx+s0/2,vy-s0/2,L0) + DPHI(vx+s0/2,vy+s0/2,L0) + DPHI(vx-s0/2,vy-s0/2,L0) - DPHI(vx-s0/2,vy+s0/2,L0)
         caa_xy /= 2.
         caa_xy /= 2.

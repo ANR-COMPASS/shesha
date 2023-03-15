@@ -30,6 +30,10 @@ import matplotlib.pyplot as plt
 import astropy.io.fits as pfits
 import os
 from shesha.util.slopesCovariance import KLmodes
+from tqdm import trange
+
+if wao is None:
+    raise RuntimeError("Simulation need to be initialized before")
 
 saxoplusmanager = wao.manager
 saxo = wao.wao1.supervisor

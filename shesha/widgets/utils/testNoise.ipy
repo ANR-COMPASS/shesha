@@ -1,7 +1,10 @@
+import numpy as np
 from tqdm import trange
 import matplotlib.pyplot as plt
 plt.ion()
 
+if wao is None:
+    raise RuntimeError("Simulation need to be initialized before")
 
 def testNoise(noise=0.9, niter=100, close_loop=True):
 
