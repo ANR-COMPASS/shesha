@@ -1,13 +1,13 @@
 ## @package   shesha.supervisor
 ## @brief     User layer for initialization and execution of a COMPASS simulation
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   5.3.0
+## @version   5.4.1
 ## @date      2022/01/24
 ## @copyright GNU Lesser General Public License
 #
 #  This file is part of COMPASS <https://anr-compass.github.io/compass/>
 #
-#  Copyright (C) 2011-2022 COMPASS Team <https://github.com/ANR-COMPASS>
+#  Copyright (C) 2011-2023 COMPASS Team <https://github.com/ANR-COMPASS>
 #  All rights reserved.
 #  Distributed under GNU - LGPL
 #
@@ -63,7 +63,7 @@ class RtcAbstract(ABC):
     """
 
     def __init__(self, context: carmaWrap_context, config, *, brahma: bool = False,
-                 fp16: bool = False, cacao: bool = False):
+                 fp16: bool = False, cacao: bool = False, silence_tqdm: bool = False):
         """ Initialize a RtcCompass component for rtc related supervision
 
         Args:
@@ -80,10 +80,13 @@ class RtcAbstract(ABC):
 
             cacao : (bool) : If True, enables CACAO features in RTC (Default is False)
                                       Requires OCTOPUS to be installed
+
+            silence_tqdm : (bool) : Silence tqdm's output
         """
         self.brahma = brahma
         self.fp16 = fp16
         self.cacao = cacao
+        self.silence_tqdm = silence_tqdm
         self._context = context
         self._config = config  # Parameters configuration coming from supervisor init
         self._rtc = None

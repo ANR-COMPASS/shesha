@@ -108,7 +108,7 @@ def init_config(config):
 # /_/ \_\___/  |_\___/\___/ .__/
 #                         |_|
 ##############################################################################
-def loop(n):
+def loop(config, n):
     """
     Performs the main AO loop for n interations. First, initialize buffers
     for error breakdown computations. Then, at the end of each iteration, just
@@ -198,7 +198,7 @@ def loop(n):
     return SR, SR2
 
 
-def preloop(n):
+def preloop(config, n):
     """
     Performs the main AO loop for n interations. First, initialize buffers
     for error breakdown computations. Then, at the end of each iteration, just
@@ -385,7 +385,7 @@ def cov_cor(P, noise, trunc, alias, H, bp, tomo):
 ###########################################################################################
 
 
-def save_it(filename):
+def save_it(config, filename):
     IF = rtc.get_IFsparse(1)
     TT = rtc.get_IFtt(1)
     noise_com = roket.getContributor("noise")
@@ -449,12 +449,15 @@ def save_it(filename):
 ###############################################################################################
 param_file = "/home/fferreira/compass/trunk/shesha/data/par/par4roket/correlation_study/roket_8m_1layer.py"
 error_flag = True
+config = None
 if (param_file.split('.')[-1] == b"py"):
     filename = param_file.split('/')[-1]
     param_path = param_file.split(filename)[0]
     sys.path.insert(0, param_path)
     exec("import %s as config" % filename.split(".py")[0])
     #sys.path.remove(param_path)
+else: 
+    raise RuntimeError("unsupported config file")
 nfiltered = 20
 niters = config.p_loop.niter
 
@@ -482,7 +485,7 @@ RD = np.dot(R, imat).astype(np.float32)
 gRD = (np.identity(RD.shape[0]) - config.p_controllers[0].gain * RD).astype(np.float32)
 roket = ao.roket_init(rtc, wfs, tar, dms, tel, atm, 0, 1, Btt.shape[0], Btt.shape[1],
                       nfiltered, niters, Btt, P, gRD, RD)
-preloop(1000)
-SR, SR2 = loop(niters)
+preloop(config, 1000)
+SR, SR2 = loop(config, niters)
 
-save_it(savename)
+save_it(config, savename)

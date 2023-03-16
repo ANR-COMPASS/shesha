@@ -1,13 +1,13 @@
 ## @package   shesha.ao.basis
 ## @brief     Functions for modal basis (DM basis, KL, Btt, etc...)
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   5.3.0
+## @version   5.4.1
 ## @date      2022/01/24
 ## @copyright GNU Lesser General Public License
 #
 #  This file is part of COMPASS <https://anr-compass.github.io/compass/>
 #
-#  Copyright (C) 2011-2022 COMPASS Team <https://github.com/ANR-COMPASS>
+#  Copyright (C) 2011-2023 COMPASS Team <https://github.com/ANR-COMPASS>
 #  All rights reserved.
 #  Distributed under GNU - LGPL
 #
@@ -45,7 +45,7 @@ import shesha.constants as scons
 from scipy.sparse import csr_matrix
 
 from typing import List
-from tqdm import trange
+from tqdm import tqdm
 
 
 def compute_KL2V(p_controller: conf.Param_controller, dms: Dms, p_dms: list,
@@ -112,7 +112,7 @@ def compute_KL2V(p_controller: conf.Param_controller, dms: Dms, p_dms: list,
     return KL2V
 
 
-def compute_dm_basis(g_dm, p_dm: conf.Param_dm, p_geom: conf.Param_geom):
+def compute_dm_basis(g_dm, p_dm: conf.Param_dm, p_geom: conf.Param_geom, silence_tqdm: bool = False):
     """ Compute a the DM basis as a sparse matrix :
             - push on each actuator
             - get the corresponding dm shape
@@ -125,6 +125,8 @@ def compute_dm_basis(g_dm, p_dm: conf.Param_dm, p_geom: conf.Param_geom):
 
         p_geom: (Param_geom) : geom settings
 
+        silence_tqdm : (bool) : Silence tqdm's output
+
     :return:
 
         IFbasis = (csr_matrix) : DM IF basis
@@ -136,7 +138,7 @@ def compute_dm_basis(g_dm, p_dm: conf.Param_dm, p_geom: conf.Param_geom):
     indx_valid = np.where(pup.flatten("F") > 0)[0].astype(np.int32)
 
     #IFbasis = np.ndarray((indx_valid.size, p_dm._ntotact), dtype=np.float32)
-    for i in trange(p_dm._ntotact):
+    for i in tqdm(range(p_dm._ntotact), disable=silence_tqdm):
         g_dm.reset_shape()
         g_dm.comp_oneactu(i, 1.0)
         shape = np.array(g_dm.d_shape)
@@ -154,7 +156,7 @@ def compute_dm_basis(g_dm, p_dm: conf.Param_dm, p_geom: conf.Param_geom):
     return IFbasis
 
 
-def compute_IFsparse(g_dm: Dms, p_dms: list, p_geom: conf.Param_geom):
+def compute_IFsparse(g_dm: Dms, p_dms: list, p_geom: conf.Param_geom, silence_tqdm: bool = False):
     """ Compute the influence functions of all DMs as a sparse matrix :
             - push on each actuator
             - get the corresponding dm shape
@@ -168,13 +170,15 @@ def compute_IFsparse(g_dm: Dms, p_dms: list, p_geom: conf.Param_geom):
 
         p_geom: (Param_geom) : geom settings
 
+        silence_tqdm : (bool) : Silence tqdm's output
+
     :return:
 
         IFbasis = (csr_matrix) : DM IF basis
     """
     ndm = len(p_dms)
     for i in range(ndm):
-        IFi = compute_dm_basis(g_dm.d_dms[i], p_dms[i], p_geom)
+        IFi = compute_dm_basis(g_dm.d_dms[i], p_dms[i], p_geom, silence_tqdm=silence_tqdm)
         if (i == 0):
             val = IFi.data
             col = IFi.indices

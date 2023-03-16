@@ -2,13 +2,13 @@
 ## @package   shesha.widgets.widget_ao
 ## @brief     Widget to simulate a closed loop
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   5.3.0
+## @version   5.4.1
 ## @date      2022/01/24
 ## @copyright GNU Lesser General Public License
 #
 #  This file is part of COMPASS <https://anr-compass.github.io/compass/>
 #
-#  Copyright (C) 2011-2022 COMPASS Team <https://github.com/ANR-COMPASS>
+#  Copyright (C) 2011-2023 COMPASS Team <https://github.com/ANR-COMPASS>
 #  All rights reserved.
 #  Distributed under GNU - LGPL
 #
@@ -57,20 +57,21 @@ import numpy as np
 import time
 
 import pyqtgraph as pg
-from pyqtgraph.dockarea import Dock, DockArea
 
 from shesha.util.tools import plsh, plpyr
 from shesha.config import ParamConfig
 
-import warnings
+try:
+    from PyQt5 import QtWidgets
+    from PyQt5.QtCore import Qt
+except ModuleNotFoundError as e:
+    try:    
+        from PySide2 import QtWidgets
+        from PySide2.QtCore import Qt
+    except ModuleNotFoundError as e:
+        raise ModuleNotFoundError("No module named 'PyQt5' or PySide2', please install one of them\nException raised: "+e.msg)
 
-from PyQt5 import QtGui, QtWidgets
-from PyQt5.uic import loadUiType
-from PyQt5.QtCore import QThread, QTimer, Qt
-
-from subprocess import Popen, PIPE
-
-from typing import Any, Dict, Tuple, Callable, List
+from typing import Any, Dict, Tuple
 
 from docopt import docopt
 from collections import deque
@@ -91,10 +92,10 @@ class widgetAOWindow(AOClassTemplate, WidgetBase):
 
     def __init__(self, config_file: Any = None, cacao: bool = False,
                  expert: bool = False, devices: str = None,
-                 hide_histograms: bool = False) -> None:
+                 hide_histograms: bool = False, twoStages: bool = False) -> None:
         WidgetBase.__init__(self, hide_histograms=hide_histograms)
         AOClassTemplate.__init__(self)
-
+        self.twoStages = twoStages
         self.cacao = cacao
         self.rollingWindow = 100
         self.SRLE = deque(maxlen=self.rollingWindow)
@@ -134,9 +135,11 @@ class widgetAOWindow(AOClassTemplate, WidgetBase):
         self.uiAO.wao_open_loop.clicked[bool].connect(self.aoLoopOpen)
         self.uiAO.wao_next.clicked.connect(self.loop_once)
         self.uiAO.wao_resetSR.clicked.connect(self.resetSR)
+        self.uiAO.wao_resetCoro.clicked.connect(self.resetCoro)
         # self.uiAO.wao_actionHelp_Contents.triggered.connect(self.on_help_triggered)
 
         self.uiAO.wao_allTarget.stateChanged.connect(self.updateAllTarget)
+        self.uiAO.wao_allCoro.stateChanged.connect(self.updateAllCoro)
         self.uiAO.wao_forever.stateChanged.connect(self.updateForever)
 
         self.uiAO.wao_atmosphere.clicked[bool].connect(self.enable_atmos)
@@ -148,6 +151,8 @@ class widgetAOWindow(AOClassTemplate, WidgetBase):
         self.uiAO.wao_next.setDisabled(True)
         self.uiAO.wao_unzoom.setDisabled(True)
         self.uiAO.wao_resetSR.setDisabled(True)
+        self.uiAO.wao_resetCoro.setDisabled(True)
+        self.uiAO.wao_allCoro.setDisabled(True)
 
         p1 = self.uiAO.wao_SRPlotWindow.addPlot(title='SR evolution')
         self.curveSRSE = p1.plot(pen=(255, 0, 0), symbolBrush=(255, 0, 0), name="SR SE")
@@ -208,6 +213,9 @@ class widgetAOWindow(AOClassTemplate, WidgetBase):
     def updateAllTarget(self, state):
         self.uiAO.wao_resetSR_tarNum.setDisabled(state)
 
+    def updateAllCoro(self, state):
+        self.uiAO.wao_resetCoro_coroNum.setDisabled(state)
+
     def updateForever(self, state):
         self.uiAO.wao_nbiters.setDisabled(state)
 
@@ -222,6 +230,16 @@ class widgetAOWindow(AOClassTemplate, WidgetBase):
             tarnum = self.uiAO.wao_resetSR_tarNum.value()
             print("Reset SR on target %d" % tarnum)
             self.supervisor.target.reset_strehl(tarnum)
+
+    def resetCoro(self) -> None:
+        # TODO Adapt for multiple corono 
+        if self.uiAO.wao_allCoro.isChecked():
+            for c in range(self.ncoro):
+                self.supervisor.corono.reset()
+        else:
+            coroNum = self.uiAO.wao_resetCoro_coroNum.value()
+            print("Reset Coro %d" % coroNum)
+            self.supervisor.corono.reset()
 
     def add_dispDock(self, name: str, parent, type: str = "pg_image") -> None:
         d = WidgetBase.add_dispDock(self, name, parent, type)
@@ -323,11 +341,33 @@ class widgetAOWindow(AOClassTemplate, WidgetBase):
         for tar in range(self.ntar):
             name = 'psfLE_%d' % tar
             self.add_dispDock(name, self.wao_imagesgroup_cb)
-
+        if(self.config.p_coronos) is not None:
+            self.ncoro = len(self.config.p_coronos)
+        else:
+            self.ncoro = 0
+        for coro in range(self.ncoro):
+            name = 'coroImageLE_%d' % coro
+            self.add_dispDock(name, self.wao_imagesgroup_cb)
+        for coro in range(self.ncoro):
+            name = 'coroImageSE_%d' % coro
+            self.add_dispDock(name, self.wao_imagesgroup_cb)
+        for coro in range(self.ncoro):
+            name = 'coroPSFLE_%d' % coro
+            self.add_dispDock(name, self.wao_imagesgroup_cb)
+        for coro in range(self.ncoro):
+            name = 'coroPSFSE_%d' % coro
+            self.add_dispDock(name, self.wao_imagesgroup_cb)
+            
         self.add_dispDock("Strehl", self.wao_graphgroup_cb, "SR")
+        for coro in range(self.ncoro):
+            self.add_dispDock(f"ContrastLE_{coro}", self.wao_graphgroup_cb, "MPL")
+            self.add_dispDock(f"ContrastSE_{coro}", self.wao_graphgroup_cb, "MPL")
 
         self.uiAO.wao_resetSR_tarNum.setValue(0)
         self.uiAO.wao_resetSR_tarNum.setMaximum(len(self.config.p_targets) - 1)
+
+        self.uiAO.wao_resetCoro_coroNum.setValue(0)
+        self.uiAO.wao_resetCoro_coroNum.setMaximum(self.ncoro - 1)
 
         self.uiAO.wao_dispSR_tar.setValue(0)
         self.uiAO.wao_dispSR_tar.setMaximum(len(self.config.p_targets) - 1)
@@ -336,6 +376,8 @@ class widgetAOWindow(AOClassTemplate, WidgetBase):
         self.uiAO.wao_next.setDisabled(True)
         self.uiAO.wao_unzoom.setDisabled(True)
         self.uiAO.wao_resetSR.setDisabled(True)
+        self.uiAO.wao_resetCoro.setDisabled(True)
+        self.uiAO.wao_allCoro.setDisabled(True)
 
         self.uiBase.wao_init.setDisabled(False)
 
@@ -372,7 +414,11 @@ class widgetAOWindow(AOClassTemplate, WidgetBase):
             self.uiAO.wao_open_loop.setText("Close Loop")
 
     def init_config(self) -> None:
-        self.supervisor = CompassSupervisor(self.config)
+        if(self.twoStages):
+            from shesha.supervisor.stageSupervisor import StageSupervisor, scons
+            self.supervisor = StageSupervisor(self.config, cacao=self.cacao)
+        else:
+            self.supervisor = CompassSupervisor(self.config, cacao=self.cacao)
         WidgetBase.init_config(self)
 
     def init_configThread(self) -> None:
@@ -389,7 +435,7 @@ class widgetAOWindow(AOClassTemplate, WidgetBase):
                                        data.shape[0], data.shape[1])
             self.SRcircles[key] = pg.ScatterPlotItem(cx, cy, pen='r', size=1)
             self.viewboxes[key].addItem(self.SRcircles[key])
-            self.SRcircles[key].setPoints(cx, cy)
+            self.SRcircles[key].setData(cx, cy)
 
         for i in range(self.nwfs):
             key = "wfs_%d" % i
@@ -398,7 +444,7 @@ class widgetAOWindow(AOClassTemplate, WidgetBase):
                                        data.shape[0], data.shape[1])
             self.SRcircles[key] = pg.ScatterPlotItem(cx, cy, pen='r', size=1)
             self.viewboxes[key].addItem(self.SRcircles[key])
-            self.SRcircles[key].setPoints(cx, cy)
+            self.SRcircles[key].setData(cx, cy)
             key = 'slpComp_%d' % i
             key = 'slpGeom_%d' % i
 
@@ -416,7 +462,7 @@ class widgetAOWindow(AOClassTemplate, WidgetBase):
                                        data.shape[0], data.shape[1])
             self.SRcircles[key] = pg.ScatterPlotItem(cx, cy, pen='r', size=1)
             self.viewboxes[key].addItem(self.SRcircles[key])
-            self.SRcircles[key].setPoints(cx, cy)
+            self.SRcircles[key].setData(cx, cy)
 
         for i in range(len(self.config.p_targets)):
             key = "tar_%d" % i
@@ -425,7 +471,7 @@ class widgetAOWindow(AOClassTemplate, WidgetBase):
                                        data.shape[0], data.shape[1])
             self.SRcircles[key] = pg.ScatterPlotItem(cx, cy, pen='r', size=1)
             self.viewboxes[key].addItem(self.SRcircles[key])
-            self.SRcircles[key].setPoints(cx, cy)
+            self.SRcircles[key].setData(cx, cy)
 
             data = self.supervisor.target.get_tar_image(i)
             for psf in ["psfSE_", "psfLE_"]:
@@ -447,6 +493,35 @@ class widgetAOWindow(AOClassTemplate, WidgetBase):
                 self.viewboxes[key].addItem(self.SRCrossX[key])
                 # Put image in plot area
                 self.viewboxes[key].addItem(self.SRCrossY[key])
+
+
+        for i in range(self.ncoro):
+            data = self.supervisor.corono.get_image(i, expo_type="se")
+            for psf in ["coroImageSE_", "coroImageLE_", "coroPSFSE_", "coroPSFLE_"]:
+                key = psf + str(i)
+                Delta = 5
+                if("Image" in key):
+                    center = 0.
+                else:
+                    center = 0.5
+                self.SRCrossX[key] = pg.PlotCurveItem(
+                        np.array([
+                                data.shape[0] / 2 + center - Delta,
+                                data.shape[0] / 2 + center + Delta
+                        ]), np.array([data.shape[1] / 2 + center, data.shape[1] / 2 + center]),
+                        pen='r')
+                self.SRCrossY[key] = pg.PlotCurveItem(
+                        np.array([data.shape[0] / 2 + center, data.shape[0] / 2 + center]),
+                        np.array([
+                                data.shape[1] / 2 + center - Delta,
+                                data.shape[1] / 2 + center + Delta
+                        ]), pen='r')
+                # Put image in plot area
+                self.viewboxes[key].addItem(self.SRCrossX[key])
+                # Put image in plot area
+                self.viewboxes[key].addItem(self.SRCrossY[key])
+
+
 
         for i in range(len(self.config.p_wfss)):
             if (self.config.p_wfss[i].type == scons.WFSType.PYRHR or
@@ -483,6 +558,9 @@ class widgetAOWindow(AOClassTemplate, WidgetBase):
         self.uiAO.wao_open_loop.setDisabled(False)
         self.uiAO.wao_unzoom.setDisabled(False)
         self.uiAO.wao_resetSR.setDisabled(False)
+        if(self.ncoro):
+            self.uiAO.wao_resetCoro.setDisabled(False)
+            self.uiAO.wao_allCoro.setDisabled(False)
 
         WidgetBase.init_configFinished(self)
 
@@ -513,7 +591,7 @@ class widgetAOWindow(AOClassTemplate, WidgetBase):
         else:
             try:
                 for key, dock in self.docks.items():
-                    if key == "Strehl":
+                    if key in ["Strehl"]:
                         continue
                     elif dock.isVisible():
                         index = int(key.split("_")[-1])
@@ -534,8 +612,16 @@ class widgetAOWindow(AOClassTemplate, WidgetBase):
                         if "psfSE" in key:
                             data = self.supervisor.target.get_tar_image(
                                     index, expo_type="se")
+                        if "coroImageLE" in key:
+                            data = self.supervisor.corono.get_image(index, expo_type="le")
+                        if "coroImageSE" in key:
+                            data = self.supervisor.corono.get_image(index, expo_type="se")
+                        if "coroPSFLE" in key:
+                            data = self.supervisor.corono.get_psf(index, expo_type="le")
+                        if "coroPSFSE" in key:
+                            data = self.supervisor.corono.get_psf(index, expo_type="se")
 
-                        if "psf" in key:
+                        if "psf" in key or "coro" in key:
                             if (self.uiAO.actionPSF_Log_Scale.isChecked()):
                                 if np.any(data <= 0):
                                     # warnings.warn("\nZeros founds, filling with min nonzero value.\n")
@@ -602,7 +688,27 @@ class widgetAOWindow(AOClassTemplate, WidgetBase):
                             self.imgs[key].canvas.axes.clear()
                             self.imgs[key].canvas.axes.plot(data)
                             self.imgs[key].canvas.draw()
+                        elif "ContrastLE" in key:     
+                            distances, mean, std, mini, maxi = self.supervisor.corono.get_contrast(index, expo_type='le')
+                            if(np.all(mean)): 
+                                self.imgs[key].canvas.axes.clear()
+                                self.imgs[key].canvas.axes.plot(distances, mean)
+                                self.imgs[key].canvas.axes.set_yscale('log')
+                                self.imgs[key].canvas.axes.set_xlabel("angular distance (Lambda/D)")
+                                self.imgs[key].canvas.axes.set_ylabel("Raw contrast")
 
+                                self.imgs[key].canvas.axes.grid()
+                                self.imgs[key].canvas.draw()
+                        elif "ContrastSE" in key:
+                            distances, mean, std, mini, maxi = self.supervisor.corono.get_contrast(index, expo_type='se')
+                            if(np.all(mean)): 
+                                self.imgs[key].canvas.axes.clear()
+                                self.imgs[key].canvas.axes.plot(distances, mean)
+                                self.imgs[key].canvas.axes.set_yscale('log')
+                                self.imgs[key].canvas.axes.set_xlabel("angular distance (Lambda/D)")
+                                self.imgs[key].canvas.axes.set_ylabel("Raw contrast")
+                                self.imgs[key].canvas.axes.grid()
+                                self.imgs[key].canvas.draw()
                 self.firstTime = 1
 
             finally:
@@ -674,14 +780,47 @@ class widgetAOWindow(AOClassTemplate, WidgetBase):
             self.stop = True
             self.uiAO.wao_run.setChecked(False)
 
+import os
+import socket
+
+def tcp_connect_to_display():
+        # get the display from the environment
+        display_env = os.environ['DISPLAY']
+
+        # parse the display string
+        display_host, display_num = display_env.split(':')
+        display_num_major = display_num.split('.')[0]
+
+        # calculate the port number
+        display_port = 6000 + int(display_num_major)
+
+        # attempt a TCP connection
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        try:
+                sock.connect((display_host, display_port))
+        except socket.error:
+                return False
+        finally:
+            sock.close()
+        return True
 
 if __name__ == '__main__':
+    # if(not tcp_connect_to_display()):
+    #     raise RuntimeError("Cannot connect to display")
+        
     arguments = docopt(__doc__)
     app = QtWidgets.QApplication(sys.argv)
     app.setStyle('cleanlooks')
     wao = widgetAOWindow(arguments["<parameters_filename>"], cacao=arguments["--cacao"],
                          expert=arguments["--expert"], devices=arguments["--devices"])
     wao.show()
+
+    print("")
+    print("If the GUI is black, you can:")
+    print("    type %gui qt5 to unlock GUI")
+    print(" or launch ipython with the option '--gui=qt' or '--matplotlib=qt'")
+    print(" or edit ~/.ipython/profile_default/ipython_config.py to set c.TerminalIPythonApp.matplotlib = 'qt'")
+
     if arguments["--interactive"]:
         from shesha.util.ipython_embed import embed
         embed(os.path.basename(__file__), locals())

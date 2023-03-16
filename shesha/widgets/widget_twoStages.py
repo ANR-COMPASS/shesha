@@ -7,7 +7,7 @@
 #
 #  This file is part of COMPASS <https://anr-compass.github.io/compass/>
 #
-#  Copyright (C) 2011-2022 COMPASS Team <https://github.com/ANR-COMPASS>
+#  Copyright (C) 2011-2023 COMPASS Team <https://github.com/ANR-COMPASS>
 #  All rights reserved.
 #  Distributed under GNU - LGPL
 #
@@ -35,21 +35,21 @@
 #  You should have received a copy of the GNU Lesser General Public License along with COMPASS.
 #  If not, see <https://www.gnu.org/licenses/lgpl-3.0.txt>.
 """
-Widget built to simulate a 2 stage AO loop mainly in the SAXO+ context (1st stage = SH; second stage = pyramid). Both parameters files must be prepared such that the SH param file ittime is equal to the second stage ittime. The frequency ratio is then required to specify the WFS integration time of the first stage.
+Widget built to simulate a 2 stage AO loop (1st stage = SH; second stage = pyramid)
 
 Usage:
-  widget_saxoplus.py <saxoparameters_filename> <saxoPlusparameters_filename> [options]
+  widget_twoStages.py <parameters_filename1> <parameters_filename2> <freqratio> [options]
 
-with 'saxoparameters_filename' the path to the parameters file for SAXO+ First stage
-with 'saxoPlusparameters_filename' the path to the parameters file for SAXO+ Second stage
-with 'freqratio' (default = 3) the ratio of the second stage frequency over the first stage one.
+with 'parameters_filename1' the path to the parameters file for first stage
+with 'parameters_filename2' the path to the parameters file for second stage
+with 'freqratio' the ratio of the frequencies of the two stages
 
 Options:
   -a, --adopt       used to connect ADOPT (via pyro + shm cacao)
-  -f, --freqratio freqratio Ratio of the 2 stages frequencies
+
 Example: 
-    ipython -i widget_saxoplus.py ../../data/par/SPHERE+/sphere.py ../../data/par/SPHERE+/sphere+.py 
-    ipython -i widget_saxoplus.py ../../data/par/SPHERE+/sphere.py ../../data/par/SPHERE+/sphere+.py --freqratio 3 -- --adopt
+    ipython -i widget_twoStages.py ../../data/par/SPHERE+/sphere.py ../../data/par/SPHERE+/sphere+.py
+    ipython -i widget_twoStages.py ../../data/par/SPHERE+/sphere.py ../../data/par/SPHERE+/sphere+.py -- --adopt
 """
 
 import os, sys
@@ -61,7 +61,7 @@ from shesha.util.tools import plsh, plpyr
 from tqdm import trange
 import astropy.io.fits as pfits
 from PyQt5 import QtWidgets
-from shesha.supervisor.saxoPlusManager import SaxoPlusManager
+from shesha.supervisor.twoStagesManager import TwoStagesManager
 
 from typing import Any, Dict, Tuple, Callable, List
 from docopt import docopt
@@ -73,26 +73,26 @@ global server
 server = None
 
 
-class widgetSaxoPlusWindowPyro():
+class widgetTwoStagesWindowPyro():
 
-    def __init__(self, config_file1: Any = None, config_file2: Any = None,
-                 frequency_ratio: int = 3, cacao: bool = False,
-                 expert: bool = False) -> None:
+    def __init__(self, config_file1: Any = None, config_file2: Any = None, freqratio : int = None, 
+                 cacao: bool = False, expert: bool = False) -> None:
         self.config1 = config_file1
         self.config2 = config_file2
+        self.freqratio = freqratio
 
         from shesha.config import ParamConfig
 
 
-        self.wao2=widgetAOWindow(config_file2, cacao=cacao, hide_histograms=True)
-        self.wao1=widgetAOWindow(config_file1, cacao=cacao, hide_histograms=True)
-        pupdiamSAXO = self.wao1.supervisor.config.p_geom.pupdiam
-        pupdiamSAXOPLUS = self.wao2.supervisor.config.p_geom.pupdiam
-        if(pupdiamSAXO != pupdiamSAXOPLUS):
+        self.wao2=widgetAOWindow(config_file2, cacao=cacao, hide_histograms=True, twoStages=True)
+        self.wao1=widgetAOWindow(config_file1, cacao=cacao, hide_histograms=True, twoStages=True)
+        pupdiam_first_stage = self.wao1.supervisor.config.p_geom.pupdiam
+        pupdiam_second_stage = self.wao2.supervisor.config.p_geom.pupdiam
+        if(pupdiam_first_stage != pupdiam_second_stage):
             print("---------------ERROR---------------")
-            print("SAXO PLUS PUPDIAM IS SET TO %d" % pupdiamSAXOPLUS)
-            print("SAXO PUPDIAM IS SET TO %d" % pupdiamSAXO)
-            raise Exception('ERROR!!!! SAXO PUPDIAM MUST BE SET TO %d' % pupdiamSAXOPLUS)
+            print("SECOND STAGE PUPDIAM IS SET TO %d" % pupdiam_second_stage)
+            print("FIRST STAGE PUPDIAM IS SET TO %d" % pupdiam_first_stage)
+            raise Exception('ERROR!!!! FIRST STAGE PUPDIAM MUST BE SET TO %d' % pupdiam_second_stage)
 
         #Pyro.core.ObjBase.__init__(self)
         self.CB = {}
@@ -113,8 +113,7 @@ class widgetSaxoPlusWindowPyro():
         #                       METHODS                             #
         #############################################################
 
-        self.manager = SaxoPlusManager(self.wao1.supervisor, self.wao2.supervisor,
-                                       frequency_ratio)
+        self.manager = TwoStagesManager(self.wao1.supervisor, self.wao2.supervisor, self.freqratio)
         if(self.cacao):
             global server
             server = self.start_pyro_server()
@@ -235,20 +234,35 @@ class widgetSaxoPlusWindowPyro():
             supervisor1 = self.manager.first_stage
             supervisor2 = self.manager.second_stage
 
+            if(supervisor1.corono == None):
+                from shesha.util.pyroEmptyClass import PyroEmptyClass
+                coro2pyro1 = PyroEmptyClass()
+            else:
+                coro2pyro1 = supervisor1.corono
+
+            if(supervisor2.corono == None):
+                from shesha.util.pyroEmptyClass import PyroEmptyClass
+                coro2pyro2 = PyroEmptyClass()
+            else:
+                coro2pyro2 = supervisor2.corono
+
             devices1 = [
                     supervisor1, supervisor1.rtc, supervisor1.wfs, supervisor1.target,
                     supervisor1.tel, supervisor1.basis, supervisor1.calibration,
-                    supervisor1.atmos, supervisor1.dms, supervisor1.config, supervisor1.modalgains
+                    supervisor1.atmos, supervisor1.dms, supervisor1.config, supervisor1.modalgains,
+                    coro2pyro1
             ]
             devices2 = [
                     supervisor2, supervisor2.rtc, supervisor2.wfs, supervisor2.target,
                     supervisor2.tel, supervisor2.basis, supervisor2.calibration,
-                    supervisor2.atmos, supervisor2.dms, supervisor2.config, supervisor2.modalgains
+                    supervisor2.atmos, supervisor2.dms, supervisor2.config, supervisor2.modalgains,
+                    coro2pyro2
             ]
             names = [
                     "supervisor", "supervisor_rtc", "supervisor_wfs", "supervisor_target",
                     "supervisor_tel", "supervisor_basis", "supervisor_calibration",
-                    "supervisor_atmos", "supervisor_dms", "supervisor_config", "supervisor_modalgains"
+                    "supervisor_atmos", "supervisor_dms", "supervisor_config", "supervisor_modalgains",
+                    "supervisor_corono"
             ]
 
             label = "firstStage"
@@ -260,7 +274,7 @@ class widgetSaxoPlusWindowPyro():
             for name in names:
                 nname.append(name + "_" + user + "_" +label)
 
-            nname.append('supervisorSAXOPlus'+ "_" + user ) # Adding master next dedicated to trigger SAXO+ hybrid loop
+            nname.append('twoStagesManager'+ "_" + user ) # Adding master next dedicated to trigger 2-stages loop
             nname.append("wao_loop"+ "_" + user)
             devices = devices1 + devices2 + [supervisor, wao_loop]
             server = PyroServer(listDevices=devices, listNames=nname)
@@ -293,17 +307,17 @@ class loopHandler:
 if __name__ == '__main__':
     arguments = docopt(__doc__)
     adopt = arguments["--adopt"]
-
-    frequency_ratio = 3 # Default value                                                           
-    if arguments["--freqratio"]: # If provided by user, overwrite the default value               
-        frequency_ratio = int(arguments["--freqratio"])
-
     app = QtWidgets.QApplication(sys.argv)
     app.setStyle('cleanlooks')
-    wao = widgetSaxoPlusWindowPyro(arguments["<saxoparameters_filename>"], arguments["<saxoPlusparameters_filename>"], frequency_ratio=frequency_ratio, cacao=adopt)
+    wao = widgetTwoStagesWindowPyro(arguments["<parameters_filename1>"], 
+                                    arguments["<parameters_filename2>"], 
+                                    arguments["<freqratio>"], cacao=adopt)
 
     wao.wao1.show()
-    # wao.wao2.show()
+    wao.wao2.show()
+    wao.wao2.uiAO.wao_run.hide()
+    wao.wao2.uiAO.wao_next.hide()
+    wao.wao2.uiAO.wao_atmosphere.hide()
     wao.wao1.loop_once = wao.loop_once # very dirty (for some reason this does not work during class init...)
     wao.wao2.loop_once = wao.loop_once # very dirty bis
 

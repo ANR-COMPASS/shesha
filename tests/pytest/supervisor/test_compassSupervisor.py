@@ -1,13 +1,13 @@
 ## @package   shesha.tests
 ## @brief     Tests the supervisor module
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   5.3.0
+## @version   5.4.1
 ## @date      2022/01/24
 ## @copyright GNU Lesser General Public License
 #
 #  This file is part of COMPASS <https://anr-compass.github.io/compass/>
 #
-#  Copyright (C) 2011-2022 COMPASS Team <https://github.com/ANR-COMPASS>
+#  Copyright (C) 2011-2023 COMPASS Team <https://github.com/ANR-COMPASS>
 #  All rights reserved.
 #  Distributed under GNU - LGPL
 #
@@ -754,4 +754,22 @@ def test_set_iir_a_vector():
                         reason="Generic Linear only")
 def test_set_iir_b_vector():
     sup.rtc.set_iir_b_vector(1,0,sup.rtc._get_iir_b_vector(1,0))
+    assert(True)
+
+#                                                _    
+#    __ ___ _ _ ___ _ _  __ _ __ _ _ _ __ _ _ __| |_  
+#   / _/ _ \ '_/ _ \ ' \/ _` / _` | '_/ _` | '_ \ ' \ 
+#   \__\___/_| \___/_||_\__,_\__, |_| \__,_| .__/_||_|
+#                            |___/         |_|        
+
+def test_get_image_corono():
+    img = sup.corono.get_image(0)
+    assert(True)
+
+def test_get_psf_corono():
+    img = sup.corono.get_psf(0)
+    assert(True)
+
+def test_reset_corono():
+    sup.corono.reset()
     assert(True)

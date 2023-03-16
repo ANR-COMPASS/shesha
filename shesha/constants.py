@@ -1,13 +1,13 @@
 ## @package   shesha.constants
 ## @brief     Numerical constants for shesha and config enumerations for safe-typing
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   5.3.0
+## @version   5.4.1
 ## @date      2022/01/24
 ## @copyright GNU Lesser General Public License
 #
 #  This file is part of COMPASS <https://anr-compass.github.io/compass/>
 #
-#  Copyright (C) 2011-2022 COMPASS Team <https://github.com/ANR-COMPASS>
+#  Copyright (C) 2011-2023 COMPASS Team <https://github.com/ANR-COMPASS>
 #  All rights reserved.
 #  Distributed under GNU - LGPL
 #
@@ -190,7 +190,6 @@ class ApertureType:
     KECK = 'keck'
     VLT_NOOBS = 'VLT-NoObs'
 
-
 class SpiderType:
     """
         Spiders
@@ -223,6 +222,7 @@ class FieldStopType:
     """
     SQUARE = 'square'
     ROUND = 'round'
+    NONE = 'none'
 
 class PupilType(MultiValueEnum):
     """Compass pupil enumeration
@@ -230,3 +230,42 @@ class PupilType(MultiValueEnum):
     SPUPIL = "spupil", "s"
     MPUPIL = "mpupil", "m"
     IPUPIL = "ipupil", "i"
+
+class CoronoType:
+    """ Coronograph types
+    """
+    MODULE = "module"
+    PERFECT = "perfect"
+    CUSTOM = "custom"
+    SPHERE_APLC = "SPHERE_APLC"
+
+class ApodizerType:
+    """ Apodizer types
+    """
+    SPHERE_APLC_APO1 = "SPHERE_APLC_apodizer_APO1"
+
+class FpmType:
+    """ Focal plane mask types
+    """
+    CLASSICAL_LYOT = "classical_Lyot"
+    SPHERE_APLC_fpm_ALC1 = "SPHERE_APLC_fpm_ALC1"
+    SPHERE_APLC_fpm_ALC2 = "SPHERE_APLC_fpm_ALC2"
+    SPHERE_APLC_fpm_ALC3 = "SPHERE_APLC_fpm_ALC3"
+
+class LyotStopType:
+    """ Lyot stop types
+    """
+    SPHERE_APLC_LYOT_STOP = "SPHERE_APLC_Lyot_stop"
+
+class MftType:
+    """ MFT types
+    """
+    IMG = "img"
+    PSF = "psf"
+    FPM = "fpm"
+    LYOT= "lyot"
+class ExposureType:
+    """ Exposure type
+    """
+    LE = "le"
+    SE = "se"

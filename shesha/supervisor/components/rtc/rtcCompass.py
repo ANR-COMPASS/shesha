@@ -1,13 +1,13 @@
 ## @package   shesha.supervisor
 ## @brief     User layer for initialization and execution of a COMPASS simulation
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   5.3.0
+## @version   5.4.1
 ## @date      2022/01/24
 ## @copyright GNU Lesser General Public License
 #
 #  This file is part of COMPASS <https://anr-compass.github.io/compass/>
 #
-#  Copyright (C) 2011-2022 COMPASS Team <https://github.com/ANR-COMPASS>
+#  Copyright (C) 2011-2023 COMPASS Team <https://github.com/ANR-COMPASS>
 #  All rights reserved.
 #  Distributed under GNU - LGPL
 #
@@ -49,7 +49,7 @@ class RtcCompass(RtcAbstract):
     """
 
     def __init__(self, context: carmaWrap_context, config, tel, wfs, dms, atm, *,
-                 brahma: bool = False, fp16: bool = False, cacao: bool = False):
+                 brahma: bool = False, fp16: bool = False, cacao: bool = False, silence_tqdm: bool = False):
         """ Initialize a RtcCompass component for rtc related supervision
 
         Args:
@@ -74,12 +74,14 @@ class RtcCompass(RtcAbstract):
 
             cacao : (bool) : If True, enables CACAO features in RTC (Default is False)
                                        Requires OCTOPUS to be installed
+
+            silence_tqdm : (bool) : Silence tqdm's output
         """
         RtcAbstract.__init__(self, context, config, brahma=brahma, fp16=fp16,
-                             cacao=cacao)
-        self.rtc_init(tel, wfs, dms, atm)
+                             cacao=cacao, silence_tqdm=silence_tqdm)
+        self.rtc_init(tel, wfs, dms, atm, silence_tqdm=silence_tqdm)
 
-    def rtc_init(self, tel, wfs, dms, atm):
+    def rtc_init(self, tel, wfs, dms, atm, silence_tqdm: bool = False):
         """ Initialize a RtcCompass component for rtc related supervision
 
         Args:
@@ -96,4 +98,4 @@ class RtcCompass(RtcAbstract):
                              self._config.p_geom, self._config.p_atmos,
                              self._config.p_loop.ittime, self._config.p_centroiders,
                              self._config.p_controllers, self._config.p_dms,
-                             cacao=self.cacao)
+                             cacao=self.cacao, silence_tqdm=silence_tqdm)

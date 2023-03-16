@@ -1,13 +1,13 @@
 ## @package   shesha.widgets.widget_base
 ## @brief     Abstract Widget base
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   5.3.0
+## @version   5.4.1
 ## @date      2022/01/24
 ## @copyright GNU Lesser General Public License
 #
 #  This file is part of COMPASS <https://anr-compass.github.io/compass/>
 #
-#  Copyright (C) 2011-2022 COMPASS Team <https://github.com/ANR-COMPASS>
+#  Copyright (C) 2011-2023 COMPASS Team <https://github.com/ANR-COMPASS>
 #  All rights reserved.
 #  Distributed under GNU - LGPL
 #
@@ -39,13 +39,23 @@ import os
 import sys
 import threading
 import warnings
-from typing import Any, Callable, Dict, List, Tuple
+from typing import Any, Callable, Dict
 
 import numpy as np
 import pyqtgraph as pg
-from PyQt5 import QtGui, QtWidgets
-from PyQt5.QtCore import QObject, QThread, QTimer, pyqtSignal
-from PyQt5.uic import loadUiType
+
+try:
+    from PyQt5 import QtWidgets
+    from PyQt5.QtCore import QThread, QTimer
+    from PyQt5.uic import loadUiType
+except ModuleNotFoundError as e:
+    try:    
+        from PySide2 import QtWidgets
+        from PySide2.QtCore import  QThread, QTimer
+        from PySide2.QtUiTools import loadUiType
+    except ModuleNotFoundError as e:
+        raise ModuleNotFoundError("No module named 'PyQt5' or PySide2', please install one of them\nException raised: "+e.msg)
+
 from pyqtgraph.dockarea import Dock, DockArea
 
 from shesha.util.matplotlibwidget import MatplotlibWidget
@@ -59,7 +69,7 @@ def uiLoader(moduleName):
 BaseWidgetTemplate, BaseClassTemplate = uiLoader('widget_base')
 
 
-class PupilBoxes(pg.QtGui.QGraphicsPathItem):
+class PupilBoxes(QtWidgets.QGraphicsPathItem):
 
     def __init__(self, x, y):
         """x and y are 2D arrays of shape (Nplots, Nsamples)"""
@@ -250,9 +260,9 @@ class WidgetBase(BaseClassTemplate):
             self.docks[guilty_guy].close()
 
     def add_dispDock(self, name: str, parent, type: str = "pg_image") -> Dock:
-        checkBox = QtGui.QCheckBox(name, parent)
+        checkBox = QtWidgets.QCheckBox(name, parent)
         checkBox.clicked.connect(self.update_displayDock)
-        checkableAction = QtGui.QWidgetAction(parent)
+        checkableAction = QtWidgets.QWidgetAction(parent)
         checkableAction.setDefaultWidget(checkBox)
         parent.addAction(checkableAction)
         self.disp_checkboxes.append(checkBox)
@@ -260,7 +270,7 @@ class WidgetBase(BaseClassTemplate):
         d = Dock(name)  # , closable=True)
         self.docks[name] = d
         if type == "pg_image":
-            img = pg.ImageItem(border='w')
+            img = pg.ImageItem(border='w', image=np.zeros((2,2)))
             self.imgs[name] = img
 
             viewbox = pg.ViewBox()
@@ -268,9 +278,14 @@ class WidgetBase(BaseClassTemplate):
             viewbox.setAspectLocked(True)
             viewbox.addItem(img)  # Put image in plot area
             self.viewboxes[name] = viewbox
-            iv = pg.ImageView(view=viewbox, imageItem=img)
             viewbox.invertY(False)
 
+            iv = pg.ImageView(view=viewbox, imageItem=img)
+            try:
+                cmap = pg.colormap.get('viridis') # prepare a viridis color map
+                iv.setColorMap(cmap)
+            except:
+                pass
             if (self.hide_histograms):
                 iv.ui.histogram.hide()
             iv.ui.histogram.autoHistogramRange()  # init levels
@@ -314,18 +329,18 @@ class WidgetBase(BaseClassTemplate):
         self.imgs.clear()
         self.viewboxes.clear()
 
-        self.wao_phasesgroup_cb = QtGui.QMenu(self)
+        self.wao_phasesgroup_cb = QtWidgets.QMenu(self)
         self.uiBase.wao_phasesgroup_tb.setMenu(self.wao_phasesgroup_cb)
         self.uiBase.wao_phasesgroup_tb.setText('Select')
         self.uiBase.wao_phasesgroup_tb.setPopupMode(QtWidgets.QToolButton.InstantPopup)
 
-        self.wao_graphgroup_cb = QtGui.QMenu(self)
+        self.wao_graphgroup_cb = QtWidgets.QMenu(self)
         self.uiBase.wao_graphgroup_tb.setMenu(self.wao_graphgroup_cb)
         self.uiBase.wao_graphgroup_tb.setText('Select')
         self.uiBase.wao_graphgroup_tb.setPopupMode(QtWidgets.QToolButton.InstantPopup)
 
         self.uiBase.wao_imagesgroup_tb.setText('Select')
-        self.wao_imagesgroup_cb = QtGui.QMenu(self)
+        self.wao_imagesgroup_cb = QtWidgets.QMenu(self)
         self.uiBase.wao_imagesgroup_tb.setMenu(self.wao_imagesgroup_cb)
         self.uiBase.wao_imagesgroup_tb.setPopupMode(QtWidgets.QToolButton.InstantPopup)
 

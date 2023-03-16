@@ -4,11 +4,11 @@ This script is intended to be used with the saxo+ Manager ONLY!
 The saxo+ manager can be instanciated using the follwing commands. 
 
 > cd $HOME/compass/shesha/shesha/widgets/
-> ipython -i widget_saxoplus.py ../../data/par/SPHERE+/sphere.py ../../data/par/SPHERE+/sphere+.py--freqratio 3
+> ipython -i widget_saxoplus.py ../../data/par/SPHERE+/sphere.py ../../data/par/SPHERE+/sphere+.py
 
 The first argument (here ../../data/par/SPHERE+/sphere.py) point towards the saxo parameter configuration file
 The second argument (here ../../data/par/SPHERE+/sphere+.py) point towards the saxo+ parameter configuration file
-An optional argument is the frequency ratio between the second and the first stage (default = 3)
+
 
 Once started the GUI interface should show 3 windows. 
 1) is the main control window of the manager (which controls the 2 instance of COMPASS)
@@ -18,8 +18,8 @@ Once started the GUI interface should show 3 windows.
 COMPASS methods can be accessed using either:
 
 <wao.manager>  object is the main SAXO+ manager (which handles the synchronisation between the 2 AO stages)
-<wao.wao1.supervisor> is the First stage supervisor
-<wao.wao2.supervisor> is the Second stage supervisor
+<wao.wao1.supervisor> is the First stage compass supervisor
+<wao.wao2.supervisor> is the Second stage compass supervisor
 
 
 Author: F.V
@@ -45,22 +45,20 @@ wao.wao1.aoLoopClicked(False) # Make sure the loop controlled by the main GUI is
 wao.wao1.enable_atmos(False) # disabling turbulence
 #Measuring ref slopes saxo
 saxo.wfs.set_noise(0, -1) #removing noise on SH WFS (-1 = no noise)
-saxo.rtc.reset_ref_slopes(0) # reset refslopes from saxo to 0 (check)                    
-saxoplusmanager.iterations=0 # reset iterations count
-saxoplusmanager.next(do_control=False) # do a complete loop with no control computation
+for i in range(6): saxoplusmanager.next(); # check
+saxo.rtc.reset_ref_slopes(0) # reset refslopes from saxo to 0 (check)
 saxo.rtc.do_ref_slopes(0) # meaure and load reflopes from null phase
+for i in range(6): saxoplusmanager.next(); # check
+
+
 
 #Measuring ref slopes saxoplus
 saxoplus.wfs.set_noise(0, -1) #removing noise on PYR WFS (-1 = no noise)
 saxoplus.rtc.reset_ref_slopes(0) # reset refslopes from saxo to 0 (check)
-saxoplusmanager.iterations=0 # reset iterations count
-saxoplusmanager.next(do_control=False) # do a complete loop with no control computation
-saxoplus.rtc.do_ref_slopes(0) # meaure and load reflopes from null phase                 
+for i in range(6): saxoplusmanager.next(); # check
 
-
-# 2. Start measurements of iMats                                                         
-saxoplusmanager.iterations=0 # reset iterations count
-
+saxoplus.rtc.do_ref_slopes(0) # meaure and load reflopes from null phase
+for i in range(6): saxoplusmanager.next(); # check
 
 # Computing modified KL basis (Gendron modal basis)
 xpos0 = saxo.config.p_dms[0]._xpos # actus positions
@@ -89,11 +87,9 @@ imat01 = np.zeros((Nslopes1, nModes0))
 
 # Measuring imat on saxo. (both HODM and SH (imat0) + HODM and PYR (imat01))
 for mode in trange(nModes0):
-    volts = B0All[:, mode] * ampli0;
-    saxoplusmanager.iterations=0
-    
+    volts = B0All[:, mode] * ampli0; 
     saxo.rtc.set_perturbation_voltage(0, "tmp", volts)
-    saxoplusmanager.next(do_control=False); 
+    for i in range(6): saxoplusmanager.next(); # check
 
     s1 = saxo.rtc.get_slopes(0) / ampli0
     s2 = saxoplus.rtc.get_slopes(0)  / ampli0
@@ -103,7 +99,9 @@ saxo.rtc.reset_perturbation_voltage(0) #remove ALL pertu voltages (rest the DM)
 saxo.wfs.set_noise(0, saxo.config.p_wfss[0].get_noise()) #  sets the noise back to the config value
 
 
+
 # Measuring imat on saxo+. ( Boston and PYR (imat1))
+for i in range(6): saxoplusmanager.next(); # check
 nmodes1 = B1.shape[1] # number of modes for second stage AO
 ampli1 = 1.0e-2
 imat1 = np.zeros((Nslopes1, nmodes1))
@@ -111,9 +109,7 @@ imat1 = np.zeros((Nslopes1, nmodes1))
 for mode in trange(nmodes1):
     volts = B1[:, mode] * ampli1; 
     saxoplus.rtc.set_perturbation_voltage(0, "tmp", volts)
-    saxoplusmanager.iterations=0
-    saxoplusmanager.next(do_control=False);
-    
+    for i in range(6): saxoplusmanager.next(); # check
     s = saxoplus.rtc.get_slopes(0)  / ampli1
     imat1[:, mode] = s.copy()
 saxoplus.rtc.reset_perturbation_voltage(0) #remove ALL pertu voltages (rest the DM)
@@ -155,13 +151,11 @@ saxoplus.rtc.close_loop(0) # closing loop on second stage
 
 # starting long exposure... 
 nbiters = 300
-saxoplusmanager.iterations = 0 # reset iterations to zero to reset WFS integration
-
 print("starting long exposure")
 plt.ion()
 saxo.target.reset_strehl(0) # resetting long exposure SR on saxo
 saxoplus.target.reset_strehl(0) # resetting long exposure SR on saxo+
-for i in trange(nbiters): saxoplusmanager.next(); # exposure...
+for i in trange(nbiters): saxoplusmanager.next(seeAtmos=False); # exposure...
 psfsaxo = saxo.target.get_tar_image(0, expo_type="le")
 psfsaxoplus = saxoplus.target.get_tar_image(0, expo_type="le")
 

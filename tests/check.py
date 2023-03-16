@@ -2,13 +2,13 @@
 ## @package   shesha.tests
 ## @brief     Runs a set of tests
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   5.3.0
+## @version   5.4.1
 ## @date      2022/01/24
 ## @copyright GNU Lesser General Public License
 #
 #  This file is part of COMPASS <https://anr-compass.github.io/compass/>
 #
-#  Copyright (C) 2011-2022 COMPASS Team <https://github.com/ANR-COMPASS>
+#  Copyright (C) 2011-2023 COMPASS Team <https://github.com/ANR-COMPASS>
 #  All rights reserved.
 #  Distributed under GNU - LGPL
 #
@@ -91,7 +91,7 @@ if __name__ == "__main__":
 
         try:
             t0 = time.perf_counter()
-            supervisor = CompassSupervisor(config)
+            supervisor = CompassSupervisor(config, silence_tqdm=True)
             t_init = time.perf_counter() - t0
             is_init = supervisor.is_init
         except:

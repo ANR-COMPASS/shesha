@@ -1,13 +1,13 @@
 ## @package   shesha.supervisor
 ## @brief     User layer for initialization and execution of a COMPASS simulation
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   5.3.0
+## @version   5.4.1
 ## @date      2022/01/24
 ## @copyright GNU Lesser General Public License
 #
 #  This file is part of COMPASS <https://anr-compass.github.io/compass/>
 #
-#  Copyright (C) 2011-2022 COMPASS Team <https://github.com/ANR-COMPASS>
+#  Copyright (C) 2011-2023 COMPASS Team <https://github.com/ANR-COMPASS>
 #  All rights reserved.
 #  Distributed under GNU - LGPL
 #
@@ -96,6 +96,14 @@ class WfsCompass(SourceCompass):
         """
         self._wfs.d_wfs[wfs_index].set_binimg(img, img.size)
 
+    def set_wfs_image(self, wfs_index : int, img: np.ndarray):
+        """ Set an image in the WFS (wfs[0] by default)
+        Args:
+            wfs_index : (int) : index of the WFS (or the centroider) to request an image
+            img: (np.ndarray) : Image to set
+        """
+        self._wfs.d_wfs[wfs_index].set_binimg(img, img.size)
+        
     def set_pyr_modulation_points(self, wfs_index : int, cx: np.ndarray, cy: np.ndarray,
                                   *, weights: np.ndarray = None) -> None:
         """ Set pyramid modulation positions
@@ -357,6 +365,19 @@ class WfsCompass(SourceCompass):
         """
         for wfs_index, p_wfs in enumerate(self._config.p_wfss):
             self._wfs.d_wfs[wfs_index].set_noise(p_wfs.noise, 1234 + wfs_index)
+    
+    def reset_image(self, *, wfs_index : int = None):
+        """ Reset the WFS image 
+
+        Kwargs:
+            wfs_index : (int): WFS index. If not provided, will reset all WFS
+        """
+        if wfs_index is not None:
+            self._wfs.d_wfs[wfs_index].d_binimg.reset()
+            return
+        
+        for _,swfs in enumerate(self._wfs.d_wfs):
+            swfs.d_binimg.reset()
 
     def get_ncpa_wfs(self, wfs_index : int) -> np.ndarray:
         """ Return the current NCPA phase screen of the WFS path

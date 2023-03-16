@@ -32,9 +32,13 @@ class MatplotlibWidget(QtGui.QWidget):
         self.setLayout(self.vbl)
 """
 
-import sys
-import platform
-from PyQt5 import QtCore, QtGui, QtWidgets
+try:
+    from PyQt5 import QtWidgets
+except ModuleNotFoundError as e:
+    try:
+        from PySide2 import QtWidgets
+    except ModuleNotFoundError as e:
+        raise ModuleNotFoundError("No module named 'PyQt5' or PySide2', please install one of them\nException raised: "+e.msg)
 
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as Navigationtoolbar

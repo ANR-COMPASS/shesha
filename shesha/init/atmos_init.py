@@ -1,13 +1,13 @@
 ## @package   shesha.init.atmos_init
 ## @brief     Initialization of a Atmos object
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   5.3.0
+## @version   5.4.1
 ## @date      2022/01/24
 ## @copyright GNU Lesser General Public License
 #
 #  This file is part of COMPASS <https://anr-compass.github.io/compass/>
 #
-#  Copyright (C) 2011-2022 COMPASS Team <https://github.com/ANR-COMPASS>
+#  Copyright (C) 2011-2023 COMPASS Team <https://github.com/ANR-COMPASS>
 #  All rights reserved.
 #  Distributed under GNU - LGPL
 #
@@ -46,7 +46,7 @@ import numpy as np
 
 def atmos_init(context: carmaWrap_context, p_atmos: conf.Param_atmos,
                p_tel: conf.Param_tel, p_geom: conf.Param_geom, ittime=None, p_wfss=None,
-               p_targets=None, dataBase={}, use_DB=False):
+               p_targets=None, dataBase={}, use_DB=False, silence_tqdm: bool = False):
     """
     Initializes an Atmos object
 
@@ -69,6 +69,8 @@ def atmos_init(context: carmaWrap_context, p_atmos: conf.Param_atmos,
         dataBase: (dict): dictionary for data base
 
         use_DB: (bool): flag for using the dataBase system
+
+        silence_tqdm : (bool) : Silence tqdm's output
 
     :return:
         atm : (Atmos): Atmos object
@@ -130,7 +132,7 @@ def atmos_init(context: carmaWrap_context, p_atmos: conf.Param_atmos,
                 p_atmos._deltax, p_atmos._deltay, context.active_device)
 
     print("Creating turbulent layers :")
-    for i in tqdm(range(p_atmos.nscreens)):
+    for i in tqdm(range(p_atmos.nscreens), disable=silence_tqdm):
         if "A" in dataBase:
             A, B, istx, isty = h5u.load_AB_from_dataBase(dataBase, i)
         else:
