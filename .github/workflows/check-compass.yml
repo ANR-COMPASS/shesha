@@ -1,0 +1,48 @@
+name: Check COMPASS
+
+on:
+  pull_request:
+    # Sequence of patterns matched against refs/heads
+    branches:    
+      - main
+      - saxoPlus
+  push:
+    branches:
+      - main
+      - beta
+jobs:
+  install_and_test:
+    runs-on: self-hosted
+    strategy:
+      max-parallel: 5
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Install compass
+      run: |
+        conda install -c compass compass
+    - name: Lint with flake8
+      run: |
+        conda install flake8
+        # stop the build if there are Python syntax errors or undefined names
+        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
+        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+    - name: Check Compass on scao_sh_16x16_8pix
+      run: |
+        export SHESHA_ROOT=$PWD
+        export PYTHONPATH=$SHESHA_ROOT:$PYTHONPATH
+        export PYTHONDONTWRITEBYTECODE=1
+        ipython -i shesha/scripts/closed_loop.py data/par/par4bench/scao_sh_16x16_8pix.py
+    - name: Check Compass
+      run: |
+        export SHESHA_ROOT=$PWD
+        export PYTHONPATH=$SHESHA_ROOT:$PYTHONPATH
+        export PYTHONDONTWRITEBYTECODE=1
+        ./tests/checkCompass.sh
+    - name: Archive check results
+      uses: actions/upload-artifact@v3
+      with:
+        name: report
+        path: |
+          report_E2E.md
