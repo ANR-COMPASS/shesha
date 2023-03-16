@@ -46,3 +46,16 @@ jobs:
         name: report
         path: |
           report_E2E.md
+
+    - name: Build coverage file
+      run: |
+        export SHESHA_ROOT=$PWD
+        export PYTHONPATH=$SHESHA_ROOT:$PYTHONPATH
+        export PYTHONDONTWRITEBYTECODE=1
+        pytest --junitxml=pytest.xml --cov-report=term-missing:skip-covered --cov=app tests/pytest | tee pytest-coverage.txt
+
+    - name: Pytest coverage comment
+      uses: MishaKav/pytest-coverage-comment@main
+      with:
+        pytest-coverage-path: ./pytest-coverage.txt
+        junitxml-path: ./pytest.xml
