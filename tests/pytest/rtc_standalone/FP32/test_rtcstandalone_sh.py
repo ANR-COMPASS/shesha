@@ -36,7 +36,6 @@
 #  If not, see <https://www.gnu.org/licenses/lgpl-3.0.txt>.
 
 import numpy as np
-import naga as ng
 import os
 from shesha.supervisor.components import RtcStandalone
 from shesha.supervisor.compassSupervisor import CompassSupervisor as Supervisor
@@ -45,8 +44,7 @@ from shesha.config import ParamConfig
 
 precision = 1e-2
 
-config = ParamConfig(os.getenv("COMPASS_ROOT") +
-        "/shesha/tests/pytest/par/test_sh.py")
+config = ParamConfig(os.getenv("SHESHA_ROOT") + "/tests/pytest/par/test_sh.py")
 sup = Supervisor(config)
 sup.next()
 sup.rtc.open_loop(0)
@@ -69,9 +67,9 @@ rtc._rtc.d_centro[0].load_img(frame, frame.shape[0])
 rtc._rtc.d_centro[0].calibrate_img()
 
 rtc._rtc.do_centroids(0)
-slp = ng.array(rtc._rtc.d_control[0].d_centroids)
+slp = np.array(rtc._rtc.d_control[0].d_centroids)
 rtc._rtc.do_control(0)
-com = ng.array(rtc._rtc.d_control[0].d_com)
+com = np.array(rtc._rtc.d_control[0].d_com)
 
 dark = np.random.random(frame.shape)
 flat = np.random.random(frame.shape)
@@ -194,7 +192,7 @@ def test_clipping():
     C_clipped = C.copy()
     C_clipped[np.where(C > 1)] = 1
     C_clipped[np.where(C < -1)] = -1
-    assert (relative_array_error(ng.array(control.d_com_clipped).toarray(), C_clipped) <
+    assert (relative_array_error(np.array(control.d_com_clipped), C_clipped) <
             precision)
 
 
@@ -202,7 +200,7 @@ def test_add_perturb_voltage():
     C = np.random.random(sup.config.p_controllers[0].nactu)
     control.add_perturb_voltage("test", C, 1)
     assert (relative_array_error(
-            ng.array(control.d_perturb_map["test"][0]).toarray(), C) < precision)
+            np.array(control.d_perturb_map["test"][0]), C) < precision)
 
 
 def test_remove_perturb_voltage():
@@ -213,9 +211,9 @@ def test_remove_perturb_voltage():
 def test_add_perturb():
     C = np.random.random(sup.config.p_controllers[0].nactu)
     control.add_perturb_voltage("test", C, 1)
-    com = ng.array(control.d_com_clipped).toarray()
+    com = np.array(control.d_com_clipped)
     control.add_perturb()
-    assert (relative_array_error(ng.array(control.d_com_clipped).toarray(), com + C) <
+    assert (relative_array_error(np.array(control.d_com_clipped), com + C) <
             precision)
 
 
@@ -228,10 +226,10 @@ def test_disable_perturb_voltage():
 
 def test_enable_perturb_voltage():
     control.enable_perturb_voltage("test")
-    com = ng.array(control.d_com_clipped).toarray()
-    C = ng.array(control.d_perturb_map["test"][0]).toarray()
+    com = np.array(control.d_com_clipped)
+    C = np.array(control.d_perturb_map["test"][0])
     control.add_perturb()
-    assert (relative_array_error(ng.array(control.d_com_clipped).toarray(), com + C) <
+    assert (relative_array_error(np.array(control.d_com_clipped), com + C) <
             precision)
 
 
@@ -248,8 +246,8 @@ def test_comp_voltage():
     C = np.random.random(sup.config.p_controllers[0].nactu)
     control.add_perturb_voltage("test", C, 1)
     control.set_com(C, C.size)
-    com0 = ng.array(control.d_circularComs0).toarray()
-    com1 = ng.array(control.d_circularComs1).toarray()
+    com0 = np.array(control.d_circularComs0)
+    com1 = np.array(control.d_circularComs1)
     control.comp_voltage()
     delay = sup.config.p_controllers[0].delay
     a = delay - int(delay)
@@ -258,7 +256,7 @@ def test_comp_voltage():
     comPertu = commands + C
     comPertu[np.where(comPertu > volt_max)] = volt_max
     comPertu[np.where(comPertu < volt_min)] = volt_min
-    assert (relative_array_error(ng.array(control.d_voltage).toarray(), comPertu) <
+    assert (relative_array_error(np.array(control.d_voltage), comPertu) <
             precision)
 
 

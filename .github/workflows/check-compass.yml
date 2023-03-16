@@ -52,10 +52,26 @@ jobs:
         export SHESHA_ROOT=$PWD
         export PYTHONPATH=$SHESHA_ROOT:$PYTHONPATH
         export PYTHONDONTWRITEBYTECODE=1
-        pytest --junitxml=pytest.xml --cov-report=term-missing:skip-covered --cov=app tests/pytest | tee pytest-coverage.txt
+        pytest --cov-report=term-missing:skip-covered --cov=shesha tests/pytest | tee /tmp/pytest-coverage.txt
+        pytest --junitxml=/tmp/pytest-rtc.xml --cov-report=term-missing:skip-covered --cov=shesha tests/pytest/rtc | tee /tmp/pytest-rtc-coverage.txt
+        pytest --junitxml=/tmp/pytest-rtc_standalone.xml --cov-report=term-missing:skip-covered --cov=shesha tests/pytest/rtc_standalone | tee /tmp/pytest-rtc_standalone-coverage.txt
+        pytest --junitxml=/tmp/pytest-supervisor.xml --cov-report=term-missing:skip-covered --cov=shesha tests/pytest/supervisor | tee /tmp/pytest-supervisor-coverage.txt
 
     - name: Pytest coverage comment
       uses: MishaKav/pytest-coverage-comment@main
       with:
-        pytest-coverage-path: ./pytest-coverage.txt
-        junitxml-path: ./pytest.xml
+        multiple-files: |
+          RTC, /tmp/pytest-rtc-coverage.txt, /tmp/pytest-rtc.xml
+          RTC Standalone, /tmp/pytest-rtc_standalone-coverage.txt, /tmp/pytest-rtc_standalone.xml
+          Supervisor, /tmp/pytest-supervisor-coverage.txt, /tmp/pytest-supervisor.xml
+        # pytest-xml-coverage-path: /tmp/pytest-coverage.xml
+        pytest-coverage-path: /tmp/pytest-coverage.txt
+        # junitxml-path: /tmp/pytest.xml
+        title: COMPASS Coverage Report
+        badge-title: Coverage
+        hide-badge: false
+        hide-report: false
+        create-new-comment: false
+        hide-comment: false
+        report-only-changed-files: false
+        remove-link-from-badge: false

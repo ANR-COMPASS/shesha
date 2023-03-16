@@ -36,17 +36,14 @@
 #  If not, see <https://www.gnu.org/licenses/lgpl-3.0.txt>.
 
 import numpy as np
-import naga as ng
 import os
 from shesha.sutra_wrap import Rtc_FFF as Rtc
 from shesha.supervisor.compassSupervisor import CompassSupervisor as Supervisor
-from scipy.ndimage.measurements import center_of_mass
 from shesha.config import ParamConfig
 
 precision = 1e-2
 
-config = ParamConfig(os.getenv("COMPASS_ROOT") +
-        "/shesha/tests/pytest/par/test_pyrhr.py")
+config = ParamConfig(os.getenv("SHESHA_ROOT") + "/tests/pytest/par/test_pyrhr.py")
 sup = Supervisor(config)
 sup.next()
 sup.rtc.open_loop(0)
@@ -73,9 +70,7 @@ rtc.d_centro[0].load_img(frame, frame.shape[0])
 rtc.d_centro[0].calibrate_img()
 
 rtc.do_centroids(0)
-slp = ng.array(rtc.d_control[0].d_centroids)
 rtc.do_control(0)
-com = ng.array(rtc.d_control[0].d_com)
 
 dark = np.random.random(frame.shape)
 flat = np.random.random(frame.shape)
@@ -93,5 +88,5 @@ def test_doCentroids_maskedPix():
     psum = binimg[xvalid, yvalid].sum() / slopes.size
     for k in range(slopes.size):
         slopes[k] = binimg[xvalid[k], yvalid[k]] / psum - 1 # -1 for ref slopes
-    assert (relative_array_error(ng.array(control.d_centroids).toarray(), slopes) <
+    assert (relative_array_error(np.array(control.d_centroids), slopes) <
             precision)

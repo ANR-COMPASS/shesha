@@ -36,7 +36,6 @@
 #  If not, see <https://www.gnu.org/licenses/lgpl-3.0.txt>.
 
 import numpy as np
-import naga as ng
 import os
 from shesha.sutra_wrap import Rtc_UFF as Rtc
 from shesha.supervisor.compassSupervisor import CompassSupervisor as Supervisor
@@ -45,8 +44,7 @@ from shesha.config import ParamConfig
 
 precision = 1e-2
 
-config = ParamConfig(os.getenv("COMPASS_ROOT") +
-        "/shesha/tests/pytest/par/test_sh.py")
+config = ParamConfig(os.getenv("SHESHA_ROOT") + "/tests/pytest/par/test_sh.py")
 sup = Supervisor(config)
 
 sup.wfs._wfs.d_wfs[0].set_fakecam(True)
@@ -78,9 +76,9 @@ rtc.d_centro[0].load_img(frame, frame.shape[0])
 rtc.d_centro[0].calibrate_img()
 
 rtc.do_centroids(0)
-slp = ng.array(rtc.d_control[0].d_centroids)
+slp = np.array(rtc.d_control[0].d_centroids)
 rtc.do_control(0)
-com = ng.array(rtc.d_control[0].d_com)
+com = np.array(rtc.d_control[0].d_com)
 
 dark = np.random.random(frame.shape)
 flat = np.random.random(frame.shape)
@@ -137,7 +135,7 @@ def test_load_validposY():
 
 
 def test_set_cmat():
-    assert (relative_array_error(ng.array(control.d_cmat).toarray(), cmat) < precision)
+    assert (relative_array_error(np.array(control.d_cmat), cmat) < precision)
 
 
 def test_set_gain():
@@ -149,17 +147,17 @@ def test_load_img():
 
 
 def test_set_dark():
-    assert (relative_array_error(ng.array(centro.d_dark).toarray(), dark) < precision)
+    assert (relative_array_error(np.array(centro.d_dark), dark) < precision)
 
 
 def test_set_flat():
-    assert (relative_array_error(ng.array(centro.d_flat).toarray(), flat) < precision)
+    assert (relative_array_error(np.array(centro.d_flat), flat) < precision)
 
 
 def test_calibrate_img():
     centro.calibrate_img()
     imgCal = (frame - dark) * flat
-    assert (relative_array_error(ng.array(centro.d_img).toarray(), imgCal) < precision)
+    assert (relative_array_error(np.array(centro.d_img), imgCal) < precision)
 
 
 def test_doCentroids_cog():
@@ -171,16 +169,16 @@ def test_doCentroids_cog():
         tmp = center_of_mass(bincube[:, :, k])
         slopes[k] = (tmp[0] - offset) * scale
         slopes[k + sup.config.p_wfss[0]._nvalid] = (tmp[1] - offset) * scale
-    assert (relative_array_error(ng.array(control.d_centroids).toarray(), slopes) <
+    assert (relative_array_error(np.array(control.d_centroids), slopes) <
             precision)
 
 
 def test_do_control_generic():
-    slopes = ng.array(control.d_centroids).toarray()
+    slopes = np.array(control.d_centroids)
     gain = control.gain
-    cmat = ng.array(control.d_cmat).toarray()
+    cmat = np.array(control.d_cmat)
     commands = cmat.dot(slopes) * gain * (-1)
-    assert (relative_array_error(ng.array(control.d_com).toarray(), commands) <
+    assert (relative_array_error(np.array(control.d_com), commands) <
             precision)
 
 
@@ -197,7 +195,7 @@ def test_clipping():
     C_clipped = C.copy()
     C_clipped[np.where(C > 1)] = 1
     C_clipped[np.where(C < -1)] = -1
-    assert (relative_array_error(ng.array(control.d_com_clipped).toarray(), C_clipped) <
+    assert (relative_array_error(np.array(control.d_com_clipped), C_clipped) <
             precision)
 
 
@@ -205,7 +203,7 @@ def test_add_perturb_voltage():
     C = np.random.random(sup.config.p_controllers[0].nactu)
     control.add_perturb_voltage("test", C, 1)
     assert (relative_array_error(
-            ng.array(control.d_perturb_map["test"][0]).toarray(), C) < precision)
+            np.array(control.d_perturb_map["test"][0]), C) < precision)
 
 
 def test_remove_perturb_voltage():
@@ -216,25 +214,25 @@ def test_remove_perturb_voltage():
 def test_add_perturb():
     C = np.random.random(sup.config.p_controllers[0].nactu)
     control.add_perturb_voltage("test", C, 1)
-    com = ng.array(control.d_com_clipped).toarray()
+    com = np.array(control.d_com_clipped)
     control.add_perturb()
-    assert (relative_array_error(ng.array(control.d_com_clipped).toarray(), com + C) <
+    assert (relative_array_error(np.array(control.d_com_clipped), com + C) <
             precision)
 
 
 def test_disable_perturb_voltage():
     control.disable_perturb_voltage("test")
-    com = ng.array(control.d_com).toarray()
+    com = np.array(control.d_com)
     control.add_perturb()
-    assert (relative_array_error(ng.array(control.d_com).toarray(), com) < precision)
+    assert (relative_array_error(np.array(control.d_com), com) < precision)
 
 
 def test_enable_perturb_voltage():
     control.enable_perturb_voltage("test")
-    com = ng.array(control.d_com_clipped).toarray()
-    C = ng.array(control.d_perturb_map["test"][0]).toarray()
+    com = np.array(control.d_com_clipped)
+    C = np.array(control.d_perturb_map["test"][0])
     control.add_perturb()
-    assert (relative_array_error(ng.array(control.d_com_clipped).toarray(), com + C) <
+    assert (relative_array_error(np.array(control.d_com_clipped), com + C) <
             precision)
 
 
@@ -251,8 +249,8 @@ def test_comp_voltage():
     C = np.random.random(sup.config.p_controllers[0].nactu)
     control.add_perturb_voltage("test", C, 1)
     control.set_com(C, C.size)
-    com0 = ng.array(control.d_circularComs0).toarray()
-    com1 = ng.array(control.d_circularComs1).toarray()
+    com0 = np.array(control.d_circularComs0)
+    com1 = np.array(control.d_circularComs1)
     control.comp_voltage()
     delay = sup.config.p_controllers[0].delay
     a = delay - int(delay)
@@ -261,7 +259,7 @@ def test_comp_voltage():
     comPertu = commands + C
     comPertu[np.where(comPertu > volt_max)] = volt_max
     comPertu[np.where(comPertu < volt_min)] = volt_min
-    assert (relative_array_error(ng.array(control.d_voltage).toarray(), comPertu) <
+    assert (relative_array_error(np.array(control.d_voltage), comPertu) <
             precision)
 
 
@@ -296,7 +294,7 @@ def test_doCentroids_tcog():
         tmp = center_of_mass(imagette)
         slopes[k] = (tmp[0] - offset) * scale
         slopes[k + sup.config.p_wfss[0]._nvalid] = (tmp[1] - offset) * scale
-    assert (relative_array_error(ng.array(control.d_centroids).toarray(), slopes) <
+    assert (relative_array_error(np.array(control.d_centroids), slopes) <
             precision)
 
 
@@ -330,5 +328,5 @@ def test_doCentroids_bpcog():
         tmp = center_of_mass(imagette)
         slopes[k] = (tmp[0] - offset) * scale
         slopes[k + sup.config.p_wfss[0]._nvalid] = (tmp[1] - offset) * scale
-    assert (relative_array_error(ng.array(control.d_centroids).toarray(), slopes) <
+    assert (relative_array_error(np.array(control.d_centroids), slopes) <
             precision)
