@@ -31,7 +31,7 @@ p_atmos.set_winddir([45])
 p_atmos.set_L0([1.e5])
 
 #target
-p_target = conf.Param_target()
+p_target = ao.Param_target()
 p_targets = [p_target]
 p_target.set_xpos(0.)
 p_target.set_ypos(0.)

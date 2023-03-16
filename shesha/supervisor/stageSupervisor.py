@@ -1,13 +1,13 @@
 ## @package   shesha.supervisor.stageSupervisor
 ## @brief     Initialization and execution of a single stage supervisor for cascaded AO systems
 ## @author    SAXO+ Team <https://github.com/ANR-COMPASS> (Clementine Bechet)
-## @version   5.3.0
+## @version   5.4.1
 ## @date      2023/01/31
 ## @copyright GNU Lesser General Public License
 #
 #  This file is part of COMPASS <https://anr-compass.github.io/compass/>
 #
-#  Copyright (C) 2011-2022 COMPASS Team <https://github.com/ANR-COMPASS>
+#  Copyright (C) 2011-2023 COMPASS Team <https://github.com/ANR-COMPASS>
 #  All rights reserved.
 #  Distributed under GNU - LGPL
 #
@@ -48,7 +48,8 @@ from typing import Iterable
 
 class StageSupervisor(CompassSupervisor):
     """ This class implements a single stage (e.g. first stage, second stage) supervisor 
-    to handle compass simulations of cascaded AO. The main supervision will be handled by another     supervisor (manager). 
+    to handle compass simulations of cascaded AO. The main supervision will be handled by another 
+    supervisor (manager). 
 
     Attributes inherited from CompassSupervisor:
         context : (CarmaContext) : a CarmaContext instance
@@ -78,6 +79,7 @@ class StageSupervisor(CompassSupervisor):
         calibration : (Calibration) : a Calibration instance (optimizer)
 
         modalgains : (ModalGains) : a ModalGain instance (optimizer) using CLOSE algorithm
+        
         close_modal_gains : (list of floats) : list of the previous values of the modal gains
     """
 
@@ -85,10 +87,9 @@ class StageSupervisor(CompassSupervisor):
              tar_trace: Iterable[int] = None, wfs_trace: Iterable[int] = None,
              do_control: bool = True, apply_control: bool = True,
              compute_tar_psf: bool = True, stack_wfs_image: bool = False,
-             do_centroids: bool = True) -> None:
+             do_centroids: bool = True, compute_corono: bool=True) -> None:
         """Iterates the AO loop, with optional parameters, considering it is a single 
         stage and may be called in the middle of WFS frames. 
-
         Overload the CompassSupervisor next() method to arrange tasks orders and allow cascaded 
         simulation.
 
@@ -106,13 +107,17 @@ class StageSupervisor(CompassSupervisor):
             apply_control: (bool): if True (default), apply control on DMs
 
             compute_tar_psf : (bool) : If True (default), computes the PSF at the end of the
-        iteration
+                                       iteration
 
             stack_wfs_image : (bool) : If False (default), the Wfs image is computed as 
-        usual. Otherwise, a newly computed WFS image is accumulated to the previous one.
+                                       usual. Otherwise, a newly computed WFS image is accumulated 
+                                       to the previous one.
 
             do_centroids : (bool) : If True (default), the last WFS image is stacked and 
-        centroids computation is done. WFS image must be reset before next loop (in the manager).
+                                    centroids computation is done. WFS image must be reset before 
+                                    next loop (in the manager).
+
+            compute_corono: (bool): If True (default), computes the coronagraphic image
         """
         try:
             iter(nControl)
@@ -208,6 +213,10 @@ class StageSupervisor(CompassSupervisor):
             for tar_index in tar_trace:
                 self.target.comp_tar_image(tar_index)
                 self.target.comp_strehl(tar_index)
+
+        if self.corono is not None and compute_corono:
+            for coro_index in range(len(self.config.p_coronos)):
+                self.corono.compute_image(coro_index)
 
         if self.config.p_controllers[0].close_opti and (not self.rtc._rtc.d_control[0].open_loop):
             self.modalgains.update_mgains()

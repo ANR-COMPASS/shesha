@@ -1,13 +1,13 @@
 ## @package   shesha.util.make_pupil
 ## @brief     Pupil creation functions
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   5.3.0
+## @version   5.4.1
 ## @date      2022/01/24
 ## @copyright GNU Lesser General Public License
 #
 #  This file is part of COMPASS <https://anr-compass.github.io/compass/>
 #
-#  Copyright (C) 2011-2022 COMPASS Team <https://github.com/ANR-COMPASS>
+#  Copyright (C) 2011-2023 COMPASS Team <https://github.com/ANR-COMPASS>
 #  All rights reserved.
 #  Distributed under GNU - LGPL
 #
@@ -623,7 +623,7 @@ def generateEeltPupilMask(npt, dspider, i0, j0, pixscale, gap, rotdegree, D=40.0
         obstru = (util.dist(pup.shape[0], pup.shape[0] // 2 + 0.5,
                             pup.shape[0] // 2 + 0.5) >=
                   (pup.shape[0] * cobs + 1.) * 0.5).astype(np.float32)
-        pup *= obstru
+        pup = pup * obstru
     return pup
 
 
