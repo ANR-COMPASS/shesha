@@ -1,7 +1,7 @@
 ## @package   shesha.util.psfMap
 ## @brief     class PSF_map
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   5.4.1
+## @version   5.4.2
 ## @date      2022/01/24
 ## @copyright GNU Lesser General Public License
 #
