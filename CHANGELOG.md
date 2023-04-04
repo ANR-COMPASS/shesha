@@ -1,6 +1,7 @@
 # COMPASS Change logs
 
 - [COMPASS Change logs](#compass-change-logs)
+  - [Release v5.4.2 :](#release-v542-)
   - [Release v5.4.1 :](#release-v541-)
   - [Release v5.3.0](#release-v530)
   - [Release v5.2.1](#release-v521)
@@ -23,10 +24,15 @@
   - [Release v2.0](#release-v20)
   - [Release v1.1](#release-v11)
 
+## Release v5.4.2 :
+
+- Hotfix: remove clipping from pyramid slope-based kernel
+- Add python 3.10 support
+
 ## Release v5.4.1 :
 
 - Coronagraph hotfix
-- update LICENSE to LGPL
+- Update SHESHA LICENSE to LGPL
 
 ## Release v5.3.0
 
