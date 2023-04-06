@@ -127,7 +127,7 @@ class DmCompass(object):
             dm_index : (int) : Index of the DM to reset
                                          Default is -1, i.e. all DMs are reset
         """
-        if (dm_index == -1):  # All Dms reset
+        if (dm_index == -1):  # All Dms reset
             for dm in self._dms.d_dms:
                 dm.reset_shape()
         else:
