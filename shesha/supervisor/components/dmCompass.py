@@ -36,6 +36,7 @@
 #  If not, see <https://www.gnu.org/licenses/lgpl-3.0.txt>.
 from shesha.init.dm_init import dm_init
 import numpy as np
+from typing import Tuple
 
 class DmCompass(object):
     """ DM handler for compass simulation
@@ -105,7 +106,7 @@ class DmCompass(object):
         """
         return self._config.p_dms[dm_index]._influ
 
-    def get_influ_function_ipupil_coords(self, dm_index : int) -> np.ndarray:
+    def get_influ_function_ipupil_coords(self, dm_index : int) -> Tuple[np.ndarray, np.ndarray]:
         """ Returns the lower left coordinates of the influ function support in the ipupil coord system
 
         Args:
