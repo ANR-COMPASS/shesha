@@ -36,6 +36,7 @@
 #  If not, see <https://www.gnu.org/licenses/lgpl-3.0.txt>.
 from shesha.init.dm_init import dm_init
 import numpy as np
+from typing import Tuple
 
 class DmCompass(object):
     """ DM handler for compass simulation
@@ -105,7 +106,7 @@ class DmCompass(object):
         """
         return self._config.p_dms[dm_index]._influ
 
-    def get_influ_function_ipupil_coords(self, dm_index : int) -> np.ndarray:
+    def get_influ_function_ipupil_coords(self, dm_index : int) -> Tuple[np.ndarray, np.ndarray]:
         """ Returns the lower left coordinates of the influ function support in the ipupil coord system
 
         Args:
@@ -114,10 +115,10 @@ class DmCompass(object):
         Returns:
             coords : (tuple) : (i, j)
         """
-        i1 = self._config.p_dms[0]._i1  # i1 is in the dmshape support coords
-        j1 = self._config.p_dms[0]._j1  # j1 is in the dmshape support coords
-        ii1 = i1 + self._config.p_dms[0]._n1  # in  ipupil coords
-        jj1 = j1 + self._config.p_dms[0]._n1  # in  ipupil coords
+        i1 = self._config.p_dms[dm_index]._i1  # i1 is in the dmshape support coords
+        j1 = self._config.p_dms[dm_index]._j1  # j1 is in the dmshape support coords
+        ii1 = i1 + self._config.p_dms[dm_index]._n1  # in  ipupil coords
+        jj1 = j1 + self._config.p_dms[dm_index]._n1  # in  ipupil coords
         return ii1, jj1
 
     def reset_dm(self, dm_index: int = -1) -> None:
@@ -127,7 +128,7 @@ class DmCompass(object):
             dm_index : (int) : Index of the DM to reset
                                          Default is -1, i.e. all DMs are reset
         """
-        if (dm_index == -1):  # All Dms reset
+        if (dm_index == -1):  # All Dms reset
             for dm in self._dms.d_dms:
                 dm.reset_shape()
         else:
