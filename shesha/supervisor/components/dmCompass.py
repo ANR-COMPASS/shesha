@@ -114,10 +114,10 @@ class DmCompass(object):
         Returns:
             coords : (tuple) : (i, j)
         """
-        i1 = self._config.p_dms[0]._i1  # i1 is in the dmshape support coords
-        j1 = self._config.p_dms[0]._j1  # j1 is in the dmshape support coords
-        ii1 = i1 + self._config.p_dms[0]._n1  # in  ipupil coords
-        jj1 = j1 + self._config.p_dms[0]._n1  # in  ipupil coords
+        i1 = self._config.p_dms[dm_index]._i1  # i1 is in the dmshape support coords
+        j1 = self._config.p_dms[dm_index]._j1  # j1 is in the dmshape support coords
+        ii1 = i1 + self._config.p_dms[dm_index]._n1  # in  ipupil coords
+        jj1 = j1 + self._config.p_dms[dm_index]._n1  # in  ipupil coords
         return ii1, jj1
 
     def reset_dm(self, dm_index: int = -1) -> None:
