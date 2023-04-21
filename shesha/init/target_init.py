@@ -1,7 +1,7 @@
 ## @package   shesha.init.target_init
 ## @brief     Initialization of a Target object
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   5.4.2
+## @version   5.4.3
 ## @date      2022/01/24
 ## @copyright GNU Lesser General Public License
 #
@@ -79,9 +79,9 @@ def target_init(ctxt: carmaWrap_context, telescope: Telescope, p_targets: list,
         # TODO apodizer, Npts=nb element of apodizer>0
         ceiled_apodizer = np.ceil(p_geom._apodizer * p_geom._spupil)
         ceiled_apodizer[np.where(ceiled_apodizer > 1)] = 1
-        Npts = np.sum(ceiled_apodizer)
+        Npts = int(np.sum(ceiled_apodizer))
     else:
-        Npts = np.sum(ceiled_pupil)
+        Npts = int(np.sum(ceiled_pupil))
 
     xpos = np.array([p_target.xpos for p_target in p_targets], dtype=np.float32)
     ypos = np.array([p_target.ypos for p_target in p_targets], dtype=np.float32)

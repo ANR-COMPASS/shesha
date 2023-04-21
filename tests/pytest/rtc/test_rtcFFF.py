@@ -1,7 +1,7 @@
 ## @package   shesha.tests
 ## @brief     Tests the RTC module
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   5.4.2
+## @version   5.4.3
 ## @date      2022/01/24
 ## @copyright GNU Lesser General Public License
 #
@@ -39,8 +39,9 @@ import numpy as np
 import os
 from shesha.sutra_wrap import Rtc_FFF as Rtc
 from shesha.supervisor.compassSupervisor import CompassSupervisor as Supervisor
-from scipy.ndimage.measurements import center_of_mass
+from scipy.ndimage import center_of_mass
 from shesha.config import ParamConfig
+from shesha.init.rtc_init import comp_weights
 
 precision = 1e-2
 
@@ -314,6 +315,37 @@ def test_doCentroids_bpcog():
         imagette -= threshold
         imagette[np.where(imagette < 0)] = 0
         tmp = center_of_mass(imagette)
+        slopes[k] = (tmp[0] - offset) * scale
+        slopes[k + sup.config.p_wfss[0]._nvalid] = (tmp[1] - offset) * scale
+    assert (relative_array_error(np.array(control.d_centroids), slopes) < precision)
+
+def test_doCentroids_wcog():
+    rtc.remove_centroider(0)
+    rtc.add_centroider(sup.context, sup.config.p_wfss[0]._nvalid,
+                       sup.config.p_wfss[0].npix / 2 - 0.5, sup.config.p_wfss[0].pixsize,
+                       False, 0, "wcog")
+
+    centro = rtc.d_centro[-1]
+    centro.set_npix(sup.config.p_wfss[0].npix)
+    threshold = 0.1
+    centro.set_threshold(threshold)
+    comp_weights(sup.config.p_centroiders[0], sup.config.p_wfss[0], sup.config.p_wfss[0].npix)
+    weights = sup.config.p_centroiders[0].weights
+    centro.init_weights()
+    centro.load_weights(weights, weights.ndim)
+    centro.load_validpos(xvalid, yvalid, xvalid.size)
+    centro.load_img(frame, frame.shape[0])
+    centro.calibrate_img()
+    rtc.do_centroids(0)
+    bincube = np.array(sup.wfs._wfs.d_wfs[0].d_bincube)
+    bincube /= bincube.max()
+    slopes = np.zeros(sup.config.p_wfss[0]._nvalid * 2, dtype=np.float32)
+    offset = centro.offset
+    scale = centro.scale
+    bincube = bincube - threshold
+    bincube[np.where(bincube < 0)] = 1e-6
+    for k in range(sup.config.p_wfss[0]._nvalid):
+        tmp = center_of_mass(bincube[:, :, k] * weights)
         slopes[k] = (tmp[0] - offset) * scale
         slopes[k + sup.config.p_wfss[0]._nvalid] = (tmp[1] - offset) * scale
     assert (relative_array_error(np.array(control.d_centroids), slopes) < precision)

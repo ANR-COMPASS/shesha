@@ -1,7 +1,7 @@
 ## @package   shesha.init.wfs_init
 ## @brief     Initialization of a Sensors object
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   5.4.2
+## @version   5.4.3
 ## @date      2022/01/24
 ## @copyright GNU Lesser General Public License
 #
@@ -83,7 +83,7 @@ def wfs_init(context: carmaWrap_context, telescope: Telescope, p_wfss: list,
     nphot = np.array([o._nphotons for o in p_wfss], dtype=np.float32)
     nphot4imat = np.array([o.nphotons4imat for o in p_wfss], dtype=np.float32)
     lgs = np.array([o.gsalt > 0 for o in p_wfss], dtype=np.int32)
-    fakecam = np.array([o.fakecam for o in p_wfss], dtype=np.bool)
+    fakecam = np.array([o.fakecam for o in p_wfss], dtype=bool)
     maxFlux = np.array([o.max_flux_per_pix for o in p_wfss], dtype=np.int32)
     max_pix_value = np.array([o.max_pix_value for o in p_wfss], dtype=np.int32)
 

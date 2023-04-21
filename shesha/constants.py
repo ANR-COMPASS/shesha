@@ -1,7 +1,7 @@
 ## @package   shesha.constants
 ## @brief     Numerical constants for shesha and config enumerations for safe-typing
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   5.4.2
+## @version   5.4.3
 ## @date      2022/01/24
 ## @copyright GNU Lesser General Public License
 #

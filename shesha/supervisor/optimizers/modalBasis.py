@@ -1,7 +1,7 @@
 ## @package   shesha.supervisor.optimizers
 ## @brief     User layer for optimizing AO supervisor loop
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   5.4.2
+## @version   5.4.3
 ## @date      2022/01/24
 ## @copyright GNU Lesser General Public License
 #
@@ -39,7 +39,7 @@ import shesha.util.utilities as util
 import shesha.util.make_pupil as mkP
 import shesha.constants as scons
 import scipy.ndimage
-from scipy.sparse.csr import csr_matrix
+from scipy.sparse import csr_matrix
 import numpy as np
 
 class ModalBasis(object):
@@ -209,7 +209,7 @@ class ModalBasis(object):
                 influ_basis2[couples_actus[i, 0], :] += influ_basis2[
                         couples_actus[i, 1], :]
             print("Pairing Done")
-            boolarray = np.zeros(influ_basis2.shape[0], dtype=np.bool)
+            boolarray = np.zeros(influ_basis2.shape[0], dtype=bool)
             boolarray[index_remove] = True
             self.slaved_actus = boolarray
             self.selected_actus = ~boolarray
@@ -273,7 +273,7 @@ class ModalBasis(object):
         dm_pos_mat = np.c_[dm_posx, dm_posy].T  # one actu per column
 
         pitch = self._config.p_dms[dm_index]._pitch
-        discard = np.zeros(len(dm_posx), dtype=np.bool)
+        discard = np.zeros(len(dm_posx), dtype=bool)
         pairs = []
 
         # For each of the k pieces of the spider

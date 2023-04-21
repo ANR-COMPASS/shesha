@@ -1,6 +1,7 @@
 # COMPASS Change logs
 
 - [COMPASS Change logs](#compass-change-logs)
+  - [Release v5.4.3 :](#release-v543-)
   - [Release v5.4.2 :](#release-v542-)
   - [Release v5.4.1 :](#release-v541-)
   - [Release v5.3.0](#release-v530)
@@ -23,6 +24,12 @@
   - [Release v3.0](#release-v30)
   - [Release v2.0](#release-v20)
   - [Release v1.1](#release-v11)
+
+## Release v5.4.3 :
+
+- Add a threshold in the wcog centroider
+- Use ```dm_index``` instead of 0 in ```get_influ_function```
+- Replace all deprecated np.bool by native bool
 
 ## Release v5.4.2 :
 
