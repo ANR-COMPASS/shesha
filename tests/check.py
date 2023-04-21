@@ -2,7 +2,7 @@
 ## @package   shesha.tests
 ## @brief     Runs a set of tests
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   5.4.1
+## @version   5.4.3
 ## @date      2022/01/24
 ## @copyright GNU Lesser General Public License
 #
@@ -107,6 +107,7 @@ if __name__ == "__main__":
             SR = supervisor.target.get_strehl(0)[1]
         except:
             SR = "N/A"
+            t_loop = 0
         try:
             df = pandas.read_hdf("check.h5")
         except FileNotFoundError:

@@ -1,7 +1,7 @@
 ## @package   shesha.init.dm_init
 ## @brief     Initialization of a Dms object
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   5.4.1
+## @version   5.4.3
 ## @date      2022/01/24
 ## @copyright GNU Lesser General Public License
 #
@@ -959,7 +959,7 @@ def make_petal_dm_core(pupImage, pupAngleDegree):
     # be identified as relevant connex areas
     from scipy.ndimage.measurements import label
     from scipy.ndimage.morphology import binary_opening
-    s = np.ones((2, 2), dtype=np.bool)
+    s = np.ones((2, 2), dtype=bool)
     segments, nbSeg = label(binary_opening(pupImage, s))
 
     # Faut trouver le plus petit support commun a tous les

@@ -1,7 +1,7 @@
 ## @package   shesha.util.make_pupil
 ## @brief     Pupil creation functions
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   5.4.1
+## @version   5.4.3
 ## @date      2022/01/24
 ## @copyright GNU Lesser General Public License
 #
@@ -723,7 +723,7 @@ def fillPolygon(x, y, i0, j0, scale, gap, N, index=0):
         a[indx, indy] = distedge
         return a
     else:
-        a = np.zeros((N, N), dtype=np.bool)
+        a = np.zeros((N, N), dtype=bool)
         a[indx, indy] = True  # convention [x,y]
 
     return a
@@ -773,7 +773,7 @@ def compute1Spider(nspider, N, dspider, i0, j0, scale, rot):
     La fonction cree un tableau de booleens avec une seule spider.
     Utilisee par la fonction compute6Segments()
     """
-    a = np.ones((N, N), dtype=np.bool)
+    a = np.ones((N, N), dtype=bool)
     X = (np.arange(N) - i0) * scale
     Y = (np.arange(N) - j0) * scale
     X, Y = np.meshgrid(X, Y, indexing='ij')  # convention d'appel [x,y]
@@ -799,7 +799,7 @@ def fillSpider(N, nspider, dspider, i0, j0, scale, rot):
     :param float rot: rotation angle in radians
 
     """
-    a = np.ones((N, N), dtype=np.bool)
+    a = np.ones((N, N), dtype=bool)
     X = (np.arange(N) - i0) * scale
     Y = (np.arange(N) - j0) * scale
     X, Y = np.meshgrid(X, Y, indexing='ij')  # convention d'appel [x,y]
@@ -811,8 +811,8 @@ def fillSpider(N, nspider, dspider, i0, j0, scale, rot):
 
 
 def fillHalfSpider(N, nspider, dspider, i0, j0, scale, rot):
-    a = np.ones((N, N), dtype=np.bool)
-    b = np.ones((N, N), dtype=np.bool)
+    a = np.ones((N, N), dtype=bool)
+    b = np.ones((N, N), dtype=bool)
     X = (np.arange(N) - i0) * scale
     Y = (np.arange(N) - j0) * scale
     X, Y = np.meshgrid(X, Y, indexing='ij')  # convention d'appel [x,y]

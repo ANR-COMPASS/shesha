@@ -1,7 +1,7 @@
 ## @package   shesha.tests
 ## @brief     Tests the RTC module
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   5.4.1
+## @version   5.4.3
 ## @date      2022/01/24
 ## @copyright GNU Lesser General Public License
 #
@@ -36,17 +36,16 @@
 #  If not, see <https://www.gnu.org/licenses/lgpl-3.0.txt>.
 
 import numpy as np
-import naga as ng
 import os
 from shesha.sutra_wrap import Rtc_FFF as Rtc
 from shesha.supervisor.compassSupervisor import CompassSupervisor as Supervisor
-from scipy.ndimage.measurements import center_of_mass
+from scipy.ndimage import center_of_mass
 from shesha.config import ParamConfig
+from shesha.init.rtc_init import comp_weights
 
 precision = 1e-2
 
-config = ParamConfig(os.getenv("COMPASS_ROOT") +
-        "/shesha/tests/pytest/par/test_sh.py")
+config = ParamConfig(os.getenv("SHESHA_ROOT") + "/tests/pytest/par/test_sh.py")
 
 sup = Supervisor(config)
 sup.next()
@@ -76,9 +75,7 @@ rtc.d_centro[0].load_img(frame, frame.shape[0])
 rtc.d_centro[0].calibrate_img()
 
 rtc.do_centroids(0)
-slp = ng.array(rtc.d_control[0].d_centroids)
 rtc.do_control(0)
-com = ng.array(rtc.d_control[0].d_com)
 
 dark = np.random.random(frame.shape)
 flat = np.random.random(frame.shape)
@@ -193,7 +190,7 @@ def test_clipping():
     C_clipped = C.copy()
     C_clipped[np.where(C > 1)] = 1
     C_clipped[np.where(C < -1)] = -1
-    assert (relative_array_error(ng.array(control.d_com_clipped).toarray(), C_clipped) <
+    assert (relative_array_error(np.array(control.d_com_clipped), C_clipped) <
             precision)
 
 
@@ -201,7 +198,7 @@ def test_add_perturb_voltage():
     C = np.random.random(sup.config.p_controllers[0].nactu)
     control.add_perturb_voltage("test", C, 1)
     assert (relative_array_error(
-            ng.array(control.d_perturb_map["test"][0]).toarray(), C) < precision)
+            np.array(control.d_perturb_map["test"][0]), C) < precision)
 
 
 def test_remove_perturb_voltage():
@@ -212,9 +209,9 @@ def test_remove_perturb_voltage():
 def test_add_perturb():
     C = np.random.random(sup.config.p_controllers[0].nactu)
     control.add_perturb_voltage("test", C, 1)
-    com = ng.array(control.d_com_clipped).toarray()
+    com = np.array(control.d_com_clipped)
     control.add_perturb()
-    assert (relative_array_error(ng.array(control.d_com_clipped).toarray(), com + C) <
+    assert (relative_array_error(np.array(control.d_com_clipped), com + C) <
             precision)
 
 
@@ -227,10 +224,10 @@ def test_disable_perturb_voltage():
 
 def test_enable_perturb_voltage():
     control.enable_perturb_voltage("test")
-    com = ng.array(control.d_com_clipped).toarray()
-    C = ng.array(control.d_perturb_map["test"][0]).toarray()
+    com = np.array(control.d_com_clipped)
+    C = np.array(control.d_perturb_map["test"][0])
     control.add_perturb()
-    assert (relative_array_error(ng.array(control.d_com_clipped).toarray(), com + C) <
+    assert (relative_array_error(np.array(control.d_com_clipped), com + C) <
             precision)
 
 
@@ -247,8 +244,8 @@ def test_comp_voltage():
     C = np.random.random(sup.config.p_controllers[0].nactu)
     control.add_perturb_voltage("test", C, 1)
     control.set_com(C, C.size)
-    com0 = ng.array(control.d_circularComs0).toarray()
-    com1 = ng.array(control.d_circularComs1).toarray()
+    com0 = np.array(control.d_circularComs0)
+    com1 = np.array(control.d_circularComs1)
     control.comp_voltage()
     delay = sup.config.p_controllers[0].delay
     a = delay - int(delay)
@@ -257,7 +254,7 @@ def test_comp_voltage():
     comPertu = commands + C
     comPertu[np.where(comPertu > volt_max)] = volt_max
     comPertu[np.where(comPertu < volt_min)] = volt_min
-    assert (relative_array_error(ng.array(control.d_voltage).toarray(), comPertu) <
+    assert (relative_array_error(np.array(control.d_voltage), comPertu) <
             precision)
 
 
@@ -318,6 +315,37 @@ def test_doCentroids_bpcog():
         imagette -= threshold
         imagette[np.where(imagette < 0)] = 0
         tmp = center_of_mass(imagette)
+        slopes[k] = (tmp[0] - offset) * scale
+        slopes[k + sup.config.p_wfss[0]._nvalid] = (tmp[1] - offset) * scale
+    assert (relative_array_error(np.array(control.d_centroids), slopes) < precision)
+
+def test_doCentroids_wcog():
+    rtc.remove_centroider(0)
+    rtc.add_centroider(sup.context, sup.config.p_wfss[0]._nvalid,
+                       sup.config.p_wfss[0].npix / 2 - 0.5, sup.config.p_wfss[0].pixsize,
+                       False, 0, "wcog")
+
+    centro = rtc.d_centro[-1]
+    centro.set_npix(sup.config.p_wfss[0].npix)
+    threshold = 0.1
+    centro.set_threshold(threshold)
+    comp_weights(sup.config.p_centroiders[0], sup.config.p_wfss[0], sup.config.p_wfss[0].npix)
+    weights = sup.config.p_centroiders[0].weights
+    centro.init_weights()
+    centro.load_weights(weights, weights.ndim)
+    centro.load_validpos(xvalid, yvalid, xvalid.size)
+    centro.load_img(frame, frame.shape[0])
+    centro.calibrate_img()
+    rtc.do_centroids(0)
+    bincube = np.array(sup.wfs._wfs.d_wfs[0].d_bincube)
+    bincube /= bincube.max()
+    slopes = np.zeros(sup.config.p_wfss[0]._nvalid * 2, dtype=np.float32)
+    offset = centro.offset
+    scale = centro.scale
+    bincube = bincube - threshold
+    bincube[np.where(bincube < 0)] = 1e-6
+    for k in range(sup.config.p_wfss[0]._nvalid):
+        tmp = center_of_mass(bincube[:, :, k] * weights)
         slopes[k] = (tmp[0] - offset) * scale
         slopes[k + sup.config.p_wfss[0]._nvalid] = (tmp[1] - offset) * scale
     assert (relative_array_error(np.array(control.d_centroids), slopes) < precision)

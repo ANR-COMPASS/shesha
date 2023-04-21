@@ -1,7 +1,7 @@
 ## @package   shesha.tests
 ## @brief     Tests the supervisor module
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   5.4.1
+## @version   5.4.3
 ## @date      2022/01/24
 ## @copyright GNU Lesser General Public License
 #
@@ -43,7 +43,7 @@ import numpy as np
 import pytest
 import shesha.config as conf
 
-config = ParamConfig(os.getenv("COMPASS_ROOT") + "/shesha/tests/pytest/par/test_pyrhr.py")
+config = ParamConfig(os.getenv("SHESHA_ROOT") + "/tests/pytest/par/test_pyrhr.py")
 config.p_controllers[0].set_type("generic")
 
 sup = CompassSupervisor(config)
