@@ -39,7 +39,8 @@ import numpy as np
 
 
 def enforce_int(n):
-    if not isinstance(n, int):
+    if not (isinstance(n, int) or isinstance(n, np.int32) or isinstance(n,
+                                                                        np.int64)):
         raise TypeError("Value should be integer.")
     return n
 
