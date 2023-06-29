@@ -1,6 +1,6 @@
 # E2E Test Report
 
-*Report generated on 29-Jun-2023 12:03:42 by checkCompass.sh*
+*Report generated on 29-Jun-2023 14:22:12 by checkCompass.sh*
 
 [Unit Tests report](report_unit_test.html)
 
@@ -12,25 +12,26 @@
 |  1 | test_custom_dm_diam_dm.py      | False  | N/A                 |        0 | 0         |
 |  2 | test_custom_dm_diam_dm_proj.py | False  | N/A                 |        0 | 0         |
 |  3 | test_custom_dm_pitch.py        | False  | N/A                 |        0 | 0         |
-|  4 | test_pyr3_maskedpix.py         | True   | 0.7534236311912537  |        0 | 0.181763  |
-|  5 | test_pyr_ELTpup.py             | False  | N/A                 |        0 | 0         |
-|  6 | test_pyr_base.py               | True   | 0.6425961256027222  |        0 | 0.191586  |
-|  7 | test_sh_ELTpup.py              | False  | N/A                 |        0 | 0         |
-|  8 | test_sh_base.py                | True   | 0.7167712450027466  |        0 | 0.0561361 |
-|  9 | test_sh_bpcog.py               | True   | 0.712725043296814   |        0 | 0.0545371 |
-| 10 | test_sh_control_klbasis.py     | True   | 0.7313299775123596  |        0 | 0.0604491 |
-| 11 | test_sh_cured.py               | True   | 0.8101580142974854  |        0 | 0.0952001 |
-| 12 | test_sh_generic.py             | True   | 0.1397433578968048  |        0 | 0.0558904 |
-| 13 | test_sh_generic_linear.py      | True   | 0.1397433578968048  |        0 | 0.064663  |
-| 14 | test_sh_geo.py                 | True   | 0.8506492376327515  |        0 | 0.054531  |
-| 15 | test_sh_influBessel.py         | True   | 0.30245241522789    |        0 | 0.0532831 |
-| 16 | test_sh_influBlacknutt.py      | True   | 0.722876787185669   |        0 | 0.0578088 |
-| 17 | test_sh_influGaussian.py       | True   | 0.7200782895088196  |        0 | 0.0586791 |
-| 18 | test_sh_influRadialSchwartz.py | True   | 0.724751353263855   |        0 | 0.061879  |
-| 19 | test_sh_influSquareSchwartz.py | True   | 0.7160112261772156  |        0 | 0.0577975 |
+|  4 | test_pyr3_maskedpix.py         | True   | 0.7534234523773193  |        0 | 0.286265  |
+|  5 | test_pyr_ELTpup.py             | True   | 0.3166523575782776  |        0 | 0.283861  |
+|  6 | test_pyr_base.py               | True   | 0.6425950527191162  |        0 | 0.261802  |
+|  7 | test_sh_ELTpup.py              | True   | 0.5852528810501099  |        0 | 0.0957167 |
+|  8 | test_sh_base.py                | True   | 0.7167598605155945  |        0 | 0.102493  |
+|  9 | test_sh_bpcog.py               | True   | 0.7127622961997986  |        0 | 0.10753   |
+| 10 | test_sh_control_klbasis.py     | True   | 0.7312788963317871  |        0 | 0.121072  |
+| 11 | test_sh_cured.py               | True   | 0.8100955486297607  |        0 | 0.171471  |
+| 12 | test_sh_generic.py             | True   | 0.13974711298942566 |        0 | 0.104276  |
+| 13 | test_sh_generic_linear.py      | True   | 0.13974711298942566 |        0 | 0.140521  |
+| 14 | test_sh_geo.py                 | True   | 0.8506491780281067  |        0 | 0.0872787 |
+| 15 | test_sh_influBessel.py         | True   | 0.30366313457489014 |        0 | 0.100523  |
+| 16 | test_sh_influBlacknutt.py      | True   | 0.7229189276695251  |        0 | 0.100631  |
+| 17 | test_sh_influGaussian.py       | True   | 0.7200560569763184  |        0 | 0.0975486 |
+| 18 | test_sh_influRadialSchwartz.py | True   | 0.7247004508972168  |        0 | 0.0985261 |
+| 19 | test_sh_influSquareSchwartz.py | True   | 0.7160175442695618  |        0 | 0.105418  |
 | 20 | test_sh_kl.py                  | False  | N/A                 |        0 | 0         |
-| 21 | test_sh_lgs_corr.py            | True   | 0.40904784202575684 |        0 | 0.0713842 |
-| 22 | test_sh_lgs_wcog.py            | True   | 0.6934942603111267  |        0 | 0.0674993 |
-| 23 | test_sh_modopti.py             | True   | 0.6609103679656982  |        0 | 0.0548834 |
-| 24 | test_sh_mv.py                  | True   | 0.7505921721458435  |        0 | 0.0565512 |
-| 25 | test_sh_tcog.py                | True   | 0.7167202830314636  |        0 | 0.0592779 |
+| 21 | test_sh_lgs_corr.py            | True   | 0.40918871760368347 |        0 | 0.122623  |
+| 22 | test_sh_lgs_wcog.py            | True   | 0.6936307549476624  |        0 | 0.11184   |
+| 23 | test_sh_modopti.py             | True   | 0.6610769629478455  |        0 | 0.0949102 |
+| 24 | test_sh_mv.py                  | True   | 0.7506710290908813  |        0 | 0.101989  |
+| 25 | test_sh_tcog.py                | True   | 0.7168002128601074  |        0 | 0.0941432 |
+| 26 | test_sh_wcog.py                | True   | 0.6626441478729248  |        0 | 0.201505  |

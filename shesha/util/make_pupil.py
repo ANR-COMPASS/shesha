@@ -692,8 +692,8 @@ def fillPolygon(x, y, i0, j0, scale, gap, N, index=0):
     # Last triangle has a special treatment because it crosses the axis
     # with theta=0=2pi
     n = x.shape[0]  # number of corners of polygon
-    indx, indy = (np.array([], dtype=np.int), np.array([], dtype=np.int))
-    distedge = np.array([], dtype=np.float)
+    indx, indy = (np.array([], dtype=np.int64), np.array([], dtype=np.int64))
+    distedge = np.array([], dtype=np.float32)
     for i in range(n):
         j = i + 1  # j=element next i except when i==n : then j=0 (cycling)
         if j == n:

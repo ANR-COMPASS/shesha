@@ -630,7 +630,7 @@ def init_custom_dm(p_dm: conf.Param_dm, p_geom: conf.Param_geom, diam: float):
 
     # Allocate influence function maps and other arrays
     p_dm._ntotact = ntotact
-    p_dm._influsize = np.int(smallsize)
+    p_dm._influsize = np.int64(smallsize)
     p_dm._i1 = np.zeros(ntotact, dtype=np.int32)
     p_dm._j1 = np.zeros(ntotact, dtype=np.int32)
     p_dm._xpos = np.zeros(ntotact, dtype=np.float32)
@@ -739,11 +739,11 @@ def make_kl_dm(p_dm: conf.Param_dm, patchDiam: int, p_geom: conf.Param_geom,
     print("KL type: ", p_dm.type_kl)
 
     if (p_dm.nkl < 13):
-        nr = np.long(5.0 * np.sqrt(52))  # one point per degree
-        npp = np.long(10.0 * nr)
+        nr = np.int64(5.0 * np.sqrt(52))  # one point per degree
+        npp = np.int64(10.0 * nr)
     else:
-        nr = np.long(5.0 * np.sqrt(p_dm.nkl))
-        npp = np.long(10.0 * nr)
+        nr = np.int64(5.0 * np.sqrt(p_dm.nkl))
+        npp = np.int64(10.0 * nr)
 
     radp = kl_util.make_radii(cobs, nr)
 
@@ -962,7 +962,7 @@ def make_petal_dm_core(pupImage, pupAngleDegree):
     # <segments> is the map of the segments, <nbSeg> in their number.
     # binary_opening() allows us to suppress individual pixels that could
     # be identified as relevant connex areas
-    from scipy.ndimage.measurements import label
+    from scipy.ndimage import label
     from scipy.ndimage.morphology import binary_opening
     s = np.ones((2, 2), dtype=bool)
     segments, nbSeg = label(binary_opening(pupImage, s))
