@@ -2,9 +2,9 @@ name: Check COMPASS
 
 on:
   push: # cannot use it due to EndBug/add-and-commit@v9 action which commit the new report
-    branches:
-      - main
-  #     - saxoPlus
+    # branches:
+    #   - main
+    #   - saxoPlus
   pull_request:
     # Sequence of patterns matched against refs/heads
     branches:    
