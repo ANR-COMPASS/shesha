@@ -1,7 +1,7 @@
 ## @package   shesha.ao.imats
 ## @brief     Computation implementations of interaction matrix
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   5.4.3
+## @version   5.4.4
 ## @date      2022/01/24
 ## @copyright GNU Lesser General Public License
 #

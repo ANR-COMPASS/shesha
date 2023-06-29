@@ -1,7 +1,7 @@
 ## @package   shesha.init.dm_init
 ## @brief     Initialization of a Dms object
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   5.4.3
+## @version   5.4.4
 ## @date      2022/01/24
 ## @copyright GNU Lesser General Public License
 #
@@ -581,6 +581,7 @@ def init_custom_dm(p_dm: conf.Param_dm, p_geom: conf.Param_geom, diam: float):
     if cases == [False, False, False]:
         f_pupm = hdul[0].header['PUPM']
         scale = diam / f_pupm
+        print('Custom DM: stretching DM to fit PUPM (%f) to compass (%f)' % (f_pupm, diam))
     elif cases == [True, False, False]:
         scale = diam / p_dm.diam_dm
     elif cases == [False, True, False]:
@@ -602,7 +603,9 @@ def init_custom_dm(p_dm: conf.Param_dm, p_geom: conf.Param_geom, diam: float):
     f_pixsize *= scale
     print("Custom dm scaling factor to pupil plane :", scale)
 
-    # Scaling factor from fits to compass system
+    # Scaling factor from fits to compass system. The float32() acts as a
+    # roundoff, required to avoid weird behavior when exporting/importing
+    # custom DMs from/to compass
     scaleToCompass = np.float32(f_pixsize) / np.float32(p_geom._pixsize)
 
     # shift to add to coordinates from fits to compass
@@ -627,7 +630,7 @@ def init_custom_dm(p_dm: conf.Param_dm, p_geom: conf.Param_geom, diam: float):
 
     # Allocate influence function maps and other arrays
     p_dm._ntotact = ntotact
-    p_dm._influsize = np.int32(smallsize)
+    p_dm._influsize = np.int(smallsize)
     p_dm._i1 = np.zeros(ntotact, dtype=np.int32)
     p_dm._j1 = np.zeros(ntotact, dtype=np.int32)
     p_dm._xpos = np.zeros(ntotact, dtype=np.float32)
@@ -736,11 +739,11 @@ def make_kl_dm(p_dm: conf.Param_dm, patchDiam: int, p_geom: conf.Param_geom,
     print("KL type: ", p_dm.type_kl)
 
     if (p_dm.nkl < 13):
-        nr = np.int64(5.0 * np.sqrt(52))  # one point per degree
-        npp = np.int64(10.0 * nr)
+        nr = np.long(5.0 * np.sqrt(52))  # one point per degree
+        npp = np.long(10.0 * nr)
     else:
-        nr = np.int64(5.0 * np.sqrt(p_dm.nkl))
-        npp = np.int64(10.0 * nr)
+        nr = np.long(5.0 * np.sqrt(p_dm.nkl))
+        npp = np.long(10.0 * nr)
 
     radp = kl_util.make_radii(cobs, nr)
 
@@ -784,8 +787,10 @@ def comp_dmgeom(p_dm: conf.Param_dm, p_geom: conf.Param_geom):
     mpup_dim = p_geom._mpupil.shape[0]
 
     if (dm_dim < mpup_dim):
+        print('DM support is smaller than mpupil')
         offs = (mpup_dim - dm_dim) // 2
     else:
+        print('DM support is larger than mpupil')
         offs = 0
         mpup_dim = dm_dim
 

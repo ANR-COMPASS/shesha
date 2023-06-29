@@ -1,7 +1,7 @@
 ## @package   shesha.config.config_setter
 ## @brief     Utility functions for enforcing types in a property setter
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   5.4.3
+## @version   5.4.4
 ## @date      2022/01/24
 ## @copyright GNU Lesser General Public License
 #
@@ -39,8 +39,7 @@ import numpy as np
 
 
 def enforce_int(n):
-    if not (isinstance(n, int) or isinstance(n, np.int32) or isinstance(n,
-                                                                        np.int64)):
+    if not isinstance(n, int):
         raise TypeError("Value should be integer.")
     return n
 

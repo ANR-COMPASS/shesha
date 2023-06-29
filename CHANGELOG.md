@@ -1,6 +1,7 @@
 # COMPASS Change logs
 
 - [COMPASS Change logs](#compass-change-logs)
+  - [Release v5.4.4 :](#release-v544-)
   - [Release v5.4.3 :](#release-v543-)
   - [Release v5.4.2 :](#release-v542-)
   - [Release v5.4.1 :](#release-v541-)
@@ -24,6 +25,10 @@
   - [Release v3.0](#release-v30)
   - [Release v2.0](#release-v20)
   - [Release v1.1](#release-v11)
+
+## Release v5.4.4 :
+
+- Debug KL2V when DM has unseen actuators
 
 ## Release v5.4.3 :
 

@@ -1,7 +1,7 @@
 ## @package   shesha.supervisor
 ## @brief     User layer for initialization and execution of a COMPASS simulation
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   5.4.3
+## @version   5.4.4
 ## @date      2022/01/24
 ## @copyright GNU Lesser General Public License
 #
@@ -338,6 +338,8 @@ class WfsCompass(SourceCompass):
                                self._config.p_wfss[wfs_index].zerop, mag)
         if (r == 0):
             print("GS magnitude is now %f on WFS %d" % (mag, wfs_index))
+            self._config.p_wfss[wfs_index].set_gsmag(mag)
+            self._config.p_wfss[wfs_index]._nphotons = wfs.nphot
 
     def compute_wfs_image(self, wfs_index : int, *, noise: bool = True) -> None:
         """ Computes the image produced by the WFS from its phase screen
