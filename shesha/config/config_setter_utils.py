@@ -1,7 +1,7 @@
 ## @package   shesha.config.config_setter
 ## @brief     Utility functions for enforcing types in a property setter
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   5.4.3
+## @version   5.4.4
 ## @date      2022/01/24
 ## @copyright GNU Lesser General Public License
 #
@@ -38,26 +38,27 @@
 import numpy as np
 
 
-def enforce_int(n):
-    if not (isinstance(n, int) or isinstance(n, np.int32) or isinstance(n,
-                                                                        np.int64)):
+def enforce_int(number):
+    if not isinstance(number, (int, np.int32, np.int64)):
         raise TypeError("Value should be integer.")
-    return n
+    return number
 
 
-def enforce_float(f):
-    if not (isinstance(f, float) or isinstance(f, int)):
+def enforce_float(number):
+    if isinstance(number, (int, np.int32, np.int64)):
+        number  = np.float32(number)
+    if not isinstance(number, (float, np.float32, np.float64)):
         raise TypeError("Value should be float.")
-    return float(f)
+    return np.float32(number)
 
 
-def enforce_or_cast_bool(b):
-    if isinstance(b, bool):
-        return b
-    if isinstance(b, (int, float)):
-        if b == 0:
+def enforce_or_cast_bool(number):
+    if isinstance(number, bool):
+        return number
+    if isinstance(number, (int, np.int32, np.int64, float, np.float32, np.float64)):
+        if number == 0:
             return False
-        elif b == 1:
+        elif number == 1:
             return True
         else:
             raise ValueError("Will not cast non 0/1 int or float to boolean.")
@@ -66,7 +67,7 @@ def enforce_or_cast_bool(b):
 
 def enforce_array(data, size, dtype=np.float32, scalar_expand=False):
     # Scalar case
-    if isinstance(data, (int, float, complex)):
+    if isinstance(data, (int, np.int32, np.int64, float, np.float32, np.float64, complex, np.complex64, np.complex128)):
         data = [data]
 
     # Singleton case

@@ -1,7 +1,7 @@
 ## @package   shesha.util.utilities
 ## @brief     Basic utilities function
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   5.4.3
+## @version   5.4.4
 ## @date      2022/01/24
 ## @copyright GNU Lesser General Public License
 #
@@ -39,6 +39,7 @@ import importlib
 import sys, os
 
 import numpy as np
+from scipy import fft
 
 
 def rebin(a, shape):
@@ -59,6 +60,7 @@ def fft_goodsize(s):
          s: (int) size
     """
     return 2**(int(np.log2(s)) + 1)
+    # return fft.next_fast_len(s)
 
 
 def bin2d(data_in, binfact):

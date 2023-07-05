@@ -1,7 +1,7 @@
 ## @package   shesha.scripts
 ## @brief     Python package for COMPASS simulation scripts
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   5.4.3
+## @version   5.4.4
 ## @date      2022/01/24
 ## @copyright GNU Lesser General Public License
 #

@@ -1,7 +1,7 @@
 ## @package   shesha.tests
 ## @brief     Tests the RTC module
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   5.4.3
+## @version   5.4.4
 ## @date      2022/01/24
 ## @copyright GNU Lesser General Public License
 #
@@ -39,7 +39,7 @@ import numpy as np
 import os
 from shesha.sutra_wrap import Rtc_UFU as Rtc
 from shesha.supervisor.compassSupervisor import CompassSupervisor as Supervisor
-from scipy.ndimage.measurements import center_of_mass
+from scipy.ndimage import center_of_mass
 from shesha.config import ParamConfig
 
 precision = 1e-2

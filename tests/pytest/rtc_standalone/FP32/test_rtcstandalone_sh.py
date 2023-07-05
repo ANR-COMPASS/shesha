@@ -1,7 +1,7 @@
 ## @package   shesha.tests
 ## @brief     Tests the RTC standalone module
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   5.4.3
+## @version   5.4.4
 ## @date      2022/01/24
 ## @copyright GNU Lesser General Public License
 #
@@ -39,7 +39,7 @@ import numpy as np
 import os
 from shesha.supervisor.components import RtcStandalone
 from shesha.supervisor.compassSupervisor import CompassSupervisor as Supervisor
-from scipy.ndimage.measurements import center_of_mass
+from scipy.ndimage import center_of_mass
 from shesha.config import ParamConfig
 
 precision = 1e-2
@@ -51,7 +51,7 @@ sup.rtc.open_loop(0)
 sup.rtc.close_loop(0)
 sup.rtc._rtc.do_control(0)
 rtc = RtcStandalone(sup.context, sup.config, 1, [sup.config.p_wfss[0]._nvalid], sup.config.p_controllers[0].nactu,
-                    ["cog"], [sup.config.p_controllers[0].delay], [0], [0.29005988378497927])
+                    ["cog"], [sup.config.p_controllers[0].delay], [0], [sup.config.p_wfss[0].pixsize])
 centro = rtc._rtc.d_centro[0]
 control = rtc._rtc.d_control[0]
 rtc._rtc.d_centro[0].set_npix(sup.config.p_wfss[0].npix)

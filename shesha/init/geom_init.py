@@ -1,7 +1,7 @@
 ## @package   shesha.init.geom_init
 ## @brief     Initialization of the system geometry and of the Telescope object
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   5.4.3
+## @version   5.4.4
 ## @date      2022/01/24
 ## @copyright GNU Lesser General Public License
 #
@@ -142,7 +142,6 @@ def init_wfs_geom(p_wfs: conf.Param_wfs, r0: float, p_tel: conf.Param_tel,
             pdiam = p_geom.pupdiam // p_wfs.nxsub
             if ((pdiam * p_wfs.nxsub) % 2):
                 pdiam += 1
-
     else:
         pdiam = -1
 
@@ -188,7 +187,7 @@ def init_wfs_size(p_wfs: conf.Param_wfs, r0: float, p_tel: conf.Param_tel, verbo
     Scheme to determine arrays sizes
     sh :
     k = 6
-    p = k * d/r0
+    p = k * d/r0  # size of seeing blob
     n = int(2*d*v/lambda/CONST.RAD2ARCSEC)+1
     N = fft_goodsize(k*n/v*lambda/r0*CONST.RAD2ARCSEC)
     u = k * lambda / r0 * CONST.RAD2ARCSEC / N
@@ -196,21 +195,25 @@ def init_wfs_size(p_wfs: conf.Param_wfs, r0: float, p_tel: conf.Param_tel, verbo
     v = n * u
     Nt = v * Npix
 
-    pyr :
+    PYRAMID CASE :
     Fs = field stop radius in arcsec
     N size of big array for FFT in pixels
     P pupil diameter in pixels
     D diameter of telescope in m
     Nssp : number of pyr measurement points in the pupil
 
+    # Rf is the radius of field stop in pixels
     Rf = Fs . N . D / lambda / P
     ideally we choose : Fs = lambda / D . Nssp / 2
 
-    if we want good sampling of r0 (avoid aliasing of speckles)
+    If we want a good sampling of r0 (to avoid aliasing of speckles that may
+    roll over the FoV), we have to specify a FoV of the FFT support that is
+    larger than seeing by a factor <m> at least equal to 2 (at a very minimum)
+    or 3 (for a better comfort..). This writes as:
     P > D / r0 . m
-    with m = 2 or 3
+    with m = 2 or 3. This condition is equivalent to put <m> pixels per r0.
 
-    to get reasonable space between pupil images : N > P.(2 + 3S)
+    To get reasonable space between pupil images : N > P.(2 + 3S)
     with S close to 1
     N must be a power of 2
 
@@ -219,16 +222,15 @@ def init_wfs_size(p_wfs: conf.Param_wfs, r0: float, p_tel: conf.Param_tel, verbo
     and actual pupil size on camera images would be P / Nssp
 
     """
-
     r0 = r0 * (p_wfs.Lambda * 2)**(6. / 5)
 
     if (r0 != 0):
         if (verbose):
-            print("r0 for WFS :", "%3.2f" % r0, " m")
+            print("r0 for WFS :", "%4.3f" % r0, " m")
         # seeing = CONST.RAD2ARCSEC * (p_wfs.lambda * 1.e-6) / r0
         if (verbose):
             print("seeing for WFS : ",
-                  "%3.2f" % (CONST.RAD2ARCSEC * (p_wfs.Lambda * 1.e-6) / r0), "\"")
+                  "%4.3f" % (CONST.RAD2ARCSEC * (p_wfs.Lambda * 1.e-6) / r0), "\"")
 
     if (p_wfs._pdiam <= 0):
         # this case is usualy for the wfs with max # of subaps
@@ -250,7 +252,7 @@ def init_wfs_size(p_wfs: conf.Param_wfs, r0: float, p_tel: conf.Param_tel, verbo
             nrebin = max(2, nrebin)
             # first atempt on a rebin factor
 
-            # since we clipped pdiam we have to be carreful in nfft computation
+            # since we clipped pdiam we have to be careful in nfft computation
             Nfft = util.fft_goodsize(
                     int(pdiam / subapdiam * nrebin / p_wfs.pixsize * CONST.RAD2ARCSEC *
                         (p_wfs.Lambda * 1.e-6)))
@@ -305,7 +307,7 @@ def init_wfs_size(p_wfs: conf.Param_wfs, r0: float, p_tel: conf.Param_tel, verbo
     elif (p_wfs.type == scons.WFSType.PYRHR or p_wfs.type == scons.WFSType.PYRLR):
         pdiam = pdiam * p_wfs.nxsub
         m = 3
-        # fft_goodsize( m * pdiam)
+        # Nfft = util.fft_goodsize( m * pdiam)
         Nfft = int(2**np.ceil(np.log2(m * pdiam)))
 
         nrebin = pdiam // p_wfs.nxsub
@@ -313,6 +315,7 @@ def init_wfs_size(p_wfs: conf.Param_wfs, r0: float, p_tel: conf.Param_tel, verbo
             nrebin += 1  # we choose to have a divisor of Nfft
             pdiam = nrebin * p_wfs.nxsub
             Nfft = int(2**np.ceil(np.log2(m * pdiam)))
+            # Nfft = util.fft_goodsize( m * pdiam)
 
         qpixsize = (pdiam *
                     (p_wfs.Lambda * 1.e-6) / p_tel.diam * CONST.RAD2ARCSEC) / Nfft

@@ -1,7 +1,7 @@
 ## @package   shesha.init.coronagraph_init
 ## @brief     Initialization of a Coronagraph object
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   5.4.3
+## @version   5.4.4
 ## @date      2023/03/02
 ## @copyright GNU Lesser General Public License
 #
