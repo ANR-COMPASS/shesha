@@ -1,7 +1,7 @@
 ## @package   shesha.supervisor
 ## @brief     User layer for initialization and execution of a COMPASS simulation
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   5.4.4
+## @version   5.5.0
 ## @date      2022/01/24
 ## @copyright GNU Lesser General Public License
 #
@@ -75,7 +75,7 @@ class TelescopeCompass(object):
                              ittime, self._config.p_wfss)
 
     def set_input_phase(self, phase : np.ndarray):
-        """ Set a circular buffer of phase screens to be raytraced as a 
+        """ Set a circular buffer of phase screens to be raytraced as a
         Telescope layer. Buffer size shall be (mpup size, mpup size, N).
 
         Args:
@@ -85,7 +85,7 @@ class TelescopeCompass(object):
             print("Input shall be a np.ndarray of dimensions (mpup size, mpup size, N)")
             return
         self._tel.set_input_phase(phase)
-    
+
     def update_input_phase(self):
         """ Update the index of the current phase screen in the circular buffer, so it passes to the next one
         """
@@ -95,7 +95,7 @@ class TelescopeCompass(object):
         """ Reset circular buffer d_input_phase
         """
         self._tel.reset_input_phase()
-        
+
     def get_input_phase(self):
         """ Return the circular buffer of telescope phase screens
 
@@ -105,7 +105,7 @@ class TelescopeCompass(object):
         if (self._tel.d_input_phase is None):
             return None
         return np.array(self._tel.d_input_phase)
-    
+
     def get_input_phase_counter(self):
         """ Return the index of the current phase screen to be raytraced inside the telescope circular buffer
 

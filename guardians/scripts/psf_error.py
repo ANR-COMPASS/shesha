@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from guardians import groot, gamora, drax
 import h5py
-from tqdm import tqdm
+from rich.progress import track
 
 filename = "/home/fferreira/Data/roket_8m_nssp40_dir135_speed10.h5"
 spup = drax.get_pup(filename)
@@ -25,7 +25,7 @@ EE5 = []
 EE10 = []
 EE20 = []
 
-for s in tqdm(speed):
+for s in track(speed):
     Cab = groot.compute_Cerr(filename, speed=np.array([s], dtype=np.float32))
     otftel, otf2, psfi, gpu = gamora.psf_rec_Vii(filename, fitting=False,
                                                  cov=(Cee + Cab).astype(np.float32))

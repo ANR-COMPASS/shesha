@@ -9,7 +9,7 @@ from shesha.sutra_wrap import carmaWrap_context, Groot
 import time
 import sys
 import os
-from tqdm import tqdm
+from rich.progress import track
 
 from guardians import gamora
 from guardians import drax, starlord
@@ -577,7 +577,7 @@ def compute_Calias(filename, slopes_space=False, modal=True, npts=3):
     # Ca = Ca * scale / 5
     Ca = np.zeros((2 * nsub, 2 * nsub))
     coeff = simpson_coeff(npts)
-    # for k in tqdm(range(npts)):
+    # for k in track(range(npts)):
     #     weight = (coeff[k:] * coeff[:npts - k]).sum()
     #     Ca += compute_Calias_element_XX(xx, yy, fc, d, nsub, tabx, taby, yoff=k /
     #                                     (npts - 1)) * weight
@@ -592,8 +592,8 @@ def compute_Calias(filename, slopes_space=False, modal=True, npts=3):
         h = d / (npts - 1)
     else:
         h = 1
-    for k in tqdm(range(npts)):
-        for p in tqdm(range(npts)):
+    for k in track(range(npts)):
+        for p in track(range(npts)):
             Ca += (compute_Calias_element_XX(xx, yy, fc, d, nsub, tabx, taby,
                                              yoff=(k - p) * h) * coeff[k] * coeff[p])
             Ca += (compute_Calias_element_YY(xx, yy, fc, d, nsub, tabx, taby,

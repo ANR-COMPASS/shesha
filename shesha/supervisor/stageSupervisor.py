@@ -1,7 +1,7 @@
 ## @package   shesha.supervisor.stageSupervisor
 ## @brief     Initialization and execution of a single stage supervisor for cascaded AO systems
 ## @author    SAXO+ Team <https://github.com/ANR-COMPASS> (Clementine Bechet)
-## @version   5.4.4
+## @version   5.5.0
 ## @date      2023/01/31
 ## @copyright GNU Lesser General Public License
 #
@@ -47,9 +47,9 @@ from typing import Iterable
 
 
 class StageSupervisor(CompassSupervisor):
-    """ This class implements a single stage (e.g. first stage, second stage) supervisor 
-    to handle compass simulations of cascaded AO. The main supervision will be handled by another 
-    supervisor (manager). 
+    """ This class implements a single stage (e.g. first stage, second stage) supervisor
+    to handle compass simulations of cascaded AO. The main supervision will be handled by another
+    supervisor (manager).
 
     Attributes:
         context : (CarmaContext) : a CarmaContext instance
@@ -88,9 +88,9 @@ class StageSupervisor(CompassSupervisor):
              do_control: bool = True, apply_control: bool = True,
              compute_tar_psf: bool = True, stack_wfs_image: bool = False,
              do_centroids: bool = True, compute_corono: bool=True) -> None:
-        """Iterates the AO loop, with optional parameters, considering it is a single 
-        stage and may be called in the middle of WFS frames. 
-        Overload the CompassSupervisor next() method to arrange tasks orders and allow cascaded 
+        """Iterates the AO loop, with optional parameters, considering it is a single
+        stage and may be called in the middle of WFS frames.
+        Overload the CompassSupervisor next() method to arrange tasks orders and allow cascaded
         simulation.
 
         Kwargs:
@@ -109,12 +109,12 @@ class StageSupervisor(CompassSupervisor):
             compute_tar_psf : (bool) : If True (default), computes the PSF at the end of the
                                         iteration
 
-            stack_wfs_image : (bool) : If False (default), the Wfs image is computed as 
-                                        usual. Otherwise, a newly computed WFS image is accumulated 
+            stack_wfs_image : (bool) : If False (default), the Wfs image is computed as
+                                        usual. Otherwise, a newly computed WFS image is accumulated
                                         to the previous one.
 
-            do_centroids : (bool) : If True (default), the last WFS image is stacked and 
-                                    centroids computation is done. WFS image must be reset before 
+            do_centroids : (bool) : If True (default), the last WFS image is stacked and
+                                    centroids computation is done. WFS image must be reset before
                                     next loop (in the manager).
 
             compute_corono: (bool): If True (default), computes the coronagraphic image
@@ -138,7 +138,7 @@ class StageSupervisor(CompassSupervisor):
             self.atmos.move_atmos()
         # in case there is at least 1 controller GEO in the controller list : use this one only
         self.tel.update_input_phase()
-        
+
         if ( geo_index > -1):
             nControl = geo_index
 
@@ -159,7 +159,7 @@ class StageSupervisor(CompassSupervisor):
 
                     if self.cacao:
                         self.rtc.publish()
-                        
+
         else:
             # start updating the DM shape
             if apply_control:
@@ -194,9 +194,9 @@ class StageSupervisor(CompassSupervisor):
                         self.wfs.set_wfs_image(w, self.wfs.get_wfs_image(w) + wfs_image)
                     else:
                         self.wfs.compute_wfs_image(w)
-                    
+
             if self.rtc is not None:
-                for ncontrol in nControl : # range(len(self.config.p_controllers)):                                                          
+                for ncontrol in nControl : # range(len(self.config.p_controllers)):
                     # modified to allow do_centroids when the WFS exposure is over.
                     # Also useful for calibration. (CBE 2023.01.30)
                     if do_centroids:
@@ -208,7 +208,7 @@ class StageSupervisor(CompassSupervisor):
             if self.cacao:
                 self.rtc.publish()
 
-                   
+
         if compute_tar_psf:
             for tar_index in tar_trace:
                 self.target.comp_tar_image(tar_index)
@@ -226,9 +226,9 @@ class StageSupervisor(CompassSupervisor):
 
 
     def reset(self):
-        """ 
+        """
         Reset the simulation to return to its original state.
-        Overwrites the compassSupervisor reset function, reseting explicitely the WFS image, 
+        Overwrites the compassSupervisor reset function, reseting explicitely the WFS image,
         to force a new integration of the frame.
         """
         self.atmos.reset_turbu()

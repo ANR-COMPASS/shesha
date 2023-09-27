@@ -1,7 +1,7 @@
 ## @package   shesha.init.dm_init
 ## @brief     Initialization of a Dms object
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   5.4.4
+## @version   5.5.0
 ## @date      2022/01/24
 ## @copyright GNU Lesser General Public License
 #
@@ -51,7 +51,7 @@ from shesha.sutra_wrap import carmaWrap_context, Dms
 
 from typing import List
 
-from tqdm import tqdm
+from rich.progress import track
 
 import os
 try:
@@ -62,7 +62,7 @@ except KeyError as err:
 
 def dm_init(context: carmaWrap_context, p_dms: List[conf.Param_dm],
             p_tel: conf.Param_tel, p_geom: conf.Param_geom,
-            p_wfss: List[conf.Param_wfs] = None, silence_tqdm: bool = False) -> Dms:
+            p_wfss: List[conf.Param_wfs] = None) -> Dms:
     """Create and initialize a Dms object on the gpu
 
     Args:
@@ -71,7 +71,6 @@ def dm_init(context: carmaWrap_context, p_dms: List[conf.Param_dm],
         p_tel: (Param_tel) : telescope settings
         p_geom: (Param_geom) : geom settings
         p_wfss: (list of Param_wfs) : wfs settings
-        silence_tqdm : (bool) : Silence tqdm's output
     :return:
         Dms: (Dms): Dms object
     """
@@ -95,14 +94,14 @@ def dm_init(context: carmaWrap_context, p_dms: List[conf.Param_dm],
 
         for i in range(len(p_dms)):
             max_extent = _dm_init(context, dms, p_dms[i], xpos_wfs, ypos_wfs, p_geom,
-                                  p_tel.diam, p_tel.cobs, p_tel.pupangle, max_extent, silence_tqdm=silence_tqdm)
+                                  p_tel.diam, p_tel.cobs, p_tel.pupangle, max_extent)
 
     return dms
 
 
 def _dm_init(context: carmaWrap_context, dms: Dms, p_dm: conf.Param_dm, xpos_wfs: list,
              ypos_wfs: list, p_geom: conf.Param_geom, diam: float, cobs: float,
-             pupAngle: float, max_extent: int, silence_tqdm: bool = False):
+             pupAngle: float, max_extent: int):
     """ inits a Dms object on the gpu
 
     Args:
@@ -124,8 +123,6 @@ def _dm_init(context: carmaWrap_context, dms: Dms, p_dm: conf.Param_dm, xpos_wfs
         pupAngle: (float) : rotation/clocking angle of the pupil in degrees
 
         max_extent: (int) : maximum dimension of all dms
-
-        silence_tqdm : (bool) : Silence tqdm's output
 
     :return:
         max_extent: (int) : new maximum dimension of all dms
@@ -150,7 +147,7 @@ def _dm_init(context: carmaWrap_context, dms: Dms, p_dm: conf.Param_dm, xpos_wfs
                                                         p_geom.ssize)
 
             # calcul defaut influsize
-            make_pzt_dm(p_dm, p_geom, cobs, pupAngle, silence_tqdm=silence_tqdm)
+            make_pzt_dm(p_dm, p_geom, cobs, pupAngle)
         else:
             init_custom_dm(p_dm, p_geom, diam)
 
@@ -224,7 +221,7 @@ def _dm_init_factorized(context: carmaWrap_context, dms: Dms, p_dm: conf.Param_d
 
     Args:
         context: (carmaWrap_context): context
-    
+
         dms: (Dms) : dm object
 
         p_dm: (Param_dms) : dm settings
@@ -344,7 +341,7 @@ def dm_init_standalone(context: carmaWrap_context, p_dms: list, p_geom: conf.Par
 
 
 def make_pzt_dm(p_dm: conf.Param_dm, p_geom: conf.Param_geom, cobs: float,
-                pupAngle: float, silence_tqdm: bool = False):
+                pupAngle: float):
     """Compute the actuators positions and the influence functions for a pzt DM.
     NOTE: if the DM is in altitude, central obstruction is forced to 0
 
@@ -356,8 +353,6 @@ def make_pzt_dm(p_dm: conf.Param_dm, p_geom: conf.Param_geom, cobs: float,
         cobs: (float) : telescope central obstruction
 
         pupAngle: (float) : rotation/clocking angle of the pupil in degrees
-
-        silence_tqdm : (bool) : Silence tqdm's output
 
     Returns:
         influ: (np.ndarray(dims=3, dtype=np.float64)) : cube of the IF for each actuator
@@ -444,10 +439,10 @@ def make_pzt_dm(p_dm: conf.Param_dm, p_geom: conf.Param_geom, cobs: float,
 
     # Allocate array of influence functions
     influ = np.zeros((smallsize, smallsize, ntotact), dtype=np.float32)
-    
+
     # Computation of influence function for each actuator
     print("Computing Influence Function type : ", p_dm.influ_type)
-    for i in tqdm(range(ntotact), disable=silence_tqdm):
+    for i in track(range(ntotact)):
 
         i1 = i1t[i]
         x = np.tile(np.arange(i1, i1 + smallsize, dtype=np.float32),
@@ -491,7 +486,7 @@ def make_pzt_dm(p_dm: conf.Param_dm, p_geom: conf.Param_geom, cobs: float,
 
         from skimage.morphology import label
         k = 0
-        for i in tqdm(range(ntotact), disable=silence_tqdm):
+        for i in track(range(ntotact)):
             # Pupil area corresponding to influ data
             i1, j1 = i1t[i] + s - smallsize // 2, j1t[i] + s - smallsize // 2
             pupilSnapshot = p_geom._ipupil[i1:i1 + smallsize, j1:j1 + smallsize]

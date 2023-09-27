@@ -1,7 +1,7 @@
 ## @package   shesha.util.influ_util
 ## @brief     Computation of the influence functions used by the DM
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   5.4.4
+## @version   5.5.0
 ## @date      2022/01/24
 ## @copyright GNU Lesser General Public License
 #
@@ -141,7 +141,7 @@ def bessel_influence(xx, yy, type_i=PatternType.SQUARE):
 
 def makeRigaut(pitch: float, coupling: float, x=None, y=None):
     """ Compute 'Rigaut-like' influence function.
-    
+
     The arguments <pitch> and <x>, <y> must be in the same unit.
     This unit shall be [pixels] if one expects that the returned value
     <smallsize> is also in [pixels].

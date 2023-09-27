@@ -1,7 +1,7 @@
 ## @package   shesha.config.PCORONO
 ## @brief     Param_corono class definition
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   5.4.4
+## @version   5.5.0
 ## @date      2022/01/24
 ## @copyright GNU Lesser General Public License
 #
@@ -150,7 +150,7 @@ class Param_corono:
 
     def set_wavelength_0(self, w):
         """ Set the central wavelength in the coronagraph
-        
+
         :param w: central wavelength
         """
         self.__wavelength_0 = w
@@ -166,7 +166,7 @@ class Param_corono:
 
     def set_delta_wav(self, w):
         """ Set the spectral bandwidth
-        
+
         :param w: (float) : spectral bandwidth
         """
         self.__delta_wav = w
@@ -182,7 +182,7 @@ class Param_corono:
 
     def set_nb_wav(self, n):
         """ Set the number of simulated wavelength in the spectral bandwidth
-        
+
         :param n: (int) : number of wavelengths
         """
         self.__nb_wav = csu.enforce_int(n)
@@ -198,7 +198,7 @@ class Param_corono:
 
     def set_wav_vec(self, w):
         """ Set the wavelengths array
-        
+
         :param w: (np.ndarray) : wavelengths array
         """
         self.__wav_vec = w
@@ -214,7 +214,7 @@ class Param_corono:
 
     def set_apodizer(self, apod):
         """ Set the apodizer pupil
-        
+
         :param apod: (np.ndarray) : apodizer
         """
         self.__apodizer = apod
@@ -230,7 +230,7 @@ class Param_corono:
 
     def set_apodizer_name(self, apod):
         """ Set the apodizer keyword or user path
-        
+
         :param apod: (str) : apodizer keyword or path
         """
         self.__apodizer_name = apod
@@ -246,7 +246,7 @@ class Param_corono:
 
     def set_focal_plane_mask(self, fpm):
         """ Set the focal plane complex amplitudes
-        
+
         :param fpm: (list of np.ndarray) : focal plane mask
         """
         self.__focal_plane_mask = fpm
@@ -262,7 +262,7 @@ class Param_corono:
 
     def set_focal_plane_mask_name(self, fpm):
         """ Set the focal plane mask keyword or user path
-        
+
         :param fpm: (str) : focal plane mask keyword or path
         """
         self.__focal_plane_mask_name = fpm
@@ -280,7 +280,7 @@ class Param_corono:
     def set_fpm_sampling(self, sp):
         """ Set the sampling in the focal plane mask
         sampling = size of lambda / D in pixel units
-        
+
         :param sp: (float) : focal plane mask sampling
         """
         self.__fpm_sampling = sp
@@ -307,14 +307,14 @@ class Param_corono:
 
     def get_dim_fpm(self):
         """ Get the size of the focal plane mask support in pixel units
-        
+
         :return: (int) : fpm support size in pixel
         """
         return self.__dim_fpm
 
     def set_dim_fpm(self, n):
         """ Set the size of the focal plane mask support in pixel units
-        
+
         :param n: (int) : fpm support size in pixel
         """
         self.__dim_fpm = csu.enforce_int(n)
@@ -323,14 +323,14 @@ class Param_corono:
 
     def get_babinet_trick(self):
         """ Get the Babinet's trick flag
-        
+
         :return: (bool) : Babinet's trick flag
         """
         return self.__babinet_trick
 
     def set_babinet_trick(self, b):
         """ Set the Babinet's trick flag
-        
+
         :param b: (bool) : Babinet's trick flag
         """
         self.__babinet_trick = csu.enforce_or_cast_bool(b)
@@ -346,7 +346,7 @@ class Param_corono:
 
     def set_lyot_stop(self, ls):
         """ Set the Lyot stop pupil
-        
+
         :param ls: (np.ndarray) : Lyot stop pupil
         """
         self.__lyot_stop = ls
@@ -362,7 +362,7 @@ class Param_corono:
 
     def set_lyot_stop_name(self, ls):
         """ Set the Lyot stop keyword or user path
-        
+
         :param ls: (str) : Lyot stop keyword or path
         """
         self.__lyot_stop_name = ls
@@ -378,7 +378,7 @@ class Param_corono:
 
     def set_dim_image(self, n):
         """ Set the size of the science image in pixel
-        
+
         :param n: (int) : image size in pixel
         """
         self.__dim_image = csu.enforce_int(n)
@@ -396,7 +396,7 @@ class Param_corono:
     def set_image_sampling(self, sp):
         """ Set the sampling in the image
         sampling = size of lambda / D in pixel units
-        
+
         :param sp: (float) : image sampling
         """
         self.__image_sampling = sp

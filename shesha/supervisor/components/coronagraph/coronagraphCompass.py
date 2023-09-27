@@ -1,7 +1,7 @@
 ## @package   shesha.components.coronagraph.coronagraphCompass
 ## @brief     User layer for compass coronagraph object
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   5.4.4
+## @version   5.5.0
 ## @date      2023/03/02
 ## @copyright GNU Lesser General Public License
 #
@@ -68,7 +68,7 @@ class CoronagraphCompass():
         Args:
             p_corono: (Param_corono): Compass coronagraph parameters
 
-            p_geom: (Param_geom): Compass geometry parameters 
+            p_geom: (Param_geom): Compass geometry parameters
 
             targetCompass: (TargetCompass): Compass Target used as input for the coronagraph
 
@@ -77,16 +77,16 @@ class CoronagraphCompass():
 
         self._coronos = []
 
-    def add_corono(self, context:context, p_corono: conf.Param_corono, p_geom: conf.Param_geom, 
+    def add_corono(self, context:context, p_corono: conf.Param_corono, p_geom: conf.Param_geom,
                    targetCompass: TargetCompass):
         """ Add a coronagraph
 
         Args:
             p_corono: (Param_corono): Compass coronagraph parameters
 
-            p_geom: (Param_geom): Compass geometry parameters 
+            p_geom: (Param_geom): Compass geometry parameters
 
-            targetCompass: (TargetCompass): Compass Target used as input for the coronagraph  
+            targetCompass: (TargetCompass): Compass Target used as input for the coronagraph
         """
         if(p_corono._type == scons.CoronoType.CUSTOM) or (p_corono._type == scons.CoronoType.SPHERE_APLC):
             from shesha.supervisor.components.coronagraph.stellarCoronagraph import StellarCoronagraphCompass
@@ -104,7 +104,7 @@ class CoronagraphCompass():
 
             comp_psf: (bool, optionnal): If True (default), also compute the PSF SE & LE
 
-            accumulate: (bool, optional): If True (default), the computed SE image is accumulated in 
+            accumulate: (bool, optional): If True (default), the computed SE image is accumulated in
                                             long exposure
         """
         self._coronos[coro_index].compute_image(comp_psf=comp_psf, accumulate=accumulate)
@@ -115,11 +115,11 @@ class CoronagraphCompass():
         Args:
             coro_index: (int): Index of the coronagraph
 
-            accumulate: (bool, optional): If True (default), the computed SE psf is accumulated in 
+            accumulate: (bool, optional): If True (default), the computed SE psf is accumulated in
                                             long exposure
         """
         self._coronos[coro_index].compute_psf(accumulate=accumulate)
-        
+
     def get_image(self, coro_index: int, *, expo_type:str=scons.ExposureType.LE):
         """ Return the coronagraphic image
 
@@ -128,7 +128,7 @@ class CoronagraphCompass():
 
             expo_type: (str, optional): If "le" (default), returns the long exposure image.
                                         If "se", returns short exposure one.
-        
+
         Return:
             img: (np.ndarra[ndim=2,dtype=np.float32]): coronagraphic image
         """
@@ -142,7 +142,7 @@ class CoronagraphCompass():
 
             expo_type: (str, optional): If "le" (default), returns the long exposure psf.
                                         If "se", returns short exposure one.
-        
+
         Return:
             img: (np.ndarra[ndim=2,dtype=np.float32]): psf
         """
@@ -198,7 +198,7 @@ class CoronagraphCompass():
             maxi: (1D array): corresponding maximums
         """
         return self._coronos[coro_index].get_contrast(expo_type=expo_type, d_min=d_min, d_max=d_max,
-                                                       width=width, 
+                                                       width=width,
                                                        normalized_by_psf=normalized_by_psf)
 
     def set_electric_field_amplitude(self, coro_index, amplitude:np.ndarray):

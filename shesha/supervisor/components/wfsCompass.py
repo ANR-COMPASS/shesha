@@ -1,7 +1,7 @@
 ## @package   shesha.supervisor
 ## @brief     User layer for initialization and execution of a COMPASS simulation
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   5.4.4
+## @version   5.5.0
 ## @date      2022/01/24
 ## @copyright GNU Lesser General Public License
 #
@@ -93,7 +93,7 @@ class WfsCompass(SourceCompass):
             img: (np.ndarray) : Image to set
         """
         self._wfs.d_wfs[wfs_index].set_binimg(img, img.size)
-        
+
     def set_pyr_modulation_points(self, wfs_index : int, cx: np.ndarray, cy: np.ndarray,
                                   *, weights: np.ndarray = None) -> None:
         """ Set pyramid modulation positions
@@ -357,9 +357,9 @@ class WfsCompass(SourceCompass):
         """
         for wfs_index, p_wfs in enumerate(self._config.p_wfss):
             self._wfs.d_wfs[wfs_index].set_noise(p_wfs.noise, 1234 + wfs_index)
-    
+
     def reset_image(self, *, wfs_index : int = None):
-        """ Reset the WFS image 
+        """ Reset the WFS image
 
         Kwargs:
             wfs_index : (int): WFS index. If not provided, will reset all WFS
@@ -367,7 +367,7 @@ class WfsCompass(SourceCompass):
         if wfs_index is not None:
             self._wfs.d_wfs[wfs_index].d_binimg.reset()
             return
-        
+
         for _,swfs in enumerate(self._wfs.d_wfs):
             swfs.d_binimg.reset()
 

@@ -1,7 +1,7 @@
 ## @package   shesha.init.geom_init
 ## @brief     Initialization of the system geometry and of the Telescope object
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   5.4.4
+## @version   5.5.0
 ## @date      2022/01/24
 ## @copyright GNU Lesser General Public License
 #
@@ -625,11 +625,11 @@ def init_pyrhr_geom(p_wfs: conf.Param_wfs, r0: float, p_tel: conf.Param_tel,
         indj = jstart[validsubsx[i]]
         phasemap[:, i] = tmp[indi:indi + p_wfs.npix, indj:indj + p_wfs.npix].flatten("C")
         pyrtmp[indi:indi + p_wfs.npix, indj:indj + p_wfs.npix] = i
-        
+
         Sx = np.zeros([p_wfs.npix,p_wfs.npix],dtype=np.float32)
         Sy = np.zeros([p_wfs.npix,p_wfs.npix],dtype=np.float32)
-        
-        subapmask = p_geom._mpupil.T[indi:indi + p_wfs._pdiam, 
+
+        subapmask = p_geom._mpupil.T[indi:indi + p_wfs._pdiam,
                                    indj:indj + p_wfs._pdiam]
         for ii in range(p_wfs.npix):
             for jj in range(p_wfs.npix):
@@ -719,11 +719,11 @@ def init_sh_geom(p_wfs: conf.Param_wfs, r0: float, p_tel: conf.Param_tel,
         indj = jstart[p_wfs._validsubsx[i]]
         phasemap[:, i] = tmp[indi:indi + p_wfs._pdiam, indj:indj +
                              p_wfs._pdiam].flatten()
-        
+
         Sx = np.zeros([p_wfs._pdiam,p_wfs._pdiam],dtype=np.float32)
         Sy = np.zeros([p_wfs._pdiam,p_wfs._pdiam],dtype=np.float32)
-        
-        subapmask = p_geom._mpupil.T[indi:indi + p_wfs._pdiam, 
+
+        subapmask = p_geom._mpupil.T[indi:indi + p_wfs._pdiam,
                                    indj:indj + p_wfs._pdiam]
         for ii in range(p_wfs._pdiam):
             for jj in range(p_wfs._pdiam):
@@ -741,7 +741,7 @@ def init_sh_geom(p_wfs: conf.Param_wfs, r0: float, p_tel: conf.Param_tel,
         Sy /= Sy_den
         ttprojmat[:,i] = Sx.flatten()
         ttprojmat[:,i+p_wfs._nvalid] = Sy.flatten()
-    
+
     p_wfs._phasemap = phasemap
     p_wfs._validsubsx *= p_wfs.npix
     p_wfs._validsubsy *= p_wfs.npix
