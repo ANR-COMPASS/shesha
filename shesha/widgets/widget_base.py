@@ -1,7 +1,7 @@
 ## @package   shesha.widgets.widget_base
 ## @brief     Abstract Widget base
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   5.4.4
+## @version   5.5.0
 ## @date      2022/01/24
 ## @copyright GNU Lesser General Public License
 #
@@ -49,7 +49,7 @@ try:
     from PyQt5.QtCore import QThread, QTimer
     from PyQt5.uic import loadUiType
 except ModuleNotFoundError as e:
-    try:    
+    try:
         from PySide2 import QtWidgets
         from PySide2.QtCore import  QThread, QTimer
         from PySide2.QtUiTools import loadUiType

@@ -1,7 +1,7 @@
 ## @package   shesha.components.coronagraph.genericCoronagraph
 ## @brief     Abstracted layer for coronagraph object
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   5.4.4
+## @version   5.5.0
 ## @date      2023/03/02
 ## @copyright GNU Lesser General Public License
 #
@@ -67,7 +67,7 @@ class GenericCoronagraph(ABC):
         Args:
             p_corono: (Param_corono): Compass coronagraph parameters
 
-            p_geom: (Param_geom): Compass geometry parameters 
+            p_geom: (Param_geom): Compass geometry parameters
 
             targetCompass: (TargetCompass): Compass Target used as input for the coronagraph
         """
@@ -86,7 +86,7 @@ class GenericCoronagraph(ABC):
 
         Args:
             comp_psf: (bool, optionnal): If True (default), also compute the PSF SE & LE
-            accumulate: (bool, optional): If True (default), the computed SE image is accumulated in 
+            accumulate: (bool, optional): If True (default), the computed SE image is accumulated in
                                             long exposure
         """
         self._coronagraph.compute_image(accumulate=accumulate)
@@ -97,18 +97,18 @@ class GenericCoronagraph(ABC):
         """ Compute the SE psf, and accumulate it in the LE image
 
         Args:
-            accumulate: (bool, optional): If True (default), the computed SE psf is accumulated in 
+            accumulate: (bool, optional): If True (default), the computed SE psf is accumulated in
                                             long exposure
         """
         self._coronagraph.compute_psf(accumulate=accumulate)
-        
+
     def get_image(self, *, expo_type:str=scons.ExposureType.LE):
         """ Return the coronagraphic image
 
         Args:
             expo_type: (str, optional): If "le" (default), returns the long exposure image.
                                         If "se", returns short exposure one.
-        
+
         Return:
             img: (np.ndarra[ndim=2,dtype=np.float32]): coronagraphic image
         """
@@ -126,12 +126,12 @@ class GenericCoronagraph(ABC):
         Args:
             expo_type: (str, optional): If "le" (default), returns the long exposure psf.
                                         If "se", returns short exposure one.
-        
+
         Return:
             img: (np.ndarra[ndim=2,dtype=np.float32]): psf
         """
         if expo_type == scons.ExposureType.LE:
-            img = np.array(self._coronagraph.d_psf_le) 
+            img = np.array(self._coronagraph.d_psf_le)
             if(self._coronagraph.cntPsf):
                 img /= self._coronagraph.cntPsf
         if expo_type == scons.ExposureType.SE:

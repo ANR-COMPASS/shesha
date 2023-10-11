@@ -1,7 +1,7 @@
 ## @package   shesha.ao.imats
 ## @brief     Computation implementations of interaction matrix
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   5.4.4
+## @version   5.5.0
 ## @date      2022/01/24
 ## @copyright GNU Lesser General Public License
 #
@@ -38,7 +38,7 @@
 import numpy as np  # type: ignore
 import time
 from typing import List  # Mypy checker
-from tqdm import tqdm
+from rich.progress import track  # type: ignore
 
 import shesha.config as conf
 import shesha.constants as scons
@@ -53,7 +53,7 @@ from astropy.io import fits
 
 def imat_geom(wfs: Sensors, dms: Dms, p_wfss: List[conf.Param_wfs],
               p_dms: List[conf.Param_dm], p_controller: conf.Param_controller,
-              meth: int = 0, silence_tqdm: bool = False) -> np.ndarray:
+              meth: int = 0) -> np.ndarray:
     """ Compute the interaction matrix with a geometric method
 
     Args:
@@ -69,8 +69,7 @@ def imat_geom(wfs: Sensors, dms: Dms, p_wfss: List[conf.Param_wfs],
         p_controller: (Param_controller) : controller settings
 
         meth: (int) : (optional) method type (0 or 1)
-    
-        silence_tqdm : (bool) : Silence tqdm's output
+
     """
 
     nwfs = p_controller.nwfs.size
@@ -96,7 +95,7 @@ def imat_geom(wfs: Sensors, dms: Dms, p_wfss: List[conf.Param_wfs],
     for nmc in range(ndm):
         nm = p_controller.ndm[nmc]
         dms.d_dms[nm].reset_shape()
-        for i in tqdm(range(p_dms[nm]._ntotact), desc="DM%d" % nmc, disable=silence_tqdm):
+        for i in track(range(p_dms[nm]._ntotact), description="DM%d" % nmc):
             dms.d_dms[nm].comp_oneactu(i, p_dms[nm].push4imat)
             nslps = 0
             for nw in range(nwfs):
@@ -211,7 +210,7 @@ def imat_geom_ts_multiple_direction(wfs: Sensors, dms: Dms, p_ts: conf.Param_wfs
         imat_size2 += p_dms[nm]._ntotact
     imat_cpu = np.ndarray((0, imat_size2))
 
-    for i in tqdm(range(x.size), desc="TS pos"):
+    for i in track(range(x.size), description="TS pos"):
         xpos = x[i]
         ypos = y[i]
         for k in ind_dmseen:
@@ -277,9 +276,9 @@ def imat_geom_ts(wfs: Sensors, dms: Dms, p_ts: conf.Param_wfs, ind_TS: int,
     imat_cpu = np.zeros((imat_size1, imat_size2), dtype=np.float64)
     ind = 0
     cc = 0
-    for nm in tqdm(ind_DMs, desc="imat geom DM"):
+    for nm in track(ind_DMs, description="imat geom DM"):
         dms.d_dms[nm].reset_shape()
-        for i in tqdm(range(p_dms[nm]._ntotact), desc="imat geom actu"):
+        for i in track(range(p_dms[nm]._ntotact), description="imat geom actu"):
             dms.d_dms[nm].comp_oneactu(i, p_dms[nm].push4imat)
             wfs.d_wfs[ind_TS].d_gs.raytrace(dms, rst=1)
             wfs.d_wfs[ind_TS].slopes_geom(meth)

@@ -1,7 +1,7 @@
 ## @package   shesha.supervisor.optimizers
 ## @brief     User layer for optimizing AO supervisor loop
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   5.4.4
+## @version   5.5.0
 ## @date      2022/01/24
 ## @copyright GNU Lesser General Public License
 #
@@ -35,7 +35,7 @@
 #  You should have received a copy of the GNU Lesser General Public License along with COMPASS.
 #  If not, see <https://www.gnu.org/licenses/lgpl-3.0.txt>.
 import numpy as np
-from tqdm import trange
+from rich.progress import track
 
 class Calibration(object):
     """ This optimizer class handles all the modal basis and DM Influence functions
@@ -138,7 +138,7 @@ class Calibration(object):
             nmodes_max = modal_basis.shape[1]
         v_old = self._rtc.get_command(controller_index)
         self._rtc.open_loop(controller_index, reset=False)
-        for m in trange(nmodes_max):
+        for m in track(range(nmodes_max)):
             v = ampli[m] * modal_basis[:, m]
             if ((push_pull is True) or
                 (with_turbu is True)):  # with turbulence/aberrations => push/pull

@@ -1,7 +1,7 @@
 ## @package   shesha.supervisor
 ## @brief     User layer for initialization and execution of a COMPASS simulation
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   5.4.4
+## @version   5.5.0
 ## @date      2022/01/24
 ## @copyright GNU Lesser General Public License
 #
@@ -48,7 +48,7 @@ class DmCompass(object):
 
         _config : (config module) : Parameters configuration structure module
     """
-    def __init__(self, context, config, silence_tqdm: bool = False):
+    def __init__(self, context, config):
         """ Initialize a DmCompass component for DM related supervision
 
         Args:
@@ -60,7 +60,7 @@ class DmCompass(object):
         self._config = config # Parameters configuration coming from supervisor init
         print("->dms init")
         self._dms = dm_init(self._context, self._config.p_dms, self._config.p_tel,
-                               self._config.p_geom, self._config.p_wfss, silence_tqdm=silence_tqdm)
+                               self._config.p_geom, self._config.p_wfss)
 
     def set_command(self, commands: np.ndarray, *, dm_index : int=None, shape_dm : bool=True) -> None:
         """ Immediately sets provided command to DMs - does not affect integrator

@@ -1,7 +1,7 @@
 ## @package   shesha.supervisor
 ## @brief     User layer for initialization and execution of a COMPASS simulation
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   5.4.4
+## @version   5.5.0
 ## @date      2022/01/24
 ## @copyright GNU Lesser General Public License
 #
@@ -49,7 +49,7 @@ class RtcCompass(RtcAbstract):
     """
 
     def __init__(self, context: carmaWrap_context, config, tel, wfs, dms, atm, *,
-                 brahma: bool = False, fp16: bool = False, cacao: bool = False, silence_tqdm: bool = False):
+                 brahma: bool = False, fp16: bool = False, cacao: bool = False):
         """ Initialize a RtcCompass component for rtc related supervision
 
         Args:
@@ -74,14 +74,12 @@ class RtcCompass(RtcAbstract):
 
             cacao : (bool) : If True, enables CACAO features in RTC (Default is False)
                                        Requires OCTOPUS to be installed
-
-            silence_tqdm : (bool) : Silence tqdm's output
         """
         RtcAbstract.__init__(self, context, config, brahma=brahma, fp16=fp16,
-                             cacao=cacao, silence_tqdm=silence_tqdm)
-        self.rtc_init(tel, wfs, dms, atm, silence_tqdm=silence_tqdm)
+                             cacao=cacao)
+        self.rtc_init(tel, wfs, dms, atm)
 
-    def rtc_init(self, tel, wfs, dms, atm, silence_tqdm: bool = False):
+    def rtc_init(self, tel, wfs, dms, atm):
         """ Initialize a RtcCompass component for rtc related supervision
 
         Args:
@@ -98,4 +96,4 @@ class RtcCompass(RtcAbstract):
                              self._config.p_geom, self._config.p_atmos,
                              self._config.p_loop.ittime, self._config.p_centroiders,
                              self._config.p_controllers, self._config.p_dms,
-                             cacao=self.cacao, silence_tqdm=silence_tqdm)
+                             cacao=self.cacao)
