@@ -1,7 +1,7 @@
 ## @package   shesha.supervisor
 ## @brief     User layer for initialization and execution of a COMPASS simulation
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   5.4.4
+## @version   5.5.0
 ## @date      2022/01/24
 ## @copyright GNU Lesser General Public License
 #
@@ -63,7 +63,7 @@ class RtcAbstract(ABC):
     """
 
     def __init__(self, context: carmaWrap_context, config, *, brahma: bool = False,
-                 fp16: bool = False, cacao: bool = False, silence_tqdm: bool = False):
+                 fp16: bool = False, cacao: bool = False):
         """ Initialize a RtcCompass component for rtc related supervision
 
         Args:
@@ -80,13 +80,10 @@ class RtcAbstract(ABC):
 
             cacao : (bool) : If True, enables CACAO features in RTC (Default is False)
                                       Requires OCTOPUS to be installed
-
-            silence_tqdm : (bool) : Silence tqdm's output
         """
         self.brahma = brahma
         self.fp16 = fp16
         self.cacao = cacao
-        self.silence_tqdm = silence_tqdm
         self._context = context
         self._config = config  # Parameters configuration coming from supervisor init
         self._rtc = None
@@ -688,7 +685,7 @@ class RtcAbstract(ABC):
 
         Args:
             controller_index : (int) : controller index
-            
+
             geom_type : (int) : geom centroiding method, default = 0, others (1,2) are experimental
         Returns:
             slopes_geom : (np.ndarray) : geometrically computed slopes
@@ -767,7 +764,7 @@ class RtcAbstract(ABC):
 
         Args:
             controller_index: (int): controller index
-            
+
             geom_type : (int) : geom centroiding method, default = 0, others (1,2) are experimental
         """
         self._rtc.do_centroids_geom(controller_index, geom_type)

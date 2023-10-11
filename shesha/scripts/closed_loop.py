@@ -3,7 +3,7 @@
 ## @package   shesha.scripts.closed_loop
 ## @brief     script test to simulate a closed loop
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   5.4.4
+## @version   5.5.0
 ## @date      2022/01/24
 ## @copyright GNU Lesser General Public License
 #
@@ -53,7 +53,6 @@ Options:
   -n --niter niter   Number of iterations
   -g --generic       Use generic controller
   -f --fast          Compute PSF only during monitoring
-  -s --silence       Silence tqdm's output
 """
 from shesha.config import ParamConfig
 from docopt import docopt
@@ -63,7 +62,6 @@ if __name__ == "__main__":
 
     param_file = arguments["<parameters_filename>"]
     compute_tar_psf = not arguments["--fast"]
-    silence_tqdm = arguments["--silence"]
 
     config = ParamConfig(param_file)
 
@@ -87,7 +85,7 @@ if __name__ == "__main__":
     if arguments["--niter"]:
         config.p_loop.set_niter(int(arguments["--niter"]))
 
-    supervisor = Supervisor(config, silence_tqdm=silence_tqdm)
+    supervisor = Supervisor(config)
 
     supervisor.loop(supervisor.config.p_loop.niter, compute_tar_psf=compute_tar_psf)
 

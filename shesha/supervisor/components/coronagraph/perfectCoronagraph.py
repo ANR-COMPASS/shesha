@@ -1,7 +1,7 @@
 ## @package   shesha.components.coronagraph.perfectCoronagraph
 ## @brief     Perfect Coronagraph Class definition
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   5.4.4
+## @version   5.5.0
 ## @date      2023/03/02
 ## @copyright GNU Lesser General Public License
 #
@@ -75,13 +75,13 @@ class PerfectCoronagraphCompass(GenericCoronagraph):
         _AA_c: (np.ndarray[ndim=3, dtype=np.complex64]): MFT matrix for image computation
 
         _BB_c: (np.ndarray[ndim=3, dtype=np.complex64]): MFT matrix for psf computation
-        
+
         _norm0_c: (np.ndarray[ndim=3, dtype=np.complex64]): MFT matrix for psf computation
 
-        _indices_pup: (tuple): Tuple of ndarray containing X and Y indices of illuminated 
+        _indices_pup: (tuple): Tuple of ndarray containing X and Y indices of illuminated
                                 pixels in the pupil
     """
-    def __init__(self, context: context, targetCompass: TargetCompass, 
+    def __init__(self, context: context, targetCompass: TargetCompass,
                  p_corono: conf.Param_corono, p_geom: conf.Param_geom):
         """ Initialize a perfect coronagraph instance
 
@@ -107,8 +107,8 @@ class PerfectCoronagraphCompass(GenericCoronagraph):
                                                          center_on_pixel=True)
         self._indices_pup = np.where(self._spupil > 0.)
 
-        self._coronagraph = PerfectCoronagraph(context, self._target.sources[0], 
-                                               self._dim_image, self._dim_image, 
+        self._coronagraph = PerfectCoronagraph(context, self._target.sources[0],
+                                               self._dim_image, self._dim_image,
                                                self._wav_vec, self._wav_vec.size, 0)
 
         self._coronagraph.set_mft(self._AA, self._BB, self._norm0, scons.MftType.IMG)

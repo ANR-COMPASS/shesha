@@ -1,7 +1,7 @@
 ## @package   shesha.supervisor.optimizers
 ## @brief     User layer for optimizing AO supervisor loop
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   5.4.4
+## @version   5.5.0
 ## @date      2022/01/24
 ## @copyright GNU Lesser General Public License
 #
@@ -85,36 +85,32 @@ class ModalBasis(object):
         self.modal_basis = None
         self.projection_matrix = None
 
-    def compute_influ_basis(self, dm_index: int, silence_tqdm: bool = False) -> csr_matrix:
+    def compute_influ_basis(self, dm_index: int) -> csr_matrix:
         """ Computes and return the influence function phase basis of the specified DM
         as a sparse matrix
 
         Args:
             dm_index : (int) : Index of the DM
 
-            silence_tqdm : (bool) : Silence tqdm's output
-
         Returns:
             influ_sparse : (csr_matrix) : influence function phases
         """
         return basis.compute_dm_basis(self._dms._dms.d_dms[dm_index],
                                               self._config.p_dms[dm_index],
-                                              self._config.p_geom, silence_tqdm=silence_tqdm)
+                                              self._config.p_geom)
 
-    def compute_influ_delta(self, dm_index: int, silence_tqdm: bool = False) -> np.ndarray:
+    def compute_influ_delta(self, dm_index: int) -> np.ndarray:
         """ Computes and return IF delta for the specified DM
 
         Args:
             dm_index : (int) : Index of the DM
-
-            silence_tqdm : (bool) : Silence tqdm's output
 
         Return:
             influ_delta : (np.ndarray) : influence function deltas
         """
         ifsparse =  basis.compute_dm_basis(self._dms._dms.d_dms[dm_index],
                                               self._config.p_dms[dm_index],
-                                              self._config.p_geom, silence_tqdm=silence_tqdm)
+                                              self._config.p_geom)
         mpup = self._config.p_geom.get_mpupil()
         npix_in_pup = np.sum(mpup)
         ifdelta = ifsparse.dot(ifsparse.T) / np.sum(mpup)
