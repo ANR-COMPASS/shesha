@@ -101,7 +101,7 @@ class WidgetBase(BaseClassTemplate):
         self.gui_timer = QTimer()  # type: QTimer
         self.gui_timer.timeout.connect(self.updateDisplay)
         if self.uiBase.wao_Display.isChecked():
-            self.gui_timer.start(1000. / self.uiBase.wao_frameRate.value())
+            self.gui_timer.start(1000 // int(self.uiBase.wao_frameRate.value()))
         self.loopLock = threading.Lock(
         )  # type: Threading.Lock # Asynchronous loop / display safe-threading
         self.hide_histograms = hide_histograms
@@ -143,7 +143,7 @@ class WidgetBase(BaseClassTemplate):
     def gui_timer_config(self, state) -> None:
         self.uiBase.wao_frameRate.setDisabled(state)
         if state:
-            self.gui_timer.start(1000. / self.uiBase.wao_frameRate.value())
+            self.gui_timer.start(1000 // int(self.uiBase.wao_frameRate.value()))
         else:
             self.gui_timer.stop()
 
