@@ -1,7 +1,7 @@
 ## @package   shesha.tests
 ## @brief     Tests the supervisor module
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   5.4.4
+## @version   5.5.0
 ## @date      2022/01/24
 ## @copyright GNU Lesser General Public License
 #
@@ -96,7 +96,7 @@ def test_enable_atmos():
 
 def test_set_r0():
     sup.atmos.set_r0(0.15)
-    assert(sup.config.p_atmos.r0 == 0.15)
+    assert(sup.config.p_atmos.r0 == np.float32(0.15))
 
 def test_set_wind():
     sup.atmos.set_wind(0,windspeed=10, winddir=45)
@@ -292,11 +292,11 @@ def test_get_pyr_focal_plane():
     sup.wfs.get_pyr_focal_plane(0)
     assert(True)
 
-#    _____    _                          
-#   |_   _|__| |___ ___ __ ___ _ __  ___ 
+#    _____    _
+#   |_   _|__| |___ ___ __ ___ _ __  ___
 #     | |/ -_) / -_|_-</ _/ _ \ '_ \/ -_)
 #     |_|\___|_\___/__/\__\___/ .__/\___|
-#                             |_|        
+#                             |_|
 def test_set_input_phase():
     phase_shape = sup.config.get_pupil("m").shape
     phase = np.ones((phase_shape[0], phase_shape[1], 5))
@@ -513,7 +513,7 @@ def test_do_centroids():
     assert(True)
 
 def test_do_centroids_geom():
-    sup.rtc.do_centroids_geom(0)    # default 
+    sup.rtc.do_centroids_geom(0)    # default
     sup.rtc.do_centroids_geom(0, geom_type=0)  # type 0
     sup.rtc.do_centroids_geom(0, geom_type=1)  # type 1
     sup.rtc.do_centroids_geom(0, geom_type=2)  # type 2
@@ -756,11 +756,11 @@ def test_set_iir_b_vector():
     sup.rtc.set_iir_b_vector(1,0,sup.rtc._get_iir_b_vector(1,0))
     assert(True)
 
-#                                                _    
-#    __ ___ _ _ ___ _ _  __ _ __ _ _ _ __ _ _ __| |_  
-#   / _/ _ \ '_/ _ \ ' \/ _` / _` | '_/ _` | '_ \ ' \ 
+#                                                _
+#    __ ___ _ _ ___ _ _  __ _ __ _ _ _ __ _ _ __| |_
+#   / _/ _ \ '_/ _ \ ' \/ _` / _` | '_/ _` | '_ \ ' \
 #   \__\___/_| \___/_||_\__,_\__, |_| \__,_| .__/_||_|
-#                            |___/         |_|        
+#                            |___/         |_|
 
 def test_get_image_corono():
     img = sup.corono.get_image(0)

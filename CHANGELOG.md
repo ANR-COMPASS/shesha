@@ -1,10 +1,12 @@
 # COMPASS Change logs
 
 - [COMPASS Change logs](#compass-change-logs)
+  - [Release v5.5.0 :](#release-v550-)
   - [Release v5.4.4 :](#release-v544-)
   - [Release v5.4.3 :](#release-v543-)
   - [Release v5.4.2 :](#release-v542-)
   - [Release v5.4.1 :](#release-v541-)
+  - [Release v5.4.0](#release-v540)
   - [Release v5.3.0](#release-v530)
   - [Release v5.2.1](#release-v521)
   - [Release v5.2](#release-v52)
@@ -26,6 +28,14 @@
   - [Release v2.0](#release-v20)
   - [Release v1.1](#release-v11)
 
+## Release v5.5.0 :
+
+- Add cuda stream in all centroiders
+- Replace tqdm with rich
+- Change C++ ProgressBar
+- Remove cosmic conan repository
+- Unzip SAXODmData.zip
+
 ## Release v5.4.4 :
 
 - Debug KL2V when DM has unseen actuators
@@ -45,6 +55,16 @@
 
 - Coronagraph hotfix
 - Update SHESHA LICENSE to LGPL
+
+## Release v5.4.0
+
+- Add new GPU-based coronagraph module providing implementation of perfect coronagraph and APLC-like
+- Add new parameters *p_wfs.kernconv4imat* to enable/disable the feature of using a kernel convolution on the SH spots during interaction matrix computation. Default value is True to keep the same behaviour as previous versions of COMPASS
+- Add new TwoStagesManager class in shesha supervisors: this class shows an example of how to handle 2 stages AO systems with COMPASS.
+- Add cupy interface for carmaWrap.CarmaObj object
+- Add support for CUDA 12
+- Add pySide2 support to have another library available to handle GUI
+- Minor fixes and improvements
 
 ## Release v5.3.0
 

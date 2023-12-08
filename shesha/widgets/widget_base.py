@@ -1,7 +1,7 @@
 ## @package   shesha.widgets.widget_base
 ## @brief     Abstract Widget base
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   5.4.4
+## @version   5.5.0
 ## @date      2022/01/24
 ## @copyright GNU Lesser General Public License
 #
@@ -49,7 +49,7 @@ try:
     from PyQt5.QtCore import QThread, QTimer
     from PyQt5.uic import loadUiType
 except ModuleNotFoundError as e:
-    try:    
+    try:
         from PySide2 import QtWidgets
         from PySide2.QtCore import  QThread, QTimer
         from PySide2.QtUiTools import loadUiType
@@ -101,7 +101,7 @@ class WidgetBase(BaseClassTemplate):
         self.gui_timer = QTimer()  # type: QTimer
         self.gui_timer.timeout.connect(self.updateDisplay)
         if self.uiBase.wao_Display.isChecked():
-            self.gui_timer.start(1000. / self.uiBase.wao_frameRate.value())
+            self.gui_timer.start(1000 // int(self.uiBase.wao_frameRate.value()))
         self.loopLock = threading.Lock(
         )  # type: Threading.Lock # Asynchronous loop / display safe-threading
         self.hide_histograms = hide_histograms
@@ -143,7 +143,7 @@ class WidgetBase(BaseClassTemplate):
     def gui_timer_config(self, state) -> None:
         self.uiBase.wao_frameRate.setDisabled(state)
         if state:
-            self.gui_timer.start(1000. / self.uiBase.wao_frameRate.value())
+            self.gui_timer.start(1000 // int(self.uiBase.wao_frameRate.value()))
         else:
             self.gui_timer.stop()
 
