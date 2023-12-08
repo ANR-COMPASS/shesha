@@ -109,9 +109,9 @@ class StageSupervisor(CompassSupervisor):
             compute_tar_psf : (bool) : If True (default), computes the PSF at the end of the
                                        iteration
 
-            stack_wfs_image : (bool) : If False (default), the Wfs image is computed as 
-                                       usual. Otherwise, a newly computed WFS image is accumulated 
-                                       to the previous one.
+            stack_wfs_image : (bool) : If False (default), the Wfs image is computed as
+                                        usual. Otherwise, a newly computed WFS image is accumulated
+                                        to the previous one.
 
             do_centroids : (bool) : If True (default), the last WFS image is stacked and
                                     centroids computation is done. WFS image must be reset before
@@ -228,7 +228,8 @@ class StageSupervisor(CompassSupervisor):
     def reset(self):
         """
         Reset the simulation to return to its original state.
-        Overwrites the compassSupervisor reset function, reseting explicitely the WFS image, to force a new integration of the frame.
+        Overwrites the compassSupervisor reset function, reseting explicitely the WFS image,
+        to force a new integration of the frame.
         """
         self.atmos.reset_turbu()
         self.wfs.reset_noise()
