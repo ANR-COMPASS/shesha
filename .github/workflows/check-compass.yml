@@ -15,25 +15,21 @@ on:
 jobs:
   install_and_test:
     runs-on: self-hosted
+    container:
+      image: aocompass/base-20.04:11.8.0
     strategy:
       matrix:
-        python-version: ["pypy3.9", "pypy3.10", "3.9", "3.10", "3.11"]
+        python-version: ["3.9", "3.10", "3.11"]
       max-parallel: 1
-
     steps:
     - uses: actions/checkout@v4
       with:
         repository: ${{ github.event.pull_request.head.repo.full_name }}
         ref: ${{ github.event.pull_request.head.ref }}
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v4
-      with:
-        python-version: ${{ matrix.python-version }}
-    - name: Anaconda-Action
-      id: step1
-      uses: fdiblen/anaconda-action@0.1.7
-      with:
-        envFileName: 'environment.yml'
+    - name: Set up Anaconda with python ${{ matrix.python-version }}
+      run: |
+        conda create --name compass -c anaconda python=${{ matrix.python-version }}
+        conda activate compass
     - name: Install compass
       run: |
         conda install -c compass compass
