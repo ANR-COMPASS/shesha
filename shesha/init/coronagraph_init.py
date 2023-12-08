@@ -1,7 +1,7 @@
 ## @package   shesha.init.coronagraph_init
 ## @brief     Initialization of a Coronagraph object
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   5.4.4
+## @version   5.5.0
 ## @date      2023/03/02
 ## @copyright GNU Lesser General Public License
 #
@@ -211,7 +211,7 @@ def init_mft(p_corono: conf.Param_corono, pupdiam, planes, center_on_pixel=False
     image_sampling = p_corono._image_sampling
     wavelength_0 = p_corono._wavelength_0
     wav_vec = p_corono._wav_vec
-    
+
     norm0 = np.zeros(len(wav_vec))
 
     if planes == 'apod_to_fpm':
@@ -221,7 +221,7 @@ def init_mft(p_corono: conf.Param_corono, pupdiam, planes, center_on_pixel=False
         for w, wavelength in enumerate(wav_vec):
             wav_ratio = wavelength / wavelength_0
             nbres = dim_fpm / fpm_sampling / wav_ratio
-            AA_apod_to_fpm[:,:,w], BB_apod_to_fpm[:,:,w], norm0[w] = mft_matrices(pupdiam, 
+            AA_apod_to_fpm[:,:,w], BB_apod_to_fpm[:,:,w], norm0[w] = mft_matrices(pupdiam,
                                                                                   dim_fpm, nbres)
 
         return AA_apod_to_fpm, BB_apod_to_fpm, norm0
@@ -234,7 +234,7 @@ def init_mft(p_corono: conf.Param_corono, pupdiam, planes, center_on_pixel=False
             wav_ratio = wavelength / wavelength_0
             nbres = dim_fpm / fpm_sampling / wav_ratio
 
-            AA_fpm_to_lyot[:,:,w], BB_fpm_to_lyot[:,:,w], norm0[w] = mft_matrices(dim_fpm, 
+            AA_fpm_to_lyot[:,:,w], BB_fpm_to_lyot[:,:,w], norm0[w] = mft_matrices(dim_fpm,
                                                                                   pupdiam, nbres,inverse=True)
 
         return AA_fpm_to_lyot, BB_fpm_to_lyot, norm0

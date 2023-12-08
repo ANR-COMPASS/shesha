@@ -58,7 +58,7 @@ import time
 
 import pyqtgraph as pg
 from shesha.util.tools import plsh, plpyr
-from tqdm import trange
+from rich.progress import track
 import astropy.io.fits as pfits
 from PyQt5 import QtWidgets
 from shesha.supervisor.twoStagesManager import TwoStagesManager
@@ -176,7 +176,7 @@ class widgetTwoStagesWindowPyro():
 
     def next(self, nbIters):
         ''' Move atmos -> get_slopes -> applyControl ; One integrator step '''
-        for i in trange(nbIters):
+        for i in track(range(nbIters)):
             self.manager.next()
 
     def initPyrTools(self):

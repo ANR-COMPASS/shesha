@@ -1,7 +1,7 @@
 ## @package   shesha.supervisor.aoSupervisor
 ## @brief     Abstract layer for initialization and execution of a AO supervisor
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   5.4.4
+## @version   5.5.0
 ## @date      2022/01/24
 ## @copyright GNU Lesser General Public License
 #
@@ -55,18 +55,15 @@ class GenericSupervisor(ABC):
         iter : (int) : Frame counter
     """
 
-    def __init__(self, config, silence_tqdm: bool = False):
+    def __init__(self, config):
         """ Init the a supervisor
 
         Args:
             config : (config module) : Configuration module
 
-            silence_tqdm : (bool) : Silence tqdm's output
-
         """
         self.context = None
         self.config = config
-        self.silence_tqdm = silence_tqdm
         self.is_init = False
         self.iter = 0
 

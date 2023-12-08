@@ -1,7 +1,7 @@
 ## @package   shesha.supervisor.canapassSupervisor
 ## @brief     Initialization and execution of a CANAPASS supervisor
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   5.4.4
+## @version   5.5.0
 ## @date      2022/01/24
 ## @copyright GNU Lesser General Public License
 #
@@ -55,20 +55,13 @@ Options:
   -r0,--setr0 setr0        change the global r0
 """
 
-import os, sys
 import numpy as np
-import time
 
-from tqdm import tqdm
-import astropy.io.fits as pfits
-from threading import Thread
 from subprocess import Popen, PIPE
 
 import shesha.ao as ao
 import shesha.constants as scons
-from shesha.constants import CentroiderType, WFSType
 
-from typing import Any, Dict, Tuple, Callable, List
 from shesha.supervisor.compassSupervisor import CompassSupervisor
 
 # from carmaWrap.obj import obj_Double2D
@@ -80,10 +73,10 @@ from shesha.supervisor.compassSupervisor import CompassSupervisor
 
 class CanapassSupervisor(CompassSupervisor):
 
-    def __init__(self, config, cacao: bool = True, silence_tqdm: bool = False) -> None:
+    def __init__(self, config, cacao: bool = True) -> None:
         print("switching to a generic controller")
         config.p_controllers[0].type = scons.ControllerType.GENERIC
-        CompassSupervisor.__init__(self, config, cacao=cacao, silence_tqdm=silence_tqdm)
+        CompassSupervisor.__init__(self, config, cacao=cacao)
 
 
 ########################## PROTO #############################

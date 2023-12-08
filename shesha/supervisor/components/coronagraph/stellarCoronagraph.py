@@ -1,7 +1,7 @@
 ## @package   shesha.components.coronagraph.stellarCoronagraph
 ## @brief     Stellar Coronagraph Class definition
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   5.4.4
+## @version   5.5.0
 ## @date      2023/03/02
 ## @copyright GNU Lesser General Public License
 #
@@ -79,19 +79,19 @@ class StellarCoronagraphCompass(GenericCoronagraph):
         _AA_lyot_to_image_c: (np.ndarray[ndim=2, dtype=np.complex64]): MFT matrix for image computation (centered on pixel)
 
         _BB_lyot_to_image_c: (np.ndarray[ndim=2, dtype=np.complex64]): MFT matrix for psf computation (centered on pixel)
-        
+
         _norm0_lyot_to_image_c: (np.ndarray[ndim=2, dtype=np.complex64]): MFT matrix for psf computation (centered on pixel)
 
         _AA_lyot_to_image: (np.ndarray[ndim=2, dtype=np.complex64]): MFT matrix for image computation
 
         _BB_lyot_to_image: (np.ndarray[ndim=2, dtype=np.complex64]): MFT matrix for psf computation
-        
+
         _norm0_lyot_to_image: (np.ndarray[ndim=2, dtype=np.complex64]): MFT matrix for psf computation
 
-        _indices_pup: (tuple): Tuple of ndarray containing X and Y indices of illuminated 
+        _indices_pup: (tuple): Tuple of ndarray containing X and Y indices of illuminated
                                 pixels in the pupil
     """
-    def __init__(self, context: context, targetCompass: TargetCompass, p_corono: conf.Param_corono, 
+    def __init__(self, context: context, targetCompass: TargetCompass, p_corono: conf.Param_corono,
                  p_geom: conf.Param_geom):
         """ Initialize a stellar coronagraph instance
 
@@ -122,23 +122,23 @@ class StellarCoronagraphCompass(GenericCoronagraph):
                                                                                                    self._pupdiam,
                                                                                                    planes='lyot_to_image',
                                                                                                    center_on_pixel=True)
-        self._coronagraph = StellarCoronagraph(context, self._target.sources[0], 
-                                               self._dim_image, self._dim_image, 
-                                               self._p_corono._dim_fpm, self._p_corono._dim_fpm, 
-                                               self._wav_vec, self._wav_vec.size, 
+        self._coronagraph = StellarCoronagraph(context, self._target.sources[0],
+                                               self._dim_image, self._dim_image,
+                                               self._p_corono._dim_fpm, self._p_corono._dim_fpm,
+                                               self._wav_vec, self._wav_vec.size,
                                                self._p_corono._babinet_trick, 0)
-        
-        self._coronagraph.set_mft(self._AA_lyot_to_image, 
-                                  self._BB_lyot_to_image, 
+
+        self._coronagraph.set_mft(self._AA_lyot_to_image,
+                                  self._BB_lyot_to_image,
                                   self._norm0_lyot_to_image, scons.MftType.IMG)
-        self._coronagraph.set_mft(self._AA_lyot_to_image_c, 
-                                  self._BB_lyot_to_image_c, 
+        self._coronagraph.set_mft(self._AA_lyot_to_image_c,
+                                  self._BB_lyot_to_image_c,
                                   self._norm0_lyot_to_image_c, scons.MftType.PSF)
-        self._coronagraph.set_mft(self._AA_apod_to_fpm, 
-                                  self._BB_apod_to_fpm, 
+        self._coronagraph.set_mft(self._AA_apod_to_fpm,
+                                  self._BB_apod_to_fpm,
                                   self._norm0_apod_to_fpm, scons.MftType.FPM)
-        self._coronagraph.set_mft(self._AA_fpm_to_lyot, 
-                                  self._BB_fpm_to_lyot, 
+        self._coronagraph.set_mft(self._AA_fpm_to_lyot,
+                                  self._BB_fpm_to_lyot,
                                   self._norm0_fpm_to_lyot, scons.MftType.LYOT)
 
         self._coronagraph.set_apodizer(self._p_corono._apodizer)

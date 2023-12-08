@@ -2,7 +2,7 @@
 ## @package   shesha.widgets.widget_ao
 ## @brief     Widget to simulate a closed loop
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
-## @version   5.4.4
+## @version   5.5.0
 ## @date      2022/01/24
 ## @copyright GNU Lesser General Public License
 #
@@ -65,7 +65,7 @@ try:
     from PyQt5 import QtWidgets
     from PyQt5.QtCore import Qt
 except ModuleNotFoundError as e:
-    try:    
+    try:
         from PySide2 import QtWidgets
         from PySide2.QtCore import Qt
     except ModuleNotFoundError as e:
@@ -232,7 +232,7 @@ class widgetAOWindow(AOClassTemplate, WidgetBase):
             self.supervisor.target.reset_strehl(tarnum)
 
     def resetCoro(self) -> None:
-        # TODO Adapt for multiple corono 
+        # TODO Adapt for multiple corono
         if self.uiAO.wao_allCoro.isChecked():
             for c in range(self.ncoro):
                 self.supervisor.corono.reset()
@@ -357,7 +357,7 @@ class widgetAOWindow(AOClassTemplate, WidgetBase):
         for coro in range(self.ncoro):
             name = 'coroPSFSE_%d' % coro
             self.add_dispDock(name, self.wao_imagesgroup_cb)
-            
+
         self.add_dispDock("Strehl", self.wao_graphgroup_cb, "SR")
         for coro in range(self.ncoro):
             self.add_dispDock(f"ContrastLE_{coro}", self.wao_graphgroup_cb, "MPL")
@@ -688,9 +688,9 @@ class widgetAOWindow(AOClassTemplate, WidgetBase):
                             self.imgs[key].canvas.axes.clear()
                             self.imgs[key].canvas.axes.plot(data)
                             self.imgs[key].canvas.draw()
-                        elif "ContrastLE" in key:     
+                        elif "ContrastLE" in key:
                             distances, mean, std, mini, maxi = self.supervisor.corono.get_contrast(index, expo_type='le')
-                            if(np.all(mean)): 
+                            if(np.all(mean)):
                                 self.imgs[key].canvas.axes.clear()
                                 self.imgs[key].canvas.axes.plot(distances, mean)
                                 self.imgs[key].canvas.axes.set_yscale('log')
@@ -701,7 +701,7 @@ class widgetAOWindow(AOClassTemplate, WidgetBase):
                                 self.imgs[key].canvas.draw()
                         elif "ContrastSE" in key:
                             distances, mean, std, mini, maxi = self.supervisor.corono.get_contrast(index, expo_type='se')
-                            if(np.all(mean)): 
+                            if(np.all(mean)):
                                 self.imgs[key].canvas.axes.clear()
                                 self.imgs[key].canvas.axes.plot(distances, mean)
                                 self.imgs[key].canvas.axes.set_yscale('log')
@@ -807,7 +807,7 @@ def tcp_connect_to_display():
 if __name__ == '__main__':
     # if(not tcp_connect_to_display()):
     #     raise RuntimeError("Cannot connect to display")
-        
+
     arguments = docopt(__doc__)
     app = QtWidgets.QApplication(sys.argv)
     app.setStyle('cleanlooks')
