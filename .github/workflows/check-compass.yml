@@ -28,6 +28,11 @@ jobs:
       uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python-version }}
+    - name: Anaconda-Action
+      id: step1
+      uses: fdiblen/anaconda-action@0.1.7
+      with:
+        envFileName: 'environment.yml'
     - name: Install compass
       run: |
         conda install -c compass compass
