@@ -62,13 +62,13 @@ class TelescopeCompass(object):
         if self._config.p_atmos is not None:
             r0 = self._config.p_atmos.r0
         else:
-            raise ValueError('A r0 value through a Param_atmos is required.')
+            raise ValueError('A r0 value through a ParamAtmos is required.')
 
         if self._config.p_loop is not None:
             ittime = self._config.p_loop.ittime
         else:
             raise ValueError(
-                    'An ittime (iteration time in seconds) value through a Param_loop is required.'
+                    'An ittime (iteration time in seconds) value through a ParamLoop is required.'
             )
         print("->telescope init")
         self._tel = tel_init(self._context, self._config.p_geom, self._config.p_tel, r0,

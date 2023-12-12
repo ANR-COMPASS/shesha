@@ -53,12 +53,12 @@ from shesha.sutra_wrap import Sensors
 import scipy.ndimage.interpolation as sci
 
 
-def make_lgs_prof1d(p_wfs: conf.Param_wfs, p_tel: conf.Param_tel, prof: np.ndarray,
+def make_lgs_prof1d(p_wfs: conf.ParamWfs, p_tel: conf.ParamTel, prof: np.ndarray,
                     h: np.ndarray, beam: float, center=""):
     """same as prep_lgs_prof but cpu only. original routine from rico
 
     Args:
-        p_tel: (Param_tel) : telescope settings
+        p_tel: (ParamTel) : telescope settings
 
         prof: (np.ndarray[dtype=np.float32]) : Na profile intensity, in arbitrary units
 
@@ -196,18 +196,18 @@ def make_lgs_prof1d(p_wfs: conf.Param_wfs, p_tel: conf.Param_tel, prof: np.ndarr
     p_wfs._lgskern = im.T
 
 
-def prep_lgs_prof(p_wfs: conf.Param_wfs, nsensors: int, p_tel: conf.Param_tel,
+def prep_lgs_prof(p_wfs: conf.ParamWfs, nsensors: int, p_tel: conf.ParamTel,
                   sensors: Sensors, center="", imat=0):
     """The function returns an image array(double,n,n) of a laser beacon elongated by perpective
     effect. It is obtaind by convolution of a gaussian of width "lgsWidth" arcseconds, with the
     line of the sodium profile "prof". The altitude of the profile is the array "h".
 
         Args:
-            p_wfs: (Param_wfs) : WFS settings
+            p_wfs: (ParamWfs) : WFS settings
 
             nsensors: (int) : wfs index
 
-            p_tel: (Param_tel) : telescope settings
+            p_tel: (ParamTel) : telescope settings
 
             Sensors: (Sensors) : WFS object
 

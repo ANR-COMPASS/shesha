@@ -56,7 +56,7 @@ def make_pupil(dim, pupd, tel, xc=-1, yc=-1, real=0, halfSpider=False):
 
         pupd: (long) : linear size of total pupil = p_geom.pupdiam
 
-        tel: (Param_tel) : Telescope structure
+        tel: (ParamTel) : Telescope structure
 
         xc: (int) = p_geom.pupdiam / 2. - 0.5
 
@@ -214,7 +214,7 @@ def make_VLT(dim, pupd, tel):
 
         pupd: (long) : linear size of total pupil
 
-        tel: (Param_tel) : Telescope structure
+        tel: (ParamTel) : Telescope structure
     """
 
     if (tel.t_spiders == -1):
@@ -256,7 +256,7 @@ def make_EELT(dim, pupd, tel, N_seg=-1):
 
         pupd: (long) : linear size of total pupil
 
-        tel: (Param_tel) : Telescope structure
+        tel: (ParamTel) : Telescope structure
 
         N_seg: (int)
 
@@ -378,7 +378,7 @@ def make_phase_ab(dim, pupd, tel, pup=None, xc=-1, yc=-1, real=0, halfSpider=Fal
 
         pupd: (long) : linear size of total pupil
 
-        tel: (Param_tel) : Telescope structure
+        tel: (ParamTel) : Telescope structure
 
         pup: (?)
 

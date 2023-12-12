@@ -6,7 +6,7 @@ def write_atm(file_name, atm, screen_file, zenithangle):
     Args:
         file_name : (str) : name of the file to append the parameter to
 
-        atm : (Param_atmos) : compass atmospheric parameters. Note that
+        atm : (ParamAtmos) : compass atmospheric parameters. Note that
             atm.winddir is transformed
 
         screen_file : (str) : path to the yao turbulent screen files. Note

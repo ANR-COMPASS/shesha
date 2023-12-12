@@ -39,3 +39,4 @@ from shesha.supervisor.optimizers.modalBasis import ModalBasis
 from shesha.supervisor.optimizers.calibration import Calibration
 from shesha.supervisor.optimizers.modalGains import ModalGains
 
+__all__ = ['ModalBasis', 'Calibration', 'ModalGains']

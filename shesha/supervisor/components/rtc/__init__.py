@@ -38,3 +38,4 @@
 from shesha.supervisor.components.rtc.rtcCompass import RtcCompass
 from shesha.supervisor.components.rtc.rtcStandalone import RtcStandalone
 
+__all__ = ['RtcCompass', 'RtcStandalone']

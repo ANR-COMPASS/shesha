@@ -1,5 +1,5 @@
 ## @package   shesha.config.PDMS
-## @brief     Param_dm class definition
+## @brief     ParamDm class definition
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
 ## @version   5.5.0
 ## @date      2022/01/24
@@ -37,13 +37,13 @@
 
 import numpy as np
 import shesha.constants as scons
-from . import config_setter_utils as csu
+import shesha.config.config_setter_utils as csu
 
 
 #################################################
-# P-Class (parametres) Param_dm
+# P-Class (parametres) ParamDm
 #################################################
-class Param_dm:
+class ParamDm:
 
     def __init__(self):
 

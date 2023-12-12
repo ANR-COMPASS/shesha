@@ -1,5 +1,5 @@
 ## @package   shesha.config.PATMOS
-## @brief     Param_atmos class definition
+## @brief     ParamAtmos class definition
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
 ## @version   5.5.0
 ## @date      2022/01/24
@@ -36,14 +36,14 @@
 #  If not, see <https://www.gnu.org/licenses/lgpl-3.0.txt>.
 
 import numpy as np
-from . import config_setter_utils as csu
+import shesha.config.config_setter_utils as csu
 
 #################################################
-# P-Class (parametres) Param_atmos
+# P-Class (parametres) ParamAtmos
 #################################################
 
 
-class Param_atmos:
+class ParamAtmos:
 
     def __init__(self):
         """ Number of turbulent layers."""

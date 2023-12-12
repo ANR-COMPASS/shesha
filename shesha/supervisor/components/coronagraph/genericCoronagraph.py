@@ -51,7 +51,7 @@ class GenericCoronagraph(ABC):
 
         _dim_image :(int): Coronagraphic image dimension
 
-        _p_corono: (Param_corono): Coronagraph parameters
+        _p_corono: (ParamCoronagraph): Coronagraph parameters
 
         _target: (TargetCompass): Compass Target used as input for the coronagraph
 
@@ -61,13 +61,13 @@ class GenericCoronagraph(ABC):
 
         _coronagraph: (SutraCoronagraph): Sutra coronagraph instance
     """
-    def __init__(self, p_corono: conf.Param_corono, p_geom: conf.Param_geom, targetCompass: TargetCompass):
+    def __init__(self, p_corono: conf.ParamCoronagraph, p_geom: conf.ParamGeom, targetCompass: TargetCompass):
         """ Initialize a coronagraph instance with generic attributes
 
         Args:
-            p_corono: (Param_corono): Compass coronagraph parameters
+            p_corono: (ParamCoronagraph): Compass coronagraph parameters
 
-            p_geom: (Param_geom): Compass geometry parameters
+            p_geom: (ParamGeom): Compass geometry parameters
 
             targetCompass: (TargetCompass): Compass Target used as input for the coronagraph
         """

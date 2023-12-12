@@ -81,25 +81,25 @@ def params_dictionary(config):
 
     param_dict = {"simul_name": config.simul_name.encode('utf8'), "commit": commit}
 
-    updateParamDict(param_dict, config.p_loop, "_Param_loop__")
-    updateParamDict(param_dict, config.p_geom, "_Param_geom__")
-    updateParamDict(param_dict, config.p_tel, "_Param_tel__")
+    updateParamDict(param_dict, config.p_loop, "_ParamLoop__")
+    updateParamDict(param_dict, config.p_geom, "_ParamGeom__")
+    updateParamDict(param_dict, config.p_tel, "_ParamTel__")
     if config.p_atmos is not None:
-        updateParamDict(param_dict, config.p_atmos, "_Param_atmos__")
+        updateParamDict(param_dict, config.p_atmos, "_ParamAtmos__")
     if config.p_targets is not None:
-        updateParamDict(param_dict, config.p_targets, "_Param_target__")
+        updateParamDict(param_dict, config.p_targets, "_ParamTarget__")
         param_dict.update({"ntargets": len(config.p_targets)})
     if config.p_wfss is not None:
-        updateParamDict(param_dict, config.p_wfss, "_Param_wfs__")
+        updateParamDict(param_dict, config.p_wfss, "_ParamWfs__")
         param_dict.update({"nwfs": len(config.p_wfss)})
     if config.p_dms is not None:
-        updateParamDict(param_dict, config.p_dms, "_Param_dm__")
+        updateParamDict(param_dict, config.p_dms, "_ParamDm__")
         param_dict.update({"ndms": len(config.p_dms)})
     if config.p_controllers is not None:
-        updateParamDict(param_dict, config.p_controllers, "_Param_controller__")
+        updateParamDict(param_dict, config.p_controllers, "_ParamController__")
         param_dict.update({"ncontrollers": len(config.p_controllers)})
     if config.p_centroiders is not None:
-        updateParamDict(param_dict, config.p_centroiders, "_Param_centroider__")
+        updateParamDict(param_dict, config.p_centroiders, "_ParamCentroider__")
         param_dict.update({"ncentroiders": len(config.p_centroiders)})
 
     for k in param_dict.keys():
@@ -310,10 +310,10 @@ def checkTurbuParams(savepath, config, pdict, matricesToLoad):
     """
     dataBase = pandas.read_hdf(savepath + "matricesDataBase.h5", "A")
     param2test = [
-            "_Param_atmos__r0", "_Param_atmos__seeds", "_Param_atmos__L0",
-            "_Param_atmos__alt", "_Param_tel__diam", "_Param_tel__cobs",
-            "_Param_geom__pupdiam", "_Param_geom__zenithangle", "_Param_target__xpos",
-            "_Param_target__ypos", "_Param_wfs__xpos", "_Param_wfs__ypos"
+            "_ParamAtmos__r0", "_ParamAtmos__seeds", "_ParamAtmos__L0",
+            "_ParamAtmos__alt", "_ParamTel__diam", "_ParamTel__cobs",
+            "_ParamGeom__pupdiam", "_ParamGeom__zenithangle", "_ParamTarget__xpos",
+            "_ParamTarget__ypos", "_ParamWfs__xpos", "_ParamWfs__ypos"
     ]
 
     for i in dataBase.index:
@@ -368,24 +368,24 @@ def checkControlParams(savepath, config, pdict, matricesToLoad):
     dataBase = pandas.read_hdf(savepath + "matricesDataBase.h5", "imat")
 
     param2test = [
-            "_Param_tel__diam", "_Param_tel__t_spiders", "_Param_tel__spiders_type",
-            "_Param_tel__pupangle", "_Param_tel__referr", "_Param_tel__std_piston",
-            "_Param_tel__std_tt", "_Param_tel__type_ap", "_Param_tel__nbrmissing",
-            "_Param_tel__cobs", "_Param_geom__pupdiam", "nwfs", "_Param_wfs__type",
-            "_Param_wfs__nxsub", "_Param_wfs__npix", "_Param_wfs__pixsize",
-            "_Param_wfs__fracsub", "_Param_wfs__xpos", "_Param_wfs__ypos",
-            "_Param_wfs__Lambda", "_Param_wfs__dms_seen", "_Param_wfs__fssize",
-            "_Param_wfs__fstop", "_Param_wfs__pyr_ampl", "_Param_wfs__pyr_loc",
-            "_Param_wfs__pyr_npts", "_Param_wfs__pyr_pup_sep", "_Param_wfs__pyrtype",
-            "ndms", "_Param_dm__type", "_Param_dm__alt", "_Param_dm__coupling",
-            "_Param_dm__margin_in", "_Param_dm__margin_out", "_Param_dm__nact",
-            "_Param_dm__nkl", "_Param_dm__type_kl", "_Param_dm__push4imat",
-            "_Param_dm__thresh", "_Param_dm__unitpervolt", "ncentroiders",
-            "_Param_centroider__type", "_Param_centroider__nmax",
-            "_Param_centroider__nwfs", "_Param_centroider__sizex",
-            "_Param_centroider__sizey", "_Param_centroider__thresh",
-            "_Param_centroider__type_fct", "_Param_centroider__weights",
-            "_Param_centroider__width"
+            "_ParamTel__diam", "_ParamTel__t_spiders", "_ParamTel__spiders_type",
+            "_ParamTel__pupangle", "_ParamTel__referr", "_ParamTel__std_piston",
+            "_ParamTel__std_tt", "_ParamTel__type_ap", "_ParamTel__nbrmissing",
+            "_ParamTel__cobs", "_ParamGeom__pupdiam", "nwfs", "_ParamWfs__type",
+            "_ParamWfs__nxsub", "_ParamWfs__npix", "_ParamWfs__pixsize",
+            "_ParamWfs__fracsub", "_ParamWfs__xpos", "_ParamWfs__ypos",
+            "_ParamWfs__Lambda", "_ParamWfs__dms_seen", "_ParamWfs__fssize",
+            "_ParamWfs__fstop", "_ParamWfs__pyr_ampl", "_ParamWfs__pyr_loc",
+            "_ParamWfs__pyr_npts", "_ParamWfs__pyr_pup_sep", "_ParamWfs__pyrtype",
+            "ndms", "_ParamDm__type", "_ParamDm__alt", "_ParamDm__coupling",
+            "_ParamDm__margin_in", "_ParamDm__margin_out", "_ParamDm__nact",
+            "_ParamDm__nkl", "_ParamDm__type_kl", "_ParamDm__push4imat",
+            "_ParamDm__thresh", "_ParamDm__unitpervolt", "ncentroiders",
+            "_ParamCentroider__type", "_ParamCentroider__nmax",
+            "_ParamCentroider__nwfs", "_ParamCentroider__sizex",
+            "_ParamCentroider__sizey", "_ParamCentroider__thresh",
+            "_ParamCentroider__type_fct", "_ParamCentroider__weights",
+            "_ParamCentroider__width"
     ]
 
     for i in dataBase.index:
@@ -432,19 +432,19 @@ def checkDmsParams(savepath, config, pdict, matricesToLoad):
     dataBase = pandas.read_hdf(savepath + "matricesDataBase.h5", "dm")
 
     param2test = [
-            "_Param_tel__diam", "_Param_tel__t_spiders", "_Param_tel__spiders_type",
-            "_Param_tel__pupangle", "_Param_tel__referr", "_Param_tel__std_piston",
-            "_Param_tel__std_tt", "_Param_tel__type_ap", "_Param_tel__nbrmissing",
-            "_Param_tel__cobs", "_Param_geom__pupdiam", "nwfs", "_Param_wfs__type",
-            "_Param_wfs__nxsub", "_Param_wfs__npix", "_Param_wfs__pixsize",
-            "_Param_wfs__fracsub", "_Param_wfs__xpos", "_Param_wfs__ypos",
-            "_Param_wfs__Lambda", "_Param_wfs__dms_seen", "_Param_wfs__fssize",
-            "_Param_wfs__fstop", "_Param_wfs__pyr_ampl", "_Param_wfs__pyr_loc",
-            "_Param_wfs__pyr_npts", "_Param_wfs__pyrtype", "_Param_wfs__pyr_pup_sep",
-            "ndms", "_Param_dm__type", "_Param_dm__alt", "_Param_dm__coupling",
-            "_Param_dm__margin_in", "_Param_dm__margin_out", "_Param_dm__nkl",
-            "_Param_dm__nact", "_Param_dm__type_kl", "_Param_dm__push4imat",
-            "_Param_dm__thresh", "_Param_dm__unitpervolt"
+            "_ParamTel__diam", "_ParamTel__t_spiders", "_ParamTel__spiders_type",
+            "_ParamTel__pupangle", "_ParamTel__referr", "_ParamTel__std_piston",
+            "_ParamTel__std_tt", "_ParamTel__type_ap", "_ParamTel__nbrmissing",
+            "_ParamTel__cobs", "_ParamGeom__pupdiam", "nwfs", "_ParamWfs__type",
+            "_ParamWfs__nxsub", "_ParamWfs__npix", "_ParamWfs__pixsize",
+            "_ParamWfs__fracsub", "_ParamWfs__xpos", "_ParamWfs__ypos",
+            "_ParamWfs__Lambda", "_ParamWfs__dms_seen", "_ParamWfs__fssize",
+            "_ParamWfs__fstop", "_ParamWfs__pyr_ampl", "_ParamWfs__pyr_loc",
+            "_ParamWfs__pyr_npts", "_ParamWfs__pyrtype", "_ParamWfs__pyr_pup_sep",
+            "ndms", "_ParamDm__type", "_ParamDm__alt", "_ParamDm__coupling",
+            "_ParamDm__margin_in", "_ParamDm__margin_out", "_ParamDm__nkl",
+            "_ParamDm__nact", "_ParamDm__type_kl", "_ParamDm__push4imat",
+            "_ParamDm__thresh", "_ParamDm__unitpervolt"
     ]
 
     for i in dataBase.index:
@@ -557,7 +557,7 @@ def configFromH5(filename, config):
     # WFS
     config.p_wfss = []
     for i in range(f.attrs.get("nwfs")):
-        config.p_wfss.append(config.Param_wfs())
+        config.p_wfss.append(config.ParamWfs())
         config.p_wfss[i].set_type(str(f.attrs.get("type")[i]))
         config.p_wfss[i].set_nxsub(f.attrs.get("nxsub")[i])
         config.p_wfss[i].set_npix(f.attrs.get("npix")[i])
@@ -593,7 +593,7 @@ def configFromH5(filename, config):
     config.p_dms = []
     if (f.attrs.get("ndms")):
         for i in range(f.attrs.get("ndms")):
-            config.p_dms.append(config.Param_dm())
+            config.p_dms.append(config.ParamDm())
             config.p_dms[i].set_type(str(f.attrs.get("type")[i]))
             config.p_dms[i].set_nact(f.attrs.get("nact")[i])
             config.p_dms[i].set_alt(f.attrs.get("dm.alt")[i])
@@ -606,7 +606,7 @@ def configFromH5(filename, config):
     config.p_centroiders = []
     if (f.attrs.get("ncentroiders")):
         for i in range(f.attrs.get("ncentroiders")):
-            config.p_centroiders.append(config.Param_centroider())
+            config.p_centroiders.append(config.ParamCentroider())
             config.p_centroiders[i].set_nwfs(f.attrs.get("centro.nwfs")[i])
             config.p_centroiders[i].set_type(str(f.attrs.get("type")[i]))
             config.p_centroiders[i].set_type_fct(str(f.attrs.get("type_fct")[i]))
@@ -621,7 +621,7 @@ def configFromH5(filename, config):
     config.p_controllers = []
     if (f.attrs.get("ncontrollers")):
         for i in range(f.attrs.get("ncontrollers")):
-            config.p_controllers.append(config.Param_controller())
+            config.p_controllers.append(config.ParamController())
             config.p_controllers[i].set_type(str(f.attrs.get("type")[i]))
             config.p_controllers[i].set_nwfs(f.attrs.get("control.nwfs")[i])
             config.p_controllers[i].set_ndm(f.attrs.get("ndm")[i])

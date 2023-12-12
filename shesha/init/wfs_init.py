@@ -45,18 +45,18 @@ import numpy as np
 
 
 def wfs_init(context: carmaWrap_context, telescope: Telescope, p_wfss: list,
-             p_tel: conf.Param_tel, p_geom: conf.Param_geom, p_dms=None, p_atmos=None):
+             p_tel: conf.ParamTel, p_geom: conf.ParamGeom, p_dms=None, p_atmos=None):
     """
     Create and initialise  a Sensors object
 
     Args:
         context : (carmaWrap_context)
         telescope: (Telescope) : Telescope object
-        p_wfss: (list of Param_wfs) : wfs settings
-        p_tel: (Param_tel) : telescope settings
-        p_geom: (Param_geom) : geom settings
-        p_dms : (list of Param_dm) : (optional) dms settings
-        p_atmos: (Param_atmos) : (optional) atmos settings
+        p_wfss: (list of ParamWfs) : wfs settings
+        p_tel: (ParamTel) : telescope settings
+        p_geom: (ParamGeom) : geom settings
+        p_dms : (list of ParamDm) : (optional) dms settings
+        p_atmos: (ParamAtmos) : (optional) atmos settings
     :return:
         g_wfs: (Sensors): Sensors object
     """

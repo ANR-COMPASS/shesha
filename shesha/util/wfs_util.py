@@ -88,7 +88,7 @@ def export_custom_wfs(file_name:str, p_wfs, p_geom, *, p_tel=None):
     Args :
         file_name : (str)       : name of the wfs fits file
 
-        p_wfs     : (Param_wfs) : wfs settings
+        p_wfs     : (ParamWfs) : wfs settings
 
     """
     pixsize = p_geom.get_pixsize()

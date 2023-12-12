@@ -58,17 +58,17 @@ except KeyError:
     shesha_dm = os.environ['SHESHA_ROOT'] + "/data/dm-data"
 
 
-def dm_init(context: carmaWrap_context, p_dms: List[conf.Param_dm],
-            p_tel: conf.Param_tel, p_geom: conf.Param_geom,
-            p_wfss: List[conf.Param_wfs] = None) -> Dms:
+def dm_init(context: carmaWrap_context, p_dms: List[conf.ParamDm],
+            p_tel: conf.ParamTel, p_geom: conf.ParamGeom,
+            p_wfss: List[conf.ParamWfs] = None) -> Dms:
     """Create and initialize a Dms object on the gpu
 
     Args:
         context: (carmaWrap_context): context
-        p_dms: (list of Param_dms) : dms settings
-        p_tel: (Param_tel) : telescope settings
-        p_geom: (Param_geom) : geom settings
-        p_wfss: (list of Param_wfs) : wfs settings
+        p_dms: (list of ParamDms) : dms settings
+        p_tel: (ParamTel) : telescope settings
+        p_geom: (ParamGeom) : geom settings
+        p_wfss: (list of ParamWfs) : wfs settings
     :return:
         Dms: (Dms): Dms object
     """
@@ -97,8 +97,8 @@ def dm_init(context: carmaWrap_context, p_dms: List[conf.Param_dm],
     return dms
 
 
-def _dm_init(context: carmaWrap_context, dms: Dms, p_dm: conf.Param_dm, xpos_wfs: list,
-             ypos_wfs: list, p_geom: conf.Param_geom, diam: float, cobs: float,
+def _dm_init(context: carmaWrap_context, dms: Dms, p_dm: conf.ParamDm, xpos_wfs: list,
+             ypos_wfs: list, p_geom: conf.ParamGeom, diam: float, cobs: float,
              pupAngle: float, max_extent: int):
     """ inits a Dms object on the gpu
 
@@ -106,13 +106,13 @@ def _dm_init(context: carmaWrap_context, dms: Dms, p_dm: conf.Param_dm, xpos_wfs
         context: (carmaWrap_context): context
         dms: (Dms) : dm object
 
-        p_dm: (Param_dms) : dm settings
+        p_dm: (ParamDms) : dm settings
 
         xpos_wfs: (list) : list of wfs xpos
 
         ypos_wfs: (list) : list of wfs ypos
 
-        p_geom: (Param_geom) : geom settings
+        p_geom: (ParamGeom) : geom settings
 
         diam: (float) : diameter of telescope
 
@@ -211,8 +211,8 @@ def _dm_init(context: carmaWrap_context, dms: Dms, p_dm: conf.Param_dm, xpos_wfs
     return max_extent
 
 
-def _dm_init_factorized(context: carmaWrap_context, dms: Dms, p_dm: conf.Param_dm,
-                        xpos_wfs: list, ypos_wfs: list, p_geom: conf.Param_geom,
+def _dm_init_factorized(context: carmaWrap_context, dms: Dms, p_dm: conf.ParamDm,
+                        xpos_wfs: list, ypos_wfs: list, p_geom: conf.ParamGeom,
                         diam: float, cobs: float, pupAngle: float, max_extent: int):
     """ inits a Dms object on the gpu
     NOTE: This is the
@@ -222,13 +222,13 @@ def _dm_init_factorized(context: carmaWrap_context, dms: Dms, p_dm: conf.Param_d
 
         dms: (Dms) : dm object
 
-        p_dm: (Param_dms) : dm settings
+        p_dm: (ParamDms) : dm settings
 
         xpos_wfs: (list) : list of wfs xpos
 
         ypos_wfs: (list) : list of wfs ypos
 
-        p_geom: (Param_geom) : geom settings
+        p_geom: (ParamGeom) : geom settings
 
         diam: (float) : diameter of telescope
 
@@ -309,14 +309,14 @@ def _dm_init_factorized(context: carmaWrap_context, dms: Dms, p_dm: conf.Param_d
     return max_extent
 
 
-def dm_init_standalone(context: carmaWrap_context, p_dms: list, p_geom: conf.Param_geom,
+def dm_init_standalone(context: carmaWrap_context, p_dms: list, p_geom: conf.ParamGeom,
                        diam=1., cobs=0., pupAngle=0., wfs_xpos=[0], wfs_ypos=[0]):
     """Create and initialize a Dms object on the gpu
 
     Args:
-        p_dms: (list of Param_dms) : dms settings
+        p_dms: (list of ParamDms) : dms settings
 
-        p_geom: (Param_geom) : geom settings
+        p_geom: (ParamGeom) : geom settings
 
         diam: (float) : diameter of telescope (default 1.)
 
@@ -338,15 +338,15 @@ def dm_init_standalone(context: carmaWrap_context, p_dms: list, p_geom: conf.Par
     return dms
 
 
-def make_pzt_dm(p_dm: conf.Param_dm, p_geom: conf.Param_geom, cobs: float,
+def make_pzt_dm(p_dm: conf.ParamDm, p_geom: conf.ParamGeom, cobs: float,
                 pupAngle: float):
     """Compute the actuators positions and the influence functions for a pzt DM.
     NOTE: if the DM is in altitude, central obstruction is forced to 0
 
     Args:
-        p_dm: (Param_dm) : dm parameters
+        p_dm: (ParamDm) : dm parameters
 
-        p_geom: (Param_geom) : geometry parameters
+        p_geom: (ParamGeom) : geometry parameters
 
         cobs: (float) : telescope central obstruction
 
@@ -512,13 +512,13 @@ def make_pzt_dm(p_dm: conf.Param_dm, p_geom: conf.Param_geom, cobs: float,
 
 
 
-def init_custom_dm(p_dm: conf.Param_dm, p_geom: conf.Param_geom, diam: float):
+def init_custom_dm(p_dm: conf.ParamDm, p_geom: conf.ParamGeom, diam: float):
     """Read Fits for influence pzt fonction and form
 
     Args:
-        p_dm: (Param_dm) : dm settings
+        p_dm: (ParamDm) : dm settings
 
-        p_geom: (Param_geom) : geom settings
+        p_geom: (ParamGeom) : geom settings
 
         diam: (float) : tel diameter
 
@@ -677,16 +677,16 @@ def init_custom_dm(p_dm: conf.Param_dm, p_geom: conf.Param_geom, diam: float):
     comp_dmgeom(p_dm, p_geom)
 
 
-def make_tiptilt_dm(p_dm: conf.Param_dm, patchDiam: int, p_geom: conf.Param_geom,
+def make_tiptilt_dm(p_dm: conf.ParamDm, patchDiam: int, p_geom: conf.ParamGeom,
                     diam: float):
     """Compute the influence functions for a tip-tilt DM
 
     Args:
-        p_dm: (Param_dm) : dm settings
+        p_dm: (ParamDm) : dm settings
 
         patchDiam: (int) : patchDiam for dm size
 
-        p_geom: (Param_geom) : geom settings
+        p_geom: (ParamGeom) : geom settings
 
         diam: (float) : telescope diameter
     :return:
@@ -713,16 +713,16 @@ def make_tiptilt_dm(p_dm: conf.Param_dm, patchDiam: int, p_geom: conf.Param_geom
     return influ
 
 
-def make_kl_dm(p_dm: conf.Param_dm, patchDiam: int, p_geom: conf.Param_geom,
+def make_kl_dm(p_dm: conf.ParamDm, patchDiam: int, p_geom: conf.ParamGeom,
                cobs: float) -> None:
     """Compute the influence function for a Karhunen-Loeve DM
 
     Args:
-        p_dm: (Param_dm) : dm settings
+        p_dm: (ParamDm) : dm settings
 
         patchDiam: (int) : patchDiam for dm size
 
-        p_geom: (Param_geom) : geom settings
+        p_geom: (ParamGeom) : geom settings
 
         cobs: (float) : telescope cobs
 
@@ -766,13 +766,13 @@ def make_kl_dm(p_dm: conf.Param_dm, patchDiam: int, p_geom: conf.Param_geom,
     p_dm.ap = ap
 
 
-def comp_dmgeom(p_dm: conf.Param_dm, p_geom: conf.Param_geom):
+def comp_dmgeom(p_dm: conf.ParamDm, p_geom: conf.ParamGeom):
     """Compute the geometry of a DM : positions of actuators and influence functions
 
     Args:
-        dm: (Param_dm) : dm settings
+        dm: (ParamDm) : dm settings
 
-        geom: (Param_geom) : geom settings
+        geom: (ParamGeom) : geom settings
     """
     smallsize = p_dm._influsize
     nact = p_dm._ntotact
@@ -835,17 +835,17 @@ def comp_dmgeom(p_dm: conf.Param_dm, p_geom: conf.Param_geom):
     # p_dm._ninflu = ninflu
 
 
-def correct_dm(context, dms: Dms, p_dms: list, p_controller: conf.Param_controller,
-               p_geom: conf.Param_geom, imat: np.ndarray = None, dataBase: dict = {},
+def correct_dm(context, dms: Dms, p_dms: list, p_controller: conf.ParamController,
+               p_geom: conf.ParamGeom, imat: np.ndarray = None, dataBase: dict = {},
                use_DB: bool = False):
     """Correct the geometry of the DMs using the imat (filter unseen actuators)
 
     Args:
         context: (carmaWrap_context): context
         dms: (Dms) : Dms object
-        p_dms: (list of Param_dm) : dms settings
-        p_controller: (Param_controller) : controller settings
-        p_geom: (Param_geom) : geom settings
+        p_dms: (list of ParamDm) : dms settings
+        p_controller: (ParamController) : controller settings
+        p_geom: (ParamGeom) : geom settings
         imat: (np.ndarray) : interaction matrix
         dataBase: (dict): dictionary containing paths to files to load
         use_DB: (bool): dataBase use flag

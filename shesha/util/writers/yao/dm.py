@@ -20,7 +20,7 @@ def write_dm(file_name, dm, index, *, sub_system=1):
     Args:
         file_name : (str) : name of the file to append the parameter to
 
-        dm : (Param_dm) : compass dm  parameters
+        dm : (ParamDm) : compass dm  parameters
 
         index : (int) : YAO index for dm
 
@@ -51,7 +51,7 @@ def write_dms(file_name, dms, *, sub_system=1, offset=0):
     Args:
         file_name : str       : name of the file to append the parameter to
 
-        dms       : list[Param_dm] : compass dm  parameters list
+        dms       : list[ParamDm] : compass dm  parameters list
 
     Kwargs:
         sub_system : (int) : (optional), default 1 index of yao sub-system

@@ -3,7 +3,7 @@ def atmos_to_json(atmos, name=""):
     """return a json description of a the atmos
 
     Args:
-        atmos : (Param_atmos) : compass atmospheric parameters
+        atmos : (ParamAtmos) : compass atmospheric parameters
     """
     json_atm = {
         "nLayer" : atmos.get_nscreens(),

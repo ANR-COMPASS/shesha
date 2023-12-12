@@ -41,7 +41,7 @@ def get_idx(p_dm, *, xpos=None, ypos=None):
     """return a correspondance between the covariance matrix indices and the covariance map indices
 
     Args:
-        p_dm: (Param_dm): dm settings
+        p_dm: (ParamDm): dm settings
 
     Kwargs:
         xpos: (np.ndarray[ndim=1, dtype=np.int32]): (optional) actuator position in x

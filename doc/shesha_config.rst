@@ -7,47 +7,47 @@
 .. automodule:: shesha.config
    :members:
 
-.. _shesha.config.Param_atmos class:
+.. _shesha.config.ParamAtmos class:
 
-.. autoclass:: shesha.config.Param_atmos
+.. autoclass:: shesha.config.ParamAtmos
    :members:
 
-.. _shesha.config.Param_centroider class:
+.. _shesha.config.ParamCentroider class:
 
-.. autoclass:: shesha.config.Param_centroider
+.. autoclass:: shesha.config.ParamCentroider
    :members:
 
-.. _shesha.config.Param_controller class:
+.. _shesha.config.ParamController class:
 
-.. autoclass:: shesha.config.Param_controller
+.. autoclass:: shesha.config.ParamController
    :members:
 
-.. _shesha.config.Param_dm class:
+.. _shesha.config.ParamDm class:
 
-.. autoclass:: shesha.config.Param_dm
+.. autoclass:: shesha.config.ParamDm
    :members:
 
-.. _shesha.config.Param_geom class:
+.. _shesha.config.ParamGeom class:
 
-.. autoclass:: shesha.config.Param_geom
+.. autoclass:: shesha.config.ParamGeom
    :members:
 
-.. _shesha.config.Param_loop class:
+.. _shesha.config.ParamLoop class:
 
-.. autoclass:: shesha.config.Param_loop
+.. autoclass:: shesha.config.ParamLoop
    :members:
 
-.. _shesha.config.Param_target class:
+.. _shesha.config.ParamTarget class:
 
-.. autoclass:: shesha.config.Param_target
+.. autoclass:: shesha.config.ParamTarget
    :members:
 
-.. _shesha.config.Param_tel class:
+.. _shesha.config.ParamTel class:
 
-.. autoclass:: shesha.config.Param_tel
+.. autoclass:: shesha.config.ParamTel
    :members:
 
-.. _shesha.config.Param_wfs class:
+.. _shesha.config.ParamWfs class:
 
-.. autoclass:: shesha.config.Param_wfs
+.. autoclass:: shesha.config.ParamWfs
    :members:

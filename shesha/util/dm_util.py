@@ -499,14 +499,14 @@ def export_custom_dm(file_name, p_dm, p_geom, *, p_tel=None):
     {}
 
     Args:
-        p_dm   : (Param_dm)   : dm settings
+        p_dm   : (ParamDm)   : dm settings
 
-        p_geom : (Param_geom) : geometry settings
+        p_geom : (ParamGeom) : geometry settings
 
     Kwargs:
         file_name : (string) : if set, the HDU is written to the file specified by this variable
 
-        p_tel : (Param_tel) : telescope settings, used to provide the diameter (if not provided, the default diameter id obtained from the p_geom as pupdiam*pixsize)
+        p_tel : (ParamTel) : telescope settings, used to provide the diameter (if not provided, the default diameter id obtained from the p_geom as pupdiam*pixsize)
 
     Returns:
         (HDUList) : custom_dm data

@@ -47,11 +47,11 @@ from shesha.init.geom_init import geom_init_generic
 from shesha.init.dm_init import dm_init_standalone
 
 #geom
-p_geom = conf.Param_geom()
+p_geom = conf.ParamGeom()
 geom_init_generic(p_geom, 500)
 
 #dm
-p_dm0 = conf.Param_dm()
+p_dm0 = conf.ParamDm()
 p_dms = [p_dm0]
 p_dm0.set_type("pzt")
 # p_dm0.set_pattern("hexa")

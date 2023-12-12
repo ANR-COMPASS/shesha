@@ -57,7 +57,7 @@ def open_loopSlp(tel: Telescope, atmos: Atmos, wfs: Sensors, rtc: Rtc, nrec: int
 
         ncontrol: (int) : controller's index
 
-        p_wfss: (list of Param_wfs) : wfs settings
+        p_wfss: (list of ParamWfs) : wfs settings
     """
     # TEST IT
     ol_slopes = np.zeros((sum([2 * p_wfss[i]._nvalid

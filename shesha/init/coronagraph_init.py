@@ -48,7 +48,7 @@ import shesha.util.coronagraph_utils as util
 
 # TODO : add some checks (dimension, type, etc...)
 
-def init_coronagraph(p_corono: conf.Param_corono, pupdiam):
+def init_coronagraph(p_corono: conf.ParamCoronagraph, pupdiam):
     """ Initialize the coronagraph
     """
     wavelength_0 = p_corono._wavelength_0
@@ -79,7 +79,7 @@ def init_coronagraph(p_corono: conf.Param_corono, pupdiam):
         init_focal_plane_mask(p_corono)
         init_lyot_stop(p_corono, pupdiam)
 
-def init_sphere_aplc(p_corono: conf.Param_corono, pupdiam):
+def init_sphere_aplc(p_corono: conf.ParamCoronagraph, pupdiam):
     """ Dedicated function for SPHERE APLC coronagraph init
 
     References:
@@ -111,12 +111,12 @@ def init_sphere_aplc(p_corono: conf.Param_corono, pupdiam):
         image_sampling = (lambda_over_D * 180 / np.pi * 3600 * 1000) / irdis_plate_scale
         p_corono.set_image_sampling(image_sampling)
 
-def init_perfect_coronagraph(p_corono: conf.Param_corono, pupdiam):
+def init_perfect_coronagraph(p_corono: conf.ParamCoronagraph, pupdiam):
     """ Dedicated function for perfect coronagraph init
     """
     pass
 
-def init_apodizer(p_corono: conf.Param_corono, pupdiam):
+def init_apodizer(p_corono: conf.ParamCoronagraph, pupdiam):
     """ Apodizer init
     """
     if p_corono._apodizer_name == scons.ApodizerType.SPHERE_APLC_APO1:
@@ -133,7 +133,7 @@ def init_apodizer(p_corono: conf.Param_corono, pupdiam):
         raise TypeError('apodizer name should be a string')
     p_corono.set_apodizer(apodizer)
 
-def init_focal_plane_mask(p_corono: conf.Param_corono):
+def init_focal_plane_mask(p_corono: conf.ParamCoronagraph):
     """ Focal plane mask init
     """
     if p_corono._focal_plane_mask_name == scons.FpmType.CLASSICAL_LYOT:
@@ -185,7 +185,7 @@ def init_focal_plane_mask(p_corono: conf.Param_corono):
                 fpm.append(fpm_array[:, :, i])
     p_corono.set_focal_plane_mask(fpm)
 
-def init_lyot_stop(p_corono: conf.Param_corono, pupdiam):
+def init_lyot_stop(p_corono: conf.ParamCoronagraph, pupdiam):
     """ Lyot stop init
     """
     if p_corono._lyot_stop_name == scons.LyotStopType.SPHERE_APLC_LYOT_STOP:
@@ -202,7 +202,7 @@ def init_lyot_stop(p_corono: conf.Param_corono, pupdiam):
         raise TypeError('Lyot stop name should be a string')
     p_corono.set_lyot_stop(lyot_stop)
 
-def init_mft(p_corono: conf.Param_corono, pupdiam, planes, center_on_pixel=False):
+def init_mft(p_corono: conf.ParamCoronagraph, pupdiam, planes, center_on_pixel=False):
     """ Initialize mft matrices
     """
     dim_fpm = p_corono._dim_fpm
