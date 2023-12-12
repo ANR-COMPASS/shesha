@@ -1,5 +1,3 @@
-import numpy as np
-import json
 
 def get_actu_pos_pixel(dm):
     """return the coordinates in pixel of a given DM actuators

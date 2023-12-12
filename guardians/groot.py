@@ -7,8 +7,6 @@ import h5py
 from shesha.sutra_wrap import carmaWrap_context, Groot
 
 import time
-import sys
-import os
 from rich.progress import track
 
 from guardians import gamora
@@ -143,12 +141,12 @@ def compute_Cerr_cpu(filename, modal=True):
     xij = xx - xx.T
     yij = yy - yy.T
 
-    for l in range(f.attrs["_Param_atmos__nscreens"]):
-        H = f.attrs["_Param_atmos__alt"][l]
-        L0 = f.attrs["_Param_atmos__L0"][l]
-        speed = f.attrs["_Param_atmos__windspeed"][l]
-        theta = f.attrs["_Param_atmos__winddir"][l] * np.pi / 180.
-        frac = f.attrs["_Param_atmos__frac"][l]
+    for atm_layer in range(f.attrs["_Param_atmos__nscreens"]):
+        H = f.attrs["_Param_atmos__alt"][atm_layer]
+        L0 = f.attrs["_Param_atmos__L0"][atm_layer]
+        speed = f.attrs["_Param_atmos__windspeed"][atm_layer]
+        theta = f.attrs["_Param_atmos__winddir"][atm_layer] * np.pi / 180.
+        frac = f.attrs["_Param_atmos__frac"][atm_layer]
 
         Htheta = np.linalg.norm([wxpos, wypos]) / RASC * H
         vdt = speed * dt / gain
@@ -428,7 +426,7 @@ def compute_OTF_fitting(filename, otftel):
     f = h5py.File(filename, 'r')
     r0 = f.attrs["_Param_atmos__r0"] * (f.attrs["_Param_target__Lambda"][0] / 0.5)**(
             6. / 5.)
-    ratio_lambda = 2 * np.pi / f.attrs["_Param_target__Lambda"][0]
+    # ratio_lambda = 2 * np.pi / f.attrs["_Param_target__Lambda"][0]
     # Telescope OTF
     spup = drax.get_pup(filename)
     mradix = 2
@@ -486,7 +484,7 @@ def compute_Calias_gpu(filename, slopes_space=False, modal=True, npts=3):
     f = h5py.File(filename, 'r')
     nsub = f["R"][:].shape[1] // 2
     nssp = f.attrs["_Param_wfs__nxsub"][0]
-    npix = f.attrs["_Param_wfs__npix"][0]
+    # npix = f.attrs["_Param_wfs__npix"][0]
     validint = f.attrs["_Param_tel__cobs"]
     x = np.linspace(-1, 1, nssp)
     x, y = np.meshgrid(x, x)
@@ -546,7 +544,7 @@ def compute_Calias(filename, slopes_space=False, modal=True, npts=3):
     tabx, taby = starlord.tabulateIj0()
     nsub = f["R"][:].shape[1] // 2
     nssp = f.attrs["_Param_wfs__nxsub"][0]
-    npix = f.attrs["_Param_wfs__npix"][0]
+    # npix = f.attrs["_Param_wfs__npix"][0]
     validint = f.attrs["_Param_tel__cobs"]
     x = np.linspace(-1, 1, nssp)
     x, y = np.meshgrid(x, x)
@@ -657,7 +655,7 @@ def compute_Calias_element_XX(xx, yy, fc, d, nsub, tabx, taby, xoff=0, yoff=0):
     AB = np.linalg.norm([xx, yy + yoff], axis=0)
     Ab = np.linalg.norm([xx - d, yy + yoff], axis=0)
     aB = np.linalg.norm([xx + d, yy + yoff], axis=0)
-    ab = AB
+    # ab = AB
 
     Ca[:nsub, :nsub] += starlord.dphi_highpass(
             Ab, fc, tabx, taby) + starlord.dphi_highpass(
@@ -692,7 +690,7 @@ def compute_Calias_element_YY(xx, yy, fc, d, nsub, tabx, taby, xoff=0, yoff=0):
     CD = np.linalg.norm([xx + xoff, yy], axis=0)
     Cd = np.linalg.norm([xx + xoff, yy - d], axis=0)
     cD = np.linalg.norm([xx + xoff, yy + d], axis=0)
-    cd = CD
+    # cd = CD
 
     Ca[nsub:, nsub:] += starlord.dphi_highpass(
             Cd, fc, tabx, taby) + starlord.dphi_highpass(
@@ -759,7 +757,7 @@ def compute_Calias_element(xx, yy, fc, d, nsub, tabx, taby, xoff=0, yoff=0):
     AB = np.linalg.norm([xx, yy], axis=0)
     Ab = np.linalg.norm([xx - d, yy], axis=0)
     aB = np.linalg.norm([xx + d, yy], axis=0)
-    ab = AB
+    # ab = AB
 
     Ca[:nsub, :nsub] += starlord.dphi_highpass(
             Ab, fc, tabx, taby) + starlord.dphi_highpass(
@@ -769,7 +767,7 @@ def compute_Calias_element(xx, yy, fc, d, nsub, tabx, taby, xoff=0, yoff=0):
     CD = AB
     Cd = np.linalg.norm([xx, yy - d], axis=0)
     cD = np.linalg.norm([xx, yy + d], axis=0)
-    cd = CD
+    # cd = CD
 
     Ca[nsub:, nsub:] += starlord.dphi_highpass(
             Cd, fc, tabx, taby) + starlord.dphi_highpass(

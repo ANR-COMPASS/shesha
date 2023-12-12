@@ -8,11 +8,10 @@ import matplotlib as mpl
 
 from bokeh.plotting import figure
 from bokeh.models import ColumnDataSource, Range1d
-from bokeh.models.widgets import Panel, TextInput, Slider, CheckboxButtonGroup, DataTable, TableColumn, Tabs, Button, RadioButtonGroup, Select, DataTable, DateFormatter, TableColumn, PreText
+from bokeh.models.widgets import Panel, TextInput, Button, Select, PreText
 from bokeh.layouts import layout, widgetbox
-from bokeh.io import curdoc, output_file, show
 
-from guardians import gamora, groot
+from guardians import gamora
 
 
 class Bokeh_gamora:

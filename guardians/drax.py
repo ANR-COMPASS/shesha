@@ -6,9 +6,7 @@ Useful functions for ROKET file exploitation
 
 import numpy as np
 import h5py
-import pandas
 import matplotlib.pyplot as plt
-plt.ion()
 from scipy.sparse import csr_matrix
 
 
@@ -97,7 +95,7 @@ def get_cumSR(filename):
         Lambda = f.attrs["_Param_target__Lambda"][0]
     else:
         Lambda = 1.65
-    nactus = f["noise"][:].shape[0]
+    # nactus = f["noise"][:].shape[0]
     niter = f["noise"][:].shape[1]
     P = f["P"][:]
     nmodes = P.shape[0]
@@ -714,8 +712,8 @@ def ensquare_PSF(filename, psf, N, display=False, cmap="jet"):
     RASC = 180 / np.pi * 3600.
     pixsize = Lambda_tar * 1e-6 / (psf.shape[0] * f.attrs["_Param_tel__diam"] / f.attrs[
             "_Param_geom__pupdiam"]) * RASC
-    x = (np.arange(psf.shape[0]) - psf.shape[0] / 2) * pixsize / (
-            Lambda_tar * 1e-6 / f.attrs["_Param_tel__diam"] * RASC)
+    # x = (np.arange(psf.shape[0]) - psf.shape[0] / 2) * pixsize / (
+    #         Lambda_tar * 1e-6 / f.attrs["_Param_tel__diam"] * RASC)
     w = int(N * (Lambda_tar * 1e-6 / f.attrs["_Param_tel__diam"] * RASC) / pixsize)
     mid = psf.shape[0] // 2
     psfe = np.abs(psf[mid - w:mid + w, mid - w:mid + w])

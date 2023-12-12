@@ -103,7 +103,7 @@ def params_dictionary(config):
         param_dict.update({"ncentroiders": len(config.p_centroiders)})
 
     for k in param_dict.keys():
-        if type(param_dict[k]) is list:
+        if isinstance(param_dict[k], list):
             param_dict[k] = [d if d is not None else -10 for d in param_dict[k]]
         elif param_dict[k] is None:
             param_dict[k] = -10
@@ -158,14 +158,14 @@ def init_hdf5_files(savepath, param_dict, matricesToLoad):
         create_file_attributes(filename, param_dict)
         updateDataBase(filename, savepath, "A")
 
-    if not ("dm" in matricesToLoad):
+    if "dm" not in matricesToLoad:
         df = pandas.read_hdf(savepath + "matricesDataBase.h5", "dm")
         ind = len(df.index)
         filename = savepath + "mat/dm_" + commit + "_" + str(ind) + ".h5"
         create_file_attributes(filename, param_dict)
         updateDataBase(filename, savepath, "dm")
 
-    if not ("imat" in matricesToLoad):
+    if "imat" not in matricesToLoad:
         df = pandas.read_hdf(savepath + "matricesDataBase.h5", "imat")
         ind = len(df.index)
         filename = savepath + "mat/imat_" + commit + "_" + str(ind) + ".h5"
@@ -480,11 +480,11 @@ def validDataBase(savepath, matricesToLoad):
     """ TODO: docstring
     """
     store = pandas.HDFStore(savepath + "matricesDataBase.h5")
-    if not ("A" in matricesToLoad):
+    if "A" not in matricesToLoad:
         validInStore(store, savepath, "A")
-    if not ("dm" in matricesToLoad):
+    if "dm" not in matricesToLoad:
         validInStore(store, savepath, "dm")
-    if not ("imat" in matricesToLoad):
+    if "imat" not in matricesToLoad:
         validInStore(store, savepath, "imat")
     store.close()
 

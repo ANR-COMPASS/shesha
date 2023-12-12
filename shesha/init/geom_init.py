@@ -42,7 +42,6 @@ from shesha.constants import CONST
 import shesha.util.make_pupil as mkP
 import shesha.util.utilities as util
 from shesha.sutra_wrap import carmaWrap_context, Telescope
-from shesha.constants import ApertureType
 import numpy as np
 
 
@@ -461,9 +460,9 @@ def init_pyrhr_geom(p_wfs: conf.Param_wfs, r0: float, p_tel: conf.Param_tel,
 
     # Creating pyramid mask
     pyrsize = p_wfs._Nfft
-    cobs = p_tel.cobs
-    rpup = p_geom.pupdiam / 2.0
-    dpup = p_geom.pupdiam
+    # cobs = p_tel.cobs
+    # rpup = p_geom.pupdiam / 2.0
+    # dpup = p_geom.pupdiam
     nrebin = p_wfs._nrebin
     fracsub = p_wfs.fracsub
     if p_wfs.pyr_pup_sep == -1:

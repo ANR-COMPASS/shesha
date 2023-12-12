@@ -41,7 +41,6 @@ from shesha.config import ParamConfig
 import os
 import numpy as np
 import pytest
-import shesha.config as conf
 
 config = ParamConfig(os.getenv("SHESHA_ROOT") + "/tests/pytest/par/test_pyrhr.py")
 config.p_controllers[0].set_type("generic")
@@ -92,7 +91,7 @@ def test_export_config():
 #                                        |_|
 def test_enable_atmos():
     sup.atmos.enable_atmos(False)
-    assert(sup.atmos.is_enable == False)
+    assert(not sup.atmos.is_enable)
 
 def test_set_r0():
     sup.atmos.set_r0(0.15)
@@ -467,10 +466,6 @@ def test_get_command():
     sup.rtc.get_command(0)
     assert(True)
 
-def test_set_command():
-    sup.rtc.set_command(0, np.zeros(sup.config.p_controllers[0].nactu))
-    assert(True)
-
 def test_reset_command():
     sup.rtc.reset_command()
     assert(True)
@@ -609,10 +604,6 @@ def test_set_cmat_modal():
     nslope = sup.config.p_controllers[0].nslope
     nactu = sup.config.p_controllers[0].nactu
     sup.modalgains.set_cmat_modal(np.ones((nactu, nslope)))
-    assert(True)
-
-def test_get_modal_gains():
-    sup.modalgains.get_modal_gains()
     assert(True)
 
 def test_set_mask():
@@ -763,11 +754,11 @@ def test_set_iir_b_vector():
 #                            |___/         |_|
 
 def test_get_image_corono():
-    img = sup.corono.get_image(0)
+    sup.corono.get_image(0)
     assert(True)
 
 def test_get_psf_corono():
-    img = sup.corono.get_psf(0)
+    sup.corono.get_psf(0)
     assert(True)
 
 def test_reset_corono():

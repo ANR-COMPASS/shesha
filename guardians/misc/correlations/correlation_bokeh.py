@@ -6,14 +6,11 @@ Created on Wed Oct 5 14:28:23 2016
 
 import numpy as np
 import h5py
-import pandas
-from bokeh.plotting import Figure, figure
-from bokeh.models import Range1d, ColumnDataSource, HoverTool
-from bokeh.models.widgets import Select, Slider, CheckboxButtonGroup, Panel, Tabs, Button, Dialog, Paragraph, RadioButtonGroup, TextInput
+from bokeh.plotting import figure
+from bokeh.models import ColumnDataSource, HoverTool
+from bokeh.models.widgets import Select
 from bokeh.io import curdoc
 from bokeh.models.layouts import HBox, VBox
-from bokeh.models.widgets import DataTable, DateFormatter, TableColumn
-from bokeh.client import push_session
 import glob
 import matplotlib.pyplot as plt
 from scipy.special import jv  # Bessel function
@@ -214,7 +211,7 @@ def update(attrs, old, new):
 
     ind = np.where(ind)
     if (yname == b"Var(t)"):
-        Hthetak = Htheta / xmap["Gain"]
+        # Hthetak = Htheta / xmap["Gain"]
         y_model = np.ones(ind[0].shape[0])
         #y_model = y_model * 6.88 * (Htheta/r0)**(5./3.) * 0.5
         for k in range(ind[0].shape[0]):
@@ -228,7 +225,7 @@ def update(attrs, old, new):
                                       taby) * (1. / r0)**(5. / 3.) * 0.5
     if (yname == b"Covar"):
         vdt = xmap["Windspeed"] * dt / xmap["Gain"]
-        Hthetak = Htheta / xmap["Gain"]
+        # Hthetak = Htheta / xmap["Gain"]
         gamma = np.arctan2(ypos, xpos) - xmap["Winddir"] * np.pi / 180.
         rho = np.sqrt(Htheta**2 + (vdt)**2 - 2 * Htheta * vdt * np.cos(gamma))
         Drho = np.zeros(rho[ind].shape[0])

@@ -48,7 +48,6 @@ import shesha.util.hdf5_util as h5u
 from shesha.sutra_wrap import Sensors, Dms, Rtc_FFF as Rtc
 from shesha.constants import CONST
 
-from astropy.io import fits
 
 
 def imat_geom(wfs: Sensors, dms: Dms, p_wfss: List[conf.Param_wfs],
@@ -258,7 +257,7 @@ def imat_geom_ts(wfs: Sensors, dms: Dms, p_ts: conf.Param_wfs, ind_TS: int,
     """
 
     #nwfs = 1 #p_controller.nwfs.size # as parameter list of indices for wfs if several ts (only 1 ts for now)
-    ndm = len(ind_DMs)  #p_controller.ndm.size # as parameter list of indices of used dms
+    # ndm = len(ind_DMs)  #p_controller.ndm.size # as parameter list of indices of used dms
     imat_size1 = p_ts._nvalid * 2  # as parameter (nvalid)
     imat_size2 = 0
 

@@ -318,7 +318,7 @@ def compute_fourier(nActu: int, pitch: float, actu_x_pos: np.ndarray,
         raise ValueError('periodic can only be "n" or "n-1" to set boundary condition.')
     xnorm = (np.round((actu_x_pos - np.min(actu_x_pos)) / pitch).astype(np.int32)) % n
     ynorm = (np.round((actu_y_pos - np.min(actu_y_pos)) / pitch).astype(np.int32)) % n
-    totActu = len(xnorm)
+    # totActu = len(xnorm)
 
     data = np.zeros((n, n, n, n), dtype=np.float32)
     for i in range(n):

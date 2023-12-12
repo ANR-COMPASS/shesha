@@ -75,10 +75,10 @@ def KLmodes(x, y, L0, filterPiston):
     # L'unite des valuers propres est en radians^2 a la longueur d'onde ou
     # est exprime r0, et sachant que tout est normalise pour (D/r0)=1.
     #
-    l, U = np.linalg.eigh(kolmo)
-    l = l / Nactu
+    singValues, U = np.linalg.eigh(kolmo)
+    singValues = singValues / Nactu
     print('done')
-    return U[:, ::-1], l[::-1]
+    return U[:, ::-1], singValues[::-1]
 
 
 def computePistonFilteringMatrix(n):

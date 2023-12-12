@@ -66,7 +66,7 @@ old2new_dict = {
         "pyr_pup_sep": "_Param_wfs__pyr_pup_sep",
         "pyrtype": "_Param_wfs__pyrtype",
         #DM params
-        "type": "_Param_dm__type_dm",
+        # "type": "_Param_dm__type_dm",
         "dm.alt": "_Param_dm__alt",
         "coupling": "_Param_dm__coupling",
         "nkl": "_Param_dm__nkl",
@@ -77,7 +77,7 @@ old2new_dict = {
         "dm.thresh": "_Param_dm__thresh",
         "unitpervolt": "_Param_dm__unitpervolt",
         #Centroider params
-        "type": "_Param_centroider__type",
+        # "type": "_Param_centroider__type",
         "nmax": "_Param_centroider__nmax",
         "centro.nwfs": "_Param_centroider__nwfs",
         "sizex": "_Param_centroider__sizex",
@@ -87,7 +87,7 @@ old2new_dict = {
         "weights": "_Param_centroider__weights",
         "width": "_Param_centroider__width",
         # Control params
-        "type": "_Param_controller__type",
+        # "type": "_Param_controller__type",
         "TTcond": "_Param_controller__TTcond",
         "cured_ndivs": "_Param_controller__cured_ndivs",
         "delay": "_Param_controller__delay",
@@ -116,12 +116,12 @@ files = glob("/home/fferreira/Data/correlation/*.h5")
 
 for ff in files:
     f = h5py.File(ff, 'r+')
-    if not "_Param_atmos__r0" in f.attrs.keys():
+    if "_Param_atmos__r0" not in f.attrs.keys():
         for k in f.attrs.keys():
             try:
                 f.attrs[old2new_dict[k]] = f.attrs[k]
                 del f.attrs[k]
-            except:
+            except BaseException:
                 print(ff)
                 print(k)
     f.close()

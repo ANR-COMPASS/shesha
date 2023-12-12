@@ -38,7 +38,7 @@ import numpy as np
 import shesha.config as conf
 import shesha.constants as scons
 from shesha.supervisor.components.coronagraph.genericCoronagraph import GenericCoronagraph
-from shesha.init.coronagraph_init import init_coronagraph, init_mft, mft_multiplication
+from shesha.init.coronagraph_init import init_coronagraph, init_mft
 from shesha.supervisor.components.targetCompass import TargetCompass
 from sutraWrap import PerfectCoronagraph
 from carmaWrap import context

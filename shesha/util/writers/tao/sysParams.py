@@ -58,7 +58,7 @@ def write_json_sys_param(sup, *, wfss_indices=None, ts=False, dms_indices=None, 
         }
     }
 
-    diam = sup.config.p_tel.get_diam()
+    # diam = sup.config.p_tel.get_diam()
     geom = sup.config.p_geom
     #WFSs
     lgs_json = []

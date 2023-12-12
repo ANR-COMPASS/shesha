@@ -3,12 +3,10 @@ Created on Wed Oct 5 14:28:23 2016
 
 @author: fferreira
 """
-import sys, os
 import numpy as np
 import h5py
 import matplotlib.pyplot as plt
 import matplotlib
-plt.ion()
 from guardians import gamora, drax
 
 datapath = "/home/fferreira/Data/"
@@ -65,18 +63,18 @@ err_layer_i = np.zeros((nmodes, 2 * nlayers))
 
 err_layers[:, 0] = drax.variance(f_layers, contributors, method="Default")
 err_layers[:, 1] = drax.variance(f_layers, contributors, method="Independence")
-l = 0
+atm_layer = 0
 for f in files:
-    err_layer_i[:, l] = drax.variance(f, contributors, method="Default")
-    err_layer_i[:, l + 1] = drax.variance(f, contributors, method="Independence")
-    l += 2
+    err_layer_i[:, atm_layer] = drax.variance(f, contributors, method="Default")
+    err_layer_i[:, atm_layer + 1] = drax.variance(f, contributors, method="Independence")
+    atm_layer += 2
 
 #err_layer1p2 = varianceMultiFiles([f_layer1,f_layer2], frac_per_layer, contributors)
 inderr = np.zeros(nmodes)
 derr = np.zeros(nmodes)
-for l in range(nlayers):
-    inderr += frac[l] * err_layer_i[:, 2 * l + 1]
-    derr += frac[l] * err_layer_i[:, 2 * l]
+for atm_layer in range(nlayers):
+    inderr += frac[atm_layer] * err_layer_i[:, 2 * atm_layer + 1]
+    derr += frac[atm_layer] * err_layer_i[:, 2 * atm_layer]
 
 otftel_ref, otf2_ref, psf_ref, gpu = gamora.psf_rec_Vii(datapath + fname_layers)
 otftel_sum, otf2_sum, psf_sum, gpu = gamora.psf_rec_Vii(datapath + fname_layers,

@@ -38,7 +38,7 @@
 import numpy as np
 import scipy.special as sp
 
-from shesha.constants import DmType, PatternType
+from shesha.constants import PatternType
 
 
 def besel_orth(m, n, phi, r):
@@ -313,7 +313,7 @@ def makeGaussian(pitch: float, coupling: float, x=None, y=None):
     """
     irc = 1.16136 + 2.97422 * coupling + \
         (-13.2381) * coupling**2 + 20.4395 * coupling**3
-    tmp_c = 1.0 / np.abs(irc)
+    # tmp_c = 1.0 / np.abs(irc)
 
     smallsize = int(np.ceil(2 * irc * pitch + 10))
     if (smallsize % 2 != 0):

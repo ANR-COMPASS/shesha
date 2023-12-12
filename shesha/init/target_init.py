@@ -37,7 +37,6 @@
 
 import shesha.config as conf
 
-import shesha.constants as scons
 from shesha.constants import CONST
 
 import numpy as np

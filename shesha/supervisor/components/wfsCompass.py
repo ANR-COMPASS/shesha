@@ -216,9 +216,9 @@ class WfsCompass(SourceCompass):
                                                    np.sin(np.pi / 3)])
         n = 1 + int(1.2 * radius)
         mat_circ = []
-        for k in range(-n, n):
-            for l in range(-n, n):
-                coord = k * gen_xp + l * gen_yp
+        for index_x in range(-n, n):
+            for index_y in range(-n, n):
+                coord = index_x * gen_xp + index_y * gen_yp
                 if np.sqrt(coord[0]**2 + coord[1]**2) <= radius:
                     mat_circ.append(coord)
         mat_circ = np.array(mat_circ)

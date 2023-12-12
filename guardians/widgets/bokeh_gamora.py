@@ -8,8 +8,10 @@ To launch it :
         then, open a web browser and connect to http://hippo6.obspm.fr:8081/bokeh_roket
 """
 from widget_gamora import Bokeh_gamora
-from bokeh.io import curdoc, output_file, show
-import glob, os, atexit
+from bokeh.io import curdoc
+import glob
+import os
+import atexit
 
 
 def remove_files():

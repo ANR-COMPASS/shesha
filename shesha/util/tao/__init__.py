@@ -1,11 +1,7 @@
 from importlib import reload
 import numpy as np
-from astropy.io import fits
 
-from shesha.ao import imats
-from shesha.ao import cmats
 
-from shesha.util.tao import writer
 from shesha.util.tao import ltao
 from shesha.util.tao import mcao
 reload(ltao)
@@ -33,33 +29,33 @@ def check():
         if (not isinstance(TAO_SETTINGS["SCHED"], str)):
             print("you must select a scheduler (dmda,dmdas,dmdar...)\n\tex: TAO_SETTINGS[\"SCHED\"]=\"dmdas\"")
             stop=1
-    except:
+    except BaseException:
         print("you must select a scheduler (dmda,dmdas,dmdar...)\n\tex: TAO_SETTINGS[\"SCHED\"]=\"dmdas\"")
         stop=1
     try :
         if( not isinstance(TAO_SETTINGS["GPU_IDS"], str)):
             print("you must define the GPUs to use as a string \n\tex:TAO_SETTINGS[\"GPU_IDS\"]=\"1,2\"")
             stop=1
-    except:
+    except BaseException:
         print("you must define the GPUs to use as a string \n\tex:TAO_SETTINGS[\"GPU_IDS\"]=\"1,2\"")
         stop=1
     try :
         if( not isinstance(TAO_SETTINGS["INPUT_PATH"], str)):
             print("you must define the location of the system parameters \n\tex: TAO_SETTINGS[\"INPUT_PATH\"]=\"~/workspace/compass/params\"")
             stop=1
-    except:
+    except BaseException:
         print("you must define the location of the system parameters \n\tex: TAO_SETTINGS[\"INPUTPATH\"]=\"~/workspace/compass/params\"")
         stop=1
     try :
         if( not isinstance(TAO_SETTINGS["TAO_PATH"], str)):
             print("you must define the location of the tao executables \n\tex: TAO_SETTINGS[\"TAO_PATH\"]=\"~/workspace/tao/install/bin\"")
             stop=1
-    except:
+    except BaseException:
         print("you must define the location of the tao executables \n\tex: TAO_SETTINGS[\"TAOPATH\"]=\"~/workspace/tao/install/bin\"")
         stop=1
     try :
         TAO_SETTINGS["STARPU_FLAGS"]
-    except:
+    except BaseException:
         TAO_SETTINGS["STARPU_FLAGS"]=""
 
     return stop

@@ -43,7 +43,7 @@ from shesha.constants import CONST
 
 from . import utilities as util
 
-from typing import List, Union
+from typing import List
 
 
 def dim_dm_support(cent: float, extent: int, ssize: int):

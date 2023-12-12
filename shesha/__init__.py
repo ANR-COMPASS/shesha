@@ -4,7 +4,8 @@ Documentation for shesha.
 More details.
 '''
 
-import subprocess, sys
+import subprocess
+import sys
 
 __version__ = "5.5.0"
 

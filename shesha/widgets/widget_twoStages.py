@@ -52,22 +52,19 @@ Example:
     ipython -i widget_twoStages.py ../../data/par/SPHERE+/sphere.py ../../data/par/SPHERE+/sphere+.py -- --adopt
 """
 
-import os, sys
+import os
+import sys
 import numpy as np
 import time
 
-import pyqtgraph as pg
-from shesha.util.tools import plsh, plpyr
 from rich.progress import track
-import astropy.io.fits as pfits
 from PyQt5 import QtWidgets
 from shesha.supervisor.twoStagesManager import TwoStagesManager
 
-from typing import Any, Dict, Tuple, Callable, List
+from typing import Any
 from docopt import docopt
 
-from shesha.widgets.widget_base import WidgetBase
-from shesha.widgets.widget_ao import widgetAOWindow, widgetAOWindow
+from shesha.widgets.widget_ao import widgetAOWindow
 
 global server
 server = None
@@ -81,7 +78,6 @@ class widgetTwoStagesWindowPyro():
         self.config2 = config_file2
         self.freqratio = freqratio
 
-        from shesha.config import ParamConfig
 
 
         self.wao2=widgetAOWindow(config_file2, cacao=cacao, hide_histograms=True, twoStages=True)
@@ -203,7 +199,7 @@ class widgetTwoStagesWindowPyro():
                 print("Lauching pyramid widget...")
                 self.initPyrTools()
                 print("Done")
-            except:
+            except Exception:
                 raise ValueError("ERROR: ADOPT  not found. Cannot launch Pyramid tools")
         else:
             if (self.wao2.uiAO.actionShow_Pyramid_Tools.isChecked()):
@@ -234,13 +230,13 @@ class widgetTwoStagesWindowPyro():
             supervisor1 = self.manager.first_stage
             supervisor2 = self.manager.second_stage
 
-            if(supervisor1.corono == None):
+            if(supervisor1.corono is None):
                 from shesha.util.pyroEmptyClass import PyroEmptyClass
                 coro2pyro1 = PyroEmptyClass()
             else:
                 coro2pyro1 = supervisor1.corono
 
-            if(supervisor2.corono == None):
+            if(supervisor2.corono is None):
                 from shesha.util.pyroEmptyClass import PyroEmptyClass
                 coro2pyro2 = PyroEmptyClass()
             else:
@@ -282,7 +278,7 @@ class widgetTwoStagesWindowPyro():
             server.start()
 
 
-        except:
+        except Exception:
             raise Exception("Error could not connect to Pyro server.\n It can  be:\n - Missing dependencies? (check if Pyro4 is installed)\n - pyro server not running")
         return server
 

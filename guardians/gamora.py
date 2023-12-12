@@ -9,7 +9,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 import h5py
 from shesha.sutra_wrap import carmaWrap_context, Gamora
-from sys import stdout
 import time
 from guardians import drax
 

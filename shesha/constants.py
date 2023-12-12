@@ -52,7 +52,7 @@ def check_enum(cls, name):
     """
 
     if not isinstance(name, str) or \
-            not name in vars(cls).values():
+            name not in vars(cls).values():
         raise ValueError("Invalid enumeration value for enum %s, value %s" % (cls, name))
     return name
 

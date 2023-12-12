@@ -68,12 +68,12 @@ class Param_target:
         """
         return self.__apod
 
-    def set_apod(self, l):
+    def set_apod(self, apod):
         """ Set apodizer flag
 
-        :param l: (bool) : apod
+        :param apod: (bool) : apod
         """
-        self.__apod = csu.enforce_or_cast_bool(l)
+        self.__apod = csu.enforce_or_cast_bool(apod)
 
     apod = property(get_apod, set_apod)
 

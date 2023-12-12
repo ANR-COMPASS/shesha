@@ -4,19 +4,14 @@ Created on Tue Jul 12 09:28:23 2016
 @author: fferreira
 """
 
-import cProfile
-import pstats as ps
 
-import sys, os
+import sys
+import os
 import numpy as np
 import carmaWrap as ch
 import shesha as ao
 import time
-import matplotlib.pyplot as plt
-plt.ion()
 import hdf5_util as h5u
-import pandas
-from scipy.sparse import csr_matrix
 
 ############################################################################
 #  _       _ _
@@ -96,7 +91,7 @@ def init_config(config):
     print("iter# | SE SR image | LE SR image | Fitting | LE SR phase var")
     print("----------------------------------------------------")
 
-    error_flag = True in [w.roket for w in config.p_wfss]
+    # error_flag = True in [w.roket for w in config.p_wfss]
 
     return atm, wfs, tel, dms, tar, rtc
 
@@ -137,22 +132,22 @@ def loop(config, n):
 
         SR : (float) : final strehl ratio returned by the simulation
     """
-    if (error_flag):
+    # if (error_flag):
         # Initialize buffers for error breakdown
-        nactu = rtc.get_command(0).size
-        nslopes = rtc.get_centroids(0).size
-        com = np.zeros((n, nactu), dtype=np.float32)
-        noise_com = np.zeros((n, nactu), dtype=np.float32)
-        alias_wfs_com = np.copy(noise_com)
-        wf_com = np.copy(noise_com)
-        tomo_com = np.copy(noise_com)
-        trunc_com = np.copy(noise_com)
-        H_com = np.copy(noise_com)
-        mod_com = np.copy(noise_com)
-        bp_com = np.copy(noise_com)
-        fit = np.zeros(n)
-    #    covm = np.zeros((nslopes,nslopes))
-    #    covv = np.zeros((nactu,nactu))
+        # nactu = rtc.get_command(0).size
+        # nslopes = rtc.get_centroids(0).size
+        # com = np.zeros((n, nactu), dtype=np.float32)
+        # noise_com = np.zeros((n, nactu), dtype=np.float32)
+        # alias_wfs_com = np.copy(noise_com)
+        # wf_com = np.copy(noise_com)
+        # tomo_com = np.copy(noise_com)
+        # trunc_com = np.copy(noise_com)
+        # H_com = np.copy(noise_com)
+        # mod_com = np.copy(noise_com)
+        # bp_com = np.copy(noise_com)
+        # fit = np.zeros(n)
+        # covm = np.zeros((nslopes,nslopes))
+        # covv = np.zeros((nactu,nactu))
 
     t0 = time.time()
     for i in range(-10, n):

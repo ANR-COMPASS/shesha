@@ -4,19 +4,14 @@ Created on Wed Apr 27 09:28:23 2016
 @author: fferreira
 """
 
-import cProfile
-import pstats as ps
 
-import sys, os
+import sys
+import os
 import numpy as np
 import carmaWrap as ch
 import shesha as ao
 import time
-import matplotlib.pyplot as pl
-pl.ion()
 import hdf5_util as h5u
-import pandas
-from scipy.sparse import csr_matrix
 
 c = ch.carmaWrap_context(devices=np.array([6], dtype=np.int32))
 
@@ -97,7 +92,7 @@ def init_config(config):
     print("iter# | SE SR image | LE SR image | Fitting | LE SR phase var")
     print("----------------------------------------------------")
 
-    error_flag = True in [w.roket for w in config.p_wfss]
+    # error_flag = True in [w.roket for w in config.p_wfss]
 
     return atm, wfs, tel, dms, tar, rtc
 

@@ -94,7 +94,7 @@ if __name__ == "__main__":
             supervisor = CompassSupervisor(config)
             t_init = time.perf_counter() - t0
             is_init = supervisor.is_init
-        except:
+        except BaseException:
             supervisor = None
             is_init = False
             t_init = 0
@@ -105,7 +105,7 @@ if __name__ == "__main__":
             t_loop = time.perf_counter() - t0
             t_init = 0
             SR = supervisor.target.get_strehl(0)[1]
-        except:
+        except BaseException:
             SR = "N/A"
             t_loop = 0
         try:

@@ -34,7 +34,8 @@
 #
 #  You should have received a copy of the GNU Lesser General Public License along with COMPASS.
 import importlib
-import sys, os
+import sys
+import os
 from collections import OrderedDict
 import numpy as np
 import shesha.constants as scons
@@ -242,7 +243,7 @@ class ParamConfig(object):
         nysubList = []
         lambdaList = []
         dms_seen = []
-        colTmpList = []
+        # colTmpList = []
         noise = []
         #new_hduwfsl = pfits.HDUList()
         #new_hduwfsSubapXY = pfits.HDUList()

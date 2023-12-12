@@ -38,14 +38,12 @@
 import shesha.config as conf
 import shesha.constants as scons
 
-from shesha.constants import CONST
 
 from shesha.util import dm_util, influ_util, kl_util
 from shesha.util import hdf5_util as h5u
 
 import numpy as np
 
-import pandas as pd
 from scipy import interpolate
 from shesha.sutra_wrap import carmaWrap_context, Dms
 
@@ -56,7 +54,7 @@ from rich.progress import track
 import os
 try:
     shesha_dm = os.environ['SHESHA_DM_ROOT']
-except KeyError as err:
+except KeyError:
     shesha_dm = os.environ['SHESHA_ROOT'] + "/data/dm-data"
 
 
@@ -136,7 +134,7 @@ def _dm_init(context: carmaWrap_context, dms: Dms, p_dm: conf.Param_dm, xpos_wfs
                                      ypos_wfs)
 
     if (p_dm.type == scons.DmType.PZT):
-        if p_dm.file_influ_fits == None:
+        if p_dm.file_influ_fits is None:
             if p_dm._pitch is None:
                 p_dm._pitch = patchDiam / float(p_dm.nact - 1)
             print(f"DM pitch = {p_dm._pitch:8.5f} pix = {p_dm._pitch*diam/p_geom.pupdiam:8.5f} m",
@@ -194,7 +192,7 @@ def _dm_init(context: carmaWrap_context, dms: Dms, p_dm: conf.Param_dm, xpos_wfs
 
         make_kl_dm(p_dm, patchDiam, p_geom, cobs)
 
-        ninflu = p_dm.nkl
+        # ninflu = p_dm.nkl
         p_dm._dim_screen = dim
 
         dms.add_dm(context, p_dm.type, p_dm.alt, dim, p_dm.nkl, p_dm._ncp, p_dm._nr,
@@ -301,7 +299,7 @@ def _dm_init_factorized(context: carmaWrap_context, dms: Dms, p_dm: conf.Param_d
         dms.d_dms[-1].tt_loadarrays(p_dm._influ)
     elif (p_dm.type == scons.DmType.KL):
         make_kl_dm(p_dm, patchDiam, p_geom, cobs)
-        ninflu = p_dm.nkl
+        # ninflu = p_dm.nkl
 
         dms.add_dm(context, p_dm.type, p_dm.alt, dim, p_dm.nkl, p_dm._ncp, p_dm._nr,
                    p_dm._npp, p_dm.push4imat, p_dm._ord.max(), context.active_device)
@@ -509,8 +507,8 @@ def make_pzt_dm(p_dm: conf.Param_dm, p_geom: conf.Param_geom, cobs: float,
 
     comp_dmgeom(p_dm, p_geom)
 
-    dim = max(p_geom._mpupil.shape[0], p_dm._n2 - p_dm._n1 + 1)
-    off = (dim - p_dm._influsize) // 2
+    # dim = max(p_geom._mpupil.shape[0], p_dm._n2 - p_dm._n1 + 1)
+    # off = (dim - p_dm._influsize) // 2
 
 
 
@@ -879,7 +877,7 @@ def correct_dm(context, dms: Dms, p_dms: list, p_controller: conf.Param_controll
             else:
                 tmp = resp[inds:inds + p_dms[nm]._ntotact]
                 ok = np.where(tmp > p_dms[nm].thresh * np.max(tmp))[0]
-                nok = np.where(tmp <= p_dms[nm].thresh * np.max(tmp))[0]
+                # nok = np.where(tmp <= p_dms[nm].thresh * np.max(tmp))[0]
 
                 p_dms[nm].set_ntotact(ok.shape[0])
                 p_dms[nm].set_influ(p_dms[nm]._influ[:, :, ok.tolist()])

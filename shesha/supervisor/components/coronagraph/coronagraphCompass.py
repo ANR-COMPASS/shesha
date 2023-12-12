@@ -39,8 +39,6 @@ import shesha.config as conf
 import shesha.constants as scons
 from carmaWrap import context
 from shesha.supervisor.components.targetCompass import TargetCompass
-from abc import ABC, abstractmethod
-from shesha.util.coronagraph_utils import compute_contrast
 
 class CoronagraphCompass():
     """ Class for Compass Coronagraph modules

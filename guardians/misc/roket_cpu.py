@@ -4,19 +4,14 @@ Created on Wed Apr 27 09:28:23 2016
 @author: fferreira
 """
 
-import cProfile
-import pstats as ps
 
-import sys, os
+import sys
+import os
 import numpy as np
 import carmaWrap as ch
 import shesha as ao
 import time
-import matplotlib.pyplot as pl
-pl.ion()
 import hdf5_util as h5u
-import pandas
-from scipy.sparse import csr_matrix
 
 if (len(sys.argv) < 2):
     error = 'command line should be at least:"python -i test.py parameters_filename"\n with "parameters_filename" the path to the parameters file'

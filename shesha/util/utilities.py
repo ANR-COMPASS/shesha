@@ -35,11 +35,8 @@
 #  You should have received a copy of the GNU Lesser General Public License along with COMPASS.
 #  If not, see <https://www.gnu.org/licenses/lgpl-3.0.txt>.
 
-import importlib
-import sys, os
 
 import numpy as np
-from scipy import fft
 
 
 def rebin(a, shape):
@@ -237,9 +234,9 @@ def generate_pseudo_source(radius: float, additional_psf=0, density=1.):
         V_edge_y.append(m * edge_dist)
         V_edge_weight.append(weight_edge[0])
     for k, val in enumerate(weight_edge[1:]):
-        for l in [-1, 1]:
+        for n in [-1, 1]:
             for m in [-1, 1]:
-                V_edge_x.append(l * (k + 1) * density)
+                V_edge_x.append(n * (k + 1) * density)
                 V_edge_y.append(m * edge_dist)
                 V_edge_weight.append(val)
     H_edge_x = []
@@ -250,18 +247,18 @@ def generate_pseudo_source(radius: float, additional_psf=0, density=1.):
         H_edge_y.append(0)
         H_edge_weight.append(weight_edge[0])
     for k, val in enumerate(weight_edge[1:]):
-        for l in [-1, 1]:
+        for n in [-1, 1]:
             for m in [-1, 1]:
                 H_edge_x.append(m * edge_dist)
-                H_edge_y.append(l * (k + 1) * density)
+                H_edge_y.append(n * (k + 1) * density)
                 H_edge_weight.append(val)
     pup_cent_x = []
     pup_cent_y = []
     pup_cent_weight = 4 * [(len(xc) - 2 * np.sum(H_edge_weight) - struct_size) / 4]
     pup_cent_dist = int(edge_dist // np.sqrt(2))
-    for l in [-1, 1]:
+    for n in [-1, 1]:
         for m in [-1, 1]:
-            pup_cent_x.append(l * pup_cent_dist)
+            pup_cent_x.append(n * pup_cent_dist)
             pup_cent_y.append(m * pup_cent_dist)
     ox = np.concatenate((center_x, V_edge_x, H_edge_x, pup_cent_x))
     oy = np.concatenate((center_y, V_edge_y, H_edge_y, pup_cent_y))

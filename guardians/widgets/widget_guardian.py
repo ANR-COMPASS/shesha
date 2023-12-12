@@ -1,4 +1,3 @@
-import numpy as np
 
 from widget_roket import Bokeh_roket
 from widget_gamora import Bokeh_gamora

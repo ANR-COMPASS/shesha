@@ -28,8 +28,6 @@ Usage with Ipython: ipython [-i] script_roket.py -- [options]
 
 from docopt import docopt
 
-import sys
-import os
 #from guardian.roket import Roket
 from roket import Roket
 from shesha.util.utilities import load_config_from_file

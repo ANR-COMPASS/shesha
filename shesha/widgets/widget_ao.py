@@ -51,7 +51,9 @@ Options:
   -i, --interactive  keep the script interactive
 """
 
-import os, sys
+import os
+import sys
+import socket
 
 import numpy as np
 import time
@@ -64,23 +66,23 @@ from shesha.config import ParamConfig
 try:
     from PyQt5 import QtWidgets
     from PyQt5.QtCore import Qt
-except ModuleNotFoundError as e:
+except ModuleNotFoundError:
     try:
         from PySide2 import QtWidgets
         from PySide2.QtCore import Qt
     except ModuleNotFoundError as e:
         raise ModuleNotFoundError("No module named 'PyQt5' or PySide2', please install one of them\nException raised: "+e.msg)
 
-from typing import Any, Dict, Tuple
+from typing import Any, Tuple
 
 from docopt import docopt
 from collections import deque
 
 from shesha.widgets.widget_base import WidgetBase, uiLoader
 
-AOWindowTemplate, AOClassTemplate = uiLoader('widget_ao')
-
 from shesha.supervisor.compassSupervisor import CompassSupervisor, scons
+
+AOWindowTemplate, AOClassTemplate = uiLoader('widget_ao')
 
 # For debug
 # from IPython.core.debugger import Pdb
@@ -286,7 +288,7 @@ class widgetAOWindow(AOClassTemplate, WidgetBase):
 
         try:
             sys.path.remove(self.defaultParPath)
-        except:
+        except BaseException:
             pass
 
         self.SRcircles.clear()
@@ -415,7 +417,7 @@ class widgetAOWindow(AOClassTemplate, WidgetBase):
 
     def init_config(self) -> None:
         if(self.twoStages):
-            from shesha.supervisor.stageSupervisor import StageSupervisor, scons
+            from shesha.supervisor.stageSupervisor import StageSupervisor
             self.supervisor = StageSupervisor(self.config, cacao=self.cacao)
         else:
             self.supervisor = CompassSupervisor(self.config, cacao=self.cacao)
@@ -455,8 +457,8 @@ class widgetAOWindow(AOClassTemplate, WidgetBase):
 
         for i in range(self.ndm):
             key = "dm_%d" % i
-            dm_type = self.config.p_dms[i].type
-            alt = self.config.p_dms[i].alt
+            # dm_type = self.config.p_dms[i].type
+            # alt = self.config.p_dms[i].alt
             data = self.supervisor.dms.get_dm_shape(i)
             cx, cy = self.circleCoords(self.config.p_geom.pupdiam / 2, 1000,
                                        data.shape[0], data.shape[1])
@@ -601,8 +603,8 @@ class widgetAOWindow(AOClassTemplate, WidgetBase):
                         if "wfs" in key:
                             data = self.supervisor.wfs.get_wfs_phase(index)
                         if "dm" in key:
-                            dm_type = self.config.p_dms[index].type
-                            alt = self.config.p_dms[index].alt
+                            # dm_type = self.config.p_dms[index].type
+                            # alt = self.config.p_dms[index].alt
                             data = self.supervisor.dms.get_dm_shape(index)
                         if "tar" in key:
                             data = self.supervisor.target.get_tar_phase(index)
@@ -779,9 +781,6 @@ class widgetAOWindow(AOClassTemplate, WidgetBase):
         if self.nbiter <= 0:
             self.stop = True
             self.uiAO.wao_run.setChecked(False)
-
-import os
-import socket
 
 def tcp_connect_to_display():
         # get the display from the environment

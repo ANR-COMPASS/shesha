@@ -38,7 +38,7 @@ import numpy as np
 import shesha.config as conf
 import shesha.constants as scons
 from shesha.supervisor.components.targetCompass import TargetCompass
-from abc import ABC, abstractmethod
+from abc import ABC
 from shesha.util.coronagraph_utils import compute_contrast
 
 class GenericCoronagraph(ABC):
@@ -179,15 +179,15 @@ class GenericCoronagraph(ABC):
             maxi: (1D array): corresponding maximums
         """
         image_sampling = self._p_corono._image_sampling
-        if width == None:
+        if width is None:
             width = image_sampling
         else:
             width = width * image_sampling
-        if d_min == None:
+        if d_min is None:
             d_min = width
         else:
             d_min = d_min * image_sampling
-        if d_max == None:
+        if d_max is None:
             d_max = self._dim_image / 2 - width / 2
         else:
             d_max = d_max * image_sampling

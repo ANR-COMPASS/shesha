@@ -14,25 +14,21 @@ To launch it :
 
 import numpy as np
 import glob
-import os, sys
+import os
 
 import h5py
-import pandas
 import datetime
 
 from bokeh.plotting import Figure, figure
 from bokeh.models import Range1d, ColumnDataSource, HoverTool
-from bokeh.models.widgets import Select, Slider, CheckboxButtonGroup, Panel, Tabs, Button, Dialog, Paragraph, RadioButtonGroup, TextInput
+from bokeh.models.widgets import Select, Slider, CheckboxButtonGroup, Panel, Tabs, Button, Dialog, Paragraph, RadioButtonGroup
 from bokeh.io import curdoc
 from bokeh.models.layouts import HBox, VBox
-from bokeh.models.widgets import DataTable, DateFormatter, TableColumn
-from bokeh.client import push_session
+from bokeh.models.widgets import DataTable, TableColumn
 
-import matplotlib.pyplot as plt
 import matplotlib as mpl
 from scipy.sparse import csr_matrix
 
-sys.path.insert(0, os.environ["SHESHA_ROOT"] + "/test/gamora/")
 import gamora
 
 
@@ -623,7 +619,7 @@ class html_display:
 
         plus = self.plus_select.active
         moins = self.moins_select.active
-        basis_val = self.basis_select1.value
+        # basis_val = self.basis_select1.value
         plot_val = self.plot_select.value
         iteration = int(self.iter_select.value)
 

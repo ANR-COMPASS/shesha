@@ -1,12 +1,14 @@
 
-from shesha.util.writers.yao.general import *
-from shesha.util.writers.yao.wfs     import *
-from shesha.util.writers.yao.dm      import *
-from shesha.util.writers.yao.targets import *
-from shesha.util.writers.yao.atmos   import *
-from shesha.util.writers.yao.loop    import *
-from shesha.util.writers.yao.gs      import *
+# from shesha.util.writers.yao.general import 
+from shesha.util.writers.yao.wfs     import init_wfs, write_wfss, finish_wfs
+from shesha.util.writers.yao.dm      import init_dm, write_dms, finish_dm
+from shesha.util.writers.yao.targets import write_targets
+from shesha.util.writers.yao.atmos   import write_atm
+from shesha.util.writers.yao.loop    import write_loop
+from shesha.util.writers.yao.gs      import write_gs
+from shesha.util.writers.yao import write_general
 from shesha.util.writers import common
+import numpy as np
 
 def write_parfiles(sup, *,  param_file_name="./yao.par",
                             fits_file_name="./yao.fits",

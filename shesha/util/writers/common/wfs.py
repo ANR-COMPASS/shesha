@@ -1,5 +1,3 @@
-import numpy as np
-import json
 
 def get_subap_pos_pixel(wfs):
     """Return the coordinates of the valid subapertures of a given WFS

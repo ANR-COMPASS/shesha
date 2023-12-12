@@ -227,7 +227,7 @@ class Calibration(object):
         """
         try:
             self._rtc.do_control(1, sources=self._target.sources)
-        except:
+        except BaseException:
             return [0]
         v = self._rtc.get_command(1)  # We compute here the residual phase on the DM modes. Gives the Equivalent volts to apply/
         if (selected_actus is None):

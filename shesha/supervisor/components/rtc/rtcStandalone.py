@@ -35,10 +35,6 @@
 #  You should have received a copy of the GNU Lesser General Public License along with COMPASS.
 #  If not, see <https://www.gnu.org/licenses/lgpl-3.0.txt>.
 from shesha.init.rtc_init import rtc_standalone
-from shesha.supervisor.components.sourceCompass import SourceCompass
-import shesha.constants as scons
-import numpy as np
-from typing import Union
 
 from shesha.supervisor.components.rtc.rtcAbstract import RtcAbstract, carmaWrap_context
 

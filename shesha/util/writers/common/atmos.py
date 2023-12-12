@@ -1,5 +1,3 @@
-import numpy as np
-import json
 
 def atmos_to_json(atmos, name=""):
     """return a json description of a the atmos

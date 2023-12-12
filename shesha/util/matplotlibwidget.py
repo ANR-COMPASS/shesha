@@ -1,4 +1,23 @@
-# -*- coding: utf-8 -*-
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as Navigationtoolbar
+from matplotlib.figure import Figure
+from matplotlib import gridspec
+
+try:
+    from PyQt5 import QtWidgets
+except ModuleNotFoundError:
+    try:
+        from PySide2 import QtWidgets
+    except ModuleNotFoundError as e:
+        raise ModuleNotFoundError("No module named 'PyQt5' or PySide2', please install one of them\nException raised: "+e.msg)
+
+# import matplotlib
+# matplotlib.use('Qt5Agg')
+
+# matplotlib.rcParams['backend.qt4']='PySide'
+# matplotlib.style.use('ggplot')
+# matplotlib.style.use('seaborn-muted')
+
 """
 Created on Tue Jun 24 00:27:01 2014
 
@@ -31,26 +50,6 @@ class MatplotlibWidget(QtGui.QWidget):
         self.vbl.addWidget(self.canvas)
         self.setLayout(self.vbl)
 """
-
-try:
-    from PyQt5 import QtWidgets
-except ModuleNotFoundError as e:
-    try:
-        from PySide2 import QtWidgets
-    except ModuleNotFoundError as e:
-        raise ModuleNotFoundError("No module named 'PyQt5' or PySide2', please install one of them\nException raised: "+e.msg)
-
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
-from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as Navigationtoolbar
-from matplotlib.figure import Figure
-from matplotlib import gridspec
-
-# import matplotlib
-# matplotlib.use('Qt5Agg')
-
-# matplotlib.rcParams['backend.qt4']='PySide'
-# matplotlib.style.use('ggplot')
-# matplotlib.style.use('seaborn-muted')
 
 
 #Embeddable matplotlib figure/canvas

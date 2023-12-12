@@ -45,7 +45,6 @@ from shesha.sutra_wrap import Rtc_FFF as Rtc
 
 from shesha.ao.wfs import noise_cov
 
-import typing
 from typing import List
 
 
@@ -147,7 +146,7 @@ def cmat_init(ncontrol: int, rtc: Rtc, p_controller: conf.Param_controller,
         print("Building cmat...")
         rtc.d_control[ncontrol].build_cmat(p_controller.maxcond)
 
-        if (p_controller.TTcond == None):
+        if (p_controller.TTcond is None):
             p_controller.set_TTcond(p_controller.maxcond)
 
         if ("tt" in [dm.type for dm in p_dms]):

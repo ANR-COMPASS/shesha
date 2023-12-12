@@ -42,7 +42,7 @@ from shesha.constants import CONST
 import shesha.util.utilities as util
 
 import numpy as np
-from shesha.sutra_wrap import Sensors, Rtc_FFF as Rtc
+from shesha.sutra_wrap import Sensors
 
 
 def comp_new_pyr_ampl(nwfs: int, ampli: float, p_wfss: list, p_tel: conf.Param_tel,

@@ -36,10 +36,6 @@
 #  If not, see <https://www.gnu.org/licenses/lgpl-3.0.txt>.
 
 from shesha.init.rtc_init import rtc_init
-from shesha.supervisor.components.sourceCompass import SourceCompass
-import shesha.constants as scons
-import numpy as np
-from typing import Union
 
 from shesha.supervisor.components.rtc.rtcAbstract import RtcAbstract, carmaWrap_context
 

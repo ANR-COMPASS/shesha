@@ -42,7 +42,6 @@ import shesha.constants as scons
 from shesha.constants import CONST
 from shesha.sutra_wrap import Sensors, Dms, Rtc_FFF as Rtc, Atmos
 
-import typing
 from typing import List
 
 

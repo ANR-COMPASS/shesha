@@ -1,7 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from guardians import groot, gamora, drax
-import h5py
 from rich.progress import track
 
 filename = "/home/fferreira/Data/roket_8m_nssp40_dir135_speed10.h5"

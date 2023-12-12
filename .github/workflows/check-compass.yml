@@ -40,23 +40,23 @@ jobs:
       run: |  
         eval "$(/home/compass/miniconda3/bin/conda shell.bash hook)"
         conda activate compass
-        ruff -- --format=github .  
+        ruff .  
       continue-on-error: true
     - name: Check Compass on scao_sh_16x16_8pix
       run: |
+        eval "$(/home/compass/miniconda3/bin/conda shell.bash hook)"
+        conda activate compass
         export SHESHA_ROOT=$PWD
         export PYTHONPATH=$SHESHA_ROOT:$PYTHONPATH
         export PYTHONDONTWRITEBYTECODE=1
-        eval "$(/home/compass/miniconda3/bin/conda shell.bash hook)"
-        conda activate compass
-        ipython shesha/scripts/closed_loop.py data/par/par4bench/scao_sh_16x16_8pix.py
+        python shesha/scripts/closed_loop.py data/par/par4bench/scao_sh_16x16_8pix.py
     - name: Check Compass
       run: |
+        eval "$(/home/compass/miniconda3/bin/conda shell.bash hook)"
+        conda activate compass
         export SHESHA_ROOT=$PWD
         export PYTHONPATH=$SHESHA_ROOT:$PYTHONPATH
         export PYTHONDONTWRITEBYTECODE=1
-        eval "$(/home/compass/miniconda3/bin/conda shell.bash hook)"
-        conda activate compass
         ./tests/checkCompass.sh
     - name: Archive check results
       uses: actions/upload-artifact@v3
@@ -66,11 +66,11 @@ jobs:
           report_E2E.md
     - name: Build coverage file and unit tests report
       run: |
+        eval "$(/home/compass/miniconda3/bin/conda shell.bash hook)"
+        conda activate compass
         export SHESHA_ROOT=$PWD
         export PYTHONPATH=$SHESHA_ROOT:$PYTHONPATH
         export PYTHONDONTWRITEBYTECODE=1
-        eval "$(/home/compass/miniconda3/bin/conda shell.bash hook)"
-        conda activate compass
         pytest --junitxml=pytest-sup.xml --cov-report=term-missing:skip-covered --cov=shesha tests/pytest/supervisor | tee pytest-sub-coverage.txt
         pytest --junitxml=pytest-rtc.xml --cov-report=term-missing:skip-covered --cov=shesha tests/pytest/rtc | tee pytest-rtc-coverage.txt
         pytest --junitxml=pytest-rtc_standalone.xml --cov-report=term-missing:skip-covered --cov=shesha tests/pytest/rtc_standalone | tee pytest-rtc_standalone-coverage.txt

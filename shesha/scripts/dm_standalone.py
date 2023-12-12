@@ -38,16 +38,11 @@
 # import cProfile
 # import pstats as ps
 
-import sys
-import os
 # import numpy as np
 import carmaWrap as ch
 import shesha.config as conf
-import time
 import numpy as np
 import matplotlib.pyplot as plt
-plt.ion()
-
 from shesha.init.geom_init import geom_init_generic
 from shesha.init.dm_init import dm_init_standalone
 

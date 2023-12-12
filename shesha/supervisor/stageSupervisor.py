@@ -36,10 +36,6 @@
 #  If not, see <https://www.gnu.org/licenses/lgpl-3.0.txt>.
 
 from shesha.supervisor.compassSupervisor import CompassSupervisor
-from shesha.supervisor.components import AtmosCompass, DmCompass, RtcCompass, TargetCompass, TelescopeCompass, WfsCompass
-from shesha.supervisor.optimizers import ModalBasis, Calibration, ModalGains
-import numpy as np
-import time
 
 import shesha.constants as scons
 

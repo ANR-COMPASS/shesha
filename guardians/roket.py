@@ -8,10 +8,9 @@ WFS non linearity, filtered modes and fitting
 Saved file contained temporal buffers of those contributors
 """
 
-import cProfile
-import pstats as ps
 
-import sys, os
+import sys
+import os
 import numpy as np
 from shesha.supervisor.compassSupervisor import CompassSupervisor
 from shesha.util.rtc_util import centroid_gain
@@ -19,11 +18,7 @@ from shesha.ao.tomo import create_nact_geom
 from shesha.ao.basis import compute_btt, compute_cmat_with_Btt
 import shesha.constants as scons
 import time
-import matplotlib.pyplot as pl
-pl.ion()
 import shesha.util.hdf5_util as h5u
-import pandas
-from scipy.sparse import csr_matrix
 
 
 class Roket(CompassSupervisor):

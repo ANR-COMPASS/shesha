@@ -9,7 +9,7 @@ def validfile(filename):
         Lambda = f.attrs["target.Lambda"][0]
     else:
         Lambda = 1.65
-    nactus = f["noise"][:].shape[0]
+    # nactus = f["noise"][:].shape[0]
     niter = f["noise"][:].shape[1]
     P = f["P"][:]
     nmodes = P.shape[0]
@@ -36,10 +36,10 @@ def validfile(filename):
 
 datapath = "/home/fferreira/Data/correlation/"
 filenames = glob.glob(datapath + "roket_8m*.h5")
-l = len(filenames)
+atm_layer = len(filenames)
 ind = 0
 for f in filenames:
     validfile(f)
     ind += 1
-    print(" reading : %d/%d\r" % (ind, l), end=' ')
+    print(" reading : %d/%d\r" % (ind, atm_layer), end=' ')
 print("read")

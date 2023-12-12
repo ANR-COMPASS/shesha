@@ -39,14 +39,14 @@ import shesha.config as conf
 import shesha.constants as scons
 from shesha.constants import CONST
 
-from shesha.ao import imats, cmats, tomo, basis, modopti
+from shesha.ao import imats, cmats, tomo, modopti
 
 from shesha.util import utilities, rtc_util
 from shesha.init import dm_init
 from typing import List
 
 import numpy as np
-from shesha.sutra_wrap import (carmaWrap_context, Sensors, Dms, Target, Rtc_brahma,
+from shesha.sutra_wrap import (carmaWrap_context, Sensors, Dms, Rtc_brahma,
                                Rtc_cacao_FFF, Atmos, Telescope)
 from shesha.sutra_wrap import Rtc_FFF as Rtc
 
@@ -132,7 +132,7 @@ def rtc_init(context: carmaWrap_context, tel: Telescope, wfs: Sensors, dms: Dms,
     if p_controllers is not None:
         if (p_wfss is not None and p_dms is not None):
             for i in range(ncontrol):
-                if not "dm" in dataBase:
+                if "dm" not in dataBase:
                     imat = imats.imat_geom(wfs, dms, p_wfss, p_dms, p_controllers[i],
                                            meth=0)
                 else:
@@ -153,8 +153,8 @@ def rtc_init(context: carmaWrap_context, tel: Telescope, wfs: Sensors, dms: Dms,
                 p_controller = p_controllers[0]
                 Nphi = np.where(p_geom._spupil)[0].size
 
-                list_dmseen = [p_dms[j].type for j in p_controller.ndm]
-                nactu = np.sum([p_dms[j]._ntotact for j in p_controller.ndm])
+                # list_dmseen = [p_dms[j].type for j in p_controller.ndm]
+                # nactu = np.sum([p_dms[j]._ntotact for j in p_controller.ndm])
 
                 nmodes = 0
                 if(p_controller.nmodes is not None):
@@ -441,9 +441,9 @@ def init_controller(context, i: int, p_controller: conf.Param_controller, p_wfss
     nactu = np.sum([p_dms[j]._ntotact for j in ndms])
     p_controller.set_nactu(int(nactu))
 
-    alt = np.array([p_dms[j].alt for j in p_controller.ndm], dtype=np.float32)
+    # alt = np.array([p_dms[j].alt for j in p_controller.ndm], dtype=np.float32)
 
-    list_dmseen = [p_dms[j].type for j in p_controller.ndm]
+    # list_dmseen = [p_dms[j].type for j in p_controller.ndm]
     if (p_controller.type == scons.ControllerType.GEO):
         Nphi = np.where(p_geom._spupil)[0].size
     else:
@@ -492,7 +492,7 @@ def init_controller(context, i: int, p_controller: conf.Param_controller, p_wfss
         try:
             p_controller._imat = imats.imat_geom(wfs, dms, p_wfss, p_dms, p_controller,
                                                  meth=0)
-        except:
+        except BaseException:
             print("p_controller._imat not set")
 
 

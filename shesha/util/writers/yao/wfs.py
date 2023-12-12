@@ -1,4 +1,3 @@
-import numpy as np
 
 YAO_WFSTYPE={"sh":"\"hartmann\"", "pyrhr":"\"pyramid\""}
 

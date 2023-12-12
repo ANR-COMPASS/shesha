@@ -38,8 +38,7 @@
 import os
 try:
     shesha_db = os.environ['SHESHA_DB_ROOT']
-except KeyError as err:
-    import warnings
+except KeyError:
     shesha_db = os.environ['SHESHA_ROOT'] + "/data/"
     # warnings.warn("'SHESHA_DB_ROOT' not defined, using default one: " + shesha_db)
 finally:
@@ -48,7 +47,6 @@ finally:
 
 import shesha.config as conf
 import shesha.constants as scons
-from shesha.util import utilities as util
 import numpy as np
 
 from shesha.sutra_wrap import Sensors
@@ -100,7 +98,7 @@ def make_lgs_prof1d(p_wfs: conf.Param_wfs, p_tel: conf.Param_tel, prof: np.ndarr
     profi = np.zeros((p_wfs._Ntot, p_wfs._nvalid), dtype=np.float32)
 
     subsdone = np.ones(p_wfs._nvalid, dtype=np.int32)
-    dif2do = np.zeros(p_wfs._nvalid, dtype=np.int32)
+    # dif2do = np.zeros(p_wfs._nvalid, dtype=np.int32)
 
     while (np.any(subsdone)):
         tmp = dOffAxis[np.where(subsdone)][0]
@@ -174,12 +172,12 @@ def make_lgs_prof1d(p_wfs: conf.Param_wfs, p_tel: conf.Param_tel, prof: np.ndarr
 
     p_wfs._azimuth = azimuth
 
-    if (center == "image"):
-        xcent = p_wfs._Ntot / 2. - 0.5
-        ycent = xcent
-    else:
-        xcent = p_wfs._Ntot / 2.  #+ 1
-        ycent = xcent
+    # if (center == "image"):
+    #     xcent = p_wfs._Ntot / 2. - 0.5
+    #     ycent = xcent
+    # else:
+    #     xcent = p_wfs._Ntot / 2.  #+ 1
+    #     ycent = xcent
 
     if (ysubs.size > 0):
         # TODO rotate
