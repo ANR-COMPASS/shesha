@@ -73,21 +73,32 @@ jobs:
         export PYTHONDONTWRITEBYTECODE=1
         eval "$(/home/compass/miniconda3/bin/conda shell.bash hook)"
         conda activate compass
-        pytest --junitxml=pytest.xml --cov-report=term-missing:skip-covered --cov=shesha tests/pytest/supervisor | tee pytest-coverage.txt
+        pytest --junitxml=pytest-sup.xml --cov-report=term-missing:skip-covered --cov=shesha tests/pytest/supervisor | tee pytest-sub-coverage.txt
         pytest --junitxml=pytest-rtc.xml --cov-report=term-missing:skip-covered --cov=shesha tests/pytest/rtc | tee pytest-rtc-coverage.txt
         pytest --junitxml=pytest-rtc_standalone.xml --cov-report=term-missing:skip-covered --cov=shesha tests/pytest/rtc_standalone | tee pytest-rtc_standalone-coverage.txt
+    - name: Archive check results
+      uses: actions/upload-artifact@v3
+      with:
+        name: unit_tests_report
+        path: |
+          pytest-sub-coverage.txt
+          pytest-sup.xml
+          pytest-rtc-coverage.txt
+          pytest-rtc.xml
+          pytest-rtc_standalone-coverage.txt
+          pytest-rtc_standalone.xml
     - name: Fix dubious ownership 
       run: git config --global --add safe.directory /__w/shesha/shesha
     - name: Pytest coverage comment
       uses: MishaKav/pytest-coverage-comment@main
       with:
         multiple-files: |
-          Supervisor, pytest-coverage.txt, pytest.xml
+          Supervisor, pytest-sub-coverage.txt, pytest-sup.xml
           RTC, pytest-rtc-coverage.txt, pytest-rtc.xml
           RTC Standalone, pytest-rtc_standalone-coverage.txt, pytest-rtc_standalone.xml
-        # pytest-xml-coverage-path: pytest-coverage.xml
-        # pytest-coverage-path: pytest-coverage.txt
-        # junitxml-path: pytest.xml
+        pytest-xml-coverage-path: ''
+        pytest-coverage-path: ''
+        junitxml-path: ''
         title: COMPASS Coverage Report
         badge-title: Coverage
         hide-badge: false
