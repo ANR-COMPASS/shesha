@@ -9,9 +9,16 @@ import sys
 import os
 import numpy as np
 import carmaWrap as ch
-import shesha as ao
 import time
 import hdf5_util as h5u
+
+from shesha.init.atmos_init import atmos_init
+from shesha.init.wfs_init import wfs_init
+from shesha.init.dm_init import dm_init
+from shesha.init.target_init import target_init
+from shesha.init.rtc_init import rtc_init
+
+from shesha.ao.tomo import create_nact_geom
 
 if (len(sys.argv) < 2):
     error = 'command line should be at least:"python -i test.py parameters_filename"\n with "parameters_filename" the path to the parameters file'
@@ -73,27 +80,27 @@ c = ch.carmaWrap_context(devices=np.array([6], dtype=np.int32))
 
 #    wfs
 print("->wfs")
-wfs, tel = ao.wfs_init(config.p_wfss, config.p_atmos, config.p_tel, config.p_geom,
+wfs, tel = wfs_init(config.p_wfss, config.p_atmos, config.p_tel, config.p_geom,
                        config.p_target, config.p_loop, config.p_dms)
 
 #   atmos
 print("->atmos")
-atm = ao.atmos_init(c, config.p_atmos, config.p_tel, config.p_geom, config.p_loop,
+atm = atmos_init(c, config.p_atmos, config.p_tel, config.p_geom, config.p_loop,
                     config.p_wfss, wfs, config.p_target, rank=0, clean=clean,
                     load=matricesToLoad)
 
 #   dm
 print("->dm")
-dms = ao.dm_init(config.p_dms, config.p_wfss, wfs, config.p_geom, config.p_tel)
+dms = dm_init(config.p_dms, config.p_wfss, wfs, config.p_geom, config.p_tel)
 
 #   target
 print("->target")
-tar = ao.target_init(c, tel, config.p_target, config.p_atmos, config.p_geom,
+tar = target_init(c, tel, config.p_target, config.p_atmos, config.p_geom,
                      config.p_tel, config.p_dms)
 
 print("->rtc")
 #   rtc
-rtc = ao.rtc_init(tel, wfs, config.p_wfss, dms, config.p_dms, config.p_geom,
+rtc = rtc_init(tel, wfs, config.p_wfss, dms, config.p_dms, config.p_geom,
                   config.p_rtc, config.p_atmos, atm, config.p_tel, config.p_loop,
                   clean=clean, simul_name=simul_name, load=matricesToLoad)
 
@@ -521,7 +528,7 @@ def compute_btt2():
 
 def compute_cmatWithBtt(Btt, nfilt):
     D = rtc.get_imat(0)
-    #D = ao.imat_geom(wfs,config.p_wfss,config.p_controllers[0],dms,config.p_dms,meth=0)
+    #D = imat_geom(wfs,config.p_wfss,config.p_controllers[0],dms,config.p_dms,meth=0)
     # Filtering on Btt modes
     Btt_filt = np.zeros((Btt.shape[0], Btt.shape[1] - nfilt))
     Btt_filt[:, :Btt_filt.shape[1] - 2] = Btt[:, :Btt.shape[1] - (nfilt + 2)]
@@ -670,7 +677,7 @@ rtc.set_cmat(0, cmat)
 R = rtc.get_cmat(0)
 imat = rtc.get_imat(0)
 RD = np.dot(R, imat)
-Nact = ao.create_nact_geom(config.p_dms, 0)
+Nact = create_nact_geom(config.p_dms, 0)
 gamma = 1. / 0.51495
 #gamma = centroid_gain(100)
 #print("gamma = ",gamma)
@@ -680,7 +687,7 @@ gamma = 1. / 0.51495
 #gRD = np.diag(diagRD)
 #gRD=np.diag(gRD)
 
-#imat_geom = ao.imat_geom(wfs,config.p_wfss,config.p_controllers[0],dms,config.p_dms,meth=0)
+#imat_geom = imat_geom(wfs,config.p_wfss,config.p_controllers[0],dms,config.p_dms,meth=0)
 #RDgeom = np.dot(R,imat_geom)
 #preloop(1000)
 

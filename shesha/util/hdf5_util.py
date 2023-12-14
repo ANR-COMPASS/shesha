@@ -526,7 +526,7 @@ def validInStore(store, savepath, matricetype):
 def configFromH5(filename, config):
     """ TODO: docstring
     """
-    #import shesha as ao
+    #import shesha.config as conf
 
     f = h5py.File(filename, "r")
 
@@ -731,9 +731,10 @@ def save_AB_in_database(k, A, B, istx, isty):
     """
     commit = check_output(["git", "rev-parse", "--short", "HEAD"]).decode('utf8').strip()
     print("writing files and updating database")
-    df = pandas.read_hdf(shesha_db + "/data/dataBase/matricesDataBase.h5", "A")
+    df = pandas.read_hdf(
+            os.getenv('SHESHA_ROOT') + "/data/dataBase/matricesDataBase.h5", "A")
     ind = len(df.index) - 1
-    savename = shesha_db + "/data/dataBase/turbu/A_" + \
+    savename = os.getenv('SHESHA_ROOT') + "/data/dataBase/turbu/A_" + \
         commit + "_" + str(ind) + ".h5"
     save_hdf5(savename, "A_" + str(k), A)
     save_hdf5(savename, "B_" + str(k), B)
@@ -782,9 +783,10 @@ def save_dm_geom_in_dataBase(ndm, influpos, ninflu, influstart, i1, j1, ok):
     """
     commit = check_output(["git", "rev-parse", "--short", "HEAD"]).decode('utf8').strip()
     print("writing files and updating database")
-    df = pandas.read_hdf(shesha_db + "/data/dataBase/matricesDataBase.h5", "dm")
+    df = pandas.read_hdf(
+            os.getenv('SHESHA_ROOT') + "/data/dataBase/matricesDataBase.h5", "dm")
     ind = len(df.index) - 1
-    savename = shesha_db + "/data/dataBase/mat/dm_" + \
+    savename = os.getenv('SHESHA_ROOT') + "/data/dataBase/mat/dm_" + \
         commit + "_" + str(ind) + ".h5"
     save_hdf5(savename, "influpos_" + str(ndm), influpos)
     save_hdf5(savename, "ninflu_" + str(ndm), ninflu)
@@ -818,8 +820,9 @@ def save_imat_in_dataBase(imat):
     """
     commit = check_output(["git", "rev-parse", "--short", "HEAD"]).decode('utf8').strip()
     print("writing files and updating database")
-    df = pandas.read_hdf(shesha_db + "/data/dataBase/matricesDataBase.h5", "imat")
+    df = pandas.read_hdf(
+            os.getenv('SHESHA_ROOT') + "/data/dataBase/matricesDataBase.h5", "imat")
     ind = len(df.index) - 1
-    savename = shesha_db + "/data/dataBase/mat/imat_" + \
+    savename = os.getenv('SHESHA_ROOT') + "/data/dataBase/mat/imat_" + \
         commit + "_" + str(ind) + ".h5"
     save_hdf5(savename, "imat", imat)

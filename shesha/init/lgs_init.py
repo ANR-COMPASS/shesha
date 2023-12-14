@@ -43,6 +43,7 @@ import numpy as np
 from shesha.sutra_wrap import Sensors
 import scipy.ndimage.interpolation as sci
 
+shesha_db = None
 try:
     shesha_db = os.environ['SHESHA_DB_ROOT']
 except KeyError:
@@ -52,10 +53,11 @@ except KeyError:
     else: # if SHESHA_ROOT is not defined, search for the data directory in the default package location
         if os.path.isdir(os.path.dirname(__file__) + "/../../data"):
             shesha_db = os.path.dirname(__file__) + "/../../data"
-        else:
-            raise RuntimeError("SHESHA_DB_ROOT and SHESHA_ROOT are not defined")
-finally:
-    shesha_savepath = shesha_db
+            
+if shesha_db is None:
+    raise RuntimeError("SHESHA_DB_ROOT is not defined. Please define it to point to the data directory of the shesha package.")
+
+shesha_savepath = shesha_db
 
 
 def make_lgs_prof1d(p_wfs: conf.ParamWfs, p_tel: conf.ParamTel, prof: np.ndarray,

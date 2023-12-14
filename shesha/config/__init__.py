@@ -35,17 +35,17 @@
 #  You should have received a copy of the GNU Lesser General Public License along with COMPASS.
 #  If not, see <https://www.gnu.org/licenses/lgpl-3.0.txt>.
 
-from shesha.config.pConfig import ParamConfig
 from shesha.config.pAtmos import ParamAtmos
+from shesha.config.pCentroider import ParamCentroider
+from shesha.config.pConfig import ParamConfig
+from shesha.config.pController import ParamController
 from shesha.config.pCoronagraph import ParamCoronagraph
 from shesha.config.pDms import ParamDm
 from shesha.config.pGeom import ParamGeom
 from shesha.config.pLoop import ParamLoop
+from shesha.config.pTarget import ParamTarget
 from shesha.config.pTel import ParamTel
 from shesha.config.pWfs import ParamWfs
-from shesha.config.pTarget import ParamTarget
-from shesha.config.pController import ParamController
-from shesha.config.pCentroider import ParamCentroider
 
 __all__ = ['ParamConfig', 'ParamAtmos', 'ParamCoronagraph', 
            'ParamDm', 'ParamGeom', 'ParamLoop', 'ParamTel', 

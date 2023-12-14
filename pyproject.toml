@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "shesha"
-version = "5.5.0"
+version = "5.5.0-0"
 description = "SHESHA is the python part of the COMPASS platform designed to meet the need of high-performance for the simulation of AO systems"
 authors = [
     "Florian Ferreira <florian.ferreira@obspm.fr>",
