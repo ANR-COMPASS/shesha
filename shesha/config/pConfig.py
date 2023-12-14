@@ -91,7 +91,14 @@ class ParamConfig(object):
         Args:
             filename_path: (str): path to the parameters file
         """
-        path = os.path.dirname(os.path.abspath(filename_path))
+        path = os.path.dirname(filename_path)
+
+        # If the path not exists try to find it in the package directory
+        if not os.path.isdir(path):
+            path = os.path.dirname(__file__) + "/../../" + path
+            
+        path = os.path.abspath(path)
+
         filename = os.path.basename(filename_path)
         name, ext = os.path.splitext(filename)
 

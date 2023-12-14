@@ -44,7 +44,7 @@ from shesha.config import ParamConfig
 
 precision = 1e-2
 
-config = ParamConfig(os.getenv("SHESHA_ROOT") + "/tests/pytest/par/test_sh.py")
+config = ParamConfig(os.path.dirname(__file__) + "/../par/test_sh.py")
 sup = Supervisor(config)
 
 sup.wfs._wfs.d_wfs[0].set_fakecam(True)

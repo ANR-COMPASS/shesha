@@ -55,7 +55,14 @@ import os
 try:
     shesha_dm = os.environ['SHESHA_DM_ROOT']
 except KeyError:
-    shesha_dm = os.environ['SHESHA_ROOT'] + "/data/dm-data"
+    # if SHESHA_DM_ROOT is not defined, test if SHESHA_ROOT is defined
+    if 'SHESHA_ROOT' in os.environ:
+        shesha_dm = os.environ['SHESHA_ROOT'] + "/data/dm-data"
+    else: # if SHESHA_ROOT is not defined, search for the data directory in the default package location
+        if os.path.isdir(os.path.dirname(__file__) + "/../../data/dm-data"):
+            shesha_dm = os.path.dirname(__file__) + "/../../data/dm-data"
+        else:
+            raise RuntimeError("SHESHA_DM_ROOT and SHESHA_ROOT are not defined")
 
 
 def dm_init(context: carmaWrap_context, p_dms: List[conf.ParamDm],

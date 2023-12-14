@@ -1,0 +1,72 @@
+[tool.poetry]
+name = "shesha"
+version = "5.5.0"
+description = "SHESHA is the python part of the COMPASS platform designed to meet the need of high-performance for the simulation of AO systems"
+authors = [
+    "Florian Ferreira <florian.ferreira@obspm.fr>",
+    "Damien Gratadour <damien.gratadour@obspm.fr>",
+    "Arnaud Sevin <arnaud.sevin@obspm.fr>",
+]
+maintainers = [
+    "Florian Ferreira <florian.ferreira@obspm.fr>",
+    "Arnaud Sevin <arnaud.sevin@obspm.fr>",
+]
+license = "LGPL-3.0-or-later"
+readme = "README.md"
+repository = "https://github.com/ANR-COMPASS/shesha"
+documentation = "https://shesha.readthedocs.io/en/master/"
+packages = [
+    { include = "data" },
+    { include = "shesha" },
+    { include = "CHANGELOG.md" },
+    { include = "report_E2E.md" },
+]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+astropy = "^6.0.0"
+docopt = "^0.6.2"
+h5py = "^3.10.0"
+ipython = "^8.18.1"
+matplotlib = "^3.8.2"
+numpy = "^1.26.2"
+pandas = "^2.1.4"
+pyqtgraph = "^0.13.3"
+scipy = "^1.11.4"
+tables = "^3.9.2"
+tabulate = "^0.9.0"
+rich = "^13.7.0"
+packaging = "^23.2"
+
+[tool.poetry.group.test.dependencies]
+coverage = "^7.3.3"
+pytest = "^7.4.3"
+pytest-cov = "^4.1.0"
+pytest-html = "^4.1.1"
+pytest-metadata = "^3.0.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.ruff]
+line-length = 100
+
+# Enable Pyflakes `E` and `F` codes by default.
+select = ["E", "F"]
+
+# ignore E501 Line too long
+ignore = ["E501"]
+
+# Assume Python 3.11.
+target-version = "py311"
+
+[tool.ruff.flake8-quotes]
+docstring-quotes = "double"
+
+[tool.ruff.mccabe]
+# Unlike Flake8, default to a complexity level of 10.
+max-complexity = 10
+
+[tool.ruff.pydocstyle]
+convention = "google"  # Accepts: "google", "numpy", or "pep257".

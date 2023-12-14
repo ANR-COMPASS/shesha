@@ -44,7 +44,7 @@ from shesha.config import ParamConfig
 
 precision = 1e-2
 
-config = ParamConfig(os.getenv("SHESHA_ROOT") + "/tests/pytest/par/test_sh.py")
+config = ParamConfig(os.path.dirname(__file__) + "/../par/test_sh.py")
 config.p_dms[0].unitpervolt = 500
 config.p_dms[0].push4imat = 0.5
 config.p_dms[1].unitpervolt = 500

@@ -35,6 +35,7 @@
 #  You should have received a copy of the GNU Lesser General Public License along with COMPASS.
 #  If not, see <https://www.gnu.org/licenses/lgpl-3.0.txt>.
 
+import math
 import numpy as np
 from astropy.io import fits
 
@@ -356,14 +357,14 @@ def make_zernike(nzer: int, size: int, diameter: int, xc=-1., yc=-1., ext=0):
 
         if ext:
             for i in range((n - m) // 2 + 1):
-                z[:, :, zn] = z[:, :, zn] + (-1.) ** i * zrmod ** (n - 2. * i) * float(np.math.factorial(n - i)) / \
-                    float(np.math.factorial(i) * np.math.factorial((n + m) // 2 - i) *
-                          np.math.factorial((n - m) // 2 - i))
+                z[:, :, zn] = z[:, :, zn] + (-1.) ** i * zrmod ** (n - 2. * i) * float(math.factorial(n - i)) / \
+                    float(math.factorial(i) * math.factorial((n + m) // 2 - i) *
+                          math.factorial((n - m) // 2 - i))
         else:
             for i in range((n - m) // 2 + 1):
-                z[:, :, zn] = z[:, :, zn] + (-1.) ** i * zr ** (n - 2. * i) * float(np.math.factorial(n - i)) / \
-                    float(np.math.factorial(i) * np.math.factorial((n + m) // 2 - i) *
-                          np.math.factorial((n - m) // 2 - i))
+                z[:, :, zn] = z[:, :, zn] + (-1.) ** i * zr ** (n - 2. * i) * float(math.factorial(n - i)) / \
+                    float(math.factorial(i) * math.factorial((n + m) // 2 - i) *
+                          math.factorial((n - m) // 2 - i))
 
         if ((zn + 1) % 2 == 1):
             if (m == 0):

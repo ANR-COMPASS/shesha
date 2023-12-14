@@ -42,7 +42,7 @@ import os
 import numpy as np
 import pytest
 
-config = ParamConfig(os.getenv("SHESHA_ROOT") + "/tests/pytest/par/test_pyrhr.py")
+config = ParamConfig(os.path.dirname(__file__) + "/../par/test_pyrhr.py")
 config.p_controllers[0].set_type("generic")
 
 sup = CompassSupervisor(config)

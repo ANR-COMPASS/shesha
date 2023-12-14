@@ -41,6 +41,22 @@ import os
 import numpy as np
 from subprocess import check_output
 
+shesha_db = None
+try:
+    shesha_db = os.environ['SHESHA_DB_ROOT']
+except KeyError:
+    # if SHESHA_DB_ROOT is not defined, test if SHESHA_ROOT is defined
+    if 'SHESHA_ROOT' in os.environ:
+        shesha_db = os.environ['SHESHA_ROOT'] + "/data"
+    else: # if SHESHA_ROOT is not defined, search for the data directory in the default package location
+        if os.path.isdir(os.path.dirname(__file__) + "/../../data"):
+            shesha_db = os.path.dirname(__file__) + "/../../data"
+
+if not shesha_db:
+    raise RuntimeError("neither SHESHA_DB_ROOT nor SHESHA_ROOT are defined, and the default data directory is not found. Please define SHESHA_DB_ROOT or SHESHA_ROOT to point to the data directory (see documentation).")
+
+shesha_savepath = shesha_db
+
 
 def updateParamDict(pdict, pClass, prefix):
     """
@@ -715,10 +731,9 @@ def save_AB_in_database(k, A, B, istx, isty):
     """
     commit = check_output(["git", "rev-parse", "--short", "HEAD"]).decode('utf8').strip()
     print("writing files and updating database")
-    df = pandas.read_hdf(
-            os.getenv('SHESHA_ROOT') + "/data/dataBase/matricesDataBase.h5", "A")
+    df = pandas.read_hdf(shesha_db + "/data/dataBase/matricesDataBase.h5", "A")
     ind = len(df.index) - 1
-    savename = os.getenv('SHESHA_ROOT') + "/data/dataBase/turbu/A_" + \
+    savename = shesha_db + "/data/dataBase/turbu/A_" + \
         commit + "_" + str(ind) + ".h5"
     save_hdf5(savename, "A_" + str(k), A)
     save_hdf5(savename, "B_" + str(k), B)
@@ -767,10 +782,9 @@ def save_dm_geom_in_dataBase(ndm, influpos, ninflu, influstart, i1, j1, ok):
     """
     commit = check_output(["git", "rev-parse", "--short", "HEAD"]).decode('utf8').strip()
     print("writing files and updating database")
-    df = pandas.read_hdf(
-            os.getenv('SHESHA_ROOT') + "/data/dataBase/matricesDataBase.h5", "dm")
+    df = pandas.read_hdf(shesha_db + "/data/dataBase/matricesDataBase.h5", "dm")
     ind = len(df.index) - 1
-    savename = os.getenv('SHESHA_ROOT') + "/data/dataBase/mat/dm_" + \
+    savename = shesha_db + "/data/dataBase/mat/dm_" + \
         commit + "_" + str(ind) + ".h5"
     save_hdf5(savename, "influpos_" + str(ndm), influpos)
     save_hdf5(savename, "ninflu_" + str(ndm), ninflu)
@@ -804,9 +818,8 @@ def save_imat_in_dataBase(imat):
     """
     commit = check_output(["git", "rev-parse", "--short", "HEAD"]).decode('utf8').strip()
     print("writing files and updating database")
-    df = pandas.read_hdf(
-            os.getenv('SHESHA_ROOT') + "/data/dataBase/matricesDataBase.h5", "imat")
+    df = pandas.read_hdf(shesha_db + "/data/dataBase/matricesDataBase.h5", "imat")
     ind = len(df.index) - 1
-    savename = os.getenv('SHESHA_ROOT') + "/data/dataBase/mat/imat_" + \
+    savename = shesha_db + "/data/dataBase/mat/imat_" + \
         commit + "_" + str(ind) + ".h5"
     save_hdf5(savename, "imat", imat)

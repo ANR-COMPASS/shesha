@@ -82,6 +82,14 @@ from shesha.widgets.widget_base import WidgetBase, uiLoader
 
 from shesha.supervisor.compassSupervisor import CompassSupervisor, scons
 
+if 'SHESHA_ROOT' in os.environ:
+    shesha_data = os.environ['SHESHA_ROOT'] + "/data"
+else: # if SHESHA_ROOT is not defined, search for the data directory in the default package location
+    if os.path.isdir(os.path.dirname(__file__) + "/../data"):
+        shesha_data = os.path.dirname(__file__) + "/../data"
+    else:
+        raise RuntimeError("SHESHA_ROOT are not defined")
+
 AOWindowTemplate, AOClassTemplate = uiLoader('widget_ao')
 
 # For debug
@@ -127,8 +135,8 @@ class widgetAOWindow(AOClassTemplate, WidgetBase):
         #############################################################
 
         # Default path for config files
-        self.defaultParPath = os.environ["SHESHA_ROOT"] + "/data/par/par4bench"
-        self.defaultAreaPath = os.environ["SHESHA_ROOT"] + "/data/layouts"
+        self.defaultParPath = shesha_data + "/par/par4bench"
+        self.defaultAreaPath = shesha_data + "/layouts"
         self.loadDefaultConfig()
 
         self.uiAO.wao_run.setCheckable(True)

@@ -36,21 +36,26 @@
 #  If not, see <https://www.gnu.org/licenses/lgpl-3.0.txt>.
 
 import os
-try:
-    shesha_db = os.environ['SHESHA_DB_ROOT']
-except KeyError:
-    shesha_db = os.environ['SHESHA_ROOT'] + "/data/"
-    # warnings.warn("'SHESHA_DB_ROOT' not defined, using default one: " + shesha_db)
-finally:
-    shesha_savepath = shesha_db
-# print("shesha_savepath:", shesha_savepath)
-
 import shesha.config as conf
 import shesha.constants as scons
 import numpy as np
 
 from shesha.sutra_wrap import Sensors
 import scipy.ndimage.interpolation as sci
+
+try:
+    shesha_db = os.environ['SHESHA_DB_ROOT']
+except KeyError:
+    # if SHESHA_DB_ROOT is not defined, test if SHESHA_ROOT is defined
+    if 'SHESHA_ROOT' in os.environ:
+        shesha_db = os.environ['SHESHA_ROOT'] + "/data"
+    else: # if SHESHA_ROOT is not defined, search for the data directory in the default package location
+        if os.path.isdir(os.path.dirname(__file__) + "/../../data"):
+            shesha_db = os.path.dirname(__file__) + "/../../data"
+        else:
+            raise RuntimeError("SHESHA_DB_ROOT and SHESHA_ROOT are not defined")
+finally:
+    shesha_savepath = shesha_db
 
 
 def make_lgs_prof1d(p_wfs: conf.ParamWfs, p_tel: conf.ParamTel, prof: np.ndarray,

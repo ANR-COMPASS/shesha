@@ -44,7 +44,13 @@ from . import utilities as util
 
 from shesha.constants import ApertureType, SpiderType
 
-EELT_data = os.environ.get('SHESHA_ROOT') + "/data/apertures/"
+if 'SHESHA_ROOT' in os.environ:
+    EELT_data = os.environ['SHESHA_ROOT'] + "/data/apertures"
+else: # if SHESHA_ROOT is not defined, search for the data directory in the default package location
+    if os.path.isdir(os.path.dirname(__file__) + "/../../data/apertures"):
+        EELT_data = os.path.dirname(__file__) + "/../../data/apertures"
+    else:
+        raise RuntimeError("SHESHA_ROOT are not defined")
 
 
 def make_pupil(dim, pupd, tel, xc=-1, yc=-1, real=0, halfSpider=False):

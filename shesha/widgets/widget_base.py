@@ -59,10 +59,8 @@ from pyqtgraph.dockarea import Dock, DockArea
 
 from shesha.util.matplotlibwidget import MatplotlibWidget
 
-
 def uiLoader(moduleName):
-    return loadUiType(os.environ["SHESHA_ROOT"] +
-                      "/shesha/widgets/%s.ui" % moduleName)  # type: type, type
+    return loadUiType(os.path.dirname(__file__) + f"/{moduleName}.ui")  # type: type, type
 
 
 BaseWidgetTemplate, BaseClassTemplate = uiLoader('widget_base')
