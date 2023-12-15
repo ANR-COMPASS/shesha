@@ -6,9 +6,8 @@ import h5py
 
 from bokeh.plotting import figure
 from bokeh.models import ColumnDataSource
-from bokeh.models.widgets import Panel, DataTable, TableColumn, Tabs, Button, RadioButtonGroup, Select, DataTable, DateFormatter, TableColumn, PreText
+from bokeh.models.widgets import Panel, DataTable, TableColumn, Button, RadioButtonGroup, Select, PreText
 from bokeh.layouts import layout, widgetbox
-from bokeh.io import curdoc, output_file, show
 
 from guardians import drax
 
@@ -222,9 +221,9 @@ class Bokeh_roket:
         self.pretext.text = """ Updating plot... Please wait"""
 
         basis_active = self.radioButton_basis.active
-        xi = []
-        yi = []
-        coloris = []
+        # xi = []
+        # yi = []
+        # coloris = []
 
         for c in self.contributors:
             self.source_variances[c].data = dict(x=[], y=[], color=[], legend=[])

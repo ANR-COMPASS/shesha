@@ -59,7 +59,6 @@ import numpy as np
 
 from subprocess import Popen, PIPE
 
-import shesha.ao as ao
 import shesha.constants as scons
 
 from shesha.supervisor.compassSupervisor import CompassSupervisor
@@ -162,7 +161,6 @@ if __name__ == '__main__':
     supervisor = CanapassSupervisor(config, cacao=True)
 
     try:
-        from subprocess import Popen, PIPE
         from hraa.server.pyroServer import PyroServer
         import Pyro4
         Pyro4.config.REQUIRE_EXPOSE = False
@@ -174,7 +172,7 @@ if __name__ == '__main__':
         else:
             user = out.split(b"\n")[0].decode("utf-8")
             print("User is " + user)
-        if (supervisor.corono == None):
+        if (supervisor.corono is None):
             from shesha.util.pyroEmptyClass import PyroEmptyClass
             coro2pyro = PyroEmptyClass()
         else:
@@ -195,6 +193,6 @@ if __name__ == '__main__':
         server = PyroServer(listDevices=devices, listNames=nname)
         #server.add_device(supervisor, "waoconfig_" + user)
         server.start()
-    except:
+    except BaseException:
         raise EnvironmentError(
                 "Missing dependencies (code HRAA or Pyro4 or Dill Serializer)")

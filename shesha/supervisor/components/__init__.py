@@ -34,17 +34,14 @@
 #
 #  You should have received a copy of the GNU Lesser General Public License along with COMPASS.
 #  If not, see <https://www.gnu.org/licenses/lgpl-3.0.txt>.
-__all__ = [
-        "atmosCompass", "dmCompass", "rtc", "targetCompass", "sourceCompass",
-        "telescopeCompass", "wfsCompass"
-]
 
-from .atmosCompass import AtmosCompass
-from .dmCompass import DmCompass
-from .rtc.rtcCompass import RtcCompass
-from .rtc.rtcStandalone import RtcStandalone
-from .targetCompass import TargetCompass
-from .sourceCompass import SourceCompass
-from .telescopeCompass import TelescopeCompass
-from .wfsCompass import WfsCompass
-from .coronagraph.coronagraphCompass import CoronagraphCompass
+from shesha.supervisor.components.atmosCompass import AtmosCompass
+from shesha.supervisor.components.dmCompass import DmCompass
+from shesha.supervisor.components.rtc import RtcCompass, RtcStandalone
+from shesha.supervisor.components.targetCompass import TargetCompass
+from shesha.supervisor.components.sourceCompass import SourceCompass
+from shesha.supervisor.components.telescopeCompass import TelescopeCompass
+from shesha.supervisor.components.wfsCompass import WfsCompass
+from shesha.supervisor.components.coronagraph import CoronagraphCompass, GenericCoronagraph, PerfectCoronagraphCompass, StellarCoronagraphCompass
+
+__all__ = ['AtmosCompass', 'DmCompass', 'RtcCompass', 'RtcStandalone', 'TargetCompass', 'SourceCompass', 'TelescopeCompass', 'WfsCompass', 'CoronagraphCompass', 'GenericCoronagraph', 'PerfectCoronagraphCompass', 'StellarCoronagraphCompass']

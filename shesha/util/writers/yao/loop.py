@@ -5,9 +5,9 @@ def write_loop(file_name, loop, controller):
     Args:
         file_name (str) : yao parameter file name
 
-        loop : (Param_loop) : compass loop parameters
+        loop : (ParamLoop) : compass loop parameters
 
-        controller : (Param_controller) : compass controller parameters
+        controller : (ParamController) : compass controller parameters
     """
     f=open(file_name,"a+")
     f.write("\n\n//------------------------------")

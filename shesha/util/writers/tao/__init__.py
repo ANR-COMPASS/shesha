@@ -1,5 +1,5 @@
-from shesha.util.writers.tao.sysParams import *
-from shesha.util.writers.tao.atmParams import *
+from shesha.util.writers.tao.sysParams import write_json_sys_param
+from shesha.util.writers.tao.atmParams import write_json_atm_param
 from shesha.util.writers import common
 
 def write_parfiles(sup, *, file_name_sys="./sysParams.json",

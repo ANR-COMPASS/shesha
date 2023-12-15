@@ -58,7 +58,6 @@ Example:
 
 import numpy as np
 import time
-from typing import Any, Dict, Tuple, Callable, List
 from shesha.supervisor.stageSupervisor import StageSupervisor
 
 class TwoStagesManager(object):
@@ -276,13 +275,13 @@ if __name__ == '__main__':
                 print("User is " + user)
 
 
-            if (supervisor1.corono == None):
+            if (supervisor1.corono is None):
                 from shesha.util.pyroEmptyClass import PyroEmptyClass
                 coro2pyro1 = PyroEmptyClass()
             else:
                 coro2pyro1 = supervisor1.corono
 
-            if (supervisor2.corono == None):
+            if (supervisor2.corono is None):
                 from shesha.util.pyroEmptyClass import PyroEmptyClass
                 coro2pyro2 = PyroEmptyClass()
             else:
@@ -322,7 +321,7 @@ if __name__ == '__main__':
             server = PyroServer(listDevices=devices, listNames=nname)
             #server.add_device(supervisor, "waoconfig_" + user)
             server.start()
-        except:
+        except BaseException:
             raise EnvironmentError(
                     "Missing dependencies (code HRAA or Pyro4 or Dill Serializer)")
         

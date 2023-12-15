@@ -1,5 +1,4 @@
 import json
-import numpy as np
 from shesha.util.writers import common
 
 def write_json_atm_param(sup, *, file_name="./atm-params.json"):

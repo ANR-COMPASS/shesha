@@ -37,7 +37,6 @@
 
 import shesha.config as conf
 
-import shesha.constants as scons
 from shesha.constants import CONST
 
 import numpy as np
@@ -45,18 +44,18 @@ from shesha.sutra_wrap import carmaWrap_context, Target, Target_brahma, Telescop
 
 
 def target_init(ctxt: carmaWrap_context, telescope: Telescope, p_targets: list,
-                p_atmos: conf.Param_atmos, p_tel: conf.Param_tel,
-                p_geom: conf.Param_geom, dm=None, brahma=False):
+                p_atmos: conf.ParamAtmos, p_tel: conf.ParamTel,
+                p_geom: conf.ParamGeom, dm=None, brahma=False):
     """Create a cython target from parametres structures
 
     Args:
         ctxt: (carmaWrap_context) :
         telescope: (Telescope): Telescope object
-        p_targets: (lis of Param_target) : target_settings
-        p_atmos: (Param_atmos) : atmos settings
-        p_tel: (Param_tel) : telescope settings
-        p_geom: (Param_geom) : geom settings
-        dm: (Param_dm) : (optional) dm settings
+        p_targets: (lis of ParamTarget) : target_settings
+        p_atmos: (ParamAtmos) : atmos settings
+        p_tel: (ParamTel) : telescope settings
+        p_geom: (ParamGeom) : geom settings
+        dm: (ParamDm) : (optional) dm settings
         brahma: (bool): (optional) brahma flag
     :return:
         tar: (Target): Target object

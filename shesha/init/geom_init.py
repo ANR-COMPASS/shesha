@@ -42,11 +42,10 @@ from shesha.constants import CONST
 import shesha.util.make_pupil as mkP
 import shesha.util.utilities as util
 from shesha.sutra_wrap import carmaWrap_context, Telescope
-from shesha.constants import ApertureType
 import numpy as np
 
 
-def tel_init(context: carmaWrap_context, p_geom: conf.Param_geom, p_tel: conf.Param_tel,
+def tel_init(context: carmaWrap_context, p_geom: conf.ParamGeom, p_tel: conf.ParamTel,
              r0=None, ittime=None, p_wfss=None, dm=None):
     """
         Initialize the overall geometry of the AO system, including pupil and WFS
@@ -54,18 +53,18 @@ def tel_init(context: carmaWrap_context, p_geom: conf.Param_geom, p_tel: conf.Pa
     Args:
         context: (carmaWrap_context) : context
 
-        p_geom: (Param_geom) : geom settings
+        p_geom: (ParamGeom) : geom settings
 
-        p_tel: (Param_tel) : telescope settings
+        p_tel: (ParamTel) : telescope settings
 
         r0: (float) : atmos r0 @ 0.5 microns
 
         ittime: (float) : 1/loop frequency [s]
 
-        p_wfss: (list of Param_wfs) : wfs settings
+        p_wfss: (list of ParamWfs) : wfs settings
 
     Kwargs:
-        dm: (list of Param_dm) : dms settings [=None]
+        dm: (list of ParamDm) : dms settings [=None]
 
     :return:
         telescope: (Telescope): Telescope object
@@ -116,19 +115,19 @@ def tel_init(context: carmaWrap_context, p_geom: conf.Param_geom, p_tel: conf.Pa
     return telescope
 
 
-def init_wfs_geom(p_wfs: conf.Param_wfs, r0: float, p_tel: conf.Param_tel,
-                  p_geom: conf.Param_geom, ittime: float, verbose=1):
+def init_wfs_geom(p_wfs: conf.ParamWfs, r0: float, p_tel: conf.ParamTel,
+                  p_geom: conf.ParamGeom, ittime: float, verbose=1):
     """Compute the geometry of WFSs: valid subaps, positions of the subaps,
     flux per subap, etc...
 
     Args:
-        p_wfs: (Param_wfs) : wfs settings
+        p_wfs: (ParamWfs) : wfs settings
 
         r0: (float) : atmos r0 @ 0.5 microns
 
-        p_tel: (Param_tel) : telescope settings
+        p_tel: (ParamTel) : telescope settings
 
-        geom: (Param_geom) : geom settings
+        geom: (ParamGeom) : geom settings
 
         ittime: (float) : 1/loop frequency [s]
 
@@ -172,15 +171,15 @@ def init_wfs_geom(p_wfs: conf.Param_wfs, r0: float, p_tel: conf.Param_tel,
         raise RuntimeError("This WFS can not be used")
 
 
-def init_wfs_size(p_wfs: conf.Param_wfs, r0: float, p_tel: conf.Param_tel, verbose=1):
+def init_wfs_size(p_wfs: conf.ParamWfs, r0: float, p_tel: conf.ParamTel, verbose=1):
     """Compute all the parameters usefull for further WFS image computation (array sizes)
 
     Args:
-        p_wfs: (Param_wfs) : wfs settings
+        p_wfs: (ParamWfs) : wfs settings
 
         r0: (float) : atmos r0 @ 0.5 microns
 
-        p_tel: (Param_tel) : telescope settings
+        p_tel: (ParamTel) : telescope settings
 
         verbose: (int) : (optional) display informations if 0
 
@@ -418,19 +417,19 @@ def compute_nphotons(wfs_type, ittime, optthroughput, diam, cobs=0, nxsub=0, zer
     return nphotons
 
 
-def init_pyrhr_geom(p_wfs: conf.Param_wfs, r0: float, p_tel: conf.Param_tel,
-                    p_geom: conf.Param_geom, ittime: float, verbose: bool = True):
+def init_pyrhr_geom(p_wfs: conf.ParamWfs, r0: float, p_tel: conf.ParamTel,
+                    p_geom: conf.ParamGeom, ittime: float, verbose: bool = True):
     """Compute the geometry of PYRHR WFSs: valid subaps, positions of the subaps,
     flux per subap, etc...
 
     Args:
-        p_wfs: (Param_wfs) : wfs settings
+        p_wfs: (ParamWfs) : wfs settings
 
         r0: (float) : atmos r0 @ 0.5 microns
 
-        p_tel: (Param_tel) : telescope settings
+        p_tel: (ParamTel) : telescope settings
 
-        geom: (Param_geom) : geom settings
+        geom: (ParamGeom) : geom settings
 
         ittime: (float) : 1/loop frequency [s]
 
@@ -461,9 +460,9 @@ def init_pyrhr_geom(p_wfs: conf.Param_wfs, r0: float, p_tel: conf.Param_tel,
 
     # Creating pyramid mask
     pyrsize = p_wfs._Nfft
-    cobs = p_tel.cobs
-    rpup = p_geom.pupdiam / 2.0
-    dpup = p_geom.pupdiam
+    # cobs = p_tel.cobs
+    # rpup = p_geom.pupdiam / 2.0
+    # dpup = p_geom.pupdiam
     nrebin = p_wfs._nrebin
     fracsub = p_wfs.fracsub
     if p_wfs.pyr_pup_sep == -1:
@@ -655,19 +654,19 @@ def init_pyrhr_geom(p_wfs: conf.Param_wfs, r0: float, p_tel: conf.Param_tel,
     p_wfs._pyr_offsets = pyrtmp  # pshift
 
 
-def init_sh_geom(p_wfs: conf.Param_wfs, r0: float, p_tel: conf.Param_tel,
-                 p_geom: conf.Param_geom, ittime: float, verbose: bool = True):
+def init_sh_geom(p_wfs: conf.ParamWfs, r0: float, p_tel: conf.ParamTel,
+                 p_geom: conf.ParamGeom, ittime: float, verbose: bool = True):
     """Compute the geometry of SH WFSs: valid subaps, positions of the subaps,
     flux per subap, etc...
 
     Args:
-        p_wfs: (Param_wfs) : wfs settings
+        p_wfs: (ParamWfs) : wfs settings
 
         r0: (float) : atmos r0 @ 0.5 microns
 
-        p_tel: (Param_tel) : telescope settings
+        p_tel: (ParamTel) : telescope settings
 
-        geom: (Param_geom) : geom settings
+        geom: (ParamGeom) : geom settings
 
         ittime: (float) : 1/loop frequency [s]
 
@@ -894,13 +893,13 @@ def init_sh_geom(p_wfs: conf.Param_wfs, r0: float, p_tel: conf.Param_tel,
         pyr_focmask = focmask * 1.0  # np.fft.fftshift(focmask*1.0)
         p_wfs._submask = np.fft.fftshift(pyr_focmask)
 
-def geom_init(p_geom: conf.Param_geom, p_tel: conf.Param_tel, padding=2):
+def geom_init(p_geom: conf.ParamGeom, p_tel: conf.ParamTel, padding=2):
     """
         Initialize the system geometry
 
     Args:
-        p_geom: (Param_geom) : geometry settings
-        p_tel: (Param_tel) : telescope settings
+        p_geom: (ParamGeom) : geometry settings
+        p_tel: (ParamTel) : telescope settings
         padding: (optional) : padding factor for PYRHR geometry
     """
 

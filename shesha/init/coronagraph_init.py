@@ -48,7 +48,7 @@ import shesha.util.coronagraph_utils as util
 
 # TODO : add some checks (dimension, type, etc...)
 
-def init_coronagraph(p_corono: conf.Param_corono, pupdiam):
+def init_coronagraph(p_corono: conf.ParamCoronagraph, pupdiam):
     """ Initialize the coronagraph
     """
     wavelength_0 = p_corono._wavelength_0
@@ -79,7 +79,7 @@ def init_coronagraph(p_corono: conf.Param_corono, pupdiam):
         init_focal_plane_mask(p_corono)
         init_lyot_stop(p_corono, pupdiam)
 
-def init_sphere_aplc(p_corono: conf.Param_corono, pupdiam):
+def init_sphere_aplc(p_corono: conf.ParamCoronagraph, pupdiam):
     """ Dedicated function for SPHERE APLC coronagraph init
 
     References:
@@ -93,7 +93,7 @@ def init_sphere_aplc(p_corono: conf.Param_corono, pupdiam):
     init_apodizer(p_corono, pupdiam)
 
     # fpm init
-    if p_corono._focal_plane_mask_name == None:
+    if p_corono._focal_plane_mask_name is None:
         p_corono.set_focal_plane_mask_name(scons.FpmType.SPHERE_APLC_fpm_ALC2)
     init_focal_plane_mask(p_corono)
 
@@ -102,26 +102,26 @@ def init_sphere_aplc(p_corono: conf.Param_corono, pupdiam):
     init_lyot_stop(p_corono, pupdiam)
 
     # image init
-    if p_corono._dim_image == None:
+    if p_corono._dim_image is None:
         p_corono.set_dim_image(256)
-    if p_corono._image_sampling == None:
+    if p_corono._image_sampling is None:
         irdis_plate_scale = 12.25  # [mas]
         VLT_pupil_diameter = 8  # [m]
         lambda_over_D = p_corono._wavelength_0 * 1e-6 / VLT_pupil_diameter  # [rad]
         image_sampling = (lambda_over_D * 180 / np.pi * 3600 * 1000) / irdis_plate_scale
         p_corono.set_image_sampling(image_sampling)
 
-def init_perfect_coronagraph(p_corono: conf.Param_corono, pupdiam):
+def init_perfect_coronagraph(p_corono: conf.ParamCoronagraph, pupdiam):
     """ Dedicated function for perfect coronagraph init
     """
     pass
 
-def init_apodizer(p_corono: conf.Param_corono, pupdiam):
+def init_apodizer(p_corono: conf.ParamCoronagraph, pupdiam):
     """ Apodizer init
     """
     if p_corono._apodizer_name == scons.ApodizerType.SPHERE_APLC_APO1:
         apodizer = util.make_sphere_apodizer(pupdiam)
-    elif p_corono._apodizer_name == None:
+    elif p_corono._apodizer_name is None:
         apodizer = np.ones((pupdiam, pupdiam))
     elif isinstance(p_corono._apodizer_name, str):
         if not os.path.exists(p_corono._apodizer_name):
@@ -133,7 +133,7 @@ def init_apodizer(p_corono: conf.Param_corono, pupdiam):
         raise TypeError('apodizer name should be a string')
     p_corono.set_apodizer(apodizer)
 
-def init_focal_plane_mask(p_corono: conf.Param_corono):
+def init_focal_plane_mask(p_corono: conf.ParamCoronagraph):
     """ Focal plane mask init
     """
     if p_corono._focal_plane_mask_name == scons.FpmType.CLASSICAL_LYOT:
@@ -157,7 +157,7 @@ def init_focal_plane_mask(p_corono: conf.Param_corono):
 
     if classical_lyot:
         p_corono.set_babinet_trick(True)
-        if p_corono._fpm_sampling == None:
+        if p_corono._fpm_sampling is None:
             p_corono.set_fpm_sampling(20.)
         lyot_fpm_radius_in_pix = p_corono._fpm_sampling * p_corono._lyot_fpm_radius
         dim_fpm = 2 * int(lyot_fpm_radius_in_pix) + 2
@@ -175,7 +175,7 @@ def init_focal_plane_mask(p_corono: conf.Param_corono):
         fpm_array = pfits.getdata(p_corono._focal_plane_mask_name)
         p_corono.set_dim_fpm(fpm_array.shape[0])
         print(p_corono._dim_fpm)
-        if p_corono._fpm_sampling == None:
+        if p_corono._fpm_sampling is None:
             p_corono.set_fpm_sampling(p_corono._image_sampling)
         if len(fpm_array.shape) == 2:
             fpm = [fpm_array] * p_corono._nb_wav
@@ -185,12 +185,12 @@ def init_focal_plane_mask(p_corono: conf.Param_corono):
                 fpm.append(fpm_array[:, :, i])
     p_corono.set_focal_plane_mask(fpm)
 
-def init_lyot_stop(p_corono: conf.Param_corono, pupdiam):
+def init_lyot_stop(p_corono: conf.ParamCoronagraph, pupdiam):
     """ Lyot stop init
     """
     if p_corono._lyot_stop_name == scons.LyotStopType.SPHERE_APLC_LYOT_STOP:
         lyot_stop = util.make_sphere_lyot_stop(pupdiam)
-    elif p_corono._lyot_stop_name == None:
+    elif p_corono._lyot_stop_name is None:
         lyot_stop = np.ones((pupdiam, pupdiam))
     elif isinstance(p_corono._lyot_stop_name, str):
         if not os.path.exists(p_corono._lyot_stop_name):
@@ -202,7 +202,7 @@ def init_lyot_stop(p_corono: conf.Param_corono, pupdiam):
         raise TypeError('Lyot stop name should be a string')
     p_corono.set_lyot_stop(lyot_stop)
 
-def init_mft(p_corono: conf.Param_corono, pupdiam, planes, center_on_pixel=False):
+def init_mft(p_corono: conf.ParamCoronagraph, pupdiam, planes, center_on_pixel=False):
     """ Initialize mft matrices
     """
     dim_fpm = p_corono._dim_fpm
@@ -296,7 +296,7 @@ def mft_matrices(dim_input,
         raise TypeError(error_string_dim_input)
 
     # check dimensions and type of real_dim_input
-    if real_dim_input == None:
+    if real_dim_input is None:
         real_dim_input = dim_input
     error_string_real_dim_input = "'real_dim_input' must be an int (square input pupil) or tuple of ints of dimension 2"
     if np.isscalar(real_dim_input):

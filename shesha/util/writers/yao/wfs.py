@@ -1,4 +1,3 @@
-import numpy as np
 
 YAO_WFSTYPE={"sh":"\"hartmann\"", "pyrhr":"\"pyramid\""}
 
@@ -20,7 +19,7 @@ def write_wfs(file_name, wfs, index, *, sub_system=1):
     Args:
         file_name : (str) : name of the file to append the parameter to
 
-        wfs : (Param_wfs) : compass wfs parameters
+        wfs : (ParamWfs) : compass wfs parameters
 
         index :(int) : wfs index in ayo parameter file
 
@@ -72,7 +71,7 @@ def write_wfss(file_name, wfss, *, n_wfs=-1, sub_system=1, offset=0):
     Args:
         file_name : (str) : name of the file to append the parameter to
 
-        wfss : (list[ Param_wfs]) : compass wfs parameters list
+        wfss : (list[ ParamWfs]) : compass wfs parameters list
 
     Kwargs:
         n_wfs : (int) : (optional), default -1 number of wfs passed to yao (-1 : all wfs)

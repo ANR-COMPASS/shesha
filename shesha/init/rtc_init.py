@@ -39,21 +39,21 @@ import shesha.config as conf
 import shesha.constants as scons
 from shesha.constants import CONST
 
-from shesha.ao import imats, cmats, tomo, basis, modopti
+from shesha.ao import imats, cmats, tomo, modopti
 
 from shesha.util import utilities, rtc_util
 from shesha.init import dm_init
 from typing import List
 
 import numpy as np
-from shesha.sutra_wrap import (carmaWrap_context, Sensors, Dms, Target, Rtc_brahma,
+from shesha.sutra_wrap import (carmaWrap_context, Sensors, Dms, Rtc_brahma,
                                Rtc_cacao_FFF, Atmos, Telescope)
 from shesha.sutra_wrap import Rtc_FFF as Rtc
 
 
 def rtc_init(context: carmaWrap_context, tel: Telescope, wfs: Sensors, dms: Dms,
-             atmos: Atmos, p_wfss: list, p_tel: conf.Param_tel, p_geom: conf.Param_geom,
-             p_atmos: conf.Param_atmos, ittime: float, p_centroiders=None,
+             atmos: Atmos, p_wfss: list, p_tel: conf.ParamTel, p_geom: conf.ParamGeom,
+             p_atmos: conf.ParamAtmos, ittime: float, p_centroiders=None,
              p_controllers=None, p_dms=None, do_refslp=False, brahma=False, cacao=False,
              tar=None, dataBase={}, use_DB=False):
     """Initialize all the SutraRtc objects : centroiders and controllers
@@ -69,22 +69,22 @@ def rtc_init(context: carmaWrap_context, tel: Telescope, wfs: Sensors, dms: Dms,
 
         atmos: (Atmos) : Atmos object
 
-        p_wfss: (list of Param_wfs) : wfs settings
+        p_wfss: (list of ParamWfs) : wfs settings
 
-        p_tel: (Param_tel) : telescope settings
+        p_tel: (ParamTel) : telescope settings
 
-        p_geom: (Param_geom) : geom settings
+        p_geom: (ParamGeom) : geom settings
 
-        p_atmos: (Param_atmos) : atmos settings
+        p_atmos: (ParamAtmos) : atmos settings
 
         ittime: (float) : iteration time [s]
 
     Kwargs:
-        p_centroiders : (list of Param_centroider): centroiders settings
+        p_centroiders : (list of ParamCentroider): centroiders settings
 
-        p_controllers : (list of Param_controller): controllers settings
+        p_controllers : (list of ParamController): controllers settings
 
-        p_dms: (list of Param_dms) : dms settings
+        p_dms: (list of ParamDms) : dms settings
 
         do_refslp : (bool): do ref slopes flag, default=False
 
@@ -132,7 +132,7 @@ def rtc_init(context: carmaWrap_context, tel: Telescope, wfs: Sensors, dms: Dms,
     if p_controllers is not None:
         if (p_wfss is not None and p_dms is not None):
             for i in range(ncontrol):
-                if not "dm" in dataBase:
+                if "dm" not in dataBase:
                     imat = imats.imat_geom(wfs, dms, p_wfss, p_dms, p_controllers[i],
                                            meth=0)
                 else:
@@ -153,8 +153,8 @@ def rtc_init(context: carmaWrap_context, tel: Telescope, wfs: Sensors, dms: Dms,
                 p_controller = p_controllers[0]
                 Nphi = np.where(p_geom._spupil)[0].size
 
-                list_dmseen = [p_dms[j].type for j in p_controller.ndm]
-                nactu = np.sum([p_dms[j]._ntotact for j in p_controller.ndm])
+                # list_dmseen = [p_dms[j].type for j in p_controller.ndm]
+                # nactu = np.sum([p_dms[j]._ntotact for j in p_controller.ndm])
 
                 nmodes = 0
                 if(p_controller.nmodes is not None):
@@ -235,9 +235,9 @@ def rtc_standalone(context: carmaWrap_context, nwfs: int, nvalid: list, nactu: i
     return rtc
 
 
-def init_centroider(context, nwfs: int, p_wfs: conf.Param_wfs,
-                    p_centroider: conf.Param_centroider, p_tel: conf.Param_tel,
-                    p_atmos: conf.Param_atmos, wfs: Sensors, rtc: Rtc):
+def init_centroider(context, nwfs: int, p_wfs: conf.ParamWfs,
+                    p_centroider: conf.ParamCentroider, p_tel: conf.ParamTel,
+                    p_atmos: conf.ParamAtmos, wfs: Sensors, rtc: Rtc):
     """ Initialize a centroider object in Rtc
 
     Args:
@@ -245,9 +245,9 @@ def init_centroider(context, nwfs: int, p_wfs: conf.Param_wfs,
 
         nwfs : (int) : index of wfs
 
-        p_wfs : (Param_wfs): wfs settings
+        p_wfs : (ParamWfs): wfs settings
 
-        p_centroider : (Param_centroider) : centroider settings
+        p_centroider : (ParamCentroider) : centroider settings
 
         wfs: (Sensors): Sensor object
 
@@ -319,13 +319,13 @@ def init_centroider(context, nwfs: int, p_wfs: conf.Param_wfs,
                                              p_centroider.weights.ndim)
 
 
-def comp_weights(p_centroider: conf.Param_centroider, p_wfs: conf.Param_wfs, npix: int):
+def comp_weights(p_centroider: conf.ParamCentroider, p_wfs: conf.ParamWfs, npix: int):
     """ Compute the weights used by centroider wcog and corr
 
     Args:
-        p_centroider : (Param_centroider) : centroider settings
+        p_centroider : (ParamCentroider) : centroider settings
 
-        p_wfs : (Param_wfs) : wfs settings
+        p_wfs : (ParamWfs) : wfs settings
 
         npix: (int):
     """
@@ -375,11 +375,11 @@ def comp_weights(p_centroider: conf.Param_centroider, p_wfs: conf.Param_wfs, npi
                     p_wfs.npix // 2 - 0.5).astype(np.float32)
 
 
-def init_controller(context, i: int, p_controller: conf.Param_controller, p_wfss: list,
-                    p_geom: conf.Param_geom, p_dms: list, p_atmos: conf.Param_atmos,
-                    ittime: float, p_tel: conf.Param_tel, rtc: Rtc, dms: Dms,
+def init_controller(context, i: int, p_controller: conf.ParamController, p_wfss: list,
+                    p_geom: conf.ParamGeom, p_dms: list, p_atmos: conf.ParamAtmos,
+                    ittime: float, p_tel: conf.ParamTel, rtc: Rtc, dms: Dms,
                     wfs: Sensors, tel: Telescope, atmos: Atmos,
-                    p_centroiders: List[conf.Param_centroider], do_refslp=False,
+                    p_centroiders: List[conf.ParamCentroider], do_refslp=False,
                     dataBase={}, use_DB=False):
     """ Initialize the controller part of rtc
 
@@ -388,19 +388,19 @@ def init_controller(context, i: int, p_controller: conf.Param_controller, p_wfss
 
         i : (int) : controller index
 
-        p_controller: (Param_controller) : controller settings
+        p_controller: (ParamController) : controller settings
 
-        p_wfss: (list of Param_wfs) : wfs settings
+        p_wfss: (list of ParamWfs) : wfs settings
 
-        p_geom: (Param_geom) : geom settings
+        p_geom: (ParamGeom) : geom settings
 
-        p_dms: (list of Param_dms) : dms settings
+        p_dms: (list of ParamDms) : dms settings
 
-        p_atmos: (Param_atmos) : atmos settings
+        p_atmos: (ParamAtmos) : atmos settings
 
         ittime: (float) : iteration time [s]
 
-        p_tel: (Param_tel) : telescope settings
+        p_tel: (ParamTel) : telescope settings
 
         rtc: (Rtc) : Rtc objet
 
@@ -412,7 +412,7 @@ def init_controller(context, i: int, p_controller: conf.Param_controller, p_wfss
 
         atmos: (Atmos) : Atmos object
 
-        p_centroiders: (list of Param_centroider): centroiders settings
+        p_centroiders: (list of ParamCentroider): centroiders settings
 
     Kwargs:
         do_refslp: (bool): do the reference slopes at startup,
@@ -441,9 +441,9 @@ def init_controller(context, i: int, p_controller: conf.Param_controller, p_wfss
     nactu = np.sum([p_dms[j]._ntotact for j in ndms])
     p_controller.set_nactu(int(nactu))
 
-    alt = np.array([p_dms[j].alt for j in p_controller.ndm], dtype=np.float32)
+    # alt = np.array([p_dms[j].alt for j in p_controller.ndm], dtype=np.float32)
 
-    list_dmseen = [p_dms[j].type for j in p_controller.ndm]
+    # list_dmseen = [p_dms[j].type for j in p_controller.ndm]
     if (p_controller.type == scons.ControllerType.GEO):
         Nphi = np.where(p_geom._spupil)[0].size
     else:
@@ -492,12 +492,12 @@ def init_controller(context, i: int, p_controller: conf.Param_controller, p_wfss
         try:
             p_controller._imat = imats.imat_geom(wfs, dms, p_wfss, p_dms, p_controller,
                                                  meth=0)
-        except:
+        except BaseException:
             print("p_controller._imat not set")
 
 
-def init_controller_geo(i: int, rtc: Rtc, dms: Dms, p_geom: conf.Param_geom,
-                        p_controller: conf.Param_controller, p_dms: list, roket=False):
+def init_controller_geo(i: int, rtc: Rtc, dms: Dms, p_geom: conf.ParamGeom,
+                        p_controller: conf.ParamController, p_dms: list, roket=False):
     """ Initialize geometric controller
 
     Args:
@@ -507,11 +507,11 @@ def init_controller_geo(i: int, rtc: Rtc, dms: Dms, p_geom: conf.Param_geom,
 
         dms: (Dms): Dms object
 
-        p_geom: (Param_geom): geometry settings
+        p_geom: (ParamGeom): geometry settings
 
-        p_controller: (Param_controller): controller settings
+        p_controller: (ParamController): controller settings
 
-        p_dms: (list of Param_dms): dms settings
+        p_dms: (list of ParamDms): dms settings
 
     Kwargs
         roket: (bool): Flag to initialize ROKET
@@ -535,9 +535,9 @@ def init_controller_geo(i: int, rtc: Rtc, dms: Dms, p_geom: conf.Param_geom,
                                       roket=roket)
 
 
-def init_controller_ls(i: int, p_controller: conf.Param_controller, p_wfss: list,
-                       p_geom: conf.Param_geom, p_dms: list, p_atmos: conf.Param_atmos,
-                       ittime: float, p_tel: conf.Param_tel, rtc: Rtc, dms: Dms,
+def init_controller_ls(i: int, p_controller: conf.ParamController, p_wfss: list,
+                       p_geom: conf.ParamGeom, p_dms: list, p_atmos: conf.ParamAtmos,
+                       ittime: float, p_tel: conf.ParamTel, rtc: Rtc, dms: Dms,
                        wfs: Sensors, tel: Telescope, atmos: Atmos, dataBase: dict = {},
                        use_DB: bool = False):
     """ Initialize the least square controller
@@ -545,19 +545,19 @@ def init_controller_ls(i: int, p_controller: conf.Param_controller, p_wfss: list
     Args:
         i : (int) : controller index
 
-        p_controller: (Param_controller) : controller settings
+        p_controller: (ParamController) : controller settings
 
-        p_wfss: (list of Param_wfs) : wfs settings
+        p_wfss: (list of ParamWfs) : wfs settings
 
-        p_geom: (Param_geom) : geom settings
+        p_geom: (ParamGeom) : geom settings
 
-        p_dms: (list of Param_dms) : dms settings
+        p_dms: (list of ParamDms) : dms settings
 
-        p_atmos: (Param_atmos) : atmos settings
+        p_atmos: (ParamAtmos) : atmos settings
 
         ittime: (float) : iteration time [s]
 
-        p_tel: (Param_tel) : telescope settings
+        p_tel: (ParamTel) : telescope settings
 
         rtc: (Rtc) : Rtc objet
 
@@ -618,7 +618,7 @@ def init_controller_ls(i: int, p_controller: conf.Param_controller, p_wfss: list
         rtc.d_control[i].set_modal_gains(mgain)
 
 
-def init_controller_cured(i: int, rtc: Rtc, p_controller: conf.Param_controller,
+def init_controller_cured(i: int, rtc: Rtc, p_controller: conf.ParamController,
                           p_dms: list, p_wfss: list):
     """ Initialize the CURED controller
 
@@ -627,11 +627,11 @@ def init_controller_cured(i: int, rtc: Rtc, p_controller: conf.Param_controller,
 
         rtc: (Rtc) : Rtc objet
 
-        p_controller: (Param_controller) : controller settings
+        p_controller: (ParamController) : controller settings
 
-        p_dms: (list of Param_dms) : dms settings
+        p_dms: (list of ParamDms) : dms settings
 
-        p_wfss: (list of Param_wfs) : wfs settings
+        p_wfss: (list of ParamWfs) : wfs settings
     """
 
     print("initializing cured controller")
@@ -644,26 +644,26 @@ def init_controller_cured(i: int, rtc: Rtc, p_controller: conf.Param_controller,
     rtc.d_control[i].set_gain(p_controller.gain)
 
 
-def init_controller_mv(i: int, p_controller: conf.Param_controller, p_wfss: list,
-                       p_geom: conf.Param_geom, p_dms: list, p_atmos: conf.Param_atmos,
-                       p_tel: conf.Param_tel, rtc: Rtc, dms: Dms, wfs: Sensors,
+def init_controller_mv(i: int, p_controller: conf.ParamController, p_wfss: list,
+                       p_geom: conf.ParamGeom, p_dms: list, p_atmos: conf.ParamAtmos,
+                       p_tel: conf.ParamTel, rtc: Rtc, dms: Dms, wfs: Sensors,
                        atmos: Atmos):
     """ Initialize the MV controller
 
     Args:
         i : (int) : controller index
 
-        p_controller: (Param_controller) : controller settings
+        p_controller: (ParamController) : controller settings
 
-        p_wfss: (list of Param_wfs) : wfs settings
+        p_wfss: (list of ParamWfs) : wfs settings
 
-        p_geom: (Param_geom) : geom settings
+        p_geom: (ParamGeom) : geom settings
 
-        p_dms: (list of Param_dms) : dms settings
+        p_dms: (list of ParamDms) : dms settings
 
-        p_atmos: (Param_atmos) : atmos settings
+        p_atmos: (ParamAtmos) : atmos settings
 
-        p_tel: (Param_tel) : telescope settings
+        p_tel: (ParamTel) : telescope settings
 
         rtc: (Rtc) : Rtc objet
 
@@ -685,16 +685,16 @@ def init_controller_mv(i: int, p_controller: conf.Param_controller, p_wfss: list
     cmats.cmat_init(i, rtc, p_controller, p_wfss, p_atmos, p_tel, p_dms)
 
 
-def init_controller_generic(i: int, p_controller: conf.Param_controller, p_dms: list,
+def init_controller_generic(i: int, p_controller: conf.ParamController, p_dms: list,
                             rtc: Rtc):
     """ Initialize the generic controller
 
     Args:
         i: (int): controller index
 
-        p_controller: (Param_controller): controller settings
+        p_controller: (ParamController): controller settings
 
-        p_dms: (list of Param_dm): dms settings
+        p_dms: (list of ParamDm): dms settings
 
         rtc: (Rtc): Rtc object
     """
@@ -712,15 +712,15 @@ def init_controller_generic(i: int, p_controller: conf.Param_controller, p_dms: 
     rtc.d_control[i].set_cmat(cmat)
     rtc.d_control[i].set_matE(matE)
 
-def configure_generic_linear(p_controller: conf.Param_controller):
+def configure_generic_linear(p_controller: conf.ParamController):
     """ Configures the generic controller based on set parameters.
 
     Args:
         i: (int): controller index
 
-        p_controller: (Param_controller): controller settings
+        p_controller: (ParamController): controller settings
 
-        p_dms: (list of Param_dm): dms settings
+        p_dms: (list of ParamDm): dms settings
 
         rtc: (Rtc): Rtc object
     """

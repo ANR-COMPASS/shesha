@@ -6,9 +6,7 @@ Useful functions for ROKET file exploitation
 
 import numpy as np
 import h5py
-import pandas
 import matplotlib.pyplot as plt
-plt.ion()
 from scipy.sparse import csr_matrix
 
 
@@ -59,7 +57,7 @@ def varianceMultiFiles(fs, frac_per_layer, contributors):
     swap[0:2] = [nmodes - 2, nmodes - 1]
     err = f[contributors[0]][:] * 0.
     for f in fs:
-        frac = frac_per_layer[f.attrs["_Param_atmos__.alt"][0]]
+        frac = frac_per_layer[f.attrs["_ParamAtmos__.alt"][0]]
         for c in contributors:
             err += np.sqrt(frac) * f[c][:]
 
@@ -93,11 +91,11 @@ def get_cumSR(filename):
             "noise", "aliasing", "tomography", "filtered modes", "non linearity",
             "bandwidth"
     ]
-    if (list(f.attrs.keys()).count("_Param_target__Lambda")):
-        Lambda = f.attrs["_Param_target__Lambda"][0]
+    if (list(f.attrs.keys()).count("_ParamTarget__Lambda")):
+        Lambda = f.attrs["_ParamTarget__Lambda"][0]
     else:
         Lambda = 1.65
-    nactus = f["noise"][:].shape[0]
+    # nactus = f["noise"][:].shape[0]
     niter = f["noise"][:].shape[1]
     P = f["P"][:]
     nmodes = P.shape[0]
@@ -331,8 +329,8 @@ def get_breakdown(filename):
     C = np.var(P.dot(filt + noise + trunc + bp + tomo + aliasing), axis=1)
     inde = N + S + B + T + A + F
 
-    if (list(f.attrs.keys()).count("_Param_target__Lambda")):
-        Lambda = f.attrs["_Param_target__Lambda"][0]
+    if (list(f.attrs.keys()).count("_ParamTarget__Lambda")):
+        Lambda = f.attrs["_ParamTarget__Lambda"][0]
     else:
         Lambda = 1.65
 
@@ -466,7 +464,7 @@ def getMap(filename, covmat):
     xpos = f["dm.xpos"][:]
     ypos = f["dm.ypos"][:]
     pitch = xpos[1] - xpos[0]
-    nact = f.attrs["_Param_dm__nact"][0]
+    nact = f.attrs["_ParamDm__nact"][0]
     x = ((xpos - xpos.min()) / pitch).astype(np.int32)
     y = ((ypos - ypos.min()) / pitch).astype(np.int32)
     nn = (x, y)
@@ -517,8 +515,8 @@ def SlopesMap(covmat, filename=None, nssp=None, validint=None):
     """
     if filename is not None:
         f = h5py.File(filename, 'r')
-        nssp = f.attrs["_Param_wfs__nxsub"][0]
-        validint = f.attrs["_Param_tel__cobs"]
+        nssp = f.attrs["_ParamWfs__nxsub"][0]
+        validint = f.attrs["_ParamTel__cobs"]
         f.close()
 
     if nssp is None or validint is None:
@@ -580,8 +578,8 @@ def covFromMap(Map, nsub, filename=None, nssp=None, validint=None):
     """
     if filename is not None:
         f = h5py.File(filename, 'r')
-        nssp = f.attrs["_Param_wfs__nxsub"][0]
-        validint = f.attrs["_Param_tel__cobs"]
+        nssp = f.attrs["_ParamWfs__nxsub"][0]
+        validint = f.attrs["_ParamTel__cobs"]
         f.close()
 
     if nssp is None or validint is None:
@@ -636,7 +634,7 @@ def getCovFromMap(Map, nsub, filename=None, nssp=None, validint=None):
     """
     if filename is not None:
         f = h5py.File(filename, 'r')
-        nssp = f.attrs["_Param_wfs__nxsub"][0]
+        nssp = f.attrs["_ParamWfs__nxsub"][0]
         f.close()
     mapSize = 2 * nssp - 1
     covmat = np.zeros((nsub, nsub))
@@ -667,7 +665,7 @@ def get_slopessMap(covmat, filename=None, nssp=None, validint=None):
     """
     if filename is not None:
         f = h5py.File(filename, 'r')
-        nssp = f.attrs["_Param_wfs__nxsub"][0]
+        nssp = f.attrs["_ParamWfs__nxsub"][0]
         f.close()
     nsub = covmat.shape[0] // 2
     mapSize = 2 * nssp - 1
@@ -710,13 +708,13 @@ def ensquare_PSF(filename, psf, N, display=False, cmap="jet"):
         psf: (np.ndarray[ndim=2,dtype=np.float32]): the ensquared psf
     """
     f = h5py.File(filename, 'r')
-    Lambda_tar = f.attrs["_Param_target__Lambda"][0]
+    Lambda_tar = f.attrs["_ParamTarget__Lambda"][0]
     RASC = 180 / np.pi * 3600.
-    pixsize = Lambda_tar * 1e-6 / (psf.shape[0] * f.attrs["_Param_tel__diam"] / f.attrs[
-            "_Param_geom__pupdiam"]) * RASC
-    x = (np.arange(psf.shape[0]) - psf.shape[0] / 2) * pixsize / (
-            Lambda_tar * 1e-6 / f.attrs["_Param_tel__diam"] * RASC)
-    w = int(N * (Lambda_tar * 1e-6 / f.attrs["_Param_tel__diam"] * RASC) / pixsize)
+    pixsize = Lambda_tar * 1e-6 / (psf.shape[0] * f.attrs["_ParamTel__diam"] / f.attrs[
+            "_ParamGeom__pupdiam"]) * RASC
+    # x = (np.arange(psf.shape[0]) - psf.shape[0] / 2) * pixsize / (
+    #         Lambda_tar * 1e-6 / f.attrs["_ParamTel__diam"] * RASC)
+    w = int(N * (Lambda_tar * 1e-6 / f.attrs["_ParamTel__diam"] * RASC) / pixsize)
     mid = psf.shape[0] // 2
     psfe = np.abs(psf[mid - w:mid + w, mid - w:mid + w])
     if (display):
@@ -751,12 +749,12 @@ def cutsPSF(filename, psf, psfs):
         psfs: (np.ndarray[ndim=2,dtype=np.float32]): second PSF
     """
     f = h5py.File(filename, 'r')
-    Lambda_tar = f.attrs["_Param_target__Lambda"][0]
+    Lambda_tar = f.attrs["_ParamTarget__Lambda"][0]
     RASC = 180 / np.pi * 3600.
-    pixsize = Lambda_tar * 1e-6 / (psf.shape[0] * f.attrs["_Param_tel__diam"] / f.attrs[
-            "_Param_geom__pupdiam"]) * RASC
+    pixsize = Lambda_tar * 1e-6 / (psf.shape[0] * f.attrs["_ParamTel__diam"] / f.attrs[
+            "_ParamGeom__pupdiam"]) * RASC
     x = (np.arange(psf.shape[0]) - psf.shape[0] / 2) * pixsize / (
-            Lambda_tar * 1e-6 / f.attrs["_Param_tel__diam"] * RASC)
+            Lambda_tar * 1e-6 / f.attrs["_ParamTel__diam"] * RASC)
     plt.figure()
     plt.subplot(2, 1, 1)
     plt.semilogy(x, psf[psf.shape[0] // 2, :], color="blue")
@@ -821,9 +819,9 @@ def compProfile(filename, nlayers):
         nlayers: (int): number of turbulent layers (maybe deduced in the future ?)
     """
     f = h5py.File(filename, "r")
-    dt = f.attrs["_Param_loop__ittime"]
-    dk = int(2 / 3 * f.attrs["_Param_tel__diam"] / 20 / dt)
-    pdiam = f.attrs["_Param_tel__diam"] / f.attrs["_Param_wfs__nxsub"]
+    dt = f.attrs["_ParamLoop__ittime"]
+    dk = int(2 / 3 * f.attrs["_ParamTel__diam"] / 20 / dt)
+    pdiam = f.attrs["_ParamTel__diam"] / f.attrs["_ParamWfs__nxsub"]
 
     mapC = get_slopessMap(compDerivativeCmm(filename, dt=dk), filename)
     size = mapC.shape[0] // 2
@@ -852,14 +850,14 @@ def compProfile(filename, nlayers):
                 (size - y - 1) + 3] = 0
     frac /= frac.sum()
 
-    ind = np.argsort(f.attrs["_Param_atmos__frac"])[::-1]
-    print("Real wind speed: ", f.attrs["_Param_atmos__windspeed"][ind].tolist())
+    ind = np.argsort(f.attrs["_ParamAtmos__frac"])[::-1]
+    print("Real wind speed: ", f.attrs["_ParamAtmos__windspeed"][ind].tolist())
     print("Estimated wind speed: ", ws.tolist())
     print("-----------------------------")
-    print("Real wind direction: ", f.attrs["_Param_atmos__winddir"][ind].tolist())
+    print("Real wind direction: ", f.attrs["_ParamAtmos__winddir"][ind].tolist())
     print("Estimated wind direction: ", wd.tolist())
     print("-----------------------------")
-    print("Real frac: ", f.attrs["_Param_atmos__frac"][ind].tolist())
+    print("Real frac: ", f.attrs["_ParamAtmos__frac"][ind].tolist())
     print("Estimated frac: ", frac.tolist())
     print("-----------------------------")
     f.close()

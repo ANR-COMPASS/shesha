@@ -48,25 +48,25 @@ from typing import List
 from rich.progress import track
 
 
-def compute_KL2V(p_controller: conf.Param_controller, dms: Dms, p_dms: list,
-                 p_geom: conf.Param_geom, p_atmos: conf.Param_atmos,
-                 p_tel: conf.Param_tel):
+def compute_KL2V(p_controller: conf.ParamController, dms: Dms, p_dms: list,
+                 p_geom: conf.ParamGeom, p_atmos: conf.ParamAtmos,
+                 p_tel: conf.ParamTel):
     """ Compute the Karhunen-Loeve to Volt matrix
     (transfer matrix between the KL space and volt space for a pzt dm)
 
     Args:
 
-        p_controller: (Param_controller) : p_controller settings
+        p_controller: (ParamController) : p_controller settings
 
         dms : (shesha_dms) : Dms object
 
-        p_dms: (list of Param_dm) : dms settings
+        p_dms: (list of ParamDm) : dms settings
 
-        p_geom : (Param_geom) : geometry parameters
+        p_geom : (ParamGeom) : geometry parameters
 
-        p_atmos : (Param_atmos) : atmos parameters
+        p_atmos : (ParamAtmos) : atmos parameters
 
-        p_tel : (Param_tel) : telescope parameters
+        p_tel : (ParamTel) : telescope parameters
 
     :return:
 
@@ -112,7 +112,7 @@ def compute_KL2V(p_controller: conf.Param_controller, dms: Dms, p_dms: list,
     return KL2V
 
 
-def compute_dm_basis(g_dm, p_dm: conf.Param_dm, p_geom: conf.Param_geom):
+def compute_dm_basis(g_dm, p_dm: conf.ParamDm, p_geom: conf.ParamGeom):
     """ Compute a the DM basis as a sparse matrix :
             - push on each actuator
             - get the corresponding dm shape
@@ -121,9 +121,9 @@ def compute_dm_basis(g_dm, p_dm: conf.Param_dm, p_geom: conf.Param_geom):
     Args:
         g_dm: (Dm) : Dm object
 
-        p_dm: (Param_dm) : dm settings
+        p_dm: (ParamDm) : dm settings
 
-        p_geom: (Param_geom) : geom settings
+        p_geom: (ParamGeom) : geom settings
 
     :return:
 
@@ -154,7 +154,7 @@ def compute_dm_basis(g_dm, p_dm: conf.Param_dm, p_geom: conf.Param_geom):
     return IFbasis
 
 
-def compute_IFsparse(g_dm: Dms, p_dms: list, p_geom: conf.Param_geom):
+def compute_IFsparse(g_dm: Dms, p_dms: list, p_geom: conf.ParamGeom):
     """ Compute the influence functions of all DMs as a sparse matrix :
             - push on each actuator
             - get the corresponding dm shape
@@ -164,9 +164,9 @@ def compute_IFsparse(g_dm: Dms, p_dms: list, p_geom: conf.Param_geom):
 
         g_dm: (Dms) : Dms object
 
-        p_dms: (Param_dms) : dms settings
+        p_dms: (ParamDms) : dms settings
 
-        p_geom: (Param_geom) : geom settings
+        p_geom: (ParamGeom) : geom settings
 
     :return:
 
@@ -187,7 +187,7 @@ def compute_IFsparse(g_dm: Dms, p_dms: list, p_geom: conf.Param_geom):
     return IFsparse
 
 
-def command_on_Btt(rtc: Rtc, dms: Dms, p_dms: list, p_geom: conf.Param_geom, nfilt: int):
+def command_on_Btt(rtc: Rtc, dms: Dms, p_dms: list, p_geom: conf.ParamGeom, nfilt: int):
     """ Compute a command matrix in Btt modal basis (see error breakdown) and set
     it on the sutra_rtc. It computes by itself the volts to Btt matrix.
 
@@ -197,9 +197,9 @@ def command_on_Btt(rtc: Rtc, dms: Dms, p_dms: list, p_geom: conf.Param_geom, nfi
 
         dms: (Dms): dms object
 
-        p_dms: (list of Param_dm): dms settings
+        p_dms: (list of ParamDm): dms settings
 
-        p_geom: (Param_geom): geometry settings
+        p_geom: (ParamGeom): geometry settings
 
         nfilt: (int): number of modes to filter
     """
@@ -242,9 +242,9 @@ def compute_cmat_with_Btt(rtc: Rtc, Btt: np.ndarray, nfilt: int):
     return cmat.astype(np.float32)
 
 
-def command_on_KL(rtc: Rtc, dms: Dms, p_controller: conf.Param_controller,
-                  p_dms: List[conf.Param_dm], p_geom: conf.Param_geom,
-                  p_atmos: conf.Param_atmos, p_tel: conf.Param_tel, nfilt: int):
+def command_on_KL(rtc: Rtc, dms: Dms, p_controller: conf.ParamController,
+                  p_dms: List[conf.ParamDm], p_geom: conf.ParamGeom,
+                  p_atmos: conf.ParamAtmos, p_tel: conf.ParamTel, nfilt: int):
     """ Compute a command matrix in KL modal basis and set
     it on the sutra_rtc. It computes by itself the volts to KL matrix.
 
@@ -254,13 +254,13 @@ def command_on_KL(rtc: Rtc, dms: Dms, p_controller: conf.Param_controller,
 
         dms: (Dms): dms object
 
-        p_dms: (list of Param_dm): dms settings
+        p_dms: (list of ParamDm): dms settings
 
-        p_geom: (Param_geom): geometry settings
+        p_geom: (ParamGeom): geometry settings
 
-        p_atmos : (Param_atmos) : atmos parameters
+        p_atmos : (ParamAtmos) : atmos parameters
 
-        p_tel : (Param_tel) : telescope parameters
+        p_tel : (ParamTel) : telescope parameters
 
         nfilt: (int): number of modes to filter
     """
@@ -318,7 +318,7 @@ def compute_fourier(nActu: int, pitch: float, actu_x_pos: np.ndarray,
         raise ValueError('periodic can only be "n" or "n-1" to set boundary condition.')
     xnorm = (np.round((actu_x_pos - np.min(actu_x_pos)) / pitch).astype(np.int32)) % n
     ynorm = (np.round((actu_y_pos - np.min(actu_y_pos)) / pitch).astype(np.int32)) % n
-    totActu = len(xnorm)
+    # totActu = len(xnorm)
 
     data = np.zeros((n, n, n, n), dtype=np.float32)
     for i in range(n):

@@ -42,14 +42,13 @@ import shesha.constants as scons
 from shesha.constants import CONST
 from shesha.sutra_wrap import Sensors, Dms, Rtc_FFF as Rtc, Atmos
 
-import typing
 from typing import List
 
 
-def do_tomo_matrices(ncontrol: int, rtc: Rtc, p_wfss: List[conf.Param_wfs], dms: Dms,
-                     atmos: Atmos, wfs: Sensors, p_controller: conf.Param_controller,
-                     p_geom: conf.Param_geom, p_dms: list, p_tel: conf.Param_tel,
-                     p_atmos: conf.Param_atmos):
+def do_tomo_matrices(ncontrol: int, rtc: Rtc, p_wfss: List[conf.ParamWfs], dms: Dms,
+                     atmos: Atmos, wfs: Sensors, p_controller: conf.ParamController,
+                     p_geom: conf.ParamGeom, p_dms: list, p_tel: conf.ParamTel,
+                     p_atmos: conf.ParamAtmos):
     """ Compute Cmm and Cphim matrices for the MV controller on GPU
 
     Args:
@@ -58,7 +57,7 @@ def do_tomo_matrices(ncontrol: int, rtc: Rtc, p_wfss: List[conf.Param_wfs], dms:
 
         rtc: (Rtc) : rtc object
 
-        p_wfss: (list of Param_wfs) : wfs settings
+        p_wfss: (list of ParamWfs) : wfs settings
 
         dms: (Dms) : Dms object
 
@@ -66,15 +65,15 @@ def do_tomo_matrices(ncontrol: int, rtc: Rtc, p_wfss: List[conf.Param_wfs], dms:
 
         wfs: (Sensors) : Sensors object
 
-        p_controller: (Param_controller): controller settings
+        p_controller: (ParamController): controller settings
 
-        p_geom: (Param_geom) : geom settings
+        p_geom: (ParamGeom) : geom settings
 
-        p_dms: (list of Param_dms) : dms settings
+        p_dms: (list of ParamDms) : dms settings
 
-        p_tel: (Param_tel) : telescope settings
+        p_tel: (ParamTel) : telescope settings
 
-        p_atmos: (Param_atmos) : atmos settings
+        p_atmos: (ParamAtmos) : atmos settings
     """
     nvalidperwfs = np.array([o._nvalid for o in p_wfss], dtype=np.int64)
     # Bring bottom left corner of valid subapertures in ipupil
@@ -186,17 +185,17 @@ def do_tomo_matrices(ncontrol: int, rtc: Rtc, p_wfss: List[conf.Param_wfs], dms:
     rtc.d_control[ncontrol].filter_cphim(F, Nact)
 
 
-def selectDMforLayers(p_atmos: conf.Param_atmos, p_controller: conf.Param_controller,
+def selectDMforLayers(p_atmos: conf.ParamAtmos, p_controller: conf.ParamController,
                       p_dms: list):
     """ For each atmos layer, select the DM which have to handle it in the Cphim computation for MV controller
 
     Args:
 
-        p_atmos : (Param_atmos) : atmos parameters
+        p_atmos : (ParamAtmos) : atmos parameters
 
-        p_controller : (Param_controller) : controller parameters
+        p_controller : (ParamController) : controller parameters
 
-        p_dms :(list of Param_dm) : dms parameters
+        p_dms :(list of ParamDm) : dms parameters
 
     :return:
 
@@ -214,12 +213,12 @@ def selectDMforLayers(p_atmos: conf.Param_atmos, p_controller: conf.Param_contro
     return indlayersDM
 
 
-def create_nact_geom(p_dm: conf.Param_dm):
+def create_nact_geom(p_dm: conf.ParamDm):
     """ Compute the DM coupling matrix
 
     :param:
 
-        p_dm : (Param_dm) : dm parameters
+        p_dm : (ParamDm) : dm parameters
 
     :return:
 
@@ -259,12 +258,12 @@ def create_nact_geom(p_dm: conf.Param_dm):
     return Nact
 
 
-def create_piston_filter(p_dm: conf.Param_dm):
+def create_piston_filter(p_dm: conf.ParamDm):
     """ Create the piston filter matrix
 
     Args:
 
-        p_dm: (Param_dm): dm settings
+        p_dm: (ParamDm): dm settings
     """
     nactu = p_dm._ntotact
     F = np.ones([nactu, nactu], dtype=np.float32)

@@ -38,7 +38,7 @@ import numpy as np
 import shesha.config as conf
 import shesha.constants as scons
 from shesha.supervisor.components.coronagraph.genericCoronagraph import GenericCoronagraph
-from shesha.init.coronagraph_init import init_coronagraph, init_mft, mft_multiplication
+from shesha.init.coronagraph_init import init_coronagraph, init_mft
 from shesha.supervisor.components.targetCompass import TargetCompass
 from sutraWrap import PerfectCoronagraph
 from carmaWrap import context
@@ -54,7 +54,7 @@ class PerfectCoronagraphCompass(GenericCoronagraph):
 
         _dim_image :(int): Coronagraphic image dimension
 
-        _p_corono: (Param_corono): Coronagraph parameters
+        _p_corono: (ParamCoronagraph): Coronagraph parameters
 
         _target: (TargetCompass): Compass Target used as input for the coronagraph
 
@@ -82,7 +82,7 @@ class PerfectCoronagraphCompass(GenericCoronagraph):
                                 pixels in the pupil
     """
     def __init__(self, context: context, targetCompass: TargetCompass,
-                 p_corono: conf.Param_corono, p_geom: conf.Param_geom):
+                 p_corono: conf.ParamCoronagraph, p_geom: conf.ParamGeom):
         """ Initialize a perfect coronagraph instance
 
         Args:
@@ -90,9 +90,9 @@ class PerfectCoronagraphCompass(GenericCoronagraph):
 
             targetCompass: (TargetCompass): Compass Target used as input for the coronagraph
 
-            p_corono: (Param_corono): Coronagraph parameters
+            p_corono: (ParamCoronagraph): Coronagraph parameters
 
-            p_geom: (Param_geom): Compass geometry parameters
+            p_geom: (ParamGeom): Compass geometry parameters
         """
         init_coronagraph(p_corono, p_geom.pupdiam)
         GenericCoronagraph.__init__(self, p_corono, p_geom, targetCompass)

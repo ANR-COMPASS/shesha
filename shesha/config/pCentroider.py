@@ -1,5 +1,5 @@
 ## @package   shesha.config.PCENTROIDER
-## @brief     Param_centroider class definition
+## @brief     ParamCentroider class definition
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
 ## @version   5.5.0
 ## @date      2022/01/24
@@ -36,15 +36,15 @@
 #  If not, see <https://www.gnu.org/licenses/lgpl-3.0.txt>.
 
 import numpy as np
-from . import config_setter_utils as csu
+import shesha.config.config_setter_utils as csu
 import shesha.constants as scons
 
 #################################################
-# P-Class (parametres) Param_centroider
+# P-Class (parametres) ParamCentroider
 #################################################
 
 
-class Param_centroider:
+class ParamCentroider:
 
     def __init__(self):
         self.__nwfs = None

@@ -38,7 +38,7 @@ import numpy as np
 import shesha.config as conf
 import shesha.constants as scons
 from shesha.supervisor.components.targetCompass import TargetCompass
-from abc import ABC, abstractmethod
+from abc import ABC
 from shesha.util.coronagraph_utils import compute_contrast
 
 class GenericCoronagraph(ABC):
@@ -51,7 +51,7 @@ class GenericCoronagraph(ABC):
 
         _dim_image :(int): Coronagraphic image dimension
 
-        _p_corono: (Param_corono): Coronagraph parameters
+        _p_corono: (ParamCoronagraph): Coronagraph parameters
 
         _target: (TargetCompass): Compass Target used as input for the coronagraph
 
@@ -61,13 +61,13 @@ class GenericCoronagraph(ABC):
 
         _coronagraph: (SutraCoronagraph): Sutra coronagraph instance
     """
-    def __init__(self, p_corono: conf.Param_corono, p_geom: conf.Param_geom, targetCompass: TargetCompass):
+    def __init__(self, p_corono: conf.ParamCoronagraph, p_geom: conf.ParamGeom, targetCompass: TargetCompass):
         """ Initialize a coronagraph instance with generic attributes
 
         Args:
-            p_corono: (Param_corono): Compass coronagraph parameters
+            p_corono: (ParamCoronagraph): Compass coronagraph parameters
 
-            p_geom: (Param_geom): Compass geometry parameters
+            p_geom: (ParamGeom): Compass geometry parameters
 
             targetCompass: (TargetCompass): Compass Target used as input for the coronagraph
         """
@@ -179,15 +179,15 @@ class GenericCoronagraph(ABC):
             maxi: (1D array): corresponding maximums
         """
         image_sampling = self._p_corono._image_sampling
-        if width == None:
+        if width is None:
             width = image_sampling
         else:
             width = width * image_sampling
-        if d_min == None:
+        if d_min is None:
             d_min = width
         else:
             d_min = d_min * image_sampling
-        if d_max == None:
+        if d_max is None:
             d_max = self._dim_image / 2 - width / 2
         else:
             d_max = d_max * image_sampling

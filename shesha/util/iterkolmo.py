@@ -233,10 +233,10 @@ def AB(n, L0, deltax, deltay, rank=0):
     bbt = xx - np.dot(A, xz.T)
     #    if (rank == 0):
     #        print("svd of bbt")
-    U1, l, V1 = np.linalg.svd(bbt)
+    U1, singVal, V1 = np.linalg.svd(bbt)
     #    if (rank == 0):
     #        print("compute B")
-    B = np.dot(U1, np.sqrt(np.diag(l)))
+    B = np.dot(U1, np.sqrt(np.diag(singVal)))
 
     test = np.zeros((n * n), np.float32)
     test[istencil] = np.arange(A.shape[1]) + 1

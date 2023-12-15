@@ -112,7 +112,7 @@ class ModalBasis(object):
                                               self._config.p_dms[dm_index],
                                               self._config.p_geom)
         mpup = self._config.p_geom.get_mpupil()
-        npix_in_pup = np.sum(mpup)
+        # npix_in_pup = np.sum(mpup)
         ifdelta = ifsparse.dot(ifsparse.T) / np.sum(mpup)
         return ifdelta.toarray()
 
@@ -146,7 +146,7 @@ class ModalBasis(object):
                     fnz, np.arange(self.modal_basis.shape[1])
             ])])  # pour remove le future warning!
             self.modal_basis *= sig[None, :]
-            projection_matrix = None
+            # projection_matrix = None
         elif (modal_basis_type == "Btt"):
             print("Computing Btt basis...")
             self.modal_basis, self.projection_matrix = self.compute_btt_basis(
@@ -383,6 +383,7 @@ class ModalBasis(object):
             phase = self._target.get_tar_phase(0, pupil=True)
             # Normalisation pour les unites rms en microns !!!
             norm = np.sqrt(np.sum((phase)**2) / S)
-            if norm == 0: norm = 1
+            if norm == 0: 
+                norm = 1
             phase_to_modes[i] = phase / norm
         return phase_to_modes

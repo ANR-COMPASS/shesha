@@ -17,6 +17,8 @@ dependencies:
   - rich
   - compass
   - coverage
+  - packaging
+  - pytest
   - pytest-cov
   - pytest-html
   - pytest-metadata

@@ -1,5 +1,5 @@
 ## @package   shesha.config.PCONTROLLER
-## @brief     Param_controller class definition
+## @brief     ParamController class definition
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
 ## @version   5.5.0
 ## @date      2022/01/24
@@ -36,15 +36,15 @@
 #  If not, see <https://www.gnu.org/licenses/lgpl-3.0.txt>.
 
 import numpy as np
-from . import config_setter_utils as csu
+import shesha.config.config_setter_utils as csu
 import shesha.constants as scons
 
 #################################################
-# P-Class (parametres) Param_controller
+# P-Class (parametres) ParamController
 #################################################
 
 
-class Param_controller:
+class ParamController:
 
     def __init__(self):
         self.__type = None
@@ -266,12 +266,12 @@ class Param_controller:
         """
         return self.__nwfs
 
-    def set_nwfs(self, l):
+    def set_nwfs(self, index_wfs):
         """ Set the indices of wfs
 
-        :param l: (np.ndarray[ndim=1, dtype=np.int32]) : indices of wfs
+        :param index_wfs: (np.ndarray[ndim=1, dtype=np.int32]) : indices of wfs
         """
-        self.__nwfs = csu.enforce_array(l, len(l), dtype=np.int32, scalar_expand=False)
+        self.__nwfs = csu.enforce_array(index_wfs, len(index_wfs), dtype=np.int32, scalar_expand=False)
 
     nwfs = property(get_nwfs, set_nwfs)
 
@@ -282,12 +282,12 @@ class Param_controller:
         """
         return self.__ndm
 
-    def set_ndm(self, l):
+    def set_ndm(self, index_dm):
         """ Set the indices of dms
 
-        :param l: (np.ndarray[ndim=1, dtype=np.int32]) : indices of dms
+        :param index_dm: (np.ndarray[ndim=1, dtype=np.int32]) : indices of dms
         """
-        self.__ndm = csu.enforce_array(l, len(l), dtype=np.int32, scalar_expand=False)
+        self.__ndm = csu.enforce_array(index_dm, len(index_dm), dtype=np.int32, scalar_expand=False)
 
     ndm = property(get_ndm, set_ndm)
 
@@ -298,12 +298,12 @@ class Param_controller:
         """
         return self.__nactu
 
-    def set_nactu(self, l):
+    def set_nactu(self, nb_actu):
         """ Set the number of actuators
 
-        :param l: (int) : number of actus
+        :param nb_actu: (int) : number of actus
         """
-        self.__nactu = csu.enforce_int(l)
+        self.__nactu = csu.enforce_int(nb_actu)
 
     nactu = property(get_nactu, set_nactu)
 
@@ -314,12 +314,12 @@ class Param_controller:
         """
         return self.__nslope
 
-    def set_nslope(self, l):
+    def set_nslope(self, nb_slopes):
         """ Set the number of slopes
 
-        :param l: (int) : number of slopes
+        :param nb_slopes: (int) : number of slopes
         """
-        self.__nslope = csu.enforce_int(l)
+        self.__nslope = csu.enforce_int(nb_slopes)
 
     nslope = property(get_nslope, set_nslope)
 
@@ -330,12 +330,12 @@ class Param_controller:
         """
         return self.__nslope_buffer
 
-    def set_nslope_buffer(self, l):
+    def set_nslope_buffer(self, nb_slopes_buffer):
         """ Set the number of slope buffers
 
-        :param l: (int) : number of slope buffers
+        :param nb_slopes_buffer: (int) : number of slope buffers
         """
-        self.__nslope_buffer = csu.enforce_int(l)
+        self.__nslope_buffer = csu.enforce_int(nb_slopes_buffer)
 
     nslope_buffer = property(get_nslope_buffer, set_nslope_buffer)
 
@@ -346,12 +346,12 @@ class Param_controller:
         """
         return self.__nvalid
 
-    def set_nvalid(self, l):
+    def set_nvalid(self, nvalid):
         """ Set the number of valid subaps
 
-        :param l: (list of int) : number of valid subaps
+        :param nvalid: (list of int) : number of valid subaps
         """
-        self.__nvalid = csu.enforce_int(l)
+        self.__nvalid = csu.enforce_int(nvalid)
 
     nvalid = property(get_nvalid, set_nvalid)
 
@@ -362,12 +362,12 @@ class Param_controller:
         """
         return self.__maxcond
 
-    def set_maxcond(self, m):
+    def set_maxcond(self, maxcond):
         """ Set the max condition number
 
-        :param m: (float) : max condition number
+        :param maxcond: (float) : max condition number
         """
-        self.__maxcond = csu.enforce_float(m)
+        self.__maxcond = csu.enforce_float(maxcond)
 
     maxcond = property(get_maxcond, set_maxcond)
 
@@ -378,12 +378,12 @@ class Param_controller:
         """
         return self.__TTcond
 
-    def set_TTcond(self, m):
+    def set_TTcond(self, ttcond):
         """ Set the tiptilt condition number for cmat filtering with mv controller
 
-        :param m: (float) : tiptilt condition number
+        :param ttcond: (float) : tiptilt condition number
         """
-        self.__TTcond = csu.enforce_float(m)
+        self.__TTcond = csu.enforce_float(ttcond)
 
     TTcond = property(get_TTcond, set_TTcond)
 
@@ -394,12 +394,12 @@ class Param_controller:
         """
         return self.__delay
 
-    def set_delay(self, d):
+    def set_delay(self, delay):
         """ Set the loop delay expressed in frames
 
-        :param d: (float) :delay [frames]
+        :param delay: (float) :delay [frames]
         """
-        self.__delay = csu.enforce_float(d)
+        self.__delay = csu.enforce_float(delay)
 
     delay = property(get_delay, set_delay)
 
@@ -410,12 +410,12 @@ class Param_controller:
         """
         return self.__gain
 
-    def set_gain(self, g):
+    def set_gain(self, gain):
         """ Set the loop gain
 
-        :param g: (float) : loop gain
+        :param gain: (float) : loop gain
         """
-        self.__gain = csu.enforce_float(g)
+        self.__gain = csu.enforce_float(gain)
 
     gain = property(get_gain, set_gain)
 
@@ -426,12 +426,12 @@ class Param_controller:
         """
         return self.__cured_ndivs
 
-    def set_cured_ndivs(self, n):
+    def set_cured_ndivs(self, ndivs):
         """ Set the subdivision levels in cured
 
-        :param c: (long) : subdivision levels in cured
+        :param ndivs: (long) : subdivision levels in cured
         """
-        self.__cured_ndivs = csu.enforce_int(n)
+        self.__cured_ndivs = csu.enforce_int(ndivs)
 
     cured_ndivs = property(get_cured_ndivs, set_cured_ndivs)
 
@@ -442,12 +442,12 @@ class Param_controller:
         """
         return self.__modopti
 
-    def set_modopti(self, n):
+    def set_modopti(self, modopti):
         """ Set the flag for modal optimization
 
-        :param n: (int) : flag for modal optimization
+        :param modopti: (int) : flag for modal optimization
         """
-        self.__modopti = csu.enforce_or_cast_bool(n)
+        self.__modopti = csu.enforce_or_cast_bool(modopti)
 
     modopti = property(get_modopti, set_modopti)
 
@@ -458,12 +458,12 @@ class Param_controller:
         """
         return self.__nrec
 
-    def set_nrec(self, n):
+    def set_nrec(self, nrec):
         """ Set the number of sample of open loop slopes for modal optimization computation
 
-        :param n: (int) : number of sample
+        :param nrec: (int) : number of sample
         """
-        self.__nrec = csu.enforce_int(n)
+        self.__nrec = csu.enforce_int(nrec)
 
     nrec = property(get_nrec, set_nrec)
 
@@ -474,12 +474,12 @@ class Param_controller:
         """
         return self.__nmodes
 
-    def set_nmodes(self, n):
+    def set_nmodes(self, nmodes):
         """ Set the number of modes for M2V matrix (modal optimization)
 
-        :param n: (int) : number of modes
+        :param nmodes: (int) : number of modes
         """
-        self.__nmodes = csu.enforce_int(n)
+        self.__nmodes = csu.enforce_int(nmodes)
 
     nmodes = property(get_nmodes, set_nmodes)
 
@@ -490,12 +490,12 @@ class Param_controller:
         """
         return self.__nmode_buffer
 
-    def set_nmode_buffer(self, n):
+    def set_nmode_buffer(self, nmode_buffer):
         """ Set the number of mode buffers
 
-        :param n: (int) : number of modes buffers
+        :param nmode_buffer: (int) : number of modes buffers
         """
-        self.__nmode_buffer = csu.enforce_int(n)
+        self.__nmode_buffer = csu.enforce_int(nmode_buffer)
 
     nmode_buffer = property(get_nmode_buffer, set_nmode_buffer)
 
@@ -506,12 +506,12 @@ class Param_controller:
         """
         return self.__gmin
 
-    def set_gmin(self, g):
+    def set_gmin(self, gmin):
         """ Set the minimum gain for modal optimization
 
-        :param g: (float) : minimum gain for modal optimization
+        :param gmin: (float) : minimum gain for modal optimization
         """
-        self.__gmin = csu.enforce_float(g)
+        self.__gmin = csu.enforce_float(gmin)
 
     gmin = property(get_gmin, set_gmin)
 
@@ -522,12 +522,12 @@ class Param_controller:
         """
         return self.__gmax
 
-    def set_gmax(self, g):
+    def set_gmax(self, gmax):
         """ Set the maximum gain for modal optimization
 
-        :param g: (float) : maximum gain for modal optimization
+        :param gmax: (float) : maximum gain for modal optimization
         """
-        self.__gmax = csu.enforce_float(g)
+        self.__gmax = csu.enforce_float(gmax)
 
     gmax = property(get_gmax, set_gmax)
 
@@ -538,12 +538,12 @@ class Param_controller:
         """
         return self.__ngain
 
-    def set_ngain(self, n):
+    def set_ngain(self, ngain):
         """ Set the number of tested gains
 
-        :param n: (int) : number of tested gains
+        :param ngain: (int) : number of tested gains
         """
-        self.__ngain = csu.enforce_int(n)
+        self.__ngain = csu.enforce_int(ngain)
 
     ngain = property(get_ngain, set_ngain)
 
@@ -590,12 +590,12 @@ class Param_controller:
         """
         return self.__nstates
 
-    def set_nstates(self, l):
+    def set_nstates(self, nstates):
         """ Set the number of states
 
-        :param l: (int) : number of states
+        :param nstates: (int) : number of states
         """
-        self.__nstates = csu.enforce_int(l)
+        self.__nstates = csu.enforce_int(nstates)
 
     nstates = property(get_nstates, set_nstates)
 
@@ -606,12 +606,12 @@ class Param_controller:
         """
         return self.__nstate_buffer
 
-    def set_nstate_buffer(self, l):
+    def set_nstate_buffer(self, nstate_buffer):
         """ Set the number of state buffer
 
-        :param l: (int) : number of state buffer
+        :param nstate_buffer: (int) : number of state buffer
         """
-        self.__nstate_buffer = csu.enforce_int(l)
+        self.__nstate_buffer = csu.enforce_int(nstate_buffer)
 
     nstate_buffer = property(get_nstate_buffer, set_nstate_buffer)
 
@@ -671,12 +671,12 @@ class Param_controller:
         """
         return self.__close_learning_factor
 
-    def set_close_learning_factor(self, p):
+    def set_close_learning_factor(self, close_learning_factor):
         """ Set the modal gain optimization learning factor
 
-        :param p: (float) : learning factor
+        :param close_learning_factor: (float) : learning factor
         """
-        self.__close_learning_factor = csu.enforce_float(p)
+        self.__close_learning_factor = csu.enforce_float(close_learning_factor)
 
     lf = property(get_close_learning_factor, set_close_learning_factor)
 
@@ -687,12 +687,12 @@ class Param_controller:
         """
         return self.__close_target
 
-    def set_close_target(self, t):
+    def set_close_target(self, close_target):
         """ Set the autocorrelation target
 
-        :param t: (float) : close target
+        :param close_target: (float) : close target
         """
-        self.__close_target = csu.enforce_float(t)
+        self.__close_target = csu.enforce_float(close_target)
 
     close_target = property(get_close_target, set_close_target)
 
@@ -719,12 +719,12 @@ class Param_controller:
         """
         return self.__n_iir_in
 
-    def set_n_iir_in(self, n):
+    def set_n_iir_in(self, n_iir_in):
         """ Set the number of inputs used in iir filter
 
-        :param : (int) : number of iir inputs
+        :param n_iir_in: (int) : number of iir inputs
         """
-        self.__n_iir_in = csu.enforce_int(n)
+        self.__n_iir_in = csu.enforce_int(n_iir_in)
 
     n_iir_in = property(get_n_iir_in, set_n_iir_in)
 
@@ -735,12 +735,12 @@ class Param_controller:
         """
         return self.__n_iir_out
 
-    def set_n_iir_out(self, n):
+    def set_n_iir_out(self, n_iir_out):
         """ Set the number of outputs used in iir filter
 
-        :param : (int) : number of iir outputs
+        :param n_iir_out: (int) : number of iir outputs
         """
-        self.__n_iir_out = csu.enforce_int(n)
+        self.__n_iir_out = csu.enforce_int(n_iir_out)
 
     n_iir_out = property(get_n_iir_out, set_n_iir_out)
 
@@ -751,12 +751,12 @@ class Param_controller:
         """
         return self.__polc
 
-    def set_polc(self, p):
+    def set_polc(self, polc):
         """ Set POLC flag (True means using POL slopes)
 
-        :param : (bool) : POLC flag
+        :param polc: (bool) : POLC flag
         """
-        self.__polc = csu.enforce_or_cast_bool(p)
+        self.__polc = csu.enforce_or_cast_bool(polc)
 
     polc = property(get_polc, set_polc)
 
@@ -767,12 +767,12 @@ class Param_controller:
         """
         return self.__modal
 
-    def set_modal(self, m):
+    def set_modal(self, modal):
         """ Set flag to use modal control \n(allows MVM from modes to actu)
 
-        :param : (bool) : modal flag
+        :param modal: (bool) : modal flag
         """
-        self.__modal = csu.enforce_or_cast_bool(m)
+        self.__modal = csu.enforce_or_cast_bool(modal)
 
     modal = property(get_modal, set_modal)
 
@@ -784,12 +784,12 @@ class Param_controller:
         """
         return self.__kernconv4imat
 
-    def set_kernconv4imat(self, n):
+    def set_kernconv4imat(self, kernconv4imat):
         """Set kernconv4imat, i.e. a flag for using kernel convolution to have better
         sensitivity on SH spot movements for imat computation
 
-        :param k: (int) : kernconv4imat
+        :param kernconv4imat: (int) : kernconv4imat
         """
-        self.__kernconv4imat = csu.enforce_or_cast_bool(n)
+        self.__kernconv4imat = csu.enforce_or_cast_bool(kernconv4imat)
 
     kernconv4imat = property(get_kernconv4imat, set_kernconv4imat)

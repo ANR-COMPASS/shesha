@@ -16,7 +16,7 @@ Table of Contents
 ## Requirements
 
 - Linux distribution with wget and git installed
-- Nvidia GPU card with [CUDA toolkit](https://developer.nvidia.com/cuda-downloads) >= 10.1 (Older versions could be available on request)
+- Nvidia GPU card with [CUDA toolkit](https://developer.nvidia.com/cuda-downloads) >= 11.8 (Older versions could be available on request)
 
 ## Installation of Anaconda/Miniconda
 
@@ -44,7 +44,7 @@ Once Miniconda is installed, installing the COMPASS binaries is easy :
 conda install -c compass compass -y
 ```
 
-**Note**: conda main channel is compiled with CUDA 11.6.0, for previous version please post an issue and will provide it.
+**Note**: conda main channel is compiled with CUDA 12. For previous version please have a look to the [other channel](https://anaconda.org/compass/compass/) and post an issue and we will try to provide it.
 
 This command line will also install dependencies in your conda environment.
 

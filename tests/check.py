@@ -65,7 +65,7 @@ if __name__ == "__main__":
         from tabulate import tabulate
         from datetime import datetime
         df = pandas.read_hdf("check.h5")
-        print(tabulate(df, tablefmt="pipe", headers="keys"))
+        print(tabulate(df, tablefmt="github", headers="keys"))
         if arguments["--repportResult"]:
             with open(arguments["--repportResult"], 'w') as the_file:
                 the_file.write('# E2E Test Report\n')
@@ -77,7 +77,7 @@ if __name__ == "__main__":
                 the_file.write('\n')
                 the_file.write('## Summary\n')
                 the_file.write('\n')
-                the_file.write(str(tabulate(df, tablefmt="pipe", headers="keys")))
+                the_file.write(str(tabulate(df, tablefmt="github", headers="keys")))
         remove("check.h5")
     else:
         # Get parameters from file
@@ -94,31 +94,34 @@ if __name__ == "__main__":
             supervisor = CompassSupervisor(config)
             t_init = time.perf_counter() - t0
             is_init = supervisor.is_init
-        except:
+        except BaseException:
             supervisor = None
             is_init = False
             t_init = 0
             SR = "N/A"
-        try:
-            t0 = time.perf_counter()
-            supervisor.loop(supervisor.config.p_loop.niter)
-            t_loop = time.perf_counter() - t0
-            t_init = 0
-            SR = supervisor.target.get_strehl(0)[1]
-        except:
-            SR = "N/A"
             t_loop = 0
+
+        if is_init:    
+            try:
+                t0 = time.perf_counter()
+                supervisor.loop(supervisor.config.p_loop.niter)
+                t_loop = time.perf_counter() - t0
+                SR = supervisor.target.get_strehl(0)[1]
+            except BaseException:
+                SR = "N/A"
+                t_loop = 0
+            
         try:
             df = pandas.read_hdf("check.h5")
         except FileNotFoundError:
-            columns = ["Test name", "Init", "SR@100iter"]
-            df = pandas.DataFrame(columns=columns)
+            # columns = ["Test name", "Init", "T Init", "SR@100iter", "T Loop"]
+            df = pandas.DataFrame()
 
         idx = len(df.index)
         df.loc[idx, "Test name"] = param_file.split('/')[-1]
         df.loc[idx, "Init"] = str(is_init)
-        df.loc[idx, "T Init"] = str(t_init)
         df.loc[idx, "SR@100iter"] = str(SR)
-        df.loc[idx, "T Loop"] = str(t_loop)
+        df.loc[idx, "T Init"] = str(t_init)
+        df.loc[idx, "T Loop"] = str(t_loop/config.p_loop.niter)
 
         df.to_hdf("check.h5", "check")

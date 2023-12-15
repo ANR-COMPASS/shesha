@@ -3,19 +3,17 @@ Created on Wed Oct 5 14:28:23 2016
 
 @author: fferreira
 """
-import sys, os
 import numpy as np
 import h5py
 import matplotlib.pyplot as plt
 import matplotlib
-plt.ion()
 from guardians import gamora, drax
 
 datapath = "/home/fferreira/Data/"
 fname_layers = "roket_8m_12layers_gamma1.h5"  # File with  all layers
 buferr_ref = drax.get_err(datapath + fname_layers)
 f_layers = h5py.File(datapath + fname_layers)
-nlayers = f_layers.attrs["_Param_atmos__nscreens"]
+nlayers = f_layers.attrs["_ParamAtmos__nscreens"]
 
 fname_layer_i = []
 name = "roket_8m_12layers"
@@ -28,17 +26,17 @@ for f in fname_layer_i:
 
 print("--------------------------------------------")
 print("file ", fname_layers, " :")
-print("    nlayers : ", f_layers.attrs["_Param_atmos__nscreens"])
-print("    frac    : ", f_layers.attrs["_Param_atmos__frac"])
+print("    nlayers : ", f_layers.attrs["_ParamAtmos__nscreens"])
+print("    frac    : ", f_layers.attrs["_ParamAtmos__frac"])
 print("--------------------------------------------")
 
 nmodes = f_layers["P"][:].shape[0]
 contributors = [
         "tomography", "bandwidth", "non linearity", "noise", "filtered modes", "aliasing"
 ]
-Lambda_tar = f_layers.attrs["_Param_target__Lambda"][0]
-fracs = f_layers.attrs["_Param_atmos__frac"]
-alts = f_layers.attrs["_Param_atmos__alt"]
+Lambda_tar = f_layers.attrs["_ParamTarget__Lambda"][0]
+fracs = f_layers.attrs["_ParamAtmos__frac"]
+alts = f_layers.attrs["_ParamAtmos__alt"]
 frac_per_layer = dict()
 i = 0
 for a in alts:
@@ -48,9 +46,9 @@ for a in alts:
 frac = []
 buferr_layers = drax.get_err(datapath + fname_layer_i[0]) * 0.
 for k in range(len(files)):
-    frac.append(frac_per_layer[files[k].attrs["_Param_atmos__alt"][0]])
+    frac.append(frac_per_layer[files[k].attrs["_ParamAtmos__alt"][0]])
     buferr_layers += drax.get_err(datapath + fname_layer_i[k]) * np.sqrt(
-            frac_per_layer[files[k].attrs["_Param_atmos__alt"][0]])
+            frac_per_layer[files[k].attrs["_ParamAtmos__alt"][0]])
 
 C_layers = np.zeros((buferr_layers.shape[0], buferr_layers.shape[0]))
 for k in range(len(files)):
@@ -65,18 +63,18 @@ err_layer_i = np.zeros((nmodes, 2 * nlayers))
 
 err_layers[:, 0] = drax.variance(f_layers, contributors, method="Default")
 err_layers[:, 1] = drax.variance(f_layers, contributors, method="Independence")
-l = 0
+atm_layer = 0
 for f in files:
-    err_layer_i[:, l] = drax.variance(f, contributors, method="Default")
-    err_layer_i[:, l + 1] = drax.variance(f, contributors, method="Independence")
-    l += 2
+    err_layer_i[:, atm_layer] = drax.variance(f, contributors, method="Default")
+    err_layer_i[:, atm_layer + 1] = drax.variance(f, contributors, method="Independence")
+    atm_layer += 2
 
 #err_layer1p2 = varianceMultiFiles([f_layer1,f_layer2], frac_per_layer, contributors)
 inderr = np.zeros(nmodes)
 derr = np.zeros(nmodes)
-for l in range(nlayers):
-    inderr += frac[l] * err_layer_i[:, 2 * l + 1]
-    derr += frac[l] * err_layer_i[:, 2 * l]
+for atm_layer in range(nlayers):
+    inderr += frac[atm_layer] * err_layer_i[:, 2 * atm_layer + 1]
+    derr += frac[atm_layer] * err_layer_i[:, 2 * atm_layer]
 
 otftel_ref, otf2_ref, psf_ref, gpu = gamora.psf_rec_Vii(datapath + fname_layers)
 otftel_sum, otf2_sum, psf_sum, gpu = gamora.psf_rec_Vii(datapath + fname_layers,

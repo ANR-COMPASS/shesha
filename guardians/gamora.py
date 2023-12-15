@@ -9,7 +9,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 import h5py
 from shesha.sutra_wrap import carmaWrap_context, Gamora
-from sys import stdout
 import time
 from guardians import drax
 
@@ -60,7 +59,7 @@ def psf_rec_Vii(filename, err=None, fitting=True, covmodes=None, cov=None):
     Btt = f["Btt"][:]
 
     # Scale factor
-    scale = float(2 * np.pi / f.attrs["_Param_target__Lambda"][0])
+    scale = float(2 * np.pi / f.attrs["_ParamTarget__Lambda"][0])
     # Init GPU
     gpu = Gamora(c, c.active_device, "Vii", Btt.shape[0], covmodes.shape[0],
                  f["noise"][:].shape[1], IF.data, IF.indices, IF.indptr, IF.data.size, T,
@@ -109,7 +108,7 @@ def psf_rec_vii_cpu(filename):
 
     f = h5py.File(filename, 'r')
     IF, T = drax.get_IF(filename)
-    ratio_lambda = 2 * np.pi / f.attrs["_Param_target__Lambda"][0]
+    ratio_lambda = 2 * np.pi / f.attrs["_ParamTarget__Lambda"][0]
     # Telescope OTF
     print("Computing telescope OTF...")
     spup = drax.get_pup(filename)
@@ -343,7 +342,7 @@ def intersample(Cvvmap, pupilImage, IFImage, pixscale, dactu, lambdaIR):
 #     # Sparse IF matrix
 #     IF, T = drax.get_IF(filename)
 #     # Scale factor
-#     scale = float(2 * np.pi / f.attrs["_Param_target__Lambda"][0])
+#     scale = float(2 * np.pi / f.attrs["_ParamTarget__Lambda"][0])
 #     # Init GPU
 #     gpu = gamora_init(b"roket", err.shape[0], err.shape[1],
 #                       IF.data, IF.indices, IF.indptr, T,
@@ -389,7 +388,7 @@ def intersample(Cvvmap, pupilImage, IFImage, pixscale, dactu, lambdaIR):
 #     # Sparse IF matrix
 #     IF, T = drax.get_IF(filename)
 #     # Scale factor
-#     scale = float(2 * np.pi / f.attrs["_Param_target__Lambda"][0])
+#     scale = float(2 * np.pi / f.attrs["_ParamTarget__Lambda"][0])
 
 #     for k in range(err.shape[1]):
 #         amplipup = np.zeros((fft_size, fft_size), dtype=np.complex)

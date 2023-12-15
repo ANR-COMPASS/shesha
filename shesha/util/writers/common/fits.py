@@ -1,7 +1,6 @@
 import numpy as np
 from shesha.util.writers.common import dm
 from shesha.util.writers.common import wfs
-from shesha.util.writers.common import imat
 from astropy.io import fits
 
 def wfs_to_fits_hdu(sup, wfs_id):
@@ -134,15 +133,15 @@ def write_data(file_name, sup, *, wfss_indices=None, dms_indices=None,
         hdul.append(dm_to_fits_hdu(sup, i))
         hdul.append(dm_influ_to_fits_hdu(sup, i, influ_index = influ))
 
-    if(controller_id > -1):
+    # if(controller_id > -1):
         # IMAT
-        interaction_mat=imat.compose_imat(sup, compose_type=compose_type,
-                          controller_id=controller_id)
-        hdu_imat=fits.ImageHDU(interaction_mat,name="IMAT")
+        # interaction_mat=imat.compose_imat(sup, compose_type=compose_type,
+        #                   controller_id=controller_id)
+        # hdu_imat=fits.ImageHDU(interaction_mat,name="IMAT")
 
         # CMAT
-        hdu_cmat=fits.ImageHDU(sup.rtc.get_command_matrix(controller_id),
-                               name="CMAT")
+        # hdu_cmat=fits.ImageHDU(sup.rtc.get_command_matrix(controller_id),
+        #                        name="CMAT")
 
     print("\t* number of subaperture per WFS")
     print("\t* subapertures position")

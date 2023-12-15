@@ -166,7 +166,7 @@ def plg(
         if (data.ndim > 1):
             print(("Warning %dD dimensions. Cannot plot data. Use pli instead. " %
                    data.ndim))
-    except:
+    except BaseException:
         return
     if (x == ""):
         ax.plot(data, color=color)

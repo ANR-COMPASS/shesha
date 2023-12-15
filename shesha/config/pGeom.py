@@ -1,5 +1,5 @@
 ## @package   shesha.config.PGEOM
-## @brief     Param_geom class definition
+## @brief     ParamGeom class definition
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
 ## @version   5.5.0
 ## @date      2022/01/24
@@ -35,14 +35,14 @@
 #  You should have received a copy of the GNU Lesser General Public License along with COMPASS.
 #  If not, see <https://www.gnu.org/licenses/lgpl-3.0.txt>.
 
-from . import config_setter_utils as csu
+import shesha.config.config_setter_utils as csu
 import numpy as np
 
 
 #################################################
-# P-Class (parametres) Param_geom
+# P-Class (parametres) ParamGeom
 #################################################
-class Param_geom:
+class ParamGeom:
 
     def __init__(self):
         """ Private members were initialized yet """

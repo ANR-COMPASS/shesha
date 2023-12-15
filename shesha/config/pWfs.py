@@ -1,5 +1,5 @@
 ## @package   shesha.config.PWFS
-## @brief     Param_wfs class definition
+## @brief     ParamWfs class definition
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
 ## @version   5.5.0
 ## @date      2022/01/24
@@ -36,15 +36,15 @@
 #  If not, see <https://www.gnu.org/licenses/lgpl-3.0.txt>.
 
 import numpy as np
-from . import config_setter_utils as csu
+import shesha.config.config_setter_utils as csu
 import shesha.constants as scons
 
 #################################################
-# P-Class (parametres) Param_wfs
+# P-Class (parametres) ParamWfs
 #################################################
 
 
-class Param_wfs:
+class ParamWfs:
 
     def __init__(self, roket=False):
         self.__type = None
@@ -678,12 +678,12 @@ class Param_wfs:
         """
         return self.__laserpower
 
-    def set_laserpower(self, l):
+    def set_laserpower(self, laserpower):
         """ Set the laser power
 
-        :param l: (float) : laser power in W
+        :param laserpower: (float) : laser power in W
         """
-        self.__laserpower = csu.enforce_float(l)
+        self.__laserpower = csu.enforce_float(laserpower)
 
     laserpower = property(get_laserpower, set_laserpower)
 
@@ -694,12 +694,12 @@ class Param_wfs:
         """
         return self.__lltx
 
-    def set_lltx(self, l):
+    def set_lltx(self, lltx):
         """ Set the x position of llt
 
-        :param l: (float) : x position (in meters) of llt
+        :param lltx: (float) : x position (in meters) of llt
         """
-        self.__lltx = csu.enforce_float(l)
+        self.__lltx = csu.enforce_float(lltx)
 
     lltx = property(get_lltx, set_lltx)
 
@@ -710,12 +710,12 @@ class Param_wfs:
         """
         return self.__llty
 
-    def set_llty(self, l):
+    def set_llty(self, llty):
         """ Set the y position of llt
 
-        :param l: (float) : y position (in meters) of llt
+        :param llty: (float) : y position (in meters) of llt
         """
-        self.__llty = csu.enforce_float(l)
+        self.__llty = csu.enforce_float(llty)
 
     llty = property(get_llty, set_llty)
 

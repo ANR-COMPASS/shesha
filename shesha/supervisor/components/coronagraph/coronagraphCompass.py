@@ -39,8 +39,6 @@ import shesha.config as conf
 import shesha.constants as scons
 from carmaWrap import context
 from shesha.supervisor.components.targetCompass import TargetCompass
-from abc import ABC, abstractmethod
-from shesha.util.coronagraph_utils import compute_contrast
 
 class CoronagraphCompass():
     """ Class for Compass Coronagraph modules
@@ -52,7 +50,7 @@ class CoronagraphCompass():
 
         _dim_image :(int): Coronagraphic image dimension
 
-        _p_corono: (Param_corono): Coronagraph parameters
+        _p_corono: (ParamCoronagraph): Coronagraph parameters
 
         _target: (TargetCompass): Compass Target used as input for the coronagraph
 
@@ -66,9 +64,9 @@ class CoronagraphCompass():
         """ Initialize a coronagraph instance with generic attributes
 
         Args:
-            p_corono: (Param_corono): Compass coronagraph parameters
+            p_corono: (ParamCoronagraph): Compass coronagraph parameters
 
-            p_geom: (Param_geom): Compass geometry parameters
+            p_geom: (ParamGeom): Compass geometry parameters
 
             targetCompass: (TargetCompass): Compass Target used as input for the coronagraph
 
@@ -77,14 +75,14 @@ class CoronagraphCompass():
 
         self._coronos = []
 
-    def add_corono(self, context:context, p_corono: conf.Param_corono, p_geom: conf.Param_geom,
+    def add_corono(self, context:context, p_corono: conf.ParamCoronagraph, p_geom: conf.ParamGeom,
                    targetCompass: TargetCompass):
         """ Add a coronagraph
 
         Args:
-            p_corono: (Param_corono): Compass coronagraph parameters
+            p_corono: (ParamCoronagraph): Compass coronagraph parameters
 
-            p_geom: (Param_geom): Compass geometry parameters
+            p_geom: (ParamGeom): Compass geometry parameters
 
             targetCompass: (TargetCompass): Compass Target used as input for the coronagraph
         """

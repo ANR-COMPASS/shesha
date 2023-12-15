@@ -1,11 +1,9 @@
-import numpy as np
-import json
 
 def get_actu_pos_pixel(dm):
     """return the coordinates in pixel of a given DM actuators
 
     Args:
-        dm : (Param_dm) : Dm to get the actuators position from
+        dm : (ParamDm) : Dm to get the actuators position from
 
     Returns:
         xpos : (np.ndarray[ndim=1, dtype=np.float32]) : actuators positions along axis x
@@ -42,7 +40,7 @@ def dm_to_json(dm, geom):
     """return a json description of a dm
 
     Args:
-        dm : (Param_dm) : dm to represent as json
+        dm : (ParamDm) : dm to represent as json
     """
     dm_json = {
         "n_actu" : dm.get_nact(),

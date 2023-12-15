@@ -44,8 +44,8 @@ from rich.progress import track
 import numpy as np
 
 
-def atmos_init(context: carmaWrap_context, p_atmos: conf.Param_atmos,
-               p_tel: conf.Param_tel, p_geom: conf.Param_geom, ittime=None, p_wfss=None,
+def atmos_init(context: carmaWrap_context, p_atmos: conf.ParamAtmos,
+               p_tel: conf.ParamTel, p_geom: conf.ParamGeom, ittime=None, p_wfss=None,
                p_targets=None, dataBase={}, use_DB=False):
     """
     Initializes an Atmos object
@@ -53,18 +53,18 @@ def atmos_init(context: carmaWrap_context, p_atmos: conf.Param_atmos,
     Args:
         context: (carmaWrap_context): GPU device context
 
-        p_atmos: (Param_atmos): Atmosphere parameters
+        p_atmos: (ParamAtmos): Atmosphere parameters
 
-        p_tel: (Param_tel): Telescope parameters
+        p_tel: (ParamTel): Telescope parameters
 
-        p_geom: (Param_geom): Geometry parameters
+        p_geom: (ParamGeom): Geometry parameters
 
     Kwargs:
         ittime: (float): exposition time [s]
 
-        p_wfss: (list of Param_wfs): WFS parameters
+        p_wfss: (list of ParamWfs): WFS parameters
 
-        p_targets: (list of Param_target): target parameters
+        p_targets: (list of ParamTarget): target parameters
 
         dataBase: (dict): dictionary for data base
 

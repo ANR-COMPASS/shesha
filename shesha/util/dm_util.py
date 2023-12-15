@@ -35,6 +35,7 @@
 #  You should have received a copy of the GNU Lesser General Public License along with COMPASS.
 #  If not, see <https://www.gnu.org/licenses/lgpl-3.0.txt>.
 
+import math
 import numpy as np
 from astropy.io import fits
 
@@ -43,7 +44,7 @@ from shesha.constants import CONST
 
 from . import utilities as util
 
-from typing import List, Union
+from typing import List
 
 
 def dim_dm_support(cent: float, extent: int, ssize: int):
@@ -356,14 +357,14 @@ def make_zernike(nzer: int, size: int, diameter: int, xc=-1., yc=-1., ext=0):
 
         if ext:
             for i in range((n - m) // 2 + 1):
-                z[:, :, zn] = z[:, :, zn] + (-1.) ** i * zrmod ** (n - 2. * i) * float(np.math.factorial(n - i)) / \
-                    float(np.math.factorial(i) * np.math.factorial((n + m) // 2 - i) *
-                          np.math.factorial((n - m) // 2 - i))
+                z[:, :, zn] = z[:, :, zn] + (-1.) ** i * zrmod ** (n - 2. * i) * float(math.factorial(n - i)) / \
+                    float(math.factorial(i) * math.factorial((n + m) // 2 - i) *
+                          math.factorial((n - m) // 2 - i))
         else:
             for i in range((n - m) // 2 + 1):
-                z[:, :, zn] = z[:, :, zn] + (-1.) ** i * zr ** (n - 2. * i) * float(np.math.factorial(n - i)) / \
-                    float(np.math.factorial(i) * np.math.factorial((n + m) // 2 - i) *
-                          np.math.factorial((n - m) // 2 - i))
+                z[:, :, zn] = z[:, :, zn] + (-1.) ** i * zr ** (n - 2. * i) * float(math.factorial(n - i)) / \
+                    float(math.factorial(i) * math.factorial((n + m) // 2 - i) *
+                          math.factorial((n - m) // 2 - i))
 
         if ((zn + 1) % 2 == 1):
             if (m == 0):
@@ -499,14 +500,14 @@ def export_custom_dm(file_name, p_dm, p_geom, *, p_tel=None):
     {}
 
     Args:
-        p_dm   : (Param_dm)   : dm settings
+        p_dm   : (ParamDm)   : dm settings
 
-        p_geom : (Param_geom) : geometry settings
+        p_geom : (ParamGeom) : geometry settings
 
     Kwargs:
         file_name : (string) : if set, the HDU is written to the file specified by this variable
 
-        p_tel : (Param_tel) : telescope settings, used to provide the diameter (if not provided, the default diameter id obtained from the p_geom as pupdiam*pixsize)
+        p_tel : (ParamTel) : telescope settings, used to provide the diameter (if not provided, the default diameter id obtained from the p_geom as pupdiam*pixsize)
 
     Returns:
         (HDUList) : custom_dm data

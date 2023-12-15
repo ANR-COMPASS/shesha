@@ -1,5 +1,3 @@
-import numpy as np
-import json
 
 def get_subap_pos_pixel(wfs):
     """Return the coordinates of the valid subapertures of a given WFS
@@ -7,7 +5,7 @@ def get_subap_pos_pixel(wfs):
     these coordinates are given in pixels
 
     Args:
-        wfs : Param_wfs : wfs to get the subapertures position from
+        wfs : ParamWfs : wfs to get the subapertures position from
 
     Return:
         valid_X : (np.ndarray[ndim=1, dtype=np.float64]) : subapertures positions along axis x
@@ -48,9 +46,9 @@ def wfs_to_json(wfs, geom, type, *, x_pos=None, y_pos=None):
     """return a json description of a wfs
 
     Args:
-        wfs : (Param_wfs) : wfs to represent as json
+        wfs : (ParamWfs) : wfs to represent as json
 
-        geom : (Param_geom) : geom settings
+        geom : (ParamGeom) : geom settings
 
         type : (string) : wfs type ("lgs", "ngs" "target" or "ts")
 

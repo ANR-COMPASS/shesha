@@ -1,5 +1,4 @@
 import os
-import numpy as np
 from astropy.io import fits
 
 from shesha.ao import imats

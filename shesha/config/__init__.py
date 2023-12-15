@@ -35,19 +35,19 @@
 #  You should have received a copy of the GNU Lesser General Public License along with COMPASS.
 #  If not, see <https://www.gnu.org/licenses/lgpl-3.0.txt>.
 
-__all__ = [
-        'PATMOS', 'PDMS', 'PGEOM', 'PLOOP', 'PTEL', 'PWFS', 'PTARGET', 'PCONTROLLER',
-        'PCENTROIDER', 'config_setter_utils', 'pconfig'
-]
+from shesha.config.pAtmos import ParamAtmos
+from shesha.config.pCentroider import ParamCentroider
+from shesha.config.pConfig import ParamConfig
+from shesha.config.pController import ParamController
+from shesha.config.pCoronagraph import ParamCoronagraph
+from shesha.config.pDms import ParamDm
+from shesha.config.pGeom import ParamGeom
+from shesha.config.pLoop import ParamLoop
+from shesha.config.pTarget import ParamTarget
+from shesha.config.pTel import ParamTel
+from shesha.config.pWfs import ParamWfs
 
-from .PATMOS import Param_atmos
-from .PDMS import Param_dm
-from .PTEL import Param_tel
-from .PGEOM import Param_geom
-from .PLOOP import Param_loop
-from .PWFS import Param_wfs
-from .PTARGET import Param_target
-from .PCENTROIDER import Param_centroider
-from .PCONTROLLER import Param_controller
-from .PCORONO import Param_corono
-from .pconfig import ParamConfig
+__all__ = ['ParamConfig', 'ParamAtmos', 'ParamCoronagraph', 
+           'ParamDm', 'ParamGeom', 'ParamLoop', 'ParamTel', 
+           'ParamWfs', 'ParamTarget', 'ParamController', 
+           'ParamCentroider']

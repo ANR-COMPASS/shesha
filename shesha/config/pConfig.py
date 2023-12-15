@@ -34,7 +34,8 @@
 #
 #  You should have received a copy of the GNU Lesser General Public License along with COMPASS.
 import importlib
-import sys, os
+import sys
+import os
 from collections import OrderedDict
 import numpy as np
 import shesha.constants as scons
@@ -50,23 +51,23 @@ class ParamConfig(object):
     Attributes:
         simul_name : (str) : Simulation run name
 
-        p_atmos : (Param_atmos) : A Param_atmos instance
+        p_atmos : (ParamAtmos) : A ParamAtmos instance
 
-        p_geom : (Param_geom) : A Param_geom instance
+        p_geom : (ParamGeom) : A ParamGeom instance
 
-        p_tel : (Param_tel) : A Param_tel instance
+        p_tel : (ParamTel) : A ParamTel instance
 
-        p_dms : (List of Param_dm) : List of Param_dm instance
+        p_dms : (List of ParamDm) : List of ParamDm instance
 
-        p_wfss : (List of Param_wfs) : List of Param_wfs instance
+        p_wfss : (List of ParamWfs) : List of ParamWfs instance
 
-        p_targets : (List of Param_target) : List of Param_target instance
+        p_targets : (List of ParamTarget) : List of ParamTarget instance
 
-        p_loop : (Param_loop) : A Param_loop instance
+        p_loop : (ParamLoop) : A ParamLoop instance
 
-        p_centroiders : (List of Param_centroider) : List of Param_centroider instance
+        p_centroiders : (List of ParamCentroider) : List of ParamCentroider instance
 
-        p_controllers : (List of Param_controller) : List of Param controller instance
+        p_controllers : (List of ParamController) : List of Param controller instance
 
         _config : (configuration module from parfile) : Raw parameter file module
     """
@@ -90,7 +91,14 @@ class ParamConfig(object):
         Args:
             filename_path: (str): path to the parameters file
         """
-        path = os.path.dirname(os.path.abspath(filename_path))
+        path = os.path.dirname(filename_path)
+
+        # If the path not exists try to find it in the package directory
+        if not os.path.isdir(path):
+            path = os.path.dirname(__file__) + "/../../" + path
+            
+        path = os.path.abspath(path)
+
         filename = os.path.basename(filename_path)
         name, ext = os.path.splitext(filename)
 
@@ -242,7 +250,7 @@ class ParamConfig(object):
         nysubList = []
         lambdaList = []
         dms_seen = []
-        colTmpList = []
+        # colTmpList = []
         noise = []
         #new_hduwfsl = pfits.HDUList()
         #new_hduwfsSubapXY = pfits.HDUList()

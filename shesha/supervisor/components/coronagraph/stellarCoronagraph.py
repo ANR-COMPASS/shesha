@@ -38,7 +38,7 @@ import numpy as np
 import shesha.config as conf
 import shesha.constants as scons
 from shesha.supervisor.components.coronagraph.genericCoronagraph import GenericCoronagraph
-from shesha.init.coronagraph_init import init_coronagraph, init_mft, mft_multiplication
+from shesha.init.coronagraph_init import init_coronagraph, init_mft
 from shesha.supervisor.components.targetCompass import TargetCompass
 from sutraWrap import StellarCoronagraph
 from carmaWrap import context
@@ -52,7 +52,7 @@ class StellarCoronagraphCompass(GenericCoronagraph):
 
         _dim_image :(int): Coronagraphic image dimension
 
-        _p_corono: (Param_corono): Coronagraph parameters
+        _p_corono: (ParamCoronagraph): Coronagraph parameters
 
         _target: (TargetCompass): Compass Target used as input for the coronagraph
 
@@ -91,8 +91,8 @@ class StellarCoronagraphCompass(GenericCoronagraph):
         _indices_pup: (tuple): Tuple of ndarray containing X and Y indices of illuminated
                                 pixels in the pupil
     """
-    def __init__(self, context: context, targetCompass: TargetCompass, p_corono: conf.Param_corono,
-                 p_geom: conf.Param_geom):
+    def __init__(self, context: context, targetCompass: TargetCompass, p_corono: conf.ParamCoronagraph,
+                 p_geom: conf.ParamGeom):
         """ Initialize a stellar coronagraph instance
 
         Args:
@@ -100,9 +100,9 @@ class StellarCoronagraphCompass(GenericCoronagraph):
 
             targetCompass: (TargetCompass): Compass Target used as input for the coronagraph
 
-            p_corono: (Param_corono): Coronagraph parameters
+            p_corono: (ParamCoronagraph): Coronagraph parameters
 
-            p_geom: (Param_geom): Compass geometry parameters
+            p_geom: (ParamGeom): Compass geometry parameters
         """
 
         init_coronagraph(p_corono, p_geom.pupdiam)

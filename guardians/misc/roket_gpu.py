@@ -4,19 +4,19 @@ Created on Tue Jul 12 09:28:23 2016
 @author: fferreira
 """
 
-import cProfile
-import pstats as ps
 
-import sys, os
+import sys
+import os
 import numpy as np
 import carmaWrap as ch
-import shesha as ao
 import time
-import matplotlib.pyplot as plt
-plt.ion()
 import hdf5_util as h5u
-import pandas
-from scipy.sparse import csr_matrix
+from shesha.init.atmos_init import atmos_init
+from shesha.init.wfs_init import wfs_init
+from shesha.init.dm_init import dm_init
+from shesha.init.target_init import target_init
+from shesha.init.rtc_init import rtc_init
+from shesha.init.roket_init import roket_init
 
 if (len(sys.argv) < 2):
     error = 'command line should be at least:"python -i test.py parameters_filename"\n with "parameters_filename" the path to the parameters file'
@@ -83,27 +83,27 @@ c = ch.carmaWrap_context(devices=np.array([0, 1], dtype=np.int32))
 
 #    wfs
 print("->wfs")
-wfs, tel = ao.wfs_init(config.p_wfss, config.p_atmos, config.p_tel, config.p_geom,
+wfs, tel = wfs_init(config.p_wfss, config.p_atmos, config.p_tel, config.p_geom,
                        config.p_target, config.p_loop, config.p_dms)
 
 #   atmos
 print("->atmos")
-atm = ao.atmos_init(c, config.p_atmos, config.p_tel, config.p_geom, config.p_loop,
+atm = atmos_init(c, config.p_atmos, config.p_tel, config.p_geom, config.p_loop,
                     config.p_wfss, wfs, config.p_target, rank=0, clean=clean,
                     load=matricesToLoad)
 
 #   dm
 print("->dm")
-dms = ao.dm_init(config.p_dms, config.p_wfss, wfs, config.p_geom, config.p_tel)
+dms = dm_init(config.p_dms, config.p_wfss, wfs, config.p_geom, config.p_tel)
 
 #   target
 print("->target")
-tar = ao.target_init(c, tel, config.p_target, config.p_atmos, config.p_geom,
+tar = target_init(c, tel, config.p_target, config.p_atmos, config.p_geom,
                      config.p_tel, config.p_dms)
 
 print("->rtc")
 #   rtc
-rtc = ao.rtc_init(tel, wfs, config.p_wfss, dms, config.p_dms, config.p_geom,
+rtc = rtc_init(tel, wfs, config.p_wfss, dms, config.p_dms, config.p_geom,
                   config.p_rtc, config.p_atmos, atm, config.p_tel, config.p_loop,
                   clean=clean, simul_name=simul_name, load=matricesToLoad)
 
@@ -164,20 +164,20 @@ def loop(n):
 
         SR : (float) : final strehl ratio returned by the simulation
     """
-    if (error_flag):
+    # if (error_flag):
         # Initialize buffers for error breakdown
-        nactu = rtc.get_command(0).size
-        nslopes = rtc.get_centroids(0).size
-        com = np.zeros((n, nactu), dtype=np.float32)
-        noise_com = np.zeros((n, nactu), dtype=np.float32)
-        alias_wfs_com = np.copy(noise_com)
-        wf_com = np.copy(noise_com)
-        tomo_com = np.copy(noise_com)
-        trunc_com = np.copy(noise_com)
-        H_com = np.copy(noise_com)
-        mod_com = np.copy(noise_com)
-        bp_com = np.copy(noise_com)
-        fit = np.zeros(n)
+        # nactu = rtc.get_command(0).size
+        # nslopes = rtc.get_centroids(0).size
+        # com = np.zeros((n, nactu), dtype=np.float32)
+        # noise_com = np.zeros((n, nactu), dtype=np.float32)
+        # alias_wfs_com = np.copy(noise_com)
+        # wf_com = np.copy(noise_com)
+        # tomo_com = np.copy(noise_com)
+        # trunc_com = np.copy(noise_com)
+        # H_com = np.copy(noise_com)
+        # mod_com = np.copy(noise_com)
+        # bp_com = np.copy(noise_com)
+        # fit = np.zeros(n)
     #    covm = np.zeros((nslopes,nslopes))
     #    covv = np.zeros((nactu,nactu))
 
@@ -333,7 +333,7 @@ def compute_btt():
 
 def compute_cmatWithBtt(Btt, nfilt):
     D = rtc.get_imat(0)
-    #D = ao.imat_geom(wfs,config.p_wfss,config.p_controllers[0],dms,config.p_dms,meth=0)
+    #D = imat_geom(wfs,config.p_wfss,config.p_controllers[0],dms,config.p_dms,meth=0)
     # Filtering on Btt modes
     Btt_filt = np.zeros((Btt.shape[0], Btt.shape[1] - nfilt))
     Btt_filt[:, :Btt_filt.shape[1] - 2] = Btt[:, :Btt.shape[1] - (nfilt + 2)]
@@ -486,13 +486,13 @@ imat = rtc.get_imat(0)
 RD = np.dot(R, imat).astype(np.float32)
 
 gRD = (np.identity(RD.shape[0]) - config.p_controllers[0].gain * RD).astype(np.float32)
-roket = ao.roket_init(rtc, wfs, tar, dms, tel, atm, 0, 1, Btt.shape[0], Btt.shape[1],
+roket = roket_init(rtc, wfs, tar, dms, tel, atm, 0, 1, Btt.shape[0], Btt.shape[1],
                       nfiltered, niters, Btt, P, gRD, RD)
 #diagRD = np.diag(gRD)
 #gRD = np.diag(diagRD)
 #gRD=np.diag(gRD)
 
-#imat_geom = ao.imat_geom(wfs,config.p_wfss,config.p_controllers[0],dms,config.p_dms,meth=0)
+#imat_geom = imat_geom(wfs,config.p_wfss,config.p_controllers[0],dms,config.p_dms,meth=0)
 #RDgeom = np.dot(R,imat_geom)
 preloop(1000)
 SR, SR2 = loop(niters)

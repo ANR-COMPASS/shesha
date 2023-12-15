@@ -1,6 +1,5 @@
 import numpy as np
 import matplotlib.pyplot as plt
-plt.ion()
 import h5py
 from guardians import groot, gamora
 import os

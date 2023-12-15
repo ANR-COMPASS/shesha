@@ -44,7 +44,13 @@ from . import utilities as util
 
 from shesha.constants import ApertureType, SpiderType
 
-EELT_data = os.environ.get('SHESHA_ROOT') + "/data/apertures/"
+if 'SHESHA_ROOT' in os.environ:
+    EELT_data = os.environ['SHESHA_ROOT'] + "/data/apertures"
+else: # if SHESHA_ROOT is not defined, search for the data directory in the default package location
+    if os.path.isdir(os.path.dirname(__file__) + "/../../data/apertures"):
+        EELT_data = os.path.dirname(__file__) + "/../../data/apertures"
+    else:
+        raise RuntimeError("SHESHA_ROOT are not defined")
 
 
 def make_pupil(dim, pupd, tel, xc=-1, yc=-1, real=0, halfSpider=False):
@@ -56,7 +62,7 @@ def make_pupil(dim, pupd, tel, xc=-1, yc=-1, real=0, halfSpider=False):
 
         pupd: (long) : linear size of total pupil = p_geom.pupdiam
 
-        tel: (Param_tel) : Telescope structure
+        tel: (ParamTel) : Telescope structure
 
         xc: (int) = p_geom.pupdiam / 2. - 0.5
 
@@ -80,11 +86,11 @@ def make_pupil(dim, pupd, tel, xc=-1, yc=-1, real=0, halfSpider=False):
         seg_corner = 1.8
         kpitch = seg_corner / 2 * np.sqrt(3)
         knseg = 7
-        kinner_rad = 0.9
-        kouter_rad = 3.4
+        # kinner_rad = 0.9
+        # kouter_rad = 3.4
         kR = 85
         knominalD = 10.96
-        khalf_seg = 0.9
+        # khalf_seg = 0.9
         return generateEeltPupilMask(
                 dim, tel.t_spiders, xc, yc, tel.diam / dim, tel.gap, tel.pupangle,
                 D=tel.diam, cobs=tel.cobs, halfSpider=halfSpider, pitch=kpitch,
@@ -214,7 +220,7 @@ def make_VLT(dim, pupd, tel):
 
         pupd: (long) : linear size of total pupil
 
-        tel: (Param_tel) : Telescope structure
+        tel: (ParamTel) : Telescope structure
     """
 
     if (tel.t_spiders == -1):
@@ -256,7 +262,7 @@ def make_EELT(dim, pupd, tel, N_seg=-1):
 
         pupd: (long) : linear size of total pupil
 
-        tel: (Param_tel) : Telescope structure
+        tel: (ParamTel) : Telescope structure
 
         N_seg: (int)
 
@@ -378,7 +384,7 @@ def make_phase_ab(dim, pupd, tel, pup=None, xc=-1, yc=-1, real=0, halfSpider=Fal
 
         pupd: (long) : linear size of total pupil
 
-        tel: (Param_tel) : Telescope structure
+        tel: (ParamTel) : Telescope structure
 
         pup: (?)
 
@@ -399,11 +405,11 @@ def make_phase_ab(dim, pupd, tel, pup=None, xc=-1, yc=-1, real=0, halfSpider=Fal
         seg_corner = 1.8
         kpitch = seg_corner / 2 * np.sqrt(3)
         knseg = 7
-        kinner_rad = 0.9
-        kouter_rad = 3.4
+        # kinner_rad = 0.9
+        # kouter_rad = 3.4
         kR = 85
         knominalD = 10.96
-        khalf_seg = 0.9
+        # khalf_seg = 0.9
         return generateEeltPupilMask(
                 dim, 0, xc, yc, tel.diam / dim, tel.gap, tel.pupangle, D=tel.diam,
                 cobs=tel.cobs, halfSpider=halfSpider, pitch=kpitch, nseg=knseg,
@@ -464,8 +470,8 @@ def make_phase_ab(dim, pupd, tel, pup=None, xc=-1, yc=-1, real=0, halfSpider=Fal
 
                 if (i == 0):
                     N_in_seg = np.sum(SEG)
-                    Hex_diam = 2 * np.max(
-                            np.sqrt(Xt[np.where(SEG)]**2 + Yt[np.where(SEG)]**2))
+                    # Hex_diam = 2 * np.max(
+                    #         np.sqrt(Xt[np.where(SEG)]**2 + Yt[np.where(SEG)]**2))
 
                 if (tt_seg[i] != 0):
                     TT = tt_seg[i] * (
@@ -574,7 +580,7 @@ def generateEeltPupilMask(npt, dspider, i0, j0, pixscale, gap, rotdegree, D=40.0
         referr = np.random.random(hx.size)
         referr = referr * refl / np.std(referr)
         refl = np.ones(hx.size) - referr
-    elif type(refl) == list:
+    elif isinstance(refl, list):
         if len(refl) == 3:
             refpist = np.random.randn(hx.size)
             refpist = refpist * refl[0] / np.std(refpist)

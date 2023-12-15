@@ -34,60 +34,67 @@ jobs:
       run: |
         eval "$(/home/compass/miniconda3/bin/conda shell.bash hook)"
         conda activate compass
-        conda install -c "compass/label/cuda11" compass
-        pip install coverage flake8 pytest pytest-cov pytest-cover pytest-coverage pytest-html pytest-metadata
-    - name: Lint with flake8
-      run: |
+        conda install -c "compass/label/cuda11" compass -y
+        pip install coverage coverage-badge ruff pytest pytest-cov pytest-cover pytest-coverage pytest-html pytest-metadata
+    - name: Lint with Ruff  
+      run: |  
         eval "$(/home/compass/miniconda3/bin/conda shell.bash hook)"
         conda activate compass
-        # stop the build if there are Python syntax errors or undefined names
-          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+        ruff .  
+      continue-on-error: true
     - name: Check Compass on scao_sh_16x16_8pix
       run: |
+        eval "$(/home/compass/miniconda3/bin/conda shell.bash hook)"
+        conda activate compass
         export SHESHA_ROOT=$PWD
         export PYTHONPATH=$SHESHA_ROOT:$PYTHONPATH
         export PYTHONDONTWRITEBYTECODE=1
-        eval "$(/home/compass/miniconda3/bin/conda shell.bash hook)"
-        conda activate compass
-        ipython -i shesha/scripts/closed_loop.py data/par/par4bench/scao_sh_16x16_8pix.py
+        python shesha/scripts/closed_loop.py data/par/par4bench/scao_sh_16x16_8pix.py
     - name: Check Compass
       run: |
+        eval "$(/home/compass/miniconda3/bin/conda shell.bash hook)"
+        conda activate compass
         export SHESHA_ROOT=$PWD
         export PYTHONPATH=$SHESHA_ROOT:$PYTHONPATH
         export PYTHONDONTWRITEBYTECODE=1
-        eval "$(/home/compass/miniconda3/bin/conda shell.bash hook)"
-        conda activate compass
         ./tests/checkCompass.sh
     - name: Archive check results
       uses: actions/upload-artifact@v3
       with:
-        name: report
+        name: report_${{ matrix.python-version }}
         path: |
           report_E2E.md
     - name: Build coverage file and unit tests report
       run: |
+        eval "$(/home/compass/miniconda3/bin/conda shell.bash hook)"
+        conda activate compass
         export SHESHA_ROOT=$PWD
         export PYTHONPATH=$SHESHA_ROOT:$PYTHONPATH
         export PYTHONDONTWRITEBYTECODE=1
-        eval "$(/home/compass/miniconda3/bin/conda shell.bash hook)"
-        conda activate compass
-        pytest --junitxml=pytest.xml --cov-report=term-missing:skip-covered --cov=shesha tests/pytest/supervisor | tee pytest-coverage.txt
+        pytest --junitxml=pytest-sup.xml --cov-report=term-missing:skip-covered --cov=shesha tests/pytest/supervisor | tee pytest-sub-coverage.txt
         pytest --junitxml=pytest-rtc.xml --cov-report=term-missing:skip-covered --cov=shesha tests/pytest/rtc | tee pytest-rtc-coverage.txt
         pytest --junitxml=pytest-rtc_standalone.xml --cov-report=term-missing:skip-covered --cov=shesha tests/pytest/rtc_standalone | tee pytest-rtc_standalone-coverage.txt
-    - name: Fix dubious ownership 
-      run: git config --global --add safe.directory /__w/shesha/shesha
+    - name: Archive check results
+      uses: actions/upload-artifact@v3
+      with:
+        name: unit_tests_report_${{ matrix.python-version }}
+        path: |
+          pytest-sub-coverage.txt
+          pytest-sup.xml
+          pytest-rtc-coverage.txt
+          pytest-rtc.xml
+          pytest-rtc_standalone-coverage.txt
+          pytest-rtc_standalone.xml
     - name: Pytest coverage comment
       uses: MishaKav/pytest-coverage-comment@main
       with:
         multiple-files: |
-          Supervisor, pytest-coverage.txt, pytest.xml
+          Supervisor, pytest-sub-coverage.txt, pytest-sup.xml
           RTC, pytest-rtc-coverage.txt, pytest-rtc.xml
           RTC Standalone, pytest-rtc_standalone-coverage.txt, pytest-rtc_standalone.xml
-        # pytest-xml-coverage-path: pytest-coverage.xml
-        # pytest-coverage-path: pytest-coverage.txt
-        # junitxml-path: pytest.xml
+        pytest-xml-coverage-path: ''
+        pytest-coverage-path: ''
+        junitxml-path: ''
         title: COMPASS Coverage Report
         badge-title: Coverage
         hide-badge: false

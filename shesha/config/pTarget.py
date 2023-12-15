@@ -1,5 +1,5 @@
 ## @package   shesha.config.PTARGET
-## @brief     Param_target class definition
+## @brief     ParamTarget class definition
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
 ## @version   5.5.0
 ## @date      2022/01/24
@@ -36,14 +36,14 @@
 #  If not, see <https://www.gnu.org/licenses/lgpl-3.0.txt>.
 
 import numpy as np
-from . import config_setter_utils as csu
+import shesha.config.config_setter_utils as csu
 
 #################################################
-# P-Class (parametres) Param_target
+# P-Class (parametres) ParamTarget
 #################################################
 
 
-class Param_target:
+class ParamTarget:
 
     def __init__(self):
         self.__apod = False
@@ -68,12 +68,12 @@ class Param_target:
         """
         return self.__apod
 
-    def set_apod(self, l):
+    def set_apod(self, apod):
         """ Set apodizer flag
 
-        :param l: (bool) : apod
+        :param apod: (bool) : apod
         """
-        self.__apod = csu.enforce_or_cast_bool(l)
+        self.__apod = csu.enforce_or_cast_bool(apod)
 
     apod = property(get_apod, set_apod)
 

@@ -34,7 +34,8 @@
 #
 #  You should have received a copy of the GNU Lesser General Public License along with COMPASS.
 #  If not, see <https://www.gnu.org/licenses/lgpl-3.0.txt>.
-__all__ = ["rtcCompass", "rtcStandalone"]
 
-from .rtcCompass import RtcCompass
-from .rtcStandalone import RtcStandalone
+from shesha.supervisor.components.rtc.rtcCompass import RtcCompass
+from shesha.supervisor.components.rtc.rtcStandalone import RtcStandalone
+
+__all__ = ['RtcCompass', 'RtcStandalone']

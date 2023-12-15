@@ -48,11 +48,10 @@ import shesha.util.hdf5_util as h5u
 from shesha.sutra_wrap import Sensors, Dms, Rtc_FFF as Rtc
 from shesha.constants import CONST
 
-from astropy.io import fits
 
 
-def imat_geom(wfs: Sensors, dms: Dms, p_wfss: List[conf.Param_wfs],
-              p_dms: List[conf.Param_dm], p_controller: conf.Param_controller,
+def imat_geom(wfs: Sensors, dms: Dms, p_wfss: List[conf.ParamWfs],
+              p_dms: List[conf.ParamDm], p_controller: conf.ParamController,
               meth: int = 0) -> np.ndarray:
     """ Compute the interaction matrix with a geometric method
 
@@ -62,11 +61,11 @@ def imat_geom(wfs: Sensors, dms: Dms, p_wfss: List[conf.Param_wfs],
 
         dms: (Dms) : Dms object
 
-        p_wfss: (list of Param_wfs) : wfs settings
+        p_wfss: (list of ParamWfs) : wfs settings
 
-        p_dms: (list of Param_dm) : dms settings
+        p_dms: (list of ParamDm) : dms settings
 
-        p_controller: (Param_controller) : controller settings
+        p_controller: (ParamController) : controller settings
 
         meth: (int) : (optional) method type (0 or 1)
 
@@ -114,7 +113,7 @@ def imat_geom(wfs: Sensors, dms: Dms, p_wfss: List[conf.Param_wfs],
 
 
 def imat_init(ncontrol: int, rtc: Rtc, dms: Dms, p_dms: list, wfs: Sensors, p_wfss: list,
-              p_tel: conf.Param_tel, p_controller: conf.Param_controller, M2V=None,
+              p_tel: conf.ParamTel, p_controller: conf.ParamController, M2V=None,
               dataBase: dict = {}, use_DB: bool = False) -> None:
     """ Initialize and compute the interaction matrix on the GPU
 
@@ -126,15 +125,15 @@ def imat_init(ncontrol: int, rtc: Rtc, dms: Dms, p_dms: list, wfs: Sensors, p_wf
 
         dms: (Dms) : Dms object
 
-        p_dms: (Param_dms) : dms settings
+        p_dms: (ParamDms) : dms settings
 
         wfs: (Sensors) : Sensors object
 
-        p_wfss: (list of Param_wfs) : wfs settings
+        p_wfss: (list of ParamWfs) : wfs settings
 
-        p_tel: (Param_tel) : telescope settings
+        p_tel: (ParamTel) : telescope settings
 
-        p_controller: (Param_controller) : controller settings
+        p_controller: (ParamController) : controller settings
 
         M2V:(np.array) :  KL_matrix
 
@@ -180,9 +179,9 @@ def imat_init(ncontrol: int, rtc: Rtc, dms: Dms, p_dms: list, wfs: Sensors, p_wf
 #   do imat geom
 
 
-def imat_geom_ts_multiple_direction(wfs: Sensors, dms: Dms, p_ts: conf.Param_wfs,
-                                    p_dms: List[conf.Param_dm], p_geom: conf.Param_geom,
-                                    ind_TS: int, ind_dmseen: List, p_tel: conf.Param_tel,
+def imat_geom_ts_multiple_direction(wfs: Sensors, dms: Dms, p_ts: conf.ParamWfs,
+                                    p_dms: List[conf.ParamDm], p_geom: conf.ParamGeom,
+                                    ind_TS: int, ind_dmseen: List, p_tel: conf.ParamTel,
                                     x, y, meth: int = 0) -> np.ndarray:
     """ Compute the interaction matrix with a geometric method for multiple truth sensors (with different direction)
 
@@ -191,15 +190,15 @@ def imat_geom_ts_multiple_direction(wfs: Sensors, dms: Dms, p_ts: conf.Param_wfs
 
         dms: (Dms) : Dms object
 
-        p_ts: (Param_wfs) : truth sensor settings
+        p_ts: (ParamWfs) : truth sensor settings
 
         ind_TS: (int) : index of the truth sensor in Sensors (wfs)
 
-        p_dms: (list of Param_dm) : dms settings
+        p_dms: (list of ParamDm) : dms settings
 
         ind_DMs: (list of int) : indices of used DMs
 
-        p_controller: (Param_controller) : controller settings
+        p_controller: (ParamController) : controller settings
 
     Kwargs:
         meth: (int) : (optional) method type (0 or 1)
@@ -233,8 +232,8 @@ def imat_geom_ts_multiple_direction(wfs: Sensors, dms: Dms, p_ts: conf.Param_wfs
     return imat_cpu
 
 
-def imat_geom_ts(wfs: Sensors, dms: Dms, p_ts: conf.Param_wfs, ind_TS: int,
-                 p_dms: List[conf.Param_dm], ind_DMs: List[int],
+def imat_geom_ts(wfs: Sensors, dms: Dms, p_ts: conf.ParamWfs, ind_TS: int,
+                 p_dms: List[conf.ParamDm], ind_DMs: List[int],
                  meth: int = 0) -> np.ndarray:
     """ Compute the interaction matrix with a geometric method for a single truth sensor
 
@@ -243,22 +242,22 @@ def imat_geom_ts(wfs: Sensors, dms: Dms, p_ts: conf.Param_wfs, ind_TS: int,
 
         dms: (Dms) : Dms object
 
-        p_ts: (Param_wfs) : truth sensor settings
+        p_ts: (ParamWfs) : truth sensor settings
 
         ind_TS: (int) : index of the truth sensor in Sensors (wfs)
 
-        p_dms: (list of Param_dm) : dms settings
+        p_dms: (list of ParamDm) : dms settings
 
         ind_DMs: (list of int) : indices of used DMs
 
-        p_controller: (Param_controller) : controller settings
+        p_controller: (ParamController) : controller settings
 
     Kwargs:
         meth: (int) : (optional) method type (0 or 1)
     """
 
     #nwfs = 1 #p_controller.nwfs.size # as parameter list of indices for wfs if several ts (only 1 ts for now)
-    ndm = len(ind_DMs)  #p_controller.ndm.size # as parameter list of indices of used dms
+    # ndm = len(ind_DMs)  #p_controller.ndm.size # as parameter list of indices of used dms
     imat_size1 = p_ts._nvalid * 2  # as parameter (nvalid)
     imat_size2 = 0
 
@@ -297,7 +296,7 @@ def get_metaD(sup, p_wfs, TS_xpos=None, TS_ypos=None, ind_TS=-1, n_control=0):
     Args:
         sup : (CompassSupervisor) : current COMPASS simulation
 
-        p_ts: (Param_wfs) : truth sensor settings
+        p_ts: (ParamWfs) : truth sensor settings
 
         TS_xpos : np.ndarray : TS position (x axis)
 

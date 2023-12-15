@@ -41,7 +41,7 @@ def get_idx(p_dm, *, xpos=None, ypos=None):
     """return a correspondance between the covariance matrix indices and the covariance map indices
 
     Args:
-        p_dm: (Param_dm): dm settings
+        p_dm: (ParamDm): dm settings
 
     Kwargs:
         xpos: (np.ndarray[ndim=1, dtype=np.int32]): (optional) actuator position in x
@@ -94,24 +94,24 @@ def OTF_telescope(sup):
    produces a PSF normalized with max(psf)=SR=1.0
 
     """
-    size = sup.config.p_geom.pupdiam
-    N = 2**(int(np.log(2 * size) / np.log(2) + 1))  #SutraTarget:138,
-    ud = sup.config.p_tel.diam / sup.config.p_geom.pupdiam
+    # size = sup.config.p_geom.pupdiam
+    # N = 2**(int(np.log(2 * size) / np.log(2) + 1))  #SutraTarget:138,
+    # ud = sup.config.p_tel.diam / sup.config.p_geom.pupdiam
     # computation of pupil
-    x = ud / (sup.config.p_tel.diam / 2.) * (np.arange(N) + 1 -
-                                             (N / 2 + 1))  # x exprime en rayon pupille
-    x2 = np.tile(x * x, (x.size, 1))
-    r = np.sqrt(x2 + x2.T)
+    # x = ud / (sup.config.p_tel.diam / 2.) * (np.arange(N) + 1 -
+    #                                          (N / 2 + 1))  # x exprime en rayon pupille
+    # x2 = np.tile(x * x, (x.size, 1))
+    # r = np.sqrt(x2 + x2.T)
 
     #pup=(r<=1.0)*1 * (r>sup.config.p_tel.cobs)*1
     pup = sup.config.p_geom._ipupil
     #  factor that will normalize the psf
     #  with PSF(0)=1.00 when diffraction-limited
     #  surface_pup_m2 = tomo.tel.diam^2*(1-tomo.tel.obs^2)*pi/4;
-    surface_pup_m2 = sup.config.p_tel.diam**2 * (
-            1 - sup.config.p_tel.cobs**2) * np.pi / 4.
-    surface_pup_pix = surface_pup_m2 / ud**2
-    factnorm = surface_pup_pix**2
+    # surface_pup_m2 = sup.config.p_tel.diam**2 * (
+    #         1 - sup.config.p_tel.cobs**2) * np.pi / 4.
+    # surface_pup_pix = surface_pup_m2 / ud**2
+    # factnorm = surface_pup_pix**2
     #  compute FTO of telescope. Computing the psf using
     #  just fft(FTO).re produces a psf with max(psf)=SR
     #  In fact, FTOtel is normalized so that sum(FTOtel)=1.
@@ -278,7 +278,7 @@ def to_str(a=""):
     if (type(a) is np.ndarray):
         for i in range(a.size):
             string += str(a[i]) + " "
-    if (type(a) is list):
+    if isinstance(a, list):
         for i in range(len(a)):
             string += str(a[i]) + " "
     else:

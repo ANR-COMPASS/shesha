@@ -1,5 +1,5 @@
 ## @package   shesha.config.PATMOS
-## @brief     Param_atmos class definition
+## @brief     ParamAtmos class definition
 ## @author    COMPASS Team <https://github.com/ANR-COMPASS>
 ## @version   5.5.0
 ## @date      2022/01/24
@@ -36,14 +36,14 @@
 #  If not, see <https://www.gnu.org/licenses/lgpl-3.0.txt>.
 
 import numpy as np
-from . import config_setter_utils as csu
+import shesha.config.config_setter_utils as csu
 
 #################################################
-# P-Class (parametres) Param_atmos
+# P-Class (parametres) ParamAtmos
 #################################################
 
 
-class Param_atmos:
+class ParamAtmos:
 
     def __init__(self):
         """ Number of turbulent layers."""
@@ -126,12 +126,12 @@ class Param_atmos:
         """
         return self.__L0
 
-    def set_L0(self, l):
+    def set_L0(self, l0_layers):
         """ Set the L0 per layers
 
-        :param l: (lit of float) : L0 for each layers
+        :param l0_layers: (lit of float) : L0 for each layers
         """
-        self.__L0 = csu.enforce_array(l, size=self.nscreens, dtype=np.float32,
+        self.__L0 = csu.enforce_array(l0_layers, size=self.nscreens, dtype=np.float32,
                                       scalar_expand=True)
 
     L0 = property(get_L0, set_L0)
@@ -143,12 +143,12 @@ class Param_atmos:
         """
         return self.__dim_screens
 
-    def set_dim_screens(self, l):
+    def set_dim_screens(self, size_layers):
         """ Set the size of the phase screens
 
-        :param l: (lit of float) : phase screens sizes
+        :param size_layers: (lit of float) : phase screens sizes
         """
-        self.__dim_screens = csu.enforce_array(l, size=self.nscreens, dtype=np.int64,
+        self.__dim_screens = csu.enforce_array(size_layers, size=self.nscreens, dtype=np.int64,
                                                scalar_expand=False)
 
     dim_screens = property(get_dim_screens, set_dim_screens)
@@ -177,12 +177,12 @@ class Param_atmos:
         """
         return self.__winddir
 
-    def set_winddir(self, l):
+    def set_winddir(self, wind_layers):
         """ Set the wind direction for each layer
 
-        :param l: (lit of float) : wind directions
+        :param wind_layers: (lit of float) : wind directions
         """
-        self.__winddir = csu.enforce_array(l, size=self.nscreens, dtype=np.float32,
+        self.__winddir = csu.enforce_array(wind_layers, size=self.nscreens, dtype=np.float32,
                                            scalar_expand=True)
 
     winddir = property(get_winddir, set_winddir)
@@ -194,12 +194,12 @@ class Param_atmos:
         """
         return self.__windspeed
 
-    def set_windspeed(self, l):
+    def set_windspeed(self, windspeed_layers):
         """ Set the the wind speed for each layer
 
-        :param l: (list of float) : wind speeds
+        :param windspeed_layers: (list of float) : wind speeds
         """
-        self.__windspeed = csu.enforce_array(l, size=self.nscreens, dtype=np.float32,
+        self.__windspeed = csu.enforce_array(windspeed_layers, size=self.nscreens, dtype=np.float32,
                                              scalar_expand=True)
 
     windspeed = property(get_windspeed, set_windspeed)
@@ -211,12 +211,12 @@ class Param_atmos:
         """
         return self.__frac
 
-    def set_frac(self, l):
+    def set_frac(self, r0_layers):
         """ Set the fraction of r0 for each layers
 
-        :param l: (lit of float) : fraction of r0
+        :param r0_layers: (lit of float) : fraction of r0
         """
-        self.__frac = csu.enforce_array(l, size=self.nscreens, dtype=np.float32,
+        self.__frac = csu.enforce_array(r0_layers, size=self.nscreens, dtype=np.float32,
                                         scalar_expand=True)
 
     frac = property(get_frac, set_frac)
@@ -228,12 +228,12 @@ class Param_atmos:
         """
         return self.__deltax
 
-    def set_deltax(self, l):
+    def set_deltax(self, deltax_layers):
         """ Set the translation speed on axis x for each layer
 
-        :param l: (lit of float) : translation speed
+        :param deltax_layers: (lit of float) : translation speed
         """
-        self.__deltax = csu.enforce_array(l, size=self.nscreens, dtype=np.float32,
+        self.__deltax = csu.enforce_array(deltax_layers, size=self.nscreens, dtype=np.float32,
                                           scalar_expand=True)
 
     _deltax = property(get_deltax, set_deltax)
@@ -245,12 +245,12 @@ class Param_atmos:
         """
         return self.__deltay
 
-    def set_deltay(self, l):
+    def set_deltay(self, deltay_layers):
         """ Set the translation speed on axis y for each layer
 
-        :param l: (lit of float) : translation speed
+        :param deltay_layers: (lit of float) : translation speed
         """
-        self.__deltay = csu.enforce_array(l, size=self.nscreens, dtype=np.float32,
+        self.__deltay = csu.enforce_array(deltay_layers, size=self.nscreens, dtype=np.float32,
                                           scalar_expand=True)
 
     _deltay = property(get_deltay, set_deltay)
@@ -262,12 +262,12 @@ class Param_atmos:
         """
         return self.__seeds
 
-    def set_seeds(self, l):
+    def set_seeds(self, seed_layers):
         """ Set the seed for each layer
 
-        :param l: (lit of int) : seed
+        :param seed_layers: (lit of int) : seed
         """
-        self.__seeds = csu.enforce_array(l, size=self.nscreens, dtype=np.int64,
+        self.__seeds = csu.enforce_array(seed_layers, size=self.nscreens, dtype=np.int64,
                                          scalar_expand=True)
 
     seeds = property(get_seeds, set_seeds)

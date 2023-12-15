@@ -93,7 +93,7 @@ def make_VLT_pupil(pupdiam, centralobs = 0.14, spiders = 0.00625, spiders_bool =
 
     if centralobs_bool :
         VLT_pupil = ((R < 0.5) & (R > (centralobs / 2))).astype(np.float32)
-    elif centralobs_bool == False :
+    else:
         VLT_pupil = (R < 0.5).astype(np.float32)
 
     if spiders_bool:

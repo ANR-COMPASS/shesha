@@ -45,7 +45,6 @@ from shesha.sutra_wrap import Rtc_FFF as Rtc
 
 from shesha.ao.wfs import noise_cov
 
-import typing
 from typing import List
 
 
@@ -79,9 +78,9 @@ def generic_imat_inversion(
             modalIMat[:, modeSelect])).dot(modalIMat[:, modeSelect].T))
 
 
-def cmat_init(ncontrol: int, rtc: Rtc, p_controller: conf.Param_controller,
-              p_wfss: List[conf.Param_wfs], p_atmos: conf.Param_atmos,
-              p_tel: conf.Param_tel, p_dms: List[conf.Param_dm],
+def cmat_init(ncontrol: int, rtc: Rtc, p_controller: conf.ParamController,
+              p_wfss: List[conf.ParamWfs], p_atmos: conf.ParamAtmos,
+              p_tel: conf.ParamTel, p_dms: List[conf.ParamDm],
               nmodes: int = 0) -> None:
     """ Compute the command matrix on the GPU
 
@@ -91,15 +90,15 @@ def cmat_init(ncontrol: int, rtc: Rtc, p_controller: conf.Param_controller,
 
         rtc: (Rtc) :
 
-        p_controller: (Param_controller) : controller settings
+        p_controller: (ParamController) : controller settings
 
-        p_wfss: (list of Param_wfs) : wfs settings
+        p_wfss: (list of ParamWfs) : wfs settings
 
-        p_atmos: (Param_atmos) : atmos settings
+        p_atmos: (ParamAtmos) : atmos settings
 
-        p_tel : (Param_tel) : telescope settings
+        p_tel : (ParamTel) : telescope settings
 
-        p_dms: (list of Param_dm) : dms settings
+        p_dms: (list of ParamDm) : dms settings
 
         M2V : (np.ndarray[ndim=2, dtype=np.float32]): (optional) KL to volts matrix (for KL cmat)
 
@@ -147,7 +146,7 @@ def cmat_init(ncontrol: int, rtc: Rtc, p_controller: conf.Param_controller,
         print("Building cmat...")
         rtc.d_control[ncontrol].build_cmat(p_controller.maxcond)
 
-        if (p_controller.TTcond == None):
+        if (p_controller.TTcond is None):
             p_controller.set_TTcond(p_controller.maxcond)
 
         if ("tt" in [dm.type for dm in p_dms]):
@@ -171,9 +170,9 @@ def Btt_for_cmat(rtc, dms, p_dms, p_geom):
 
         dms: (Dms): dms object
 
-        p_dms: (list of Param_dm): dms settings
+        p_dms: (list of ParamDm): dms settings
 
-        p_geom: (Param_geom): geometry settings
+        p_geom: (ParamGeom): geometry settings
 
     """
     from shesha.ao import basis

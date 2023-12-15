@@ -42,10 +42,10 @@ from shesha.constants import CONST
 import shesha.util.utilities as util
 
 import numpy as np
-from shesha.sutra_wrap import Sensors, Rtc_FFF as Rtc
+from shesha.sutra_wrap import Sensors
 
 
-def comp_new_pyr_ampl(nwfs: int, ampli: float, p_wfss: list, p_tel: conf.Param_tel,
+def comp_new_pyr_ampl(nwfs: int, ampli: float, p_wfss: list, p_tel: conf.ParamTel,
                       npts_force: int = None):
     """ Set the pyramid modulation amplitude
 
@@ -55,9 +55,9 @@ def comp_new_pyr_ampl(nwfs: int, ampli: float, p_wfss: list, p_tel: conf.Param_t
 
         ampli : (float) : new amplitude in units of lambda/D
 
-        p_wfss : (list of Param_wfs) : list of wfs parameters
+        p_wfss : (list of ParamWfs) : list of wfs parameters
 
-        p_tel : (Param_tel) : Telescope parameters
+        p_tel : (ParamTel) : Telescope parameters
     """
 
     pwfs = p_wfss[nwfs]
@@ -86,8 +86,8 @@ def comp_new_pyr_ampl(nwfs: int, ampli: float, p_wfss: list, p_tel: conf.Param_t
     return cx, cy, scale, pyr_npts
 
 
-def noise_cov(nw: int, p_wfs: conf.Param_wfs, p_atmos: conf.Param_atmos,
-              p_tel: conf.Param_tel):
+def noise_cov(nw: int, p_wfs: conf.ParamWfs, p_atmos: conf.ParamAtmos,
+              p_tel: conf.ParamTel):
     """ Compute the diagonal of the noise covariance matrix for a SH WFS (arcsec^2)
     Photon noise: (pi^2/2)*(1/Nphotons)*(d/r0)^2 / (2*pi*d/lambda)^2
     Electronic noise: (pi^2/3)*(wfs.noise^2/N^2photons)*wfs.npix^2*(wfs.npix*wfs.pixsize*d/lambda)^2 / (2*pi*d/lambda)^2
@@ -96,11 +96,11 @@ def noise_cov(nw: int, p_wfs: conf.Param_wfs, p_atmos: conf.Param_atmos,
 
         nw: wfs number
 
-        p_wfs: (Param_wfs) : wfs settings
+        p_wfs: (ParamWfs) : wfs settings
 
-        p_atmos: (Param_atmos) : atmos settings
+        p_atmos: (ParamAtmos) : atmos settings
 
-        p_tel: (Param_tel) : telescope settings
+        p_tel: (ParamTel) : telescope settings
 
     :return:
 
@@ -134,7 +134,7 @@ def noise_cov(nw: int, p_wfs: conf.Param_wfs, p_atmos: conf.Param_atmos,
     return cov
 
 
-def comp_new_fstop(wfs: Sensors, n: int, p_wfs: conf.Param_wfs, fssize: float,
+def comp_new_fstop(wfs: Sensors, n: int, p_wfs: conf.ParamWfs, fssize: float,
                    fstop: bytes):
     """ Compute a new field stop for pyrhr WFS
 
@@ -142,7 +142,7 @@ def comp_new_fstop(wfs: Sensors, n: int, p_wfs: conf.Param_wfs, fssize: float,
 
         n : (int) : WFS index
 
-        wfs : (Param_wfs) : WFS parameters
+        wfs : (ParamWfs) : WFS parameters
 
         fssize : (float) : field stop size [arcsec]
 

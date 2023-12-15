@@ -7,15 +7,10 @@ Created on Wed Oct 5 14:28:23 2016
 import numpy as np
 import h5py
 import glob
-import sys
-sys.path.append('/home/fferreira/compass/shesha/test/roket/tools/')
-sys.path.append('/home/fferreira/compass/shesha/test/gamora/')
-import Dphi
-import roket_exploitation as rexp
+import guardians.starlord as Dphi
+import guardians.drax as rexp
 import gamora
-import shesha as ao
 import matplotlib.pyplot as plt
-plt.ion()
 import matplotlib
 import time
 font = {'family': 'normal', 'weight': 'bold', 'size': 22}
@@ -39,7 +34,7 @@ def compute_and_compare_PSFs(filename, plot=False):
     psf_compass = np.fft.fftshift(f["psf"][:])
     #psf = compute_psf(filename)
     #psfi = compute_psf_independence(filename)
-    psfc = 0
+    # psfc = 0
     psfs = 0
     tic = time.time()
     Caniso, Cbp, Ccov = compute_covariance_model(filename)
@@ -194,12 +189,12 @@ def compute_covariance_model(filename):
     xij = xx - xx.T
     yij = yy - yy.T
 
-    for l in range(f.attrs["nscreens"]):
-        H = f.attrs["atm.alt"][l]
-        L0 = f.attrs["L0"][l]
-        speed = f.attrs["windspeed"][l]
-        theta = f.attrs["winddir"][l] * np.pi / 180.
-        frac = f.attrs["frac"][l]
+    for atm_layer in range(f.attrs["nscreens"]):
+        H = f.attrs["atm.alt"][atm_layer]
+        L0 = f.attrs["L0"][atm_layer]
+        speed = f.attrs["windspeed"][atm_layer]
+        theta = f.attrs["winddir"][atm_layer] * np.pi / 180.
+        frac = f.attrs["frac"][atm_layer]
 
         Htheta = np.linalg.norm([wxpos, wypos]) / RASC * H
         vdt = speed * dt / gain
@@ -262,20 +257,20 @@ def add_TT_model(filename, Ccov):
 
 def load_datas(files):
     nmodes = (files[0])["P"][:].shape[0]
-    P = (files[0])["P"][:]
-    xpos = files[0].attrs["wfs.xpos"][0]
-    ypos = files[0].attrs["wfs.ypos"][0]
+    # P = (files[0])["P"][:]
+    # xpos = files[0].attrs["wfs.xpos"][0]
+    # ypos = files[0].attrs["wfs.ypos"][0]
     contributors = ["tomography", "bandwidth"]
     Lambda_tar = files[0].attrs["target.Lambda"][0]
-    Lambda_wfs = files[0].attrs["wfs.Lambda"][0]
-    L0 = files[0].attrs["L0"][0]
-    dt = files[0].attrs["ittime"]
-    H = files[0].attrs["atm.alt"][0]
-    RASC = 180 / np.pi * 3600.
-    Htheta = np.linalg.norm(
-            [xpos, ypos]
-    ) / RASC * H  # np.sqrt(2)*4/RASC*H # Hardcoded for angular separation of sqrt(2)*4 arcsec
-    r0 = files[0].attrs["r0"] * (Lambda_tar / Lambda_wfs)**(6. / 5.)
+    # Lambda_wfs = files[0].attrs["wfs.Lambda"][0]
+    # L0 = files[0].attrs["L0"][0]
+    # dt = files[0].attrs["ittime"]
+    # H = files[0].attrs["atm.alt"][0]
+    # RASC = 180 / np.pi * 3600.
+    # Htheta = np.linalg.norm(
+    #         [xpos, ypos]
+    # ) / RASC * H  # np.sqrt(2)*4/RASC*H # Hardcoded for angular separation of sqrt(2)*4 arcsec
+    # r0 = files[0].attrs["r0"] * (Lambda_tar / Lambda_wfs)**(6. / 5.)
     nfiles = len(files)
     vartomo = np.zeros((nfiles, nmodes))
     varbp = np.zeros((nfiles, nmodes))
@@ -316,8 +311,8 @@ def ensquare_PSF(filename, psf, N, display=False):
     RASC = 180 / np.pi * 3600.
     pixsize = Lambda_tar * 1e-6 / (
             psf.shape[0] * f.attrs["tel_diam"] / f.attrs["pupdiam"]) * RASC
-    x = (np.arange(psf.shape[0]) - psf.shape[0] / 2) * pixsize / (
-            Lambda_tar * 1e-6 / f.attrs["tel_diam"] * RASC)
+    # x = (np.arange(psf.shape[0]) - psf.shape[0] / 2) * pixsize / (
+    #         Lambda_tar * 1e-6 / f.attrs["tel_diam"] * RASC)
     w = int(N * (Lambda_tar * 1e-6 / f.attrs["tel_diam"] * RASC) / pixsize)
     mid = psf.shape[0] / 2
     psfe = psf[mid - w:mid + w, mid - w:mid + w]
@@ -376,9 +371,9 @@ def compareTransferFunctions(filename):
     dt = rfile.attrs["ittime"]
     Fe = 1 / dt
     g = rfile.attrs["gain"]
-    Lambda_tar = rfile.attrs["target.Lambda"][0]
-    Lambda_wfs = rfile.attrs["wfs.Lambda"][0]
-    r0 = rfile.attrs["r0"] * (Lambda_tar / Lambda_wfs)**(6. / 5.)
+    # Lambda_tar = rfile.attrs["target.Lambda"][0]
+    # Lambda_wfs = rfile.attrs["wfs.Lambda"][0]
+    # r0 = rfile.attrs["r0"] * (Lambda_tar / Lambda_wfs)**(6. / 5.)
     d = rfile.attrs["tel_diam"] / rfile.attrs["nxsub"]
     fc = 0.314 * v / d
     f = np.linspace(0.1, fc * 1.5, 1000)

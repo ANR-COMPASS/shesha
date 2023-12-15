@@ -34,3 +34,10 @@
 #
 #  You should have received a copy of the GNU Lesser General Public License along with COMPASS.
 #  If not, see <https://www.gnu.org/licenses/lgpl-3.0.txt>.
+
+from shesha.supervisor.components.coronagraph.coronagraphCompass import CoronagraphCompass
+from shesha.supervisor.components.coronagraph.genericCoronagraph import GenericCoronagraph
+from shesha.supervisor.components.coronagraph.perfectCoronagraph import PerfectCoronagraphCompass
+from shesha.supervisor.components.coronagraph.stellarCoronagraph import StellarCoronagraphCompass
+
+__all__ = ['CoronagraphCompass', 'GenericCoronagraph', 'PerfectCoronagraphCompass', 'StellarCoronagraphCompass']

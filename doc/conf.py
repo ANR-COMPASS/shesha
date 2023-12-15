@@ -16,7 +16,6 @@ serve to show the default.
 import sys
 import os
 # import sphinx_rtd_theme
-import subprocess
 # import sphinx_bootstrap_theme
 
 os.environ["SHESHA_ROOT"] = os.getcwd() + "/.."

@@ -430,9 +430,9 @@ def set_pctr(dim: int, nr, npp, nkl: int, cobs: float, nord, ncmar=None, ncp=Non
         ap
     """
     ncp = dim
-    if (ncmar == None):
+    if (ncmar is None):
         ncmar = 2
-    if (ncp == None):
+    if (ncp is None):
         ncp = 128
     ncp, ncmar, px, py, cr, cp, pincx, pincy, pincw, ap = pcgeom(
             nr, npp, cobs, ncp, ncmar)
