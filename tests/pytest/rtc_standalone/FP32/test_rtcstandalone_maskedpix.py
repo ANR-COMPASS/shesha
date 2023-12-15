@@ -43,7 +43,7 @@ from shesha.config import ParamConfig
 
 precision = 1e-2
 
-config = ParamConfig(os.path.dirname(__file__) + "/../par/test_pyrhr.py")
+config = ParamConfig(os.path.dirname(__file__) + "/../../par/test_pyrhr.py")
 sup = Supervisor(config)
 sup.next()
 sup.rtc.open_loop(0)

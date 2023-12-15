@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "shesha"
-version = "5.5.0-0"
+version = "5.5.0-3"
 description = "SHESHA is the python part of the COMPASS platform designed to meet the need of high-performance for the simulation of AO systems"
 authors = [
     "Florian Ferreira <florian.ferreira@obspm.fr>",
@@ -16,10 +16,14 @@ readme = "README.md"
 repository = "https://github.com/ANR-COMPASS/shesha"
 documentation = "https://shesha.readthedocs.io/en/master/"
 packages = [
-    { include = "data" },
     { include = "shesha" },
-    { include = "CHANGELOG.md" },
-    { include = "report_E2E.md" },
+    { include = "data" },
+    { include = "tests" },
+]
+
+include = [
+    { path = "CHANGELOG.md" },
+    { path = "report_E2E.md" },
 ]
 
 [tool.poetry.dependencies]

@@ -244,7 +244,7 @@ def prep_lgs_prof(p_wfs: conf.ParamWfs, nsensors: int, p_tel: conf.ParamTel,
 
     profilename = scons.ProfType.FILES[p_wfs.proftype]
 
-    profile_path = shesha_savepath + profilename
+    profile_path = f"{shesha_savepath}/{profilename}"
     print("reading Na profile from", profile_path)
     prof = np.load(profile_path)
     make_lgs_prof1d(p_wfs, p_tel, np.mean(prof[1:, :], axis=0), prof[0, :],
