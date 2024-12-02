@@ -121,4 +121,4 @@ if __name__ == "__main__":
         df.loc[idx, "SR@100iter"] = str(SR)
         df.loc[idx, "T Loop"] = str(t_loop)
 
-        df.to_hdf("check.h5", "check")
+        df.to_hdf("check.h5", key="check")
